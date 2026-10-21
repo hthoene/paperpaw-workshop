@@ -179,8 +179,13 @@ compiled ahead for `wasm32` and the X4's `riscv32imc`. For a build it:
 2. for the reader, compiles a small **harness** crate: PaperPaw's web
    shell with the plugin added (`pp_plugins`, which the reader calls on
    each new instance), into one WebAssembly module;
-3. for the X4, compiles a native wrapper (`paperpaw_sdk::plugin!`) and
-   packs it with `paperpaw-sign pack` into a `.ppn`, not signed;
+3. for the X4 and the X4 Pro, compiles a native wrapper
+   (`paperpaw_sdk::plugin!`) and packs it with `paperpaw-sign pack` into
+   a `.ppn`, not signed, and checks the chip it names. The X4's compiler
+   is the image's Rust, the X4 Pro's espup's `esp` toolchain, both of
+   the versions the firmware is built with (PaperPaw's
+   `shells/xteink/versions.env`): a plugin file runs only on firmware
+   built by the same compiler;
 4. keeps the files a day at `/api/v1/workshop/builds/{id}/files/{name}`.
 
 One build runs at a time; others wait their turn (the answer says where

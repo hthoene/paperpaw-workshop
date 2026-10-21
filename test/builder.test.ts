@@ -1,4 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+import { BuilderRefused, HttpBuilder } from "../src/build/client";
 
 // @ts-expect-error: the builder is plain JavaScript (builder/), run by Node.
 import { cargo, diagnostics, harness, native, pluginManifest, problems } from "../builder/project.mjs";
@@ -42,6 +44,11 @@ describe("a project the builder takes", () => {
     const x4 = native("my-quotes", "Quotes", "/paperpaw/crates/paperpaw-sdk");
     expect(x4["src/main.rs"]).toContain("paperpaw_sdk::plugin!(my_quotes::Quotes);");
     expect(x4[".cargo/config.toml"]).toContain("-Tpaperpaw-plugin.x");
+    // The X4 Pro's flags: linked through the Xtensa GCC, its sysroot's
+    // paths written as /rust, as PaperPaw's own plugin files are.
+    expect(x4[".cargo/config.toml"]).toContain("[target.xtensa-esp32s3-none-elf]");
+    expect(x4[".cargo/config.toml"]).toContain("-Wl,-Tpaperpaw-plugin.x");
+    expect(x4[".cargo/config.toml"]).toContain("--remap-path-prefix=/usr/local/rustup/toolchains/esp=/rust");
   });
 });
 
@@ -66,5 +73,38 @@ describe("the compiler's messages", () => {
       ["warning", "src/lib.rs", 3],
     ]);
     expect(found[0].rendered).toContain("--> src/lib.rs:9:5");
+  });
+});
+
+describe("the build client", () => {
+  const view = { id: "b1", state: "done", seconds: 1, problems: [], diagnostics: [], files: [], log_tail: "" };
+  const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+
+  it("sends paperpaw.org's form token, and its refusals in its words", async () => {
+    const sent: RequestInit[] = [];
+    const answers = [json(200, { store: "open", csrf: "token-1" }), json(429, { error: "busy", message: "A build of yours is still running: one at a time." })];
+    vi.stubGlobal("fetch", async (_url: string, init: RequestInit) => {
+      sent.push(init ?? {});
+      return answers.shift()!;
+    });
+    const builder = new HttpBuilder();
+    const refused = await builder.build({ "src/lib.rs": { text: "" } }, ["web"]).catch((e) => e);
+    expect(refused).toBeInstanceOf(BuilderRefused);
+    expect(refused.message).toBe("A build of yours is still running: one at a time.");
+    expect((sent[1]!.headers as Record<string, string>)["x-paperpaw-csrf"]).toBe("token-1");
+    vi.unstubAllGlobals();
+  });
+
+  it("builds on its own without a token, where no site answers", async () => {
+    const sent: RequestInit[] = [];
+    const answers = [new Response("<!doctype html>", { status: 200 }), json(201, view)];
+    vi.stubGlobal("fetch", async (_url: string, init: RequestInit) => {
+      sent.push(init ?? {});
+      return answers.shift()!;
+    });
+    const result = await new HttpBuilder().build({ "src/lib.rs": { text: "" } }, ["web"]);
+    expect(result.state).toBe("done");
+    expect((sent[1]!.headers as Record<string, string>)["x-paperpaw-csrf"]).toBeUndefined();
+    vi.unstubAllGlobals();
   });
 });

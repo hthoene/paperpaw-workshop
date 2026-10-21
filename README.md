@@ -69,8 +69,9 @@ the browser and for the X4 ahead, so your builds take seconds). Then tick
 (`#/example/quote-a-day`): the AI starts from PaperPaw's sample plugin,
 writes Rust, builds it, reads the compiler's errors and fixes them, and
 the reader beside the conversation runs PaperPaw with the plugin in it.
-**Download** then builds it for the X4 and saves a `.ppn` (not signed
-yet) for the `plugins` folder of the reader's card.
+**Download** then builds it for the device the reader shows (the X4 or
+the X4 Pro) and saves the plugin's folder with its `code.ppn` (not
+signed yet) as a ZIP, for the `plugins` folder of the reader's card.
 
 Plugins with code use Claude Sonnet 5.5: some cents to a dollar a
 plugin, more than a data plugin.

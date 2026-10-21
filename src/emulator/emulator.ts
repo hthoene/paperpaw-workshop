@@ -109,6 +109,8 @@ export class FrameEmulator implements Emulator {
   }
 
   useModule(url: string | null): Promise<void> {
-    return this.send({ type: "module", url });
+    // The frame may live on another origin (paperpaw.org's sandbox host):
+    // the address as this page means it.
+    return this.send({ type: "module", url: url && new URL(url, location.href).href });
   }
 }

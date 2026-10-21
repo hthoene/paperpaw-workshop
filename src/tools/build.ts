@@ -4,7 +4,7 @@
 
 import { z } from "zod";
 
-import { BuilderUnavailable, projectFiles, type BuildResult } from "../build/client";
+import { BuilderRefused, BuilderUnavailable, projectFiles, type BuildResult } from "../build/client";
 import type { WorkshopTool } from "./tool";
 
 /** The most characters of compiler output the AI reads in one answer. */
@@ -22,6 +22,9 @@ export const build: WorkshopTool<Record<string, never>> = {
     try {
       result = await context.builder.build(projectFiles(context.files.all()), ["web"]);
     } catch (e) {
+      if (e instanceof BuilderRefused) {
+        return { content: `paperpaw.org did not build it: ${e.message} Say so to the person in a sentence; nothing is wrong with the plugin's code.`, isError: true, step };
+      }
       const why = e instanceof BuilderUnavailable ? "The builder is not running or could not be reached" : `The build could not be made: ${e instanceof Error ? e.message : String(e)}`;
       return { content: `${why}. Say so to the person; nothing is wrong with the plugin's code.`, isError: true, step };
     }

@@ -152,7 +152,7 @@ pub extern "C" fn pp_plugins() {
 
 /** The native wrapper: the plugin as a file for a reader, as PaperPaw's
  *  sample (samples/hello-native) builds it. */
-export function native(crate, plugin, sdk) {
+export function native(crate, plugin, sdk, espSysroot = "/usr/local/rustup/toolchains/esp") {
   const lib = crate.replaceAll("-", "_");
   return {
     "Cargo.toml": `[package]
@@ -195,6 +195,19 @@ rustflags = [
     "--cfg", "paperpaw_plugin",
     "--remap-path-prefix=/work=/plugin",
     "--remap-path-prefix=/usr/local/cargo=/cargo",
+]
+
+# The X4 Pro: espup's toolchain links through the Xtensa GCC.
+[target.xtensa-esp32s3-none-elf]
+rustflags = [
+    "-C", "link-arg=-nostartfiles",
+    "-C", "link-arg=-nostdlib",
+    "-C", "link-arg=-Wl,-Tpaperpaw-plugin.x",
+    "-C", "link-arg=-Wl,--emit-relocs",
+    "--cfg", "paperpaw_plugin",
+    "--remap-path-prefix=/work=/plugin",
+    "--remap-path-prefix=/usr/local/cargo=/cargo",
+    "--remap-path-prefix=${espSysroot}=/rust",
 ]
 `,
   };

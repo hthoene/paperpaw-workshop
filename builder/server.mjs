@@ -3,7 +3,7 @@
 // its own server (/api/v1/workshop/builds), so no CORS but for the files
 // the emulator frame (an opaque origin) fetches.
 //
-//   POST /api/v1/workshop/builds          { files: { path: { text } | { base64 } }, targets: ["web", "x4"] }
+//   POST /api/v1/workshop/builds          { files: { path: { text } | { base64 } }, targets: ["web", "x4", "x4-pro"] }
 //                                         -> { id, state: "queued" }
 //   GET  /api/v1/workshop/builds/{id}     ?after=<state> waits up to 25 s for another state
 //                                         -> { id, state, position, seconds, diagnostics, problems, files, log_tail }
@@ -27,9 +27,19 @@ const CACHE = process.env.CACHE ?? "/cache";
 const BUILDS = process.env.BUILDS ?? "/builds";
 const PORT = Number(process.env.PORT ?? 8090);
 /** The most seconds a target may take. */
-const LIMITS = { web: 180, x4: 300 };
+const LIMITS = { web: 180, x4: 300, "x4-pro": 300 };
 const KEEP_HOURS = 24;
-const TARGETS = ["web", "x4"];
+const TARGETS = ["web", "x4", "x4-pro"];
+/** The readers a plugin file is made for: the target Rust builds for, the
+ *  toolchain (the X4 Pro's is espup's `esp`, which builds `core` too) and
+ *  the chip the file must name. */
+const DEVICES = {
+  x4: { triple: "riscv32imc-unknown-none-elf", toolchain: [], extra: [], chip: 5 },
+  "x4-pro": { triple: "xtensa-esp32s3-none-elf", toolchain: ["+esp"], extra: ["-Zbuild-std=core,alloc"], chip: 9 },
+};
+/** What espup's export file adds to the environment (the Xtensa GCC on
+ *  PATH, libclang), for the X4 Pro's builds. */
+const ESP_ENV = espEnvironment(process.env.ESP_EXPORT ?? "/usr/local/export-esp.sh");
 
 /** Builds by id: { id, state, targets, files, created, started, finished, diagnostics, problems, outputs, log } */
 const builds = new Map();
@@ -153,7 +163,7 @@ async function next() {
 }
 
 /** One build: the plugin crate written to /work/plugin, then each target. */
-async function run(build) {
+async function run(build, out = path.join(BUILDS, build.id)) {
   const manifest = cargo(bytesOf(build.files["Cargo.toml"]).toString("utf8"));
   const plugin = path.join(WORK, "plugin");
   fs.rmSync(plugin, { recursive: true, force: true });
@@ -164,7 +174,6 @@ async function run(build) {
   }
   const sdk = path.join(PAPERPAW, "crates", "paperpaw-sdk");
   fs.writeFileSync(path.join(plugin, "Cargo.toml"), pluginManifest(manifest.name, manifest.version, sdk));
-  const out = path.join(BUILDS, build.id);
   fs.mkdirSync(out, { recursive: true });
 
   if (build.targets.includes("web")) {
@@ -175,17 +184,38 @@ async function run(build) {
     if (result.ok) keep(build, "web", "web.wasm", wasm, out);
     else return;
   }
-  if (build.targets.includes("x4")) {
+  for (const [device, how] of Object.entries(DEVICES)) {
+    if (!build.targets.includes(device)) continue;
     const dir = write("native", native(manifest.name, manifest.plugin, path.join(PAPERPAW, "crates", "paperpaw-sdk")));
-    const target = path.join(CACHE, "target-native");
-    const result = await cargoBuild(build, dir, ["--release", "--target", "riscv32imc-unknown-none-elf"], target, LIMITS.x4);
-    build.diagnostics.push(...diagnostics(result.output, plugin));
+    const target = path.join(CACHE, `target-${device}`);
+    const env = how.toolchain.length ? ESP_ENV : {};
+    const result = await cargoBuild(build, dir, ["--release", "--target", how.triple, ...how.extra], target, LIMITS[device], how.toolchain, env);
+    // The same messages for each reader: only the first's are kept.
+    if (!build.diagnostics.length) build.diagnostics.push(...diagnostics(result.output, plugin));
     if (!result.ok) return;
-    const elf = path.join(target, "riscv32imc-unknown-none-elf", "release", "plugin");
-    const ppn = path.join(out, "x4.ppn");
+    const elf = path.join(target, how.triple, "release", "plugin");
+    const ppn = path.join(out, `${device}.ppn`);
     const packed = await exec(build, "paperpaw-sign", ["pack", elf, ppn], WORK, 60);
-    if (packed.ok) keep(build, "x4", "x4.ppn", ppn, out);
+    if (!packed.ok) return;
+    // The file names the chip it runs on: a wrong one would be refused.
+    const shown = await exec(build, "paperpaw-sign", ["plugin", ppn], WORK, 30);
+    if (!new RegExp(`^chip: .*\\(${how.chip}\\)$`, "m").test(shown.output)) {
+      build.log += `\n${device}.ppn is not for chip ${how.chip}:\n${shown.output}`;
+      return;
+    }
+    keep(build, device, `${device}.ppn`, ppn, out);
   }
+}
+
+/** The variables espup's export file sets, PATH put before ours. */
+function espEnvironment(file) {
+  if (!fs.existsSync(file)) return {};
+  const env = {};
+  for (const line of fs.readFileSync(file, "utf8").split("\n")) {
+    const m = /^export (\w+)="?([^"]*)"?$/.exec(line.trim());
+    if (m) env[m[1]] = m[2].replace(/\$PATH|\$\{PATH\}/, process.env.PATH ?? "");
+  }
+  return env;
 }
 
 function write(name, files) {
@@ -208,9 +238,9 @@ function keep(build, target, name, from, out) {
 /** Offline but while the image is made: every crate is in the image. */
 const OFFLINE = process.argv[2] !== "prepare";
 
-function cargoBuild(build, dir, args, target, limit) {
+function cargoBuild(build, dir, args, target, limit, toolchain = [], env = {}) {
   const offline = OFFLINE ? ["--offline"] : [];
-  return exec(build, "cargo", ["build", ...offline, "--message-format=json", ...args], dir, limit, { CARGO_TARGET_DIR: target });
+  return exec(build, "cargo", [...toolchain, "build", ...offline, "--message-format=json", ...args], dir, limit, { ...env, CARGO_TARGET_DIR: target });
 }
 
 /** Runs a command, its output kept for the log and the diagnostics. */
@@ -246,7 +276,42 @@ setInterval(() => {
   }
 }, 3600_000).unref();
 
-if (process.argv[2] === "prepare") {
+if (process.argv[2] === "once") {
+  // One build and no server, for a host that runs each build in a
+  // container of its own without network (paperpaw.org's build host):
+  //   node server.mjs once <request.json> <out-dir>
+  // request.json is { files, targets } as the API takes it; the files and
+  // result.json (what the API answers, without addresses) go to <out-dir>.
+  const [request, out] = process.argv.slice(3);
+  const body = JSON.parse(fs.readFileSync(request, "utf8"));
+  const targets = (Array.isArray(body.targets) ? body.targets : ["web"]).filter((t) => TARGETS.includes(t));
+  const files = body.files ?? {};
+  const build = { id: "once", state: "building", targets, files, created: Date.now(), started: Date.now(), diagnostics: [], problems: problems(files), outputs: [], log: "" };
+  fs.mkdirSync(out, { recursive: true });
+  const finish = () => {
+    build.finished = Date.now();
+    const { id: _, position: __, ...result } = view(build);
+    result.files = build.outputs.map((o) => ({ target: o.target, name: o.name, size: o.size }));
+    fs.writeFileSync(path.join(out, "result.json"), JSON.stringify(result));
+    process.exit(0);
+  };
+  if (build.problems.length) {
+    build.state = "failed";
+    finish();
+  } else {
+    run(build, out).then(
+      () => {
+        build.state = build.outputs.length && !build.diagnostics.some((d) => d.level === "error") ? "done" : "failed";
+        finish();
+      },
+      (e) => {
+        build.state = "failed";
+        build.log += `\n${e.message ?? e}`;
+        finish();
+      },
+    );
+  }
+} else if (process.argv[2] === "prepare") {
   // At the image's build: the sample plugin built once for each target,
   // so PaperPaw's crates are compiled and the registry is in the image.
   const files = JSON.parse(fs.readFileSync(process.argv[3], "utf8"));

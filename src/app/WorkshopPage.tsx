@@ -28,6 +28,8 @@ interface Props {
   sharing: boolean;
   store: StoreApi;
   pretend: boolean;
+  /** The emulator frame's address (src/app/hosting.ts). */
+  frame: string;
 }
 
 /** The device's buttons in the order the reader shows them: the row on its
@@ -39,7 +41,7 @@ function buttonsOf(buttons: string[]): string[] {
   return [...BUTTON_ORDER.filter((b) => buttons.includes(b)), ...buttons.filter((b) => !BUTTON_ORDER.includes(b))];
 }
 
-export function WorkshopPage({ project, handbook, provider, first, firstFiles, onFirstSent, sharing, store, pretend }: Props) {
+export function WorkshopPage({ project, handbook, provider, first, firstFiles, onFirstSent, sharing, store, pretend, frame: frameUrl }: Props) {
   const workshop = useMemo(() => new Workshop(project, handbook, provider), [project, handbook, provider]);
   const [, setTick] = useState(0);
   const redraw = () => setTick((n) => n + 1);
@@ -83,8 +85,8 @@ export function WorkshopPage({ project, handbook, provider, first, firstFiles, o
   // one without, as its folder.
   const download = async () => {
     if (!workshop.code) return save(workshop.zip(), `${id}.zip`);
-    const ppn = await workshop.devicePackage();
-    if (ppn) save(ppn, `${id}-x4.ppn`);
+    const folder = await workshop.devicePackage();
+    if (folder) save(folder, `${id}-${workshop.packedFor!.target}.zip`);
   };
   const downloadForStore = () =>
     save(new Blob([workshop.storePackage() as BlobPart], { type: "application/zip" }), `${id}-for-the-store.zip`);
@@ -113,9 +115,9 @@ export function WorkshopPage({ project, handbook, provider, first, firstFiles, o
           class={`btn ${sharing ? "quiet" : "main"}`}
           onClick={() => void download()}
           disabled={!identity(project).id || workshop.packing}
-          title={workshop.code ? t("workshop.download.ppn") : undefined}
+          title={workshop.code ? t("workshop.download.ppn", { device: workshop.profile.name }) : undefined}
         >
-          {workshop.packing ? t("workshop.download.packing") : t("workshop.download")}
+          {workshop.packing ? t("workshop.download.packing", { device: workshop.packedFor?.name ?? "" }) : t("workshop.download")}
         </button>
         {sharing ? (
           <a class="btn main" href={here}>
@@ -223,7 +225,7 @@ export function WorkshopPage({ project, handbook, provider, first, firstFiles, o
           <div class="bezel">
             <iframe
               ref={frame}
-              src="frame.html"
+              src={frameUrl}
               // Its own opaque origin: no access to this page's storage or
               // key. The dev server cannot serve modules to an opaque origin
               // (CORS), so in development only the frame keeps the page's.

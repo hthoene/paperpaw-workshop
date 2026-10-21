@@ -18,6 +18,7 @@ import { loadProject, saveProject } from "../project/storage";
 import { FakeStore } from "../publish/fake";
 import { SiteStore, type StoreApi } from "../publish/store";
 import { Header } from "./Header";
+import { loadHosting, type Hosting } from "./hosting";
 import { Start } from "./Start";
 import { WorkshopPage } from "./WorkshopPage";
 
@@ -64,6 +65,7 @@ function shown(where: Route): string {
 
 export function App() {
   const [handbook, setHandbook] = useState<Handbook | null>(null);
+  const [hosting, setHosting] = useState<Hosting | null>(null);
   const [failed, setFailed] = useState("");
   const [key, setKey] = useState(rememberedKey);
   const [where, setWhere] = useState<Route>(route);
@@ -73,6 +75,7 @@ export function App() {
 
   useEffect(() => {
     Handbook.load(new URL("handbook/", document.baseURI).href).then(setHandbook, (e) => setFailed(String(e)));
+    void loadHosting().then(setHosting);
     const moved = () => setWhere(route());
     addEventListener("hashchange", moved);
     return () => removeEventListener("hashchange", moved);
@@ -125,7 +128,7 @@ export function App() {
     location.hash = `#/p/${p.key}`;
   };
 
-  const working = handbook && project && provider && where.page !== "start";
+  const working = handbook && hosting && project && provider && where.page !== "start";
   return (
     <>
       <Header />
@@ -146,6 +149,7 @@ export function App() {
             sharing={"share" in where && where.share}
             store={store}
             pretend={pretend}
+            frame={hosting.frame}
           />
         ) : (
           handbook && (

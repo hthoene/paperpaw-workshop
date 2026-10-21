@@ -18,9 +18,16 @@ import { CARRIED, Files, identity, type Project } from "../project/project";
 import { browserUploads, saveProject } from "../project/storage";
 import { ADDED, MAX_PICTURES_A_MESSAGE, UploadRefused, Uploads, type UploadStore } from "../project/uploads";
 import { pluginZip } from "../project/zip";
-import { BuilderUnavailable, HttpBuilder, projectFiles, type BuildResult, type Builder } from "../build/client";
+import { BuilderUnavailable, HttpBuilder, projectFiles, type BuildResult, type Builder, type Target } from "../build/client";
 import { CODE_TOOLS, DATA_TOOLS } from "../tools/registry";
 import type { ToolContext } from "../tools/tool";
+
+/** The devices PaperPaw takes plugin files on, by profile; Android's come
+ *  later. */
+const DEVICE_TARGETS: Record<string, { target: Target; name: string }> = {
+  "xteink-x4": { target: "x4", name: "X4" },
+  "xteink-x4-pro": { target: "x4-pro", name: "X4 Pro" },
+};
 
 export class Workshop {
   readonly files: Files;
@@ -392,22 +399,40 @@ export class Workshop {
     return new Blob([pluginZip(id, this.files.bytes({ store: false })) as BlobPart], { type: "application/zip" });
   }
 
-  /** A plugin with code, built for the X4: its `.ppn` (unsigned), or
+  /** The device a plugin with code is packed for: the one the reader
+   *  shows, if PaperPaw takes plugin files there. */
+  get packedFor(): { target: Target; name: string } | undefined {
+    return DEVICE_TARGETS[this.profile.id];
+  }
+
+  /** A plugin with code, built for the device the reader shows: its
+   *  folder (`plugin/`) with `code.ppn` in it (not signed), as a ZIP, or
    *  undefined with `error` saying why there is none. */
   async devicePackage(): Promise<Blob | undefined> {
     this.error = "";
+    const device = this.packedFor;
+    if (!device) {
+      this.error = t("workshop.ppn.device", { device: this.profile.name });
+      this.changed();
+      return undefined;
+    }
     this.packing = true;
     this.changed();
     try {
-      const result = await this.builder.build(projectFiles(this.files.all()), ["x4"]);
-      const ppn = result.files.find((f) => f.target === "x4");
+      const result = await this.builder.build(projectFiles(this.files.all()), [device.target]);
+      const ppn = result.files.find((f) => f.target === device.target);
       if (!ppn) {
-        this.error = t("workshop.ppn.failed");
+        this.error = t("workshop.ppn.failed", { device: device.name });
         return undefined;
       }
       const answer = await fetch(ppn.url);
       if (!answer.ok) throw new BuilderUnavailable(`the builder answered ${answer.status}`);
-      return await answer.blob();
+      const folder: Record<string, Uint8Array> = {};
+      for (const [path, bytes] of Object.entries(this.files.bytes({ store: false }))) {
+        if (path.startsWith("plugin/")) folder[path.slice("plugin/".length)] = bytes;
+      }
+      folder["code.ppn"] = new Uint8Array(await answer.arrayBuffer());
+      return new Blob([pluginZip(identity(this.project).id ?? "plugin", folder) as BlobPart], { type: "application/zip" });
     } catch (e) {
       this.error = e instanceof BuilderUnavailable ? t("workshop.ppn.builder") : e instanceof Error ? e.message : String(e);
       return undefined;
