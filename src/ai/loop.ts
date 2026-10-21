@@ -43,19 +43,23 @@ export function lastPrompt(project: Project): number {
   return project.lastPrompt ?? 0;
 }
 
-export async function runTurn(session: Session, text: string, events: TurnEvents = {}, signal?: AbortSignal): Promise<TurnEnd> {
+/** The person's words, and the pictures they added (image blocks). */
+export type Said = string | Anthropic.ContentBlockParam[];
+
+export async function runTurn(session: Session, said: Said, events: TurnEvents = {}, signal?: AbortSignal): Promise<TurnEnd> {
   const { project, provider } = session;
   if (lastPrompt(project) > MAX_PROMPT) return "too_long";
 
   // A turn that stopped after its tools ran ends with their results: the
   // person's words join that message rather than following it.
   const last = project.messages.at(-1);
-  let added: "message" | "block";
+  const blocks: Anthropic.ContentBlockParam[] = typeof said === "string" ? [{ type: "text", text: said }] : said;
+  let added: "message" | number;
   if (last?.role === "user" && Array.isArray(last.content)) {
-    last.content.push({ type: "text", text });
-    added = "block";
+    last.content.push(...blocks);
+    added = blocks.length;
   } else {
-    project.messages.push({ role: "user", content: text });
+    project.messages.push({ role: "user", content: typeof said === "string" ? said : blocks });
     added = "message";
   }
 
@@ -132,8 +136,8 @@ async function runTool(session: Session, call: Anthropic.ToolUseBlock, cut: bool
 }
 
 /** Takes back the person's words of a turn that never reached the model. */
-function undo(project: Project, added: "message" | "block"): void {
+function undo(project: Project, added: "message" | number): void {
   const last = project.messages.at(-1);
   if (added === "message") project.messages.pop();
-  else if (last && Array.isArray(last.content)) last.content.pop();
+  else if (last && Array.isArray(last.content)) last.content.splice(last.content.length - added, added);
 }

@@ -6,6 +6,10 @@
 import type { Finding } from "../checks/data";
 import type { Profile, Registry } from "../handbook/handbook";
 
+/** The screens the workshop asks for: the home screen, and what the
+ *  reader shows while it sleeps. */
+export type Screen = "home" | "sleep";
+
 /** A data plugin's files, by path. */
 export interface PluginFiles {
   id: string;
@@ -23,12 +27,14 @@ export type Request =
       profile: Profile;
       dark: boolean;
       plugins: PluginFiles[];
+      /** The screen to show: `home` (the default) or `sleep`. */
+      screen?: Screen;
       /** For the stub's checks; the real shell knows its own. */
       registry: Registry;
     }
   | { type: "files"; plugin: PluginFiles }
   | { type: "input"; event: InputEvent }
-  | { type: "screenshot"; profile?: Profile; dark?: boolean; screen?: string }
+  | { type: "screenshot"; profile?: Profile; dark?: boolean; screen?: Screen }
   | { type: "check" };
 
 export type Answer =

@@ -31,20 +31,20 @@ export const check: WorkshopTool<Record<string, never>> = {
   },
 };
 
-async function screen(context: ToolContext, device: string | undefined, dark: boolean | undefined) {
+async function screen(context: ToolContext, device: string | undefined, dark: boolean | undefined, which?: "home" | "sleep") {
   const profile = deviceNamed(context, device);
-  const shot = await context.emulator.screenshot(profile, dark);
+  const shot = await context.emulator.screenshot(profile, dark, which);
   return { profile, shot };
 }
 
-export const look: WorkshopTool<{ device?: string; dark?: boolean }> = {
+export const look: WorkshopTool<{ device?: string; dark?: boolean; screen?: "home" | "sleep" }> = {
   name: "look",
   description:
-    "See the reader's screen with the plugin, as a picture: the home screen of a device, light or dark (night mode). Use it to judge the result as a careful designer would.",
-  schema: z.object({ device: DEVICE.optional(), dark: z.boolean().optional() }).strict(),
-  async run({ device, dark }, context) {
+    "See the reader's screen with the plugin, as a picture: the home screen of a device, or what it shows asleep (screen: sleep, with its sleep picture or logo), light or dark (night mode). Use it to judge the result as a careful designer would.",
+  schema: z.object({ device: DEVICE.optional(), dark: z.boolean().optional(), screen: z.enum(["home", "sleep"]).optional() }).strict(),
+  async run({ device, dark, screen: which }, context) {
     await context.sync();
-    const { profile, shot } = await screen(context, device, dark);
+    const { profile, shot } = await screen(context, device, dark, which);
     const note = context.emulator.stub ? ` ${STUB_NOTE}` : "";
     return {
       content: [

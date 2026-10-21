@@ -6,6 +6,7 @@ import { check, look, press } from "./emulator";
 import { setEntry } from "./entry";
 import { deleteFile, listFiles, readFile, writeFile } from "./files";
 import type { WorkshopTool } from "./tool";
+import { convertPicture, listUploads, placeFile, viewUpload } from "./uploads";
 
 export const DATA_TOOLS: WorkshopTool<any>[] = [
   listFiles,
@@ -17,4 +18,8 @@ export const DATA_TOOLS: WorkshopTool<any>[] = [
   look,
   press,
   setEntry,
+  listUploads,
+  viewUpload,
+  convertPicture,
+  placeFile,
 ];

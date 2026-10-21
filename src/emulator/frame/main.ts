@@ -34,20 +34,24 @@ window.addEventListener("message", (event: MessageEvent) => {
   try {
     switch (request.type) {
       case "start":
-        device.start(request.profile, request.dark, request.plugins[0], request.registry);
-        redraw();
-        return answer(request.id);
+        void device.start(request.profile, request.dark, request.plugins[0], request.registry, request.screen).then(() => {
+          redraw();
+          answer(request.id);
+        }, (e) => fail(request.id, e));
+        return;
       case "files":
-        device.setFiles(request.plugin);
-        redraw();
-        return answer(request.id);
+        void device.setFiles(request.plugin).then(() => {
+          redraw();
+          answer(request.id);
+        }, (e) => fail(request.id, e));
+        return;
       case "input":
         device.input(request.event, device.items().length);
         redraw();
         return answer(request.id);
       case "screenshot": {
         const off = document.createElement("canvas");
-        device.draw(off, request.profile ?? device.profile, request.dark ?? device.dark);
+        device.draw(off, request.profile ?? device.profile, request.dark ?? device.dark, request.screen ?? device.screen);
         const png = off.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
         return answer(request.id, { png, width: off.width, height: off.height });
       }

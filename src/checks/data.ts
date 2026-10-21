@@ -6,7 +6,11 @@
 
 import type { Registry, SettingInfo } from "../handbook/handbook";
 import { parseIni, iniValue, type Ini } from "../project/ini";
+import { pngHeader } from "../pictures/png";
 import { MAX_BYTES, MAX_FILES, pathProblem, validId, validVersion } from "../project/rules";
+
+/** A picture larger than this takes long to draw on the X4. */
+const SLOW_PICTURE = 1_000_000;
 
 export type Level = "error" | "warning" | "info";
 
@@ -130,6 +134,29 @@ export function checkDataPlugin(files: Record<string, string | Uint8Array>, regi
       if (e.value !== "none" && !actions.has(e.value)) {
         add("keymap.action", "error", place, `there is no action ${e.value} (lookup_docs: actions)`);
       }
+    }
+  }
+
+  // Pictures: PNG as PaperPaw reads it, and the files settings name.
+  for (const path of paths.filter((p) => p.endsWith(".png") && !p.startsWith("store/"))) {
+    const content = files[path];
+    const header = content instanceof Uint8Array ? pngHeader(content) : undefined;
+    if (!header) add("picture.format", "error", path, "this is not a PNG picture");
+    else if (header.interlaced) add("picture.format", "error", path, "PaperPaw cannot read interlaced PNG: convert it again (convert_picture)");
+    else if ((content as Uint8Array).length > SLOW_PICTURE) add("picture.size", "warning", path, "larger than 1 MB: slow to draw on the X4; convert_picture makes it smaller");
+  }
+  const setting = (key: string) => settingsIni?.entries.find((e) => `${e.section}.${e.key}` === key);
+  const own = (value: string) => (id && value.startsWith(`plugins/${id}/`) ? value.slice(`plugins/${id}/`.length) : undefined);
+  const logo = setting("core.logo");
+  if (logo && own(logo.value) !== undefined && !(own(logo.value)! in files)) {
+    add("picture.missing", "error", `settings.ini:${logo.line}`, `the logo ${logo.value} is not in the plugin`);
+  }
+  const folder = setting("sleep.folder");
+  const show = setting("sleep.show");
+  if (folder && own(folder.value) !== undefined && show?.value === "sleep.show.picture") {
+    const inside = `${own(folder.value)!.replace(/\/+$/, "")}/`;
+    if (!paths.some((p) => p.startsWith(inside) && /\.(png|jpe?g)$/.test(p))) {
+      add("picture.missing", "error", `settings.ini:${folder.line}`, `the sleep pictures' folder ${folder.value} has no pictures in the plugin`);
     }
   }
 

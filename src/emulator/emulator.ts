@@ -4,16 +4,16 @@
 
 import type { Finding } from "../checks/data";
 import type { Profile, Registry } from "../handbook/handbook";
-import type { Answer, CheckResult, Hello, InputEvent, PluginFiles, Ready, Request, ScreenshotResult } from "./protocol";
+import type { Answer, CheckResult, Hello, InputEvent, PluginFiles, Ready, Request, Screen, ScreenshotResult } from "./protocol";
 
 export interface Emulator {
   /** Whether it is the stub rather than PaperPaw's real emulator. */
   readonly stub: boolean;
-  start(profile: Profile, dark: boolean, plugin: PluginFiles): Promise<void>;
+  start(profile: Profile, dark: boolean, plugin: PluginFiles, screen?: Screen): Promise<void>;
   setFiles(plugin: PluginFiles): Promise<void>;
   input(event: InputEvent): Promise<void>;
   /** The screen of `profile` (the one shown, if none), as a PNG. */
-  screenshot(profile?: Profile, dark?: boolean, screen?: string): Promise<ScreenshotResult>;
+  screenshot(profile?: Profile, dark?: boolean, screen?: Screen): Promise<ScreenshotResult>;
   check(): Promise<Finding[]>;
 }
 
@@ -73,8 +73,8 @@ export class FrameEmulator implements Emulator {
     });
   }
 
-  start(profile: Profile, dark: boolean, plugin: PluginFiles): Promise<void> {
-    return this.send({ type: "start", profile, dark, plugins: [plugin], registry: this.registry });
+  start(profile: Profile, dark: boolean, plugin: PluginFiles, screen?: Screen): Promise<void> {
+    return this.send({ type: "start", profile, dark, plugins: [plugin], registry: this.registry, screen });
   }
 
   setFiles(plugin: PluginFiles): Promise<void> {
@@ -85,7 +85,7 @@ export class FrameEmulator implements Emulator {
     return this.send({ type: "input", event });
   }
 
-  screenshot(profile?: Profile, dark?: boolean, screen?: string): Promise<ScreenshotResult> {
+  screenshot(profile?: Profile, dark?: boolean, screen?: Screen): Promise<ScreenshotResult> {
     return this.send({ type: "screenshot", profile, dark, screen });
   }
 

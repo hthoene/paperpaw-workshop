@@ -7,7 +7,8 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
 
 import { AnthropicDirect } from "../ai/anthropic";
-import example from "../ai/examples/night-owl.json";
+import nightOwl from "../ai/examples/night-owl.json";
+import sleepPicture from "../ai/examples/sleep-picture.json";
 import type { Provider } from "../ai/provider";
 import { ReplayProvider, type Recording } from "../ai/replay";
 import { Handbook } from "../handbook/handbook";
@@ -29,19 +30,34 @@ function rememberedKey(): string {
   }
 }
 
-type Route = { page: "start" } | { page: "project"; key: string; share: boolean } | { page: "example"; share: boolean };
+/** The recorded examples to watch, by the name in their address
+ *  (`#/example` is the first). */
+const EXAMPLES: Record<string, Recording> = {
+  "night-owl": nightOwl as Recording,
+  "sleep-picture": sleepPicture as Recording,
+};
+
+type Route =
+  | { page: "start" }
+  | { page: "project"; key: string; share: boolean }
+  | { page: "example"; name: string; share: boolean };
 
 function route(): Route {
   const m = /^#\/p\/([0-9a-f]+)(\/share)?$/.exec(location.hash);
   if (m) return { page: "project", key: m[1]!, share: !!m[2] };
-  const e = /^#\/example(\/share)?$/.exec(location.hash);
-  if (e) return { page: "example", share: !!e[1] };
+  // #/example, #/example/share, #/example/<name>, #/example/<name>/share
+  const [hash, page, ...rest] = location.hash.split("/");
+  if (hash === "#" && page === "example") {
+    const share = rest.at(-1) === "share";
+    const name = (share ? rest.slice(0, -1) : rest)[0] ?? "night-owl";
+    if (name in EXAMPLES && rest.length <= (share ? 2 : 1)) return { page: "example", name, share };
+  }
   return { page: "start" };
 }
 
 /** Which project a route shows: the same while only its page changes. */
 function shown(where: Route): string {
-  return where.page === "project" ? where.key : where.page;
+  return where.page === "project" ? where.key : where.page === "example" ? `example:${where.name}` : where.page;
 }
 
 export function App() {
@@ -51,6 +67,7 @@ export function App() {
   const [where, setWhere] = useState<Route>(route);
   const [project, setProject] = useState<Project | null>(null);
   const [first, setFirst] = useState("");
+  const [firstFiles, setFirstFiles] = useState<string[]>([]);
 
   useEffect(() => {
     Handbook.load(new URL("handbook/", document.baseURI).href).then(setHandbook, (e) => setFailed(String(e)));
@@ -65,13 +82,15 @@ export function App() {
     if (where.page === "project") {
       void loadProject(where.key).then((p) => setProject(p ?? null));
     } else if (where.page === "example") {
+      const recording = EXAMPLES[where.name]!;
       setProject(newProject());
-      setFirst((example as Recording).user[0]!);
+      setFirst(recording.user[0]!);
+      setFirstFiles(recording.attach ?? []);
     }
   }, [shown(where)]);
 
   const provider: Provider | null = useMemo(() => {
-    if (where.page === "example") return new ReplayProvider(example as Recording, 900);
+    if (where.page === "example") return new ReplayProvider(EXAMPLES[where.name]!, 900);
     return key ? new AnthropicDirect(key) : null;
   }, [shown(where), key]);
 
@@ -113,7 +132,11 @@ export function App() {
             handbook={handbook}
             provider={provider}
             first={first}
-            onFirstSent={() => setFirst("")}
+            firstFiles={firstFiles}
+            onFirstSent={() => {
+              setFirst("");
+              setFirstFiles([]);
+            }}
             sharing={"share" in where && where.share}
             store={store}
             pretend={pretend}

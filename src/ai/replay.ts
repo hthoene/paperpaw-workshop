@@ -13,6 +13,9 @@ export interface Recording {
   title: string;
   /** What the person wrote, turn by turn. */
   user: string[];
+  /** Files the person adds to their first message, from
+   *  `public/examples/`. */
+  attach?: string[];
   answers: Answer[];
   /** The answer to the share page's request for a store entry (the one
    *  request that offers `set_entry` alone), if the recording goes that

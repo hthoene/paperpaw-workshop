@@ -8,7 +8,9 @@ import { z } from "zod";
 
 import type { Emulator } from "../emulator/emulator";
 import type { Handbook, Profile } from "../handbook/handbook";
+import type { PictureKit } from "../pictures/kit";
 import type { Files } from "../project/project";
+import type { Uploads } from "../project/uploads";
 
 export interface ToolContext {
   files: Files;
@@ -18,6 +20,9 @@ export interface ToolContext {
   profiles: Profile[];
   /** Gives the emulator the plugin's files as they are now. */
   sync(): Promise<void>;
+  /** The author's uploads, and what decodes their pictures. */
+  uploads: Uploads;
+  pictures: PictureKit;
 }
 
 /** One line the conversation shows for a step: a catalog key and its values. */

@@ -5,11 +5,14 @@
 import type Anthropic from "@anthropic-ai/sdk";
 
 import { t } from "../i18n";
+import { ADDED } from "../project/uploads";
 
 export type Line =
   | { kind: "me"; text: string }
   | { kind: "ai"; text: string }
-  | { kind: "step"; text: string; failed: boolean };
+  | { kind: "step"; text: string; failed: boolean }
+  /** An upload the person added to their message, by name. */
+  | { kind: "added"; text: string };
 
 export function lines(messages: Anthropic.MessageParam[]): Line[] {
   const out: Line[] = [];
@@ -24,7 +27,10 @@ export function lines(messages: Anthropic.MessageParam[]): Line[] {
       continue;
     }
     for (const block of m.content) {
-      if (block.type === "text" && block.text.trim()) {
+      const added = block.type === "text" && m.role === "user" && block.text.startsWith(ADDED) ? /"(.+?)"/.exec(block.text) : null;
+      if (added) {
+        out.push({ kind: "added", text: added[1]! });
+      } else if (block.type === "text" && block.text.trim()) {
         out.push({ kind: m.role === "user" ? "me" : "ai", text: block.text.trim() });
       } else if (block.type === "tool_use") {
         const step = stepText(block.name, block.input as Record<string, unknown>);
@@ -38,9 +44,12 @@ export function lines(messages: Anthropic.MessageParam[]): Line[] {
 
 export function stepText(tool: string, input: Record<string, unknown>): string {
   const vars: Record<string, string> = {};
-  for (const name of ["path", "topic", "device"]) {
+  for (const name of ["path", "topic", "device", "name"]) {
     if (typeof input?.[name] === "string") vars[name] = input[name] as string;
   }
+  // The upload tools name their target `to` and their upload `upload`.
+  if (typeof input?.to === "string") vars.path = input.to;
+  if (typeof input?.upload === "string") vars.name = input.upload;
   if ((tool === "look" || tool === "press") && !vars.device) vars.device = "X4";
   return t(`step.${tool}`, vars);
 }

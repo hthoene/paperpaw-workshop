@@ -4,25 +4,33 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 
-import { runTurn, type TurnEnd } from "../ai/loop";
+import { runTurn, type Said, type TurnEnd } from "../ai/loop";
 import { MODELS, modelName } from "../ai/pricing";
 import type { Provider } from "../ai/provider";
 import type { Finding } from "../checks/data";
 import type { Emulator } from "../emulator/emulator";
 import { FrameEmulator } from "../emulator/emulator";
+import type { Screen } from "../emulator/protocol";
 import { SHOWN_PROFILES, type Handbook, type Profile } from "../handbook/handbook";
 import { t } from "../i18n";
+import { browserKit, type PictureKit } from "../pictures/kit";
 import { Files, identity, type Project } from "../project/project";
-import { saveProject } from "../project/storage";
+import { browserUploads, saveProject } from "../project/storage";
+import { ADDED, MAX_PICTURES_A_MESSAGE, UploadRefused, Uploads, type UploadStore } from "../project/uploads";
 import { pluginZip } from "../project/zip";
 import { DATA_TOOLS } from "../tools/registry";
 import type { ToolContext } from "../tools/tool";
 
 export class Workshop {
   readonly files: Files;
+  readonly uploads: Uploads;
+  /** Uploads the author added to the message being written. */
+  attached: string[] = [];
   readonly profiles: Profile[];
   profile: Profile;
   dark = false;
+  /** The screen the reader shows: home, or asleep. */
+  screen: Screen = "home";
   busy = false;
   /** The AI's words of the round running, as they come. */
   live = "";
@@ -37,8 +45,14 @@ export class Workshop {
     readonly project: Project,
     readonly handbook: Handbook,
     private provider: Provider,
+    readonly pictures: PictureKit = browserKit,
+    store: UploadStore = browserUploads,
   ) {
     this.files = new Files(project, () => void this.sync());
+    this.uploads = new Uploads(project, store, () => {
+      void saveProject(project);
+      this.changed();
+    });
     this.profiles = SHOWN_PROFILES.map((id) => handbook.profile(id)).filter((p): p is Profile => !!p);
     this.profile = this.profiles[0]!;
   }
@@ -98,7 +112,57 @@ export class Workshop {
       handbook: this.handbook,
       profiles: this.profiles,
       sync: () => this.sync(),
+      uploads: this.uploads,
+      pictures: this.pictures,
     };
+  }
+
+  /** Files the author gives (chosen or dropped): kept as uploads and added
+   *  to the message being written. Refusals say why, one by one. */
+  async addFiles(files: File[]): Promise<void> {
+    this.error = "";
+    for (const file of files) {
+      if (this.attached.length >= MAX_PICTURES_A_MESSAGE) {
+        this.error = t("upload.refused.message", { n: MAX_PICTURES_A_MESSAGE });
+        break;
+      }
+      try {
+        const info = await this.uploads.add(file.name, new Uint8Array(await file.arrayBuffer()), (b, type) => this.pictures.size(b, type));
+        this.attached.push(info.name);
+      } catch (e) {
+        this.error = e instanceof UploadRefused ? t(e.key, e.vars) : t("upload.refused.broken", { name: file.name });
+      }
+    }
+    this.changed();
+  }
+
+  /** Takes an upload off the message being written (it stays uploaded). */
+  leaveOut(name: string): void {
+    this.attached = this.attached.filter((n) => n !== name);
+    this.changed();
+  }
+
+  /** The person's words with what they attached: each picture as the AI
+   *  sees it (reduced), each named so the AI can use it with its tools. */
+  private async said(text: string): Promise<Said> {
+    if (this.attached.length === 0) return text;
+    const pictures = this.attached.filter((n) => this.uploads.info(n)?.kind === "picture");
+    if (pictures.length > this.uploads.showable) throw new Error(t("upload.refused.shown", { n: this.uploads.showable }));
+    const blocks: Anthropic.ContentBlockParam[] = [];
+    for (const name of this.attached) {
+      const info = this.uploads.info(name);
+      if (!info) continue;
+      if (info.kind === "picture") {
+        const picture = await this.pictures.forAi((await this.uploads.read(name))!, info.type);
+        blocks.push({ type: "image", source: { type: "base64", media_type: picture.mediaType, data: picture.data } });
+        blocks.push({ type: "text", text: `${ADDED} picture "${name}" (${info.width} x ${info.height} pixels).` });
+      } else {
+        blocks.push({ type: "text", text: `${ADDED} ${info.kind} "${name}" (${info.bytes} bytes).` });
+      }
+    }
+    this.uploads.shown(pictures.length);
+    blocks.push({ type: "text", text });
+    return blocks;
   }
 
   /** Whether the reader is there to take screenshots. */
@@ -112,13 +176,14 @@ export class Workshop {
   }
 
   async restart(): Promise<void> {
-    await this.emulator?.start(this.profile, this.dark, this.plugin());
+    await this.emulator?.start(this.profile, this.dark, this.plugin(), this.screen);
     this.changed();
   }
 
-  async show(profile: Profile, dark = this.dark): Promise<void> {
+  async show(profile: Profile, dark = this.dark, screen = this.screen): Promise<void> {
     this.profile = profile;
     this.dark = dark;
+    this.screen = screen;
     await this.restart();
   }
 
@@ -139,6 +204,15 @@ export class Workshop {
   /** The person's words to the AI: one turn, as many rounds as it takes. */
   async send(text: string): Promise<void> {
     if (this.busy || !text.trim() || !this.emulator) return;
+    let said: Said;
+    try {
+      said = await this.said(text.trim());
+    } catch (e) {
+      this.error = e instanceof Error ? e.message : String(e);
+      this.changed();
+      return;
+    }
+    this.attached = [];
     this.busy = true;
     this.error = "";
     this.live = "";
@@ -156,7 +230,7 @@ export class Workshop {
           model: this.model,
           effort: "medium",
         },
-        text.trim(),
+        said,
         {
           onText: (d) => {
             this.live += d;

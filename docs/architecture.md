@@ -8,12 +8,14 @@ only hands out the files (nginx in `local/`); it never sees a key or a plugin.
 src/
   app/        the pages (Preact) and the controller between them and the rest
   ai/         the conversation loop, who answers it (providers), prices
-  tools/      what the AI can do: files, docs, check, look, press, set_entry
+  tools/      what the AI can do: files, docs, check, look, press, set_entry,
+              and the author's uploads (list, view, convert a picture, place a file)
+  pictures/   pictures for e-ink: gray, fitted, toned, dithered, PNG
   handbook/   finding and reading topics of the handbook
   checks/     the rules a data plugin must follow
   emulator/   the interface to the reader, and the frame behind it
   publish/    sharing in the store: its API, screenshots, the AI's draft
-  project/    a project, its files, its store entry, storage, the ZIP
+  project/    a project, its files, its uploads, its store entry, storage, the ZIP
   i18n/       every text, and t()
 handbook/     how the handbook is made from PaperPaw (Node and Rust)
 public/       fonts, the icon, the made handbook
@@ -132,8 +134,9 @@ The share page (`#/p/<project>/share`) takes a plugin from "works on the
 reader" to "sent to the moderators" in as few steps as there can be:
 
 1. **Its page in the store** is drafted by the AI from the conversation
-   ([src/publish/draft.ts](../src/publish/draft.ts): one request that must
-   call `set_entry`), and the author changes what they like. The entry
+   ([src/publish/draft.ts](../src/publish/draft.ts): one request whose only
+   tool is `set_entry`, asked for by name), and the author changes what
+   they like. The entry
    lives in `store/store.ini` ([src/project/entry.ts](../src/project/entry.ts)),
    with the store's own limits.
 2. **Screenshots** are taken on the emulator, on each device and once at
@@ -154,6 +157,37 @@ at paperpaw.org/submit.
 
 `store/` goes to the store only: the ZIP for a reader's card and the
 files the emulator gets leave it out.
+
+## The author's pictures and files
+
+Authors add pictures (and fonts or texts) to their messages with "Add a
+picture" or by dropping them on the conversation. Two uses, which the AI
+tells apart from what the author says: **material** it builds into the
+plugin (a sleep picture, a logo), and **references** it looks at to make
+a design (a screenshot or sketch of a look).
+
+- **Uploads are not plugin files.** [src/project/uploads.ts](../src/project/uploads.ts)
+  keeps them with the project, their bytes in an IndexedDB store of their
+  own (so saving a project does not write them again), within limits
+  (kinds by their bytes, sizes, megapixels, how many). They never go to a
+  server; the AI gets a reduced copy (at most 1,568 pixels on the long
+  side, re-encoded, so no metadata goes along), at most 4 a message and
+  12 a conversation.
+- **Pictures for the readers** are made in the browser by pure functions
+  in [src/pictures/](../src/pictures/): gray, fitted (fill or whole, a
+  crop, a box for a logo), toned for e-ink (levels, brightness, contrast,
+  gamma), dithered to the panel's grays (four on the X4: diffusion for
+  photos, line art for drawings), written as 2 or 4-bit gray PNG. One
+  file per screen size once PaperPaw can pick one; until then one file
+  for the largest screen the plugin is for.
+- **The tools** `list_uploads`, `view_upload`, `convert_picture` (which
+  answers with how the X4 shows the result, so the AI judges its own
+  work) and `place_file` are in [src/tools/uploads.ts](../src/tools/uploads.ts).
+  The browser parts (decoding, the AI's copy) come through a
+  `PictureKit` ([src/pictures/kit.ts](../src/pictures/kit.ts)), which tests
+  replace with a fake.
+- The stub reader shows the sleep screen ("Asleep" beside the reader,
+  `look` with `screen: sleep`): the plugin's sleep picture, or its logo.
 
 ## Texts
 

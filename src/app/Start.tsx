@@ -62,7 +62,8 @@ export function Start({ apiKey, remembered, needsKey, onKey, onStart }: Props) {
         />
         <div class="row">
           <span class="small">
-            {t("start.hint")} <a href="#/example">{t("start.example")}</a>
+            {t("start.hint")} <a href="#/example">{t("start.example")}</a>{" "}
+            <a href="#/example/sleep-picture">{t("start.example.picture")}</a>
           </span>
           <button class="btn main" onClick={go} disabled={!idea.trim()}>
             {t("start.go")}

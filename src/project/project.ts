@@ -6,6 +6,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 
 import { parseIni, iniValue } from "./ini";
 import { isText, pathProblem } from "./rules";
+import type { UploadInfo } from "./uploads";
 
 export type Kind = "data";
 
@@ -32,6 +33,11 @@ export interface Project {
   usage: Usage;
   /** The prompt's size in the last request, in tokens. */
   lastPrompt?: number;
+  /** The author's pictures and files (their bytes are kept apart, see
+   *  uploads.ts). */
+  uploads?: UploadInfo[];
+  /** How many uploaded pictures the AI was shown in this conversation. */
+  picturesShown?: number;
   created: string;
   updated: string;
 }

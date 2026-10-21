@@ -7,6 +7,7 @@ import en from "../src/i18n/en.json";
 import { t } from "../src/i18n";
 import { GROUPS, LICENCES } from "../src/project/entry";
 import { STORE_ERRORS } from "../src/publish/store";
+import { DATA_TOOLS } from "../src/tools/registry";
 
 /** Every file under `dir` ending in one of `ends`. */
 function files(dir: string, ends: string[]): string[] {
@@ -29,7 +30,7 @@ describe("the catalog", () => {
   });
 
   it("has a text for each tool's step, button and finding level", () => {
-    for (const tool of ["list_files", "read_file", "write_file", "delete_file", "lookup_docs", "check", "look", "press", "set_entry"]) {
+    for (const tool of DATA_TOOLS.map((t) => t.name)) {
       expect(en).toHaveProperty(`step.${tool}`);
     }
     for (const b of ["page-back", "up", "down", "left", "right", "confirm", "back", "page-forward"]) {

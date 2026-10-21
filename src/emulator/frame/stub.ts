@@ -2,13 +2,14 @@
 // draws a reader's home screen roughly as PaperPaw would with the plugin's
 // look settings (margins, rows, headers, corners, highlight, lines, cards,
 // title size, text size, colours, night mode) and its home screen layout,
-// and checks the plugin with the workshop's own checks. It is a preview,
-// not PaperPaw: the real emulator draws the real screens.
+// and the sleep screen (its picture, or the logo), and checks the plugin
+// with the workshop's own checks. It is a preview, not PaperPaw: the real
+// emulator draws the real screens.
 
 import { checkDataPlugin } from "../../checks/data";
 import type { Profile, Registry } from "../../handbook/handbook";
 import { parseIni, type Ini } from "../../project/ini";
-import type { InputEvent, PluginFiles } from "../protocol";
+import type { InputEvent, PluginFiles, Screen } from "../protocol";
 
 const PAPER: Record<string, string> = {
   "core.paper.white": "#ffffff",
@@ -36,18 +37,32 @@ export class StubDevice {
   dark = false;
   plugin: PluginFiles | undefined;
   focus = 0;
+  screen: Screen = "home";
   private registry: Registry | undefined;
+  /** The plugin's pictures, decoded, by path. */
+  private pictures = new Map<string, ImageBitmap>();
 
-  start(profile: Profile, dark: boolean, plugin: PluginFiles | undefined, registry: Registry): void {
+  async start(profile: Profile, dark: boolean, plugin: PluginFiles | undefined, registry: Registry, screen: Screen = "home"): Promise<void> {
     this.profile = profile;
     this.dark = dark;
-    this.plugin = plugin;
     this.registry = registry;
     this.focus = 0;
+    this.screen = screen;
+    await this.setFiles(plugin);
   }
 
-  setFiles(plugin: PluginFiles): void {
+  async setFiles(plugin: PluginFiles | undefined): Promise<void> {
     this.plugin = plugin;
+    for (const old of this.pictures.values()) old.close();
+    this.pictures.clear();
+    for (const [path, bytes] of Object.entries(plugin?.files ?? {})) {
+      if (!/\.(png|jpe?g)$/.test(path)) continue;
+      try {
+        this.pictures.set(path, await createImageBitmap(new Blob([bytes as BlobPart])));
+      } catch {
+        // A picture the browser cannot read: the checks say so.
+      }
+    }
   }
 
   input(event: InputEvent, count: number): void {
@@ -94,13 +109,18 @@ export class StubDevice {
     return ["Continue reading", "Library", "Recently read", "Fonts", "Settings"].map((label) => ({ label }));
   }
 
-  /** Draws the home screen on `canvas`, at the profile's resolution. */
-  draw(canvas: HTMLCanvasElement, profile = this.profile, dark = this.dark): void {
+  /** Draws the home screen (or the sleep screen) on `canvas`, at the
+   *  profile's resolution. */
+  draw(canvas: HTMLCanvasElement, profile = this.profile, dark = this.dark, screen = this.screen): void {
     if (!profile) return;
     canvas.width = profile.width;
     canvas.height = profile.height;
     const g = canvas.getContext("2d");
     if (!g) return;
+    if (screen === "sleep") {
+      this.drawSleep(g, profile, dark);
+      return;
+    }
     const mm = (n: number) => (n * profile.dpi) / 25.4;
     const number = (id: string) => Number(this.value(id)) || 0;
     const choice = (id: string) => this.value(id).split(".").pop() ?? "";
@@ -235,6 +255,85 @@ export class StubDevice {
     g.fillText("Preview: PaperPaw's emulator comes later", margin, profile.height - text * 0.6);
     g.globalAlpha = 1;
   }
+
+  /** What the sleep screen shows with these settings and files. */
+  sleepParts(): SleepParts {
+    const show = this.value("sleep.show").split(".").pop() || "cover";
+    const prefix = `plugins/${this.plugin?.id ?? ""}/`;
+    const folder = this.value("sleep.folder").replace(/\/+$/, "");
+    const inPlugin = folder.startsWith(prefix) ? `${folder.slice(prefix.length)}/` : undefined;
+    const picture = inPlugin ? [...this.pictures.keys()].filter((p) => p.startsWith(inPlugin)).sort()[0] : undefined;
+    const logoSetting = this.value("core.logo");
+    const logo = logoSetting.startsWith(prefix) && this.pictures.has(logoSetting.slice(prefix.length)) ? logoSetting.slice(prefix.length) : undefined;
+    return { show, picture, logo };
+  }
+
+  /** The sleep screen: the plugin's picture filling the screen, or the
+   *  logo and "Sleeping" (PaperPaw's fallback without a picture). */
+  private drawSleep(g: CanvasRenderingContext2D, profile: Profile, dark: boolean): void {
+    const { width, height } = profile;
+    const parts = this.sleepParts();
+    const night = dark || this.value("core.night-mode") === "true";
+    const invertPictures = night && this.value("core.night-pictures") === "true";
+    const paper = night ? "#111111" : "#ffffff";
+    const ink = night ? "#f2f2f2" : "#000000";
+    g.fillStyle = paper;
+    g.fillRect(0, 0, width, height);
+    const filter = `${profile.colors ? "" : "grayscale(1) "}${invertPictures ? "invert(1)" : ""}`.trim() || "none";
+    const text = (size: number, words: string, y: number, alpha = 1) => {
+      g.fillStyle = ink;
+      g.globalAlpha = alpha;
+      g.font = `400 ${Math.round(size)}px system-ui, sans-serif`;
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      g.fillText(words, width / 2, y);
+      g.globalAlpha = 1;
+      g.textAlign = "start";
+    };
+    const unit = profile.dpi / 72;
+
+    const shown = parts.show === "picture" && parts.picture ? this.pictures.get(parts.picture) : undefined;
+    if (shown) {
+      // Filling the screen, cut at the edges, as a sleep picture is drawn.
+      const scale = Math.max(width / shown.width, height / shown.height);
+      const w = shown.width * scale;
+      const h = shown.height * scale;
+      g.filter = filter;
+      g.drawImage(shown, (width - w) / 2, (height - h) / 2, w, h);
+      g.filter = "none";
+      if (profile.id.startsWith("xteink-")) fourGrays(g, width, height);
+    } else if (parts.show === "cover") {
+      g.fillStyle = night ? "#2a2a2a" : "#d9d9d9";
+      g.fillRect(width * 0.15, height * 0.12, width * 0.7, height * 0.76);
+      text(9 * unit, "The cover of the book read last", height / 2);
+    } else {
+      const logo = parts.logo ? this.pictures.get(parts.logo) : undefined;
+      if (logo) {
+        const scale = Math.min((width * 0.45) / logo.width, (height * 0.3) / logo.height, 4);
+        g.filter = filter;
+        g.drawImage(logo, (width - logo.width * scale) / 2, height * 0.42 - logo.height * scale, logo.width * scale, logo.height * scale);
+        g.filter = "none";
+      } else {
+        text(16 * unit, "PaperPaw", height * 0.36);
+      }
+      text(10 * unit, parts.show === "picture" ? "Sleeping (no picture found in its folder)" : "Sleeping", height * 0.5);
+    }
+    // On paper, so it reads over a picture too.
+    g.fillStyle = paper;
+    g.globalAlpha = 0.8;
+    g.fillRect(0, height - 12 * unit, width, 12 * unit);
+    g.globalAlpha = 1;
+    text(6 * unit, "Preview: PaperPaw's emulator comes later", height - 6 * unit, 0.7);
+  }
+}
+
+export interface SleepParts {
+  /** What PaperPaw shows: `picture`, `message`, `cover`, `widgets`, `page`. */
+  show: string;
+  /** For a picture: the plugin's file it shows, if it has one. */
+  picture?: string;
+  /** For the message: the logo's file in the plugin, if one is set. */
+  logo?: string;
 }
 
 function roundRect(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number): void {
@@ -246,6 +345,24 @@ function roundRect(g: CanvasRenderingContext2D, x: number, y: number, w: number,
   g.arcTo(x, y + h, x, y, radius);
   g.arcTo(x, y, x + w, y, radius);
   g.closePath();
+}
+
+/** The X4's four grays, ordered dithered as its framebuffer does (4 x 4
+ *  Bayer), so a picture shows as it will there. */
+function fourGrays(g: CanvasRenderingContext2D, width: number, height: number): void {
+  const bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+  const image = g.getImageData(0, 0, width, height);
+  const d = image.data;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      const luma = 0.299 * d[i]! + 0.587 * d[i + 1]! + 0.114 * d[i + 2]!;
+      const offset = ((bayer[(y % 4) * 4 + (x % 4)]! + 0.5) / 16 - 0.5) * 85;
+      const v = Math.min(3, Math.max(0, Math.round((luma + offset) / 85))) * 85;
+      d[i] = d[i + 1] = d[i + 2] = v;
+    }
+  }
+  g.putImageData(image, 0, 0);
 }
 
 /** `text`, shortened with an ellipsis to fit `width`. */

@@ -34,6 +34,12 @@ On the start page you can:
 
 Your projects are kept in your browser (IndexedDB), not on a server.
 
+**Pictures**: "Add a picture" beside the message field (or drop one on
+the conversation). The AI builds it into the plugin, made for e-ink
+(a picture while the reader sleeps, a logo), or takes ideas from it (a
+screenshot of a look you like). Your pictures stay in your browser; the
+AI sees a smaller copy. The second example on the start page shows it.
+
 When you like your plugin, **Share it in the store** fills in everything
 the store asks for: the AI writes its description from your conversation
 (change what you like), the screenshots are taken on the reader for you,

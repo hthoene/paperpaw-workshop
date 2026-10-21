@@ -12,6 +12,7 @@ import { lines } from "./conversation";
 import { Workshop } from "./controller";
 import { Steps } from "./Header";
 import { SharePanel } from "./SharePanel";
+import { AddButton, AddedLine, Attached, DropZone, PluginFile, UploadList } from "./Uploads";
 
 interface Props {
   project: Project;
@@ -19,6 +20,8 @@ interface Props {
   provider: Provider;
   /** The idea from the start page, sent once the reader is ready. */
   first: string;
+  /** Files added to it (an example's, from `public/examples/`). */
+  firstFiles: string[];
   onFirstSent(): void;
   /** The share page instead of the conversation, the reader beside it. */
   sharing: boolean;
@@ -28,7 +31,7 @@ interface Props {
 
 const BUTTONS = ["page-back", "up", "down", "left", "right", "confirm", "back", "page-forward"];
 
-export function WorkshopPage({ project, handbook, provider, first, onFirstSent, sharing, store, pretend }: Props) {
+export function WorkshopPage({ project, handbook, provider, first, firstFiles, onFirstSent, sharing, store, pretend }: Props) {
   const workshop = useMemo(() => new Workshop(project, handbook, provider), [project, handbook, provider]);
   const [, setTick] = useState(0);
   const redraw = () => setTick((n) => n + 1);
@@ -40,11 +43,14 @@ export function WorkshopPage({ project, handbook, provider, first, onFirstSent, 
   useEffect(() => workshop.subscribe(redraw), [workshop]);
   useEffect(() => {
     if (!frame.current) return;
-    void workshop.attach(frame.current).then(() => {
-      if (first) {
-        onFirstSent();
-        void workshop.send(first);
-      }
+    void workshop.attach(frame.current).then(async () => {
+      if (!first) return;
+      onFirstSent();
+      const files = await Promise.all(
+        firstFiles.map(async (name) => new File([await (await fetch(new URL(`examples/${name}`, document.baseURI))).blob()], name)),
+      );
+      if (files.length) await workshop.addFiles(files);
+      await workshop.send(first);
     });
   }, [workshop]);
   useEffect(() => bottom.current?.scrollIntoView({ block: "end" }), [workshop.project.messages.length, workshop.live]);
@@ -110,13 +116,15 @@ export function WorkshopPage({ project, handbook, provider, first, onFirstSent, 
         {sharing ? (
           <SharePanel workshop={workshop} store={store} back={back} pretend={pretend} onDownload={downloadForStore} />
         ) : (
-          <section class="box chat" aria-label="Conversation">
+          <DropZone workshop={workshop} class="box chat">
             <div class="messages" aria-live="polite">
               {conversation.map((line, i) =>
                 line.kind === "step" ? (
                   <div key={i} class={`step${line.failed ? " failed" : ""}`}>
                     {line.text}
                   </div>
+                ) : line.kind === "added" ? (
+                  <AddedLine key={i} uploads={workshop.uploads} name={line.text} />
                 ) : (
                   <div key={i} class={line.kind}>
                     {line.text}
@@ -128,6 +136,7 @@ export function WorkshopPage({ project, handbook, provider, first, onFirstSent, 
               {workshop.error && <p class="error">{workshop.error}</p>}
               <div ref={bottom} />
             </div>
+            <Attached workshop={workshop} />
             <div class="composer">
               <label class="visually-hidden" for="say">
                 {t("workshop.input")}
@@ -145,6 +154,7 @@ export function WorkshopPage({ project, handbook, provider, first, onFirstSent, 
                   }
                 }}
               />
+              <AddButton workshop={workshop} />
               {workshop.busy ? (
                 <button class="btn quiet" onClick={() => workshop.stop()}>
                   {t("workshop.stop")}
@@ -157,7 +167,7 @@ export function WorkshopPage({ project, handbook, provider, first, onFirstSent, 
             </div>
             <p class="small cost">{t("workshop.cost", { model: workshop.modelLabel, who: workshop.who, cost })}</p>
             {workshop.example && <p class="small">{t("workshop.example")}</p>}
-          </section>
+          </DropZone>
         )}
 
         <section class="device" aria-label="The reader">
@@ -173,6 +183,12 @@ export function WorkshopPage({ project, handbook, provider, first, onFirstSent, 
             </button>
             <button aria-pressed={!workshop.dark} onClick={() => void workshop.show(profile, false)}>
               {t("reader.light")}
+            </button>
+            <button
+              aria-pressed={workshop.screen === "sleep"}
+              onClick={() => void workshop.show(profile, workshop.dark, workshop.screen === "sleep" ? "home" : "sleep")}
+            >
+              {t("reader.asleep")}
             </button>
           </div>
           <div class="bezel">
@@ -223,12 +239,11 @@ export function WorkshopPage({ project, handbook, provider, first, onFirstSent, 
                 {t("files.close")}
               </button>
             </div>
+            <UploadList uploads={workshop.uploads} />
+            <h3 class="part">{t("files.plugin")}</h3>
             {workshop.files.list().length === 0 && <p class="small">{t("files.none")}</p>}
             {workshop.files.list().map((f) => (
-              <section key={f.path}>
-                <h3>{f.path}</h3>
-                <pre>{workshop.files.read(f.path) ?? `(${f.size} bytes)`}</pre>
-              </section>
+              <PluginFile key={f.path} path={f.path} content={project.files[f.path]!} />
             ))}
           </div>
         </div>
