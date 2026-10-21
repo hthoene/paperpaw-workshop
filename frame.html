@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'" />
+    <title>Emulator</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #f2f2f2; }
+      body { display: grid; place-items: center; }
+      canvas { display: block; max-width: 100%; max-height: 100%; image-rendering: auto; }
+    </style>
+  </head>
+  <body>
+    <canvas id="screen" width="480" height="800"></canvas>
+    <script type="module" src="/src/emulator/frame/main.ts"></script>
+  </body>
+</html>
