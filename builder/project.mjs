@@ -1,5 +1,5 @@
-// What a plugin with code may be, checked before anything is built (design
-// 4.3 and 7.1): which files, how large, and a Cargo.toml that names only
+// What a plugin with code may be, checked before anything is built:
+// which files, how large, and a Cargo.toml that names only
 // what the builder has (the SDK of the PaperPaw in the image). The
 // builder writes the Cargo.toml it builds with itself; the author's says
 // only the crate's name, its version and the plugin's type.
@@ -16,7 +16,7 @@ export const MAX_FILES = 200;
 export const MAX_BYTES = 32 * 1024 * 1024;
 
 /** Crates a plugin may name: the SDK only, so far (the list grows by
- *  request, design question 5). */
+ *  request). */
 export const ALLOWED = ["paperpaw-sdk"];
 
 /** Why the project cannot be built, in sentences the AI can act on; empty

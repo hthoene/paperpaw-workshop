@@ -1,6 +1,6 @@
 // The author's uploads on the page: the button and the drop that add them
 // to a message, the small pictures that show them, and their list in the
-// Files panel apart from the plugin's own files (design 4.8).
+// Files panel apart from the plugin's own files.
 
 import type { ComponentChildren } from "preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";

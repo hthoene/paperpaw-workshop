@@ -1,6 +1,6 @@
 // The author's uploads, for the AI: list them, look at one (vision), make
 // a picture of one for the readers into the plugin, copy a font or text
-// into it (design 4.8). Uploads themselves never become plugin files;
+// into it. Uploads themselves never become plugin files;
 // what these tools write does.
 
 import { z } from "zod";

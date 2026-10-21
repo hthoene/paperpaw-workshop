@@ -1,4 +1,4 @@
-// The workshop's side of the build API (design 4.3): the project's files
+// The workshop's side of the build API: the project's files
 // go to the builder, which answers with the emulator's module (PaperPaw
 // with the plugin compiled in), a `.ppn` for the X4, and the compiler's
 // messages. The page reaches the builder on its own origin

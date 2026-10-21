@@ -1,5 +1,5 @@
 // The author's uploads: pictures and files given to the workshop, kept
-// with the project but apart from the plugin (design 4.8). Only a
+// with the project but apart from the plugin. Only a
 // converted copy that the AI or the author puts into the plugin's folder
 // is part of the plugin. The bytes live in their own store (storage.ts),
 // so a project's record stays small; the project lists what there is.

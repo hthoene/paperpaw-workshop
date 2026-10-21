@@ -1,4 +1,4 @@
-// The build API (design 4.3), the local way: one container, one build at
+// The build API, the local way: one container, one build at
 // a time, builds kept for 24 hours. The workshop's page reaches it through
 // its own server (/api/v1/workshop/builds), so no CORS but for the files
 // the emulator frame (an opaque origin) fetches.

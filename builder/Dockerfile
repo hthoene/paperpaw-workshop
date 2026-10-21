@@ -1,4 +1,4 @@
-# The builder (design 4.3): PaperPaw at a ref, its crates already compiled
+# The builder: PaperPaw at a ref, its crates already compiled
 # for the browser (wasm32), the X4 (RISC-V) and the X4 Pro (Xtensa), and
 # the build API.
 #

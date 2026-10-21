@@ -1,4 +1,4 @@
-// The workshop's side of the plugin store on paperpaw.org (design 4.7).
+// The workshop's side of the plugin store on paperpaw.org.
 // The share page knows only `StoreApi`: `SiteStore` is paperpaw.org's
 // own form, sent as the signed-in author; `FakeStore` stands in for tests
 // and for `npm run dev`. The API is described in docs/store-api.md.

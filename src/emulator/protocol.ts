@@ -1,4 +1,4 @@
-// The messages between the workshop and the emulator frame (design 4.4).
+// The messages between the workshop and the emulator frame.
 // The frame is PaperPaw's web shell (`shells/web`) once it lands; until
 // then a stub (frame/stub.ts) answers the same messages. Every request
 // carries an `id`; the frame answers each with the same `id`.

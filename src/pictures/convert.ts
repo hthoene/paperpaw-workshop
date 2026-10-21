@@ -1,8 +1,8 @@
 // A picture made for the readers a plugin is for: one file per screen
-// size, gray, at the panel's grays, dithered (design 4.8).
+// size, gray, at the panel's grays, dithered.
 //
 // Until PaperPaw picks a file per screen size (`name@480x800.png` beside
-// `name.png`, design question 12.1), a plugin for several screen sizes
+// `name.png`), a plugin for several screen sizes
 // gets one file, made for the largest of them in all 256 grays and not
 // dithered: the readers scale it and dither it themselves, and a picture
 // dithered twice (here, and again by the reader) shows a moiré.
