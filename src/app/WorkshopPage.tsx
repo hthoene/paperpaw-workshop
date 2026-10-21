@@ -79,7 +79,13 @@ export function WorkshopPage({ project, handbook, provider, first, firstFiles, o
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
   const id = identity(project).id ?? "plugin";
-  const download = () => save(workshop.zip(), `${id}.zip`);
+  // A plugin with code goes on the reader as a package the builder makes;
+  // one without, as its folder.
+  const download = async () => {
+    if (!workshop.code) return save(workshop.zip(), `${id}.zip`);
+    const ppn = await workshop.devicePackage();
+    if (ppn) save(ppn, `${id}-x4.ppn`);
+  };
   const downloadForStore = () =>
     save(new Blob([workshop.storePackage() as BlobPart], { type: "application/zip" }), `${id}-for-the-store.zip`);
   // This page's address with and without the share page.
@@ -103,8 +109,13 @@ export function WorkshopPage({ project, handbook, provider, first, firstFiles, o
         <button class="btn quiet" onClick={() => setShowFiles(true)}>
           {t("workshop.files")}
         </button>
-        <button class={`btn ${sharing ? "quiet" : "main"}`} onClick={download} disabled={!identity(project).id}>
-          {t("workshop.download")}
+        <button
+          class={`btn ${sharing ? "quiet" : "main"}`}
+          onClick={() => void download()}
+          disabled={!identity(project).id || workshop.packing}
+          title={workshop.code ? t("workshop.download.ppn") : undefined}
+        >
+          {workshop.packing ? t("workshop.download.packing") : t("workshop.download")}
         </button>
         {sharing ? (
           <a class="btn main" href={here}>

@@ -18,7 +18,7 @@ import { CARRIED, Files, identity, type Project } from "../project/project";
 import { browserUploads, saveProject } from "../project/storage";
 import { ADDED, MAX_PICTURES_A_MESSAGE, UploadRefused, Uploads, type UploadStore } from "../project/uploads";
 import { pluginZip } from "../project/zip";
-import { HttpBuilder, type BuildResult, type Builder } from "../build/client";
+import { BuilderUnavailable, HttpBuilder, projectFiles, type BuildResult, type Builder } from "../build/client";
 import { CODE_TOOLS, DATA_TOOLS } from "../tools/registry";
 import type { ToolContext } from "../tools/tool";
 
@@ -41,6 +41,8 @@ export class Workshop {
   long = false;
   /** A plugin with code: its last build. */
   build: BuildResult | undefined;
+  /** A plugin with code: its package for the X4 is being built. */
+  packing = false;
   error = "";
   findings: Finding[] = [];
   stub = true;
@@ -388,6 +390,31 @@ export class Workshop {
   zip(): Blob {
     const id = identity(this.project).id ?? "plugin";
     return new Blob([pluginZip(id, this.files.bytes({ store: false })) as BlobPart], { type: "application/zip" });
+  }
+
+  /** A plugin with code, built for the X4: its `.ppn` (unsigned), or
+   *  undefined with `error` saying why there is none. */
+  async devicePackage(): Promise<Blob | undefined> {
+    this.error = "";
+    this.packing = true;
+    this.changed();
+    try {
+      const result = await this.builder.build(projectFiles(this.files.all()), ["x4"]);
+      const ppn = result.files.find((f) => f.target === "x4");
+      if (!ppn) {
+        this.error = t("workshop.ppn.failed");
+        return undefined;
+      }
+      const answer = await fetch(ppn.url);
+      if (!answer.ok) throw new BuilderUnavailable(`the builder answered ${answer.status}`);
+      return await answer.blob();
+    } catch (e) {
+      this.error = e instanceof BuilderUnavailable ? t("workshop.ppn.builder") : e instanceof Error ? e.message : String(e);
+      return undefined;
+    } finally {
+      this.packing = false;
+      this.changed();
+    }
   }
 
   /** The plugin as the store's form takes it: with its entry and

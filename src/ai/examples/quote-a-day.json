@@ -1,0 +1,149 @@
+{
+ "title": "A quote a day: a plugin with code, a compiler error, the screen",
+ "kind": "code",
+ "user": [
+  "A screen in the tools menu that shows a short quote about reading, a different one each day."
+ ],
+ "answers": [
+  {
+   "stop_reason": "tool_use",
+   "content": [
+    {
+     "type": "text",
+     "text": "I'll start from the sample plugin and look up how a plugin reads today's date."
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_01",
+     "name": "lookup_docs",
+     "input": {
+      "topic": "sdk/time"
+     }
+    }
+   ]
+  },
+  {
+   "stop_reason": "tool_use",
+   "content": [
+    {
+     "type": "text",
+     "text": "A screen in the tools menu with seven quotes about reading; the day of the year picks one."
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_02",
+     "name": "write_file",
+     "input": {
+      "path": "Cargo.toml",
+      "content": "[package]\nname = \"quote\"\nversion = \"0.1.0\"\n\n[package.metadata.paperpaw]\nplugin = \"QuoteOfTheDay\"\n\n[dependencies]\npaperpaw-sdk = \"0.5\"\n"
+     }
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_03",
+     "name": "write_file",
+     "input": {
+      "path": "plugin/plugin.ini",
+      "content": "[plugin]\nid = quote\nname = Quote of the day\ndescription = A short quote about reading, a different one each day.\nversion = 0.1.0\n"
+     }
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_04",
+     "name": "write_file",
+     "input": {
+      "path": "i18n/en.ini",
+      "content": "[meta]\nlanguage = en\nname = English\nplural = one-other\n\n[messages]\nquote.plugin.name = Quote of the day\nquote.plugin.description = A short quote about reading, a different one each day.\nquote.title = Quote of the day\n"
+     }
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_05",
+     "name": "write_file",
+     "input": {
+      "path": "i18n/de.ini",
+      "content": "[meta]\nlanguage = de\nname = Deutsch\nplural = one-other\n\n[messages]\nquote.plugin.name = Zitat des Tages\nquote.plugin.description = Ein kurzes Zitat übers Lesen, jeden Tag ein anderes.\nquote.title = Zitat des Tages\n"
+     }
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_06",
+     "name": "write_file",
+     "input": {
+      "path": "src/lib.rs",
+      "content": "//! A quote a day: a screen in the tools menu with a short quote about\n//! reading, a different one each day of the year.\n\n#![no_std]\n\nextern crate alloc;\n\nuse alloc::borrow::Cow;\nuse alloc::boxed::Box;\n\nuse paperpaw_sdk::builtin::{actions, menus};\nuse paperpaw_sdk::time;\nuse paperpaw_sdk::ui::{self, UiStyle};\nuse paperpaw_sdk::{\n    ActionSpec, Canvas, Command, Cx, Env, Gesture, GestureKind, Handled, Id, Manifest, MenuEntry,\n    Params, Plugin, Rect, RegisterError, Registrar, Screen, ScreenSpec, Version,\n};\n\npub const PLUGIN: Id = Id::new_static(\"quote\");\npub const OPEN: Id = Id::new_static(\"quote.open\");\npub const SCREEN: Id = Id::new_static(\"quote.screen\");\n\n/// The quotes, one a day in turn.\nconst QUOTES: &[&str] = &[\n    \"Well begun is half done.\\n(Aristotle)\",\n    \"Reading is to the mind what exercise is to the body.\\n(Joseph Addison)\",\n    \"Books are the quietest and most constant of friends.\\n(Charles W. Eliot)\",\n    \"A room without books is like a body without a soul.\\n(after Cicero)\",\n    \"The secret of getting ahead is getting started.\\n(after Mark Twain)\",\n    \"No two persons ever read the same book.\\n(Edmund Wilson)\",\n    \"Once you learn to read, you will be forever free.\\n(Frederick Douglass)\",\n];\n\n#[derive(Debug, Default)]\npub struct QuoteOfTheDay;\n\nimpl Plugin for QuoteOfTheDay {\n    fn manifest(&self) -> Manifest {\n        Manifest::new(PLUGIN, \"Quote of the day\", Version::new(0, 1, 0))\n            .description(\"A short quote about reading, a different one each day.\")\n            .uses(paperpaw_sdk::Uses::NOTHING)\n    }\n\n    fn register(&self, r: &mut Registrar) -> Result<(), RegisterError> {\n        r.add_action(ActionSpec::new(OPEN, \"quote.title\").handler(|_, out| {\n            out.push(Command::OpenScreen(SCREEN, Params::new()));\n        }))?;\n        r.add_menu_entry(MenuEntry::new(menus::TOOLS, OPEN).order(90))?;\n        r.add_icon(OPEN, Cow::Borrowed(\"star\"))?;\n        r.add_screen(ScreenSpec::new(\n            SCREEN,\n            \"quote.title\",\n            Box::new(|env, _| Box::new(QuoteScreen::new(env))),\n        ))?;\n        r.add_translations(Cow::Borrowed(include_str!(\"../i18n/en.ini\")))?;\n        r.add_translations(Cow::Borrowed(include_str!(\"../i18n/de.ini\")))?;\n        Ok(())\n    }\n}\n\n/// Today's quote: the day of the year picks it; without a clock, the first.\nfn today(env: &Env<'_>) -> &'static str {\n    let day = time::local_time(env).map_or(0, |t| t.day_of_year);\n    QUOTES[usize::from(day) % QUOTES.len()]\n}\n\nstruct QuoteScreen {\n    style: UiStyle,\n    header: ui::Header,\n}\n\nimpl QuoteScreen {\n    fn new(env: &Env<'_>) -> Self {\n        let style = UiStyle::new(env);\n        Self {\n            header: ui::Header::new(env, &style, true),\n            style,\n        }\n    }\n}\n\nimpl Screen for QuoteScreen {\n    fn draw(&mut self, canvas: &mut Canvas<'_>, env: &Env<'_>) {\n        let title = env.i18n.tr(\"quote.title\");\n        self.header.draw(canvas, env, &self.style, title, None, None);\n        let display = env.device.display;\n        let top = self.header.area.height;\n        let area = Rect::new(0, top, display.width, display.height.saturating_sub(top));\n        ui::draw_message(canvas, env, &self.style, area, today(env));\n    }\n\n    fn on_action(&mut self, action: &Id, cx: &mut Cx<'_, '_>) -> Handled {\n        if *action == actions::CONFIRM || *action == actions::BACK {\n            cx.command(Command::Back);\n            return Handled::Yes;\n        }\n        Handled::No\n    }\n\n    fn on_gesture(&mut self, gesture: Gesture, cx: &mut Cx<'_, '_>) -> Handled {\n        if gesture.kind != GestureKind::Tap {\n            return Handled::No;\n        }\n        if let Some(action) = self.header.tap(cx.env(), &self.style, gesture.start, None) {\n            cx.command(Command::RunAction(action));\n        } else {\n            cx.command(Command::Back);\n        }\n        Handled::Yes\n    }\n}\n"
+     }
+    }
+   ]
+  },
+  {
+   "stop_reason": "tool_use",
+   "content": [
+    {
+     "type": "tool_use",
+     "id": "toolu_07",
+     "name": "build",
+     "input": {}
+    }
+   ]
+  },
+  {
+   "stop_reason": "tool_use",
+   "content": [
+    {
+     "type": "text",
+     "text": "LocalTime has no day of the year; time::day_of_year makes it from the date. Fixing that."
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_08",
+     "name": "write_file",
+     "input": {
+      "path": "src/lib.rs",
+      "content": "//! A quote a day: a screen in the tools menu with a short quote about\n//! reading, a different one each day of the year.\n\n#![no_std]\n\nextern crate alloc;\n\nuse alloc::borrow::Cow;\nuse alloc::boxed::Box;\n\nuse paperpaw_sdk::builtin::{actions, menus};\nuse paperpaw_sdk::time;\nuse paperpaw_sdk::ui::{self, UiStyle};\nuse paperpaw_sdk::{\n    ActionSpec, Canvas, Command, Cx, Env, Gesture, GestureKind, Handled, Id, Manifest, MenuEntry,\n    Params, Plugin, Rect, RegisterError, Registrar, Screen, ScreenSpec, Version,\n};\n\npub const PLUGIN: Id = Id::new_static(\"quote\");\npub const OPEN: Id = Id::new_static(\"quote.open\");\npub const SCREEN: Id = Id::new_static(\"quote.screen\");\n\n/// The quotes, one a day in turn.\nconst QUOTES: &[&str] = &[\n    \"Well begun is half done.\\n(Aristotle)\",\n    \"Reading is to the mind what exercise is to the body.\\n(Joseph Addison)\",\n    \"Books are the quietest and most constant of friends.\\n(Charles W. Eliot)\",\n    \"A room without books is like a body without a soul.\\n(after Cicero)\",\n    \"The secret of getting ahead is getting started.\\n(after Mark Twain)\",\n    \"No two persons ever read the same book.\\n(Edmund Wilson)\",\n    \"Once you learn to read, you will be forever free.\\n(Frederick Douglass)\",\n];\n\n#[derive(Debug, Default)]\npub struct QuoteOfTheDay;\n\nimpl Plugin for QuoteOfTheDay {\n    fn manifest(&self) -> Manifest {\n        Manifest::new(PLUGIN, \"Quote of the day\", Version::new(0, 1, 0))\n            .description(\"A short quote about reading, a different one each day.\")\n            .uses(paperpaw_sdk::Uses::NOTHING)\n    }\n\n    fn register(&self, r: &mut Registrar) -> Result<(), RegisterError> {\n        r.add_action(ActionSpec::new(OPEN, \"quote.title\").handler(|_, out| {\n            out.push(Command::OpenScreen(SCREEN, Params::new()));\n        }))?;\n        r.add_menu_entry(MenuEntry::new(menus::TOOLS, OPEN).order(90))?;\n        r.add_icon(OPEN, Cow::Borrowed(\"star\"))?;\n        r.add_screen(ScreenSpec::new(\n            SCREEN,\n            \"quote.title\",\n            Box::new(|env, _| Box::new(QuoteScreen::new(env))),\n        ))?;\n        r.add_translations(Cow::Borrowed(include_str!(\"../i18n/en.ini\")))?;\n        r.add_translations(Cow::Borrowed(include_str!(\"../i18n/de.ini\")))?;\n        Ok(())\n    }\n}\n\n/// Today's quote: the day of the year picks it; without a clock, the first.\nfn today(env: &Env<'_>) -> &'static str {\n    let day = time::local_time(env).map_or(0, |t| time::day_of_year(t.year, t.month, t.day));\n    QUOTES[usize::from(day) % QUOTES.len()]\n}\n\nstruct QuoteScreen {\n    style: UiStyle,\n    header: ui::Header,\n}\n\nimpl QuoteScreen {\n    fn new(env: &Env<'_>) -> Self {\n        let style = UiStyle::new(env);\n        Self {\n            header: ui::Header::new(env, &style, true),\n            style,\n        }\n    }\n}\n\nimpl Screen for QuoteScreen {\n    fn draw(&mut self, canvas: &mut Canvas<'_>, env: &Env<'_>) {\n        let title = env.i18n.tr(\"quote.title\");\n        self.header.draw(canvas, env, &self.style, title, None, None);\n        let display = env.device.display;\n        let top = self.header.area.height;\n        let area = Rect::new(0, top, display.width, display.height.saturating_sub(top));\n        ui::draw_message(canvas, env, &self.style, area, today(env));\n    }\n\n    fn on_action(&mut self, action: &Id, cx: &mut Cx<'_, '_>) -> Handled {\n        if *action == actions::CONFIRM || *action == actions::BACK {\n            cx.command(Command::Back);\n            return Handled::Yes;\n        }\n        Handled::No\n    }\n\n    fn on_gesture(&mut self, gesture: Gesture, cx: &mut Cx<'_, '_>) -> Handled {\n        if gesture.kind != GestureKind::Tap {\n            return Handled::No;\n        }\n        if let Some(action) = self.header.tap(cx.env(), &self.style, gesture.start, None) {\n            cx.command(Command::RunAction(action));\n        } else {\n            cx.command(Command::Back);\n        }\n        Handled::Yes\n    }\n}\n"
+     }
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_09",
+     "name": "build",
+     "input": {}
+    }
+   ]
+  },
+  {
+   "stop_reason": "tool_use",
+   "content": [
+    {
+     "type": "text",
+     "text": "Built. Opening it from the tools menu on the X4."
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_10",
+     "name": "press",
+     "input": {
+      "device": "X4",
+      "buttons": [
+       "page-forward",
+       "left",
+       "left",
+       "left",
+       "left",
+       "confirm"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "stop_reason": "end_turn",
+   "content": [
+    {
+     "type": "text",
+     "text": "Your plugin is in the reader: Quote of the day, in the tools menu, with a star. It shows one of seven short quotes about reading, a new one each day (the day of the year picks it), and OK or back closes it. It has German too. Say if you'd like other quotes, more of them, or the quote on the home screen as a widget."
+    }
+   ]
+  }
+ ]
+}

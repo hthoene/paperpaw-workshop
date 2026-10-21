@@ -5,12 +5,15 @@
 
 import type Anthropic from "@anthropic-ai/sdk";
 
+import type { Kind } from "../project/project";
 import type { Provider, Request, Stream } from "./provider";
 
 /** A recording: the model's answers in order, each its content blocks
  *  and stop reason. */
 export interface Recording {
   title: string;
+  /** The plugin's kind; one with code starts from PaperPaw's sample. */
+  kind?: Kind;
   /** What the person wrote, turn by turn. */
   user: string[];
   /** Files the person adds to their first message, from

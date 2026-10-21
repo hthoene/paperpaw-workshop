@@ -24,6 +24,11 @@ const CHECKS = ["package", "lint", "visual"];
 /** How long a press holds, in the device's time: a short one, a long one. */
 const SHORT_PRESS = 150;
 const LONG_PRESS = 1000;
+/** How far the device's time runs on after a press for what it set off
+ *  (a page turning, a screen opening), so the next press finds it done:
+ *  what is due within SOON, up to SETTLE in all. */
+const SOON = 400;
+const SETTLE = 1500;
 
 /** What a request is told when the module stopped. */
 export const STOPPED =
@@ -104,14 +109,14 @@ export class ShellReader {
         this.skew += SHORT_PRESS;
         this.step();
         this.live.pointer("up", event.x, event.y);
-        this.step();
+        this.settle();
         return;
       }
       if (!this.live.button(event.name, true)) throw new Error(`The ${this.profile?.name ?? "reader"} has no button ${event.name}.`);
       this.skew += event.long ? LONG_PRESS : SHORT_PRESS;
       this.step();
       this.live.button(event.name, false);
-      this.step();
+      this.settle();
     });
   }
 
@@ -198,12 +203,24 @@ export class ShellReader {
   }
 
   /** Lets the author's device's time pass, draws, and waits for what is
-   *  due next. */
-  private step(): void {
+   *  due next; answers how soon that is. */
+  private step(): number | null {
     clearTimeout(this.timer);
     const next = this.live.advance(performance.now() - this.started + this.skew);
     this.requestDraw();
     if (next !== null) this.timer = setTimeout(() => this.tick(), Math.max(next, 1));
+    return next;
+  }
+
+  /** After a press: the device's time runs on while what the press set off
+   *  is due soon, as when a person waits a moment between presses. */
+  private settle(): void {
+    let ran = 0;
+    for (let next = this.step(); next !== null && next <= SOON && ran < SETTLE; next = this.step()) {
+      const wait = Math.max(next, 1);
+      this.skew += wait;
+      ran += wait;
+    }
   }
 
   /** A step of its own (a timer): a stop starts it fresh. */

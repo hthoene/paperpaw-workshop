@@ -206,7 +206,7 @@
   "step.convert_picture": "Made {path} for e-ink",
   "step.place_file": "Copied {path} into the plugin",
   "reader.asleep": "Asleep",
-  "start.example.picture": "or one with a picture",
+  "start.example.picture": "or one with a picture,",
   "reader.asleep.none": "This reader runs Android, which shows its own screen while it sleeps.",
   "reader.button.home": "Home",
   "reader.button.power": "Power",
@@ -246,5 +246,10 @@
   "start.ideas.tool.kind": "With code",
   "start.ideas.tool.prompt": "A screen in the tools menu that shows a short quote, a different one each day.",
   "start.code": "This needs code:",
-  "start.code.text": "a new screen, widget or tool. The AI writes Rust and builds it (Claude Sonnet 5.5: some cents to a dollar a plugin), which needs the builder (docker compose up)."
+  "start.code.text": "a new screen, widget or tool. The AI writes Rust and builds it (Claude Sonnet 5.5: some cents to a dollar a plugin), which needs the builder (docker compose up).",
+  "workshop.download.ppn": "The plugin built for the X4, as a .ppn to put in the plugins folder of its card (not signed yet).",
+  "workshop.download.packing": "Building for the X4 ...",
+  "workshop.ppn.failed": "It did not build for the X4. Ask the AI to build it and fix what the compiler says.",
+  "workshop.ppn.builder": "The builder is not running, so there is no package for the X4 (docker compose up builder).",
+  "start.example.code": "or one with code (needs the builder)"
 }

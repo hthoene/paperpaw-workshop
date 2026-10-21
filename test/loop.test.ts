@@ -9,8 +9,10 @@ import { MODELS } from "../src/ai/pricing";
 import { ReplayProvider, type Recording } from "../src/ai/replay";
 import type { Step } from "../src/tools/tool";
 import { press } from "../src/tools/emulator";
-import { DATA_TOOLS } from "../src/tools/registry";
-import { bench } from "./helpers";
+import type { BuildResult, Builder } from "../src/build/client";
+import { newProject } from "../src/project/project";
+import { CODE_TOOLS, DATA_TOOLS } from "../src/tools/registry";
+import { bench, handbook } from "./helpers";
 
 function recording(name: string): Recording {
   return JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, "../src/ai/examples", `${name}.json`), "utf8"));
@@ -261,5 +263,54 @@ describe("a turn's ends", () => {
     expect(provider.requests).toHaveLength(1);
     // The tool's result is there: the conversation is whole.
     expect(project.messages.at(-1)!.role).toBe("user");
+  });
+
+  it("writes a plugin with code, gives the compiler's error back, and runs the build", async () => {
+    const rec = recording("quote-a-day");
+    expect(rec.kind).toBe("code");
+    const provider = new ReplayProvider(rec);
+    // The builder: the field LocalTime does not have fails, the rest builds.
+    const sent: Record<string, unknown>[] = [];
+    const builder: Builder = {
+      async build(files) {
+        sent.push(files);
+        const lib = (files["src/lib.rs"] as { text: string }).text;
+        const wrong = lib.includes("t.day_of_year");
+        const result: BuildResult = {
+          id: `b${sent.length}`,
+          state: wrong ? "failed" : "done",
+          seconds: 1,
+          problems: [],
+          diagnostics: wrong
+            ? [{ level: "error", file: "src/lib.rs", line: 63, column: 53, message: "no field `day_of_year` on type `LocalTime`", rendered: "error[E0609]: no field `day_of_year` on type `LocalTime`" }]
+            : [],
+          files: wrong ? [] : [{ target: "web", name: "web.wasm", size: 1, url: "/api/v1/workshop/builds/b2/files/web.wasm" }],
+          log_tail: "",
+        };
+        return result;
+      },
+    };
+    const b = bench(newProject("code", handbook().codeSample));
+    const s: Session = {
+      provider,
+      project: b.project,
+      tools: CODE_TOOLS,
+      handbook: b.handbook,
+      prompt: b.handbook.promptFor("code"),
+      context: { ...b.context, builder },
+      model: MODELS.code,
+      effort: "high",
+    };
+
+    expect(await runTurn(s, rec.user[0]!)).toBe("done");
+    expect(provider.done).toBe(true);
+    expect(sent).toHaveLength(2);
+    expect(b.files.read("Cargo.toml")).toContain('plugin = "QuoteOfTheDay"');
+    // The compiler's error went back to the AI as a failed tool result.
+    const failed = results(b.project.messages).find((r) => r.is_error);
+    expect(JSON.stringify(failed?.content)).toContain("no field `day_of_year`");
+    // The reader runs the second build's module.
+    expect(b.emulator.modules).toEqual(["/api/v1/workshop/builds/b2/files/web.wasm"]);
+    expect(provider.requests[0]!.system?.[0]).toMatchObject({ text: b.handbook.promptFor("code") });
   });
 });

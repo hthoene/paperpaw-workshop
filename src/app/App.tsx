@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "preact/hooks";
 
 import { AnthropicDirect } from "../ai/anthropic";
 import nightOwl from "../ai/examples/night-owl.json";
+import quoteADay from "../ai/examples/quote-a-day.json";
 import sleepPicture from "../ai/examples/sleep-picture.json";
 import type { Provider } from "../ai/provider";
 import { ReplayProvider, type Recording } from "../ai/replay";
@@ -35,6 +36,7 @@ function rememberedKey(): string {
 const EXAMPLES: Record<string, Recording> = {
   "night-owl": nightOwl as Recording,
   "sleep-picture": sleepPicture as Recording,
+  "quote-a-day": quoteADay as Recording,
 };
 
 type Route =
@@ -83,11 +85,14 @@ export function App() {
       void loadProject(where.key).then((p) => setProject(p ?? null));
     } else if (where.page === "example") {
       const recording = EXAMPLES[where.name]!;
-      setProject(newProject());
+      const code = recording.kind === "code";
+      // A plugin with code starts from the handbook's sample.
+      if (code && !handbook) return;
+      setProject(newProject(recording.kind, code ? handbook!.codeSample : undefined));
       setFirst(recording.user[0]!);
       setFirstFiles(recording.attach ?? []);
     }
-  }, [shown(where)]);
+  }, [shown(where), !!handbook]);
 
   const provider: Provider | null = useMemo(() => {
     if (where.page === "example") return new ReplayProvider(EXAMPLES[where.name]!, 900);
