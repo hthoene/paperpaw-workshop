@@ -39,6 +39,13 @@ async function screen(context: ToolContext, device: string | undefined, dark: bo
   return { profile, shot };
 }
 
+/** What happened to PaperPaw since the AI last looked, if it was stopped
+ *  with nothing asked (a timer of the plugin's that never returned). */
+function since(context: ToolContext): string {
+  const why = context.emulator.takeStopped();
+  return why ? ` Meanwhile: ${why} So the screen is the home screen now; look for the plugin's timer that does not return.` : "";
+}
+
 /** A screenshot as the AI sees it: no side longer than AI_LONG_SIDE (the
  *  Boox's screen is), as every picture it is sent. Anthropic would reduce
  *  it anyway; the free quota's proxy takes none larger. */
@@ -63,7 +70,7 @@ export const look: WorkshopTool<{ device?: string; dark?: boolean; screen?: "hom
     return {
       content: [
         await seen(context, shot),
-        { type: "text", text: `${profile.name}, ${shot.width} x ${shot.height}${dark ? ", night mode" : ""}.${note}` },
+        { type: "text", text: `${profile.name}, ${shot.width} x ${shot.height}${dark ? ", night mode" : ""}.${note}${since(context)}` },
       ],
       step: { key: "step.look", vars: { device: shortName(profile) } },
     };
@@ -100,7 +107,7 @@ export const press: WorkshopTool<{ device?: string; buttons: string[] }> = {
     return {
       content: [
         await seen(context, shot),
-        { type: "text", text: `${profile.name} after ${buttons.join(", ")}.` },
+        { type: "text", text: `${profile.name} after ${buttons.join(", ")}.${since(context)}` },
       ],
       step: { key: "step.press", vars: { device: shortName(profile) } },
     };

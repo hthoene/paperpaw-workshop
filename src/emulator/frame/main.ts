@@ -5,7 +5,7 @@
 // checkout without public/emulator/paperpaw-web.wasm). It runs in a
 // sandboxed iframe without access to the workshop's storage.
 
-import type { Answer, Hello, Ready, Request } from "../protocol";
+import type { Answer, Hello, Ready, Request, Stopped } from "../protocol";
 import { WorkerReader } from "./shell/host";
 import { StubDevice } from "./stub";
 
@@ -26,7 +26,8 @@ type Reader = { kind: "shell"; reader: WorkerReader } | { kind: "stub"; device: 
 
 async function load(): Promise<Reader> {
   try {
-    const reader = await WorkerReader.load(new URL("emulator/paperpaw-web.wasm", document.baseURI).href, canvas);
+    const stopped = (why: string) => parent.postMessage({ type: "stopped", why } satisfies Stopped, "*");
+    const reader = await WorkerReader.load(new URL("emulator/paperpaw-web.wasm", document.baseURI).href, canvas, stopped);
     return { kind: "shell", reader };
   } catch (e) {
     console.warn("paperpaw: the emulator's module is not there, the stub answers:", e);

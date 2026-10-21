@@ -55,6 +55,7 @@ export class WorkerReader {
   private constructor(
     private emulator: string,
     private canvas: HTMLCanvasElement,
+    private onStopped: (why: string) => void,
   ) {
     this.touch();
     setInterval(() => this.watch(), PING);
@@ -62,8 +63,8 @@ export class WorkerReader {
 
   /** The emulator from `emulator` (absolute) in a worker, drawing into
    *  `canvas`; fails if PaperPaw's module is not there. */
-  static async load(emulator: string, canvas: HTMLCanvasElement): Promise<WorkerReader> {
-    const reader = new WorkerReader(emulator, canvas);
+  static async load(emulator: string, canvas: HTMLCanvasElement, onStopped: (why: string) => void): Promise<WorkerReader> {
+    const reader = new WorkerReader(emulator, canvas, onStopped);
     await reader.spawn();
     return reader;
   }
@@ -134,7 +135,10 @@ export class WorkerReader {
   /** An idle worker that stopped answering goes too. */
   private watch(): void {
     if (this.waiting.size === 0 && Date.now() - this.heard > SILENT) {
-      void this.replace(stuck(Math.round(SILENT / 1000)));
+      // No request to fail: the page is told apart.
+      const why = stuck(Math.round(SILENT / 1000));
+      this.onStopped(why);
+      void this.replace(why);
       return;
     }
     if (this.waiting.size === 0) this.send({ type: "ping" });

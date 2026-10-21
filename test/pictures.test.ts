@@ -379,3 +379,14 @@ describe("screenshots for the AI", () => {
     expect(JSON.stringify(boox.content)).toContain("1264 x 1680");
   });
 });
+
+describe("PaperPaw stopped while nothing was asked", () => {
+  it("is told to the AI at its next look, once", async () => {
+    const b = bench();
+    b.emulator.stopped = "PaperPaw did not answer in 10 seconds (a loop that does not end, or work far too long for a reader) and was stopped.";
+    const first = JSON.stringify((await look.run({ device: "X4" }, b.context)).content);
+    const second = JSON.stringify((await look.run({ device: "X4" }, b.context)).content);
+    expect(first).toContain("Meanwhile: PaperPaw did not answer in 10 seconds");
+    expect(second).not.toContain("Meanwhile");
+  });
+});

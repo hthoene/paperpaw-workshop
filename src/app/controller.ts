@@ -119,6 +119,13 @@ export class Workshop {
     this.frameEmulator?.dispose();
     this.frameEmulator = emulator;
     this.emulator = emulator;
+    // A plugin's code stopped in a timer: the author sees why, the AI at
+    // its next look or press.
+    emulator.onStopped = (why) => {
+      this.screen = "home";
+      this.error = why;
+      this.changed();
+    };
     await this.restart();
     // A plugin with code: its last build's module, while the builder keeps it.
     if (this.code && this.project.module) {

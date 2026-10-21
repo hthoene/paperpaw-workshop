@@ -64,6 +64,14 @@ export interface Ready {
   version: string;
 }
 
+/** Sent by the frame when its watchdog stopped PaperPaw while nothing was
+ *  asked of it (a plugin's code that never returned, in a timer): the
+ *  reader was started again on its home screen. */
+export interface Stopped {
+  type: "stopped";
+  why: string;
+}
+
 export interface ScreenshotResult {
   /** A PNG, base64 without the `data:` prefix. */
   png: string;

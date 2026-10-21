@@ -41,6 +41,15 @@ export class FakeEmulator implements Emulator {
   /** The modules it was told to run, in order. */
   modules: (string | null)[] = [];
 
+  /** Set by a test: PaperPaw stopped with nothing asked. */
+  stopped: string | undefined;
+
+  takeStopped(): string | undefined {
+    const why = this.stopped;
+    this.stopped = undefined;
+    return why;
+  }
+
   async useModule(url: string | null): Promise<void> {
     this.modules.push(url);
   }

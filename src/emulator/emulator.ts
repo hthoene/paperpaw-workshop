@@ -4,7 +4,7 @@
 
 import type { Finding } from "../checks/data";
 import type { Profile, Registry } from "../handbook/handbook";
-import type { Answer, CheckResult, Hello, InputEvent, PluginFiles, Ready, Request, Screen, ScreenshotResult } from "./protocol";
+import type { Answer, CheckResult, Hello, InputEvent, PluginFiles, Ready, Request, Screen, ScreenshotResult, Stopped } from "./protocol";
 
 export interface Emulator {
   /** Whether it is the stub rather than PaperPaw's real emulator. */
@@ -18,6 +18,9 @@ export interface Emulator {
   /** Runs PaperPaw from another module (a build's), or `null` for the
    *  one the workshop brings. */
   useModule(url: string | null): Promise<void>;
+  /** Why PaperPaw was stopped and started again while nothing was asked
+   *  of it, since this was last asked; undefined if it was not. */
+  takeStopped(): string | undefined;
 }
 
 /** How long a request to the frame may take: longer than the frame's own
@@ -32,6 +35,9 @@ export class FrameEmulator implements Emulator {
   private ready: Promise<void>;
   private greeting: ReturnType<typeof setTimeout> | undefined;
   private listener: (event: MessageEvent) => void;
+  private stopped: string | undefined;
+  /** Told when PaperPaw was stopped with nothing asked (for the page). */
+  onStopped: ((why: string) => void) | undefined;
 
   constructor(
     private frame: HTMLIFrameElement,
@@ -51,7 +57,12 @@ export class FrameEmulator implements Emulator {
     this.listener = (event: MessageEvent) => {
       // The frame's origin is opaque ("null"): trust only its window.
       if (event.source !== this.frame.contentWindow) return;
-      const data = event.data as Answer | Ready;
+      const data = event.data as Answer | Ready | Stopped;
+      if ("type" in data && data.type === "stopped") {
+        this.stopped = data.why;
+        this.onStopped?.(data.why);
+        return;
+      }
       if ("type" in data && data.type === "ready") {
         this.stub = data.stub;
         isReady = true;
@@ -108,6 +119,12 @@ export class FrameEmulator implements Emulator {
 
   check(): Promise<CheckResult> {
     return this.send({ type: "check" });
+  }
+
+  takeStopped(): string | undefined {
+    const why = this.stopped;
+    this.stopped = undefined;
+    return why;
   }
 
   useModule(url: string | null): Promise<void> {

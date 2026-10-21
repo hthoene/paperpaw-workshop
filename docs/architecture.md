@@ -154,7 +154,10 @@ workshop's page:
   worker that does not answer is ended; a new one starts with the same
   module and device, on its home screen, and the request says what
   happened, for the AI to fix. The page's own timeout (120 s) is longer,
-  so the frame always answers first.
+  so the frame always answers first. A worker stopped while nothing was
+  asked (a timer of the plugin's that never returned) has no request to
+  fail: the frame says so to the page (`stopped`), which shows it to the
+  author and tells the AI at its next look or press.
 - The module's memory may grow to 512 MB at most (linked so: PaperPaw
   needs some 70, the Boox's screen included); at the cap it traps, and
   the reader starts again as after a panic. A module larger than 48 MB
