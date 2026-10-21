@@ -170,8 +170,9 @@ files to the builder through
 [src/build/client.ts](../src/build/client.ts) and answers the AI with
 the compiler's messages about the plugin's own files (errors first), or,
 when it built, puts the new module into the reader. The page reaches the
-builder on its own origin, `/api/v1/workshop/builds`: nginx and
-`npm run dev` pass it on to the builder at port 8090.
+builder on its own origin, `/api/v1/workshop/builds`: the workshop's
+nginx passes it on to the builder (and `npm run dev` to that nginx);
+the builder has no port of its own.
 
 The builder ([builder/](../builder/)) is a container with PaperPaw's
 source, every crate it needs (no network while building) and PaperPaw
@@ -196,6 +197,26 @@ One build runs at a time; others wait their turn (the answer says where
 they are). Since PaperPaw is compiled ahead, a plugin's
 first build takes a few seconds (7 for the quote example, the reader's
 module and the X4's file) and a build after a change about one.
+
+### What a build may do
+
+Compiling runs code: the build scripts and procedural macros of the
+crates built. An author's crate adds none: the builder writes the
+Cargo.toml it compiles with (the author's only gives the crate's name,
+its version and the plugin's type), and a plugin may name no crate but
+the SDK, so what runs are those of PaperPaw's own dependencies, locked
+by its Cargo.lock and in the image since it was made. An author's code
+itself runs at no point of a build, only in the reader later (below).
+All the same, the builder is closed in, here and on paperpaw.org:
+
+| | On one's computer (docker-compose.yml) | On paperpaw.org (its `rebuild/workshop.sh`) |
+|---|---|---|
+| Network | a network without internet, shared with the workshop's server only | none at all |
+| File system | root read-only; writable only copies of what cargo writes to | the same, fresh for each build, gone with it |
+| Mounted | nothing of the computer | nothing of the host |
+| User | its own, unprivileged, no capabilities, no new privileges | the same |
+| Limits | 2 processors, 4 GB, 512 processes; 180 s a module, 300 s a file | the same, 300 s a build in all, gVisor where the host has it |
+| Builds | one at a time | one at a time, in a container of its own each |
 
 The web shell has no hook for added plugins yet, so the builder patches
 it in ([builder/web-plugins.patch](../builder/web-plugins.patch)); the

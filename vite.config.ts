@@ -8,8 +8,9 @@ export default defineConfig({
   // Addresses beside the page: the same files work at a root (docker
   // compose) and at paperpaw.org/workshop/.
   base: "./",
-  // The builder for plugins with code (docker compose up builder).
-  server: { proxy: { "/api/v1/workshop/builds": "http://127.0.0.1:8090" } },
+  // The builder for plugins with code, through the workshop's server
+  // (docker compose --profile code up): the builder itself has no port.
+  server: { proxy: { "/api/v1/workshop/builds": "http://127.0.0.1:8080" } },
   build: {
     rollupOptions: {
       input: { workshop: "index.html", frame: "frame.html" },

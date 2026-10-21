@@ -20,18 +20,43 @@ services:
       - /var/cache/nginx
       - /var/run
       - /tmp
+    networks: [default, builds]
 
   # Plugins with code: PaperPaw's web emulator built with the plugin in it,
-  # and the plugin as a file for the X4 (builder/Dockerfile). The workshop
-  # reaches it at /api/v1/workshop/builds; npm run dev at this port.
+  # and the plugin as a file for the X4 and the X4 Pro (builder/Dockerfile).
+  # The workshop's server passes /api/v1/workshop/builds on to it (npm run
+  # dev through that server too).
+  #
+  # Building runs the build scripts and procedural macros of PaperPaw's own
+  # locked dependencies (an author's crate adds none: the builder writes the
+  # Cargo.toml it builds with). So the builder has no way out: a network
+  # with no internet that only the workshop's server shares, no port of its
+  # own, its root read-only (writable only copies of what cargo writes to,
+  # kept with the container), no capabilities, its own unprivileged user,
+  # and limits on processors, memory and processes. Nothing of this
+  # computer is mounted.
   builder:
     profiles: [code]
     build:
       context: .
       dockerfile: builder/Dockerfile
-    ports:
-      - "127.0.0.1:${BUILDER_PORT:-8090}:8090"
     restart: unless-stopped
+    networks: [builds]
+    read_only: true
+    volumes:
+      - /work
+      - /cache
+      - /builds
+      - /usr/local/cargo
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
     cpus: 2
     mem_limit: 4g
     pids_limit: 512
+
+networks:
+  # The builder's: no way to the internet.
+  builds:
+    internal: true

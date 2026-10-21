@@ -68,7 +68,11 @@ docker compose --profile code up --build
 ```
 
 The first build of the builder takes a while (it compiles PaperPaw for
-the browser and for the X4 ahead, so your builds take seconds). Then tick
+the browser, the X4 and the X4 Pro ahead, so your builds take seconds).
+Compiling runs code, so the builder is closed in: no internet, no port
+of its own, its root read-only, nothing of your computer mounted, its
+own unprivileged user, limits on processors, memory and time
+([what a build may do](docs/architecture.md#what-a-build-may-do)). Then tick
 **This needs code** on the start page, or watch the third example
 (`#/example/quote-a-day`): the AI starts from PaperPaw's sample plugin,
 writes Rust, builds it, reads the compiler's errors and fixes them, and
@@ -109,7 +113,7 @@ Changes show at once.
 | `npm run handbook -- --repo ../paperpaw --ref main` | Makes the handbook anew (see below) |
 | `npm run emulator -- --repo ../paperpaw --ref main` | Builds the reader anew from PaperPaw (needs Rust and `rustup target add wasm32-unknown-unknown`) |
 | `npm run builder-source -- --repo ../paperpaw --ref main` | PaperPaw's source for the builder (`builder/paperpaw.tar`) |
-| `docker compose --profile code up builder` | The builder alone, for `npm run dev` (port 8090) |
+| `docker compose --profile code up` | The workshop's server and the builder: `npm run dev` builds through that server (port 8080) |
 
 How the parts fit together is in [docs/architecture.md](docs/architecture.md).
 Start there if you want to add a tool, a check or a text.
