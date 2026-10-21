@@ -61,7 +61,7 @@
   "workshop.limit": "It stopped after many steps. Tell it to go on, or what to change.",
   "reader.dark": "Dark",
   "reader.light": "Light",
-  "reader.stub": "Preview without PaperPaw's emulator: the real one is on its way.",
+  "reader.stub": "Preview without PaperPaw's emulator: its module is not built here (npm run emulator).",
   "reader.buttons": "Buttons",
   "findings.title": "What the checker says",
   "findings.none": "All well: nothing the checker found.",
@@ -216,5 +216,6 @@
   "step.convert_picture": "Made {path} for e-ink",
   "step.place_file": "Copied {path} into the plugin",
   "reader.asleep": "Asleep",
-  "start.example.picture": "or one with a picture"
+  "start.example.picture": "or one with a picture",
+  "reader.asleep.none": "This reader runs Android, which shows its own screen while it sleeps."
 }

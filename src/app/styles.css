@@ -119,6 +119,7 @@ button, input, textarea { font: inherit; color: inherit; }
 .tabs button { padding: .3rem .8rem; border-radius: 99px; border: 1px solid var(--rule); background: transparent; color: var(--ink-2); cursor: pointer; }
 .tabs button[aria-pressed="true"] { border-color: var(--ink); color: var(--ink); }
 .tabs .gap { margin-left: auto; }
+.tabs button:disabled { opacity: .45; cursor: default; }
 .bezel { background: var(--bezel); border-radius: 1.3rem; padding: 1rem 1rem 2.6rem; position: relative; margin: 0 auto; width: 100%; max-width: 24rem; }
 .bezel iframe { display: block; width: 100%; border: 0; border-radius: 3px; background: #fff; }
 .buttons { display: flex; justify-content: center; gap: .4rem; flex-wrap: wrap; }

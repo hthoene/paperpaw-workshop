@@ -81,16 +81,7 @@
           "id": "toolu_s6",
           "name": "look",
           "input": {
-            "device": "X4",
-            "screen": "sleep"
-          }
-        },
-        {
-          "type": "tool_use",
-          "id": "toolu_s7",
-          "name": "look",
-          "input": {
-            "device": "Boox Go 7",
+            "device": "X4 Pro",
             "screen": "sleep"
           }
         }
@@ -101,7 +92,7 @@
       "content": [
         {
           "type": "text",
-          "text": "Done: while your reader sleeps, it shows the owl on its branch under the night sky, in its four grays on the X4 and finer on the Boox. Press Asleep beside the reader to see it. Shall I make it lighter, or show the moon instead of the owl?",
+          "text": "Done: while your reader sleeps, it shows the owl on its branch under the night sky, in the grays of e-ink. Press Asleep beside the reader to see it (the Boox runs Android, which shows its own screen while it sleeps). Shall I make it lighter, or show the moon instead of the owl?",
           "citations": null
         }
       ]

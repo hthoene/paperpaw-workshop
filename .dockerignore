@@ -4,3 +4,4 @@ handbook/.work
 .git
 *.log
 scripts/*.png
+.work

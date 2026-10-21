@@ -109,10 +109,19 @@ describe("pictures for the readers", () => {
     expect(made.drawn).toBe(false);
   });
 
-  it("for several screen sizes: one file for the largest, until PaperPaw picks per size", () => {
-    const made = makePicture(testRaster(1200, 900), "sleep/1.png", targetsFor(context.profiles), { fit: "fill" });
-    expect(made.files.map((f) => [f.path, f.target.width, f.target.grays])).toEqual([["sleep/1.png", 1264, 16]]);
-    expect(levelsOf(made.files[0]!.png).bits).toBe(4);
+  it("for several screen sizes: one file for the largest, all grays and not dithered, until PaperPaw picks per size", () => {
+    const made = makePicture(testRaster(1200, 900, false), "sleep/1.png", targetsFor(context.profiles), { fit: "fill" });
+    expect(made.files.map((f) => [f.path, f.target.width, f.target.grays])).toEqual([["sleep/1.png", 1264, 256]]);
+    const { bits, levels } = levelsOf(made.files[0]!.png);
+    expect(bits).toBe(8);
+    // A drawing of two grays stays two grays, but for the smoothed edges:
+    // nothing is dithered in between.
+    const [low, high] = levels.reduce(([lo, hi], l) => [Math.min(lo, l), Math.max(hi, l)], [255, 0]);
+    const two = levels.filter((l) => l === low || l === high).length;
+    expect(two / levels.length).toBeGreaterThan(0.97);
+    // A noisy photo too large in all grays comes in sixteen, not dithered.
+    const photo = makePicture(testRaster(1200, 900), "sleep/1.png", targetsFor(context.profiles), { fit: "fill" });
+    expect([photo.files[0]!.target.grays, levelsOf(photo.files[0]!.png).bits]).toEqual([16, 4]);
     // The preview is still the X4's.
     expect(levelsOf(made.preview)).toMatchObject({ width: 480, height: 800, bits: 2 });
   });

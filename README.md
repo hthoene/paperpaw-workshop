@@ -47,10 +47,10 @@ and on paperpaw.org you send it with two clicks once signed in. Here on
 your own computer there is no store: download it for the store instead
 and upload it at paperpaw.org/submit.
 
-> **About the reader:** until PaperPaw's web emulator is ready, the reader
-> in the workshop is a stand-in. It draws the home screen roughly from the
-> plugin's colours, sizes and layout, so the AI and you see the right idea,
-> but not every detail. The checks of the files are the real rules.
+> **About the reader:** the reader beside the conversation is PaperPaw
+> itself, its web emulator (`public/emulator/`), so you see your plugin as
+> an X4, an X4 Pro or a Boox will show it. "What the checker says" is
+> PaperPaw's own checker, paperpaw-dev.
 
 ## Working on the workshop
 
@@ -74,6 +74,7 @@ Changes show at once.
 | `npm run typecheck` | Checks the TypeScript |
 | `npm run build` | The finished site in `dist/` |
 | `npm run handbook -- --repo ../paperpaw --ref main` | Makes the handbook anew (see below) |
+| `npm run emulator -- --repo ../paperpaw --ref main` | Builds the reader anew from PaperPaw (needs Rust and `rustup target add wasm32-unknown-unknown`) |
 
 How the parts fit together is in [docs/architecture.md](docs/architecture.md).
 Start there if you want to add a tool, a check or a text.

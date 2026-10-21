@@ -9,6 +9,7 @@ import { t } from "../i18n";
 import { identity, type Project } from "../project/project";
 import type { StoreApi } from "../publish/store";
 import { lines } from "./conversation";
+import { canSleep } from "../emulator/protocol";
 import { Workshop } from "./controller";
 import { Steps } from "./Header";
 import { SharePanel } from "./SharePanel";
@@ -185,6 +186,8 @@ export function WorkshopPage({ project, handbook, provider, first, firstFiles, o
               {t("reader.light")}
             </button>
             <button
+              disabled={!canSleep(profile)}
+              title={canSleep(profile) ? undefined : t("reader.asleep.none")}
               aria-pressed={workshop.screen === "sleep"}
               onClick={() => void workshop.show(profile, workshop.dark, workshop.screen === "sleep" ? "home" : "sleep")}
             >

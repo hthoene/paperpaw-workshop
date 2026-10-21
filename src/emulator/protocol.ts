@@ -10,6 +10,12 @@ import type { Profile, Registry } from "../handbook/handbook";
  *  reader shows while it sleeps. */
 export type Screen = "home" | "sleep";
 
+/** Whether PaperPaw draws a sleep screen of its own on a device: on
+ *  readers with a power button (Android readers sleep by themselves). */
+export function canSleep(profile: { buttons: string[] }): boolean {
+  return profile.buttons.includes("power");
+}
+
 /** A data plugin's files, by path. */
 export interface PluginFiles {
   id: string;

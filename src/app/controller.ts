@@ -10,7 +10,7 @@ import type { Provider } from "../ai/provider";
 import type { Finding } from "../checks/data";
 import type { Emulator } from "../emulator/emulator";
 import { FrameEmulator } from "../emulator/emulator";
-import type { Screen } from "../emulator/protocol";
+import { canSleep, type Screen } from "../emulator/protocol";
 import { SHOWN_PROFILES, type Handbook, type Profile } from "../handbook/handbook";
 import { t } from "../i18n";
 import { browserKit, type PictureKit } from "../pictures/kit";
@@ -176,14 +176,23 @@ export class Workshop {
   }
 
   async restart(): Promise<void> {
-    await this.emulator?.start(this.profile, this.dark, this.plugin(), this.screen);
+    try {
+      await this.emulator?.start(this.profile, this.dark, this.plugin(), this.screen);
+    } catch (e) {
+      // The reader stopped (PaperPaw panicked, or ran out of memory) and
+      // was started again: say so.
+      this.screen = "home";
+      this.error = e instanceof Error ? e.message : String(e);
+    }
     this.changed();
   }
 
   async show(profile: Profile, dark = this.dark, screen = this.screen): Promise<void> {
     this.profile = profile;
     this.dark = dark;
-    this.screen = screen;
+    // Asleep is PaperPaw's own sleep screen, on readers with a power
+    // button; Android readers sleep by themselves.
+    this.screen = canSleep(profile) ? screen : "home";
     await this.restart();
   }
 

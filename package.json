@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "handbook": "node handbook/generate.mjs"
+    "handbook": "node handbook/generate.mjs",
+    "emulator": "node scripts/emulator.mjs"
   },
   "engines": {
     "node": ">=22"

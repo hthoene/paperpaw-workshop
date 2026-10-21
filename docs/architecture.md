@@ -93,16 +93,35 @@ a sandboxed iframe. The messages are in
    carries an `id`, and the frame answers with the same `id`, `ok` and a
    `result` or an `error`.
 
-Right now the frame is a **stub** ([src/emulator/frame/](../src/emulator/frame/)):
-it draws a rough home screen from the plugin's look and layout. PaperPaw's
-web shell (`shells/web`, PaperPaw compiled to WebAssembly) will answer the
-same messages; then only `frame.html` changes, not the workshop.
+The frame answers with **PaperPaw itself**: its web emulator (PaperPaw's
+`shells/web`, the kernel, plugins, device profiles and panel compiled to
+WebAssembly), built into `public/emulator/paperpaw-web.wasm` by
+`npm run emulator` ([scripts/emulator.mjs](../scripts/emulator.mjs); what it
+was built from is in `public/emulator/meta.json`). The frame drives it
+through PaperPaw's own loader (`paperpaw-web.js`, copied beside
+[src/emulator/frame/shell/reader.ts](../src/emulator/frame/shell/reader.ts)),
+not through PaperPaw's frame page, because the workshop asks for more:
+
+- screenshots of another device, in night mode or asleep, without
+  changing the reader the author sees: a second instance of the module
+  takes them;
+- the checker's findings in the workshop's shape: paperpaw-dev's
+  `package`, `lint` and `visual` checks, on the device shown;
+- a module that stops (PaperPaw panicked, or ran out of the device's
+  memory) is loaded anew, and the request says what happened.
+
+Where the module is missing (a checkout that never ran `npm run
+emulator`), the stub answers instead ([src/emulator/frame/stub.ts](../src/emulator/frame/stub.ts)):
+a rough home screen from the plugin's look and layout, and the workshop's
+own checks.
 
 The frame runs without `allow-same-origin`, so its origin is opaque: it
-cannot read the workshop's storage or the key. Two things follow from that,
-both handled in [local/nginx.conf](../local/nginx.conf): its scripts are
-loaded with CORS (`/assets/` allows any origin), and its
-Content-Security-Policy names the server's real origin instead of `'self'`.
+cannot read the workshop's storage or the key. What follows from that is
+handled in [local/nginx.conf](../local/nginx.conf): its scripts and the
+module are loaded with CORS (`/assets/` and `/emulator/` allow any
+origin), and its Content-Security-Policy names the server's real origin
+instead of `'self'` (for scripts, and for fetching the module), with
+`'wasm-unsafe-eval'` for WebAssembly.
 In `npm run dev` the frame gets `allow-same-origin`, because Vite's dev
 server sends no CORS headers.
 

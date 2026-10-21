@@ -61,8 +61,11 @@ describe("the AI loop, with a recorded conversation", () => {
     expect(String(checks[0]!.content)).toContain("outside its range, 120 to 300");
     expect(String(checks[1]!.content)).toMatch(/^0 errors/);
 
-    // It looked at the X4 and at the Boox in night mode, and got pictures.
+    // It looked at the X4, changed what it saw, and looked at the X4 and
+    // at the Boox in night mode again, and got pictures.
+    expect(files.read("settings.ini")).not.toContain("ui-margin");
     expect(emulator.screenshots).toEqual([
+      { profile: "xteink-x4", dark: undefined, screen: undefined },
       { profile: "xteink-x4", dark: undefined, screen: undefined },
       { profile: "boox-go-7", dark: true, screen: undefined },
     ]);
@@ -74,6 +77,9 @@ describe("the AI loop, with a recorded conversation", () => {
       "step.write_file",
       "step.write_file",
       "step.check",
+      "step.write_file",
+      "step.check",
+      "step.look",
       "step.write_file",
       "step.check",
       "step.look",

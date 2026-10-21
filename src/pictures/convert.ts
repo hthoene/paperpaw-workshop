@@ -3,8 +3,9 @@
 //
 // Until PaperPaw picks a file per screen size (`name@480x800.png` beside
 // `name.png`, design question 12.1), a plugin for several screen sizes
-// gets one file, made for the largest of them in 16 grays; the smaller
-// readers scale and dither it themselves.
+// gets one file, made for the largest of them in all 256 grays and not
+// dithered: the readers scale it and dither it themselves, and a picture
+// dithered twice (here, and again by the reader) shows a moiré.
 
 import type { Profile } from "../handbook/handbook";
 import { crop, fit, looksDrawn, quantize, toGray, tone, type Dither, type Raster, type Rect, type Tone } from "./gray";
@@ -23,7 +24,7 @@ const X4_WIDTH = 480;
 export interface Target {
   width: number;
   height: number;
-  grays: 4 | 16;
+  grays: 4 | 16 | 256;
   /** The devices with this screen, by name. */
   devices: string[];
 }
@@ -80,17 +81,26 @@ export function makePicture(raster: Raster, path: string, targets: Target[], opt
     const width = options.box ? Math.max(1, Math.round(options.box.width * scale)) : target.width;
     const height = options.box ? Math.max(1, Math.round(options.box.height * scale)) : target.height;
     const shaped = tone(fit(gray, width, height, options.fit), options.tone);
-    const levels = quantize(shaped, target.grays, dither);
-    return grayPng(width, height, levels, target.grays === 4 ? 2 : 4);
+    // Shared by several screens (more grays than the X4's four): the
+    // readers dither it, so it is not dithered here.
+    const levels = quantize(shaped, target.grays, target.grays === 4 || targets.length === 1 ? dither : "none");
+    return grayPng(width, height, levels, target.grays === 4 ? 2 : target.grays === 16 ? 4 : 8);
   };
 
   // One file for all, unless PaperPaw picks one per screen size.
   const largest = targets[0]!;
-  const one: Target = { ...largest, grays: Math.max(...targets.map((t) => t.grays)) as 4 | 16, devices: targets.flatMap((t) => t.devices) };
+  const shared = (): Made => {
+    // All grays if it is not too large; else sixteen, still not dithered.
+    const all: Target = { ...largest, grays: 256, devices: targets.flatMap((t) => t.devices) };
+    const png = render(all);
+    if (png.length <= MAX_PICTURE_FILE) return { path, target: all, png };
+    const fewer: Target = { ...all, grays: 16 };
+    return { path, target: fewer, png: render(fewer) };
+  };
   const files: Made[] =
     VARIANTS_IN_PAPERPAW || targets.length === 1
       ? targets.map((target, i) => ({ path: i === 0 ? path : variantPath(path, target), target, png: render(target) }))
-      : [{ path, target: one, png: render(one) }];
+      : [shared()];
 
   // How the X4 shows it: four grays at its size.
   const x4: Target = { width: X4_WIDTH, height: 800, grays: 4, devices: ["X4"] };
