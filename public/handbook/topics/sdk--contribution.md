@@ -5,6 +5,8 @@ pub paperpaw_sdk::contribution::Contribution::ActionOverride(alloc::boxed::Box<p
 pub paperpaw_sdk::contribution::Contribution::BookBadge(alloc::boxed::Box<paperpaw_sdk::library::service::BookBadge>)
 pub paperpaw_sdk::contribution::Contribution::BookData(paperpaw_sdk::library::BookData)
 pub paperpaw_sdk::contribution::Contribution::BookField(alloc::boxed::Box<paperpaw_sdk::library::service::BookField>)
+pub paperpaw_sdk::contribution::Contribution::Choice::setting: paperpaw_sdk::Id
+pub paperpaw_sdk::contribution::Contribution::Choice::value: alloc::borrow::Cow<'static, str>
 pub paperpaw_sdk::contribution::Contribution::Chrome(alloc::boxed::Box<paperpaw_sdk::chrome::ChromeSpec>)
 pub paperpaw_sdk::contribution::Contribution::Decorator(alloc::boxed::Box<paperpaw_sdk::decorations::DecoratorSpec>)
 pub paperpaw_sdk::contribution::Contribution::EventDeclared(alloc::boxed::Box<paperpaw_sdk::services::EventSpec>)
@@ -90,6 +92,7 @@ pub fn paperpaw_sdk::contribution::Registrar::add_action(&mut self, paperpaw_sdk
 pub fn paperpaw_sdk::contribution::Registrar::add_book_badge(&mut self, paperpaw_sdk::library::service::BookBadge) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_book_data(&mut self, impl core::convert::Into<alloc::borrow::Cow<'static, str>>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_book_field(&mut self, paperpaw_sdk::library::service::BookField) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_choice(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_chrome(&mut self, paperpaw_sdk::chrome::ChromeSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_decorator(&mut self, paperpaw_sdk::decorations::DecoratorSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_font(&mut self, paperpaw_sdk::FontSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
@@ -162,6 +165,7 @@ pub fn paperpaw_sdk::contribution::Registrar::add_action(&mut self, paperpaw_sdk
 pub fn paperpaw_sdk::contribution::Registrar::add_book_badge(&mut self, paperpaw_sdk::library::service::BookBadge) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_book_data(&mut self, impl core::convert::Into<alloc::borrow::Cow<'static, str>>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_book_field(&mut self, paperpaw_sdk::library::service::BookField) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_choice(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_chrome(&mut self, paperpaw_sdk::chrome::ChromeSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_decorator(&mut self, paperpaw_sdk::decorations::DecoratorSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_font(&mut self, paperpaw_sdk::FontSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>

@@ -52,7 +52,7 @@ async function handle(r: ShellReader, request: Request): Promise<unknown> {
     case "screenshot":
       return r.screenshot(request.profile, request.dark, request.screen);
     case "check":
-      return r.check();
+      return r.check(request.plugins);
     case "module":
       return r.useModule(request.url === null ? null : new URL(request.url));
   }

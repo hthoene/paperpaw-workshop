@@ -1,6 +1,9 @@
 ```rust
+pub use paperpaw_sdk::image::AlphaFile
+pub use paperpaw_sdk::image::AlphaWriter
 pub use paperpaw_sdk::image::ColorFile
 pub use paperpaw_sdk::image::ColorWriter
+pub use paperpaw_sdk::image::Decoded
 pub use paperpaw_sdk::image::Downscaler
 pub use paperpaw_sdk::image::Fit
 pub use paperpaw_sdk::image::Format
@@ -14,6 +17,8 @@ pub use paperpaw_sdk::image::Source
 pub use paperpaw_sdk::image::decode
 pub use paperpaw_sdk::image::dimensions
 pub use paperpaw_sdk::image::luma
+pub use paperpaw_sdk::image::over_white
 pub fn paperpaw_sdk::image::gray_from_file(&dyn paperpaw_platform::storage::Storage, &str, &str, paperpaw_image::Fit) -> core::option::Option<paperpaw_document::ImageRef>
 pub fn paperpaw_sdk::image::picture_from_file(&dyn paperpaw_platform::storage::Storage, &str, &str, paperpaw_image::Fit, bool) -> core::option::Option<paperpaw_document::ImageRef>
+pub fn paperpaw_sdk::image::picture_with_alpha(&dyn paperpaw_platform::storage::Storage, &str, &str, paperpaw_image::Fit) -> core::result::Result<paperpaw_document::ImageRef, paperpaw_image::ImageError>
 ```

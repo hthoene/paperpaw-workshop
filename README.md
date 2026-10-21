@@ -60,11 +60,11 @@ together with PaperPaw. It is made from a copy of PaperPaw next to this
 folder, once:
 
 ```bash
-npm run builder-source -- --repo ../paperpaw --ref claude/web-shell
+npm run builder-source -- --repo ../paperpaw --ref plugin-store
 ```
 
 ```bash
-docker compose --profile code up --build
+docker compose --profile code up --build --renew-anon-volumes
 ```
 
 The first build of the builder takes a while (it compiles PaperPaw for
@@ -112,7 +112,7 @@ Changes show at once.
 | `npm run build` | The finished site in `dist/` |
 | `npm run handbook -- --repo ../paperpaw --ref main` | Makes the handbook anew (see below) |
 | `npm run emulator -- --repo ../paperpaw --ref main` | Builds the reader anew from PaperPaw (needs Rust and `rustup target add wasm32-unknown-unknown`) |
-| `npm run builder-source -- --repo ../paperpaw --ref main` | PaperPaw's source for the builder (`builder/paperpaw.tar`) |
+| `npm run builder-source -- --repo ../paperpaw --ref plugin-store` | PaperPaw's source for the builder (`builder/paperpaw.tar`) |
 | `docker compose --profile code up` | The workshop's server and the builder: `npm run dev` builds through that server (port 8080) |
 
 How the parts fit together is in [docs/architecture.md](docs/architecture.md).

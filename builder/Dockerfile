@@ -3,7 +3,7 @@
 # the build API.
 #
 #   npm run builder-source -- --repo ../paperpaw --ref <ref>   (once, and for another ref)
-#   docker compose --profile code up --build
+#   docker compose --profile code up --build --renew-anon-volumes
 #
 # Builds run offline: every crate PaperPaw needs is in the image, and a
 # plugin may name only the SDK (builder/project.mjs).
@@ -31,11 +31,9 @@ RUN cargo install espup --version "$ESPUP_VERSION" --locked \
 
 # PaperPaw's source at the ref builder/paperpaw.json names.
 COPY builder/paperpaw.tar /tmp/paperpaw.tar
-COPY builder/web-plugins.patch /tmp/web-plugins.patch
 RUN mkdir /paperpaw && tar -xf /tmp/paperpaw.tar -C /paperpaw && rm /tmp/paperpaw.tar \
-    # Until the web shell takes plugins with code itself (set_plugins).
-    && (grep -q "pub fn set_plugins" /paperpaw/shells/web/src/emulator.rs \
-        || (cd /paperpaw && patch -p1 < /tmp/web-plugins.patch)) \
+    # A PaperPaw whose web shell takes plugins with code (set_plugins).
+    && grep -q "pub fn set_plugins" /paperpaw/shells/web/src/emulator.rs \
     && cargo install --locked --path /paperpaw/tools/sign --root /usr/local
 # The toolchains must be the firmware's.
 RUN grep -q "^channel = \"$(rustc --version | cut -d' ' -f2)\"" /paperpaw/shells/xteink/rust-toolchain.toml \
@@ -52,7 +50,7 @@ RUN useradd --system --uid 10001 --home-dir /work builder \
 
 WORKDIR /builder
 COPY builder/project.mjs builder/server.mjs ./
-COPY builder/sample.json ./
+COPY builder/sample.json builder/paperpaw.json ./
 USER builder
 # The sample built once for each target (the X4 Pro's `core` and `alloc`
 # too): every crate compiled, the registry in the image. The lock file is

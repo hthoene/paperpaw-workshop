@@ -25,6 +25,7 @@ pub fn paperpaw_sdk::ui::choice::Choice::outside(&self) -> paperpaw_sdk::Outside
 pub fn paperpaw_sdk::ui::choice::Choice::passes_through(&self) -> bool
 pub fn paperpaw_sdk::ui::choice::Choice::region(&self, &paperpaw_sdk::Env<'_>) -> core::option::Option<paperpaw_platform::geometry::Rect>
 pub fn paperpaw_sdk::ui::choice::Choice::secret(&self) -> bool
+pub fn paperpaw_sdk::ui::choice::Choice::shows_through(&self) -> paperpaw_sdk::ShowsThrough
 pub fn paperpaw_sdk::ui::choice::Choice::takes_double_taps(&self) -> bool
 pub paperpaw_sdk::ui::choice::Picked::option: alloc::string::String
 pub paperpaw_sdk::ui::choice::Picked::path: alloc::string::String
@@ -58,6 +59,7 @@ pub fn paperpaw_sdk::ui::items::ItemsScreen::outside(&self) -> paperpaw_sdk::Out
 pub fn paperpaw_sdk::ui::items::ItemsScreen::passes_through(&self) -> bool
 pub fn paperpaw_sdk::ui::items::ItemsScreen::region(&self, &paperpaw_sdk::Env<'_>) -> core::option::Option<paperpaw_platform::geometry::Rect>
 pub fn paperpaw_sdk::ui::items::ItemsScreen::secret(&self) -> bool
+pub fn paperpaw_sdk::ui::items::ItemsScreen::shows_through(&self) -> paperpaw_sdk::ShowsThrough
 pub fn paperpaw_sdk::ui::items::ItemsScreen::takes_double_taps(&self) -> bool
 pub const paperpaw_sdk::ui::items::LINES: &str
 pub mod paperpaw_sdk::ui::look
@@ -415,6 +417,7 @@ pub fn paperpaw_sdk::ui::draw_icon(&mut paperpaw_graphics::canvas::Canvas<'_>, &
 pub fn paperpaw_sdk::ui::draw_icon_at(&mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::Env<'_>, &str, f32, (i32, i32), paperpaw_platform::pixel::Color) -> bool
 pub fn paperpaw_sdk::ui::draw_icon_button(&mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::ui::UiStyle, paperpaw_platform::geometry::Rect, &str, bool, bool) -> paperpaw_platform::pixel::Color
 pub fn paperpaw_sdk::ui::draw_image(&mut paperpaw_graphics::canvas::Canvas<'_>, &dyn paperpaw_platform::storage::Storage, &paperpaw_document::ImageRef, paperpaw_platform::geometry::Rect)
+pub fn paperpaw_sdk::ui::draw_image_over(&mut paperpaw_graphics::canvas::Canvas<'_>, &dyn paperpaw_platform::storage::Storage, &paperpaw_document::ImageRef, paperpaw_platform::geometry::Rect, u8)
 pub fn paperpaw_sdk::ui::draw_label(&mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::FontHandle<'_>, f32, f32, paperpaw_platform::geometry::Rect, &str, paperpaw_platform::pixel::Color) -> f32
 pub fn paperpaw_sdk::ui::draw_message(&mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::ui::UiStyle, paperpaw_platform::geometry::Rect, &str)
 pub fn paperpaw_sdk::ui::draw_note(&mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::ui::UiStyle, paperpaw_platform::geometry::Rect, bool, &str)
@@ -484,6 +487,7 @@ pub fn paperpaw_sdk::ui::choice::Choice::outside(&self) -> paperpaw_sdk::Outside
 pub fn paperpaw_sdk::ui::choice::Choice::passes_through(&self) -> bool
 pub fn paperpaw_sdk::ui::choice::Choice::region(&self, &paperpaw_sdk::Env<'_>) -> core::option::Option<paperpaw_platform::geometry::Rect>
 pub fn paperpaw_sdk::ui::choice::Choice::secret(&self) -> bool
+pub fn paperpaw_sdk::ui::choice::Choice::shows_through(&self) -> paperpaw_sdk::ShowsThrough
 pub fn paperpaw_sdk::ui::choice::Choice::takes_double_taps(&self) -> bool
 pub fn paperpaw_sdk::ui::items::ItemsScreen::dims_below(&self) -> bool
 pub fn paperpaw_sdk::ui::items::ItemsScreen::draw(&mut self, &mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::Env<'_>)
@@ -506,5 +510,6 @@ pub fn paperpaw_sdk::ui::items::ItemsScreen::outside(&self) -> paperpaw_sdk::Out
 pub fn paperpaw_sdk::ui::items::ItemsScreen::passes_through(&self) -> bool
 pub fn paperpaw_sdk::ui::items::ItemsScreen::region(&self, &paperpaw_sdk::Env<'_>) -> core::option::Option<paperpaw_platform::geometry::Rect>
 pub fn paperpaw_sdk::ui::items::ItemsScreen::secret(&self) -> bool
+pub fn paperpaw_sdk::ui::items::ItemsScreen::shows_through(&self) -> paperpaw_sdk::ShowsThrough
 pub fn paperpaw_sdk::ui::items::ItemsScreen::takes_double_taps(&self) -> bool
 ```

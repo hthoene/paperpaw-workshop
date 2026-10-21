@@ -23,9 +23,11 @@ import type { Profile } from "../../../handbook/handbook";
 import { canSleep, type InputEvent, type PluginFiles, type Screen } from "../../protocol";
 import { PaperPawDevice } from "./paperpaw-web.js";
 
-/** paperpaw-dev's checks the module runs here, of the data plugin on the
- *  card. */
+/** paperpaw-dev's checks the module runs here: of the data plugin on the
+ *  card, and of a plugin with code as `paperpaw-dev check --plugin` does
+ *  (its frame times and heap too). */
 const CHECKS = ["package", "lint", "visual"];
+const CODE_CHECKS = ["lint", "visual", "reach", "perf"];
 /** How long a press holds, in the device's time: a short one, a long one. */
 const SHORT_PRESS = 150;
 const LONG_PRESS = 1000;
@@ -39,9 +41,14 @@ const SETTLE = 1500;
  *  build's some 16. */
 export const MAX_MODULE = 48 * 1024 * 1024;
 
-/** What a request is told when the module stopped. */
-export const STOPPED =
-  "PaperPaw stopped on this reader while doing this (it panicked or ran out of the device's memory). The reader was started again on its home screen.";
+/** What a request is told when the module stopped: `refused`, the
+ *  allocation the device's heap budget refused, if that was why. */
+export function stopped(refused: number): string {
+  const why = refused
+    ? `it ran out of the device's memory: ${refused} bytes more were refused`
+    : "it panicked";
+  return `PaperPaw stopped on this reader while doing this (${why}). The reader was started again on its home screen.`;
+}
 
 export class ShellReader {
   profile: Profile | undefined;
@@ -66,7 +73,7 @@ export class ShellReader {
 
   /** The module from `url`, its frames to `draw`. */
   static async load(url: URL, draw: (frame: ImageData) => void): Promise<ShellReader> {
-    return new ShellReader(added(await device(url)), url, draw);
+    return new ShellReader(await device(url), url, draw);
   }
 
   /** Runs PaperPaw from another module: a build's, with a plugin with code
@@ -75,7 +82,7 @@ export class ShellReader {
   async useModule(url: URL | null): Promise<void> {
     clearTimeout(this.timer);
     this.url = url ?? this.standard;
-    this.live = added(await device(this.url));
+    this.live = await device(this.url);
     if (this.profile) await this.start(this.profile, this.dark, this.plugin, this.screen);
   }
 
@@ -89,10 +96,10 @@ export class ShellReader {
       this.step();
       if (screen === "sleep" && canSleep(profile)) {
         // The power button, pressed and let go in the device's own time.
-        this.live.button("power", true);
+        this.live.button("power", true, this.clock());
         this.skew += SHORT_PRESS;
         this.step();
-        this.live.button("power", false);
+        this.live.button("power", false, this.clock());
         this.skew += 2000;
         this.step();
       }
@@ -113,17 +120,17 @@ export class ShellReader {
     return this.guard(() => {
       this.step();
       if (event.kind === "tap") {
-        this.live.pointer("down", event.x, event.y);
+        this.live.pointer("down", event.x, event.y, this.clock());
         this.skew += SHORT_PRESS;
         this.step();
-        this.live.pointer("up", event.x, event.y);
+        this.live.pointer("up", event.x, event.y, this.clock());
         this.settle();
         return;
       }
-      if (!this.live.button(event.name, true)) throw new Error(`The ${this.profile?.name ?? "reader"} has no button ${event.name}.`);
+      if (!this.live.button(event.name, true, this.clock())) throw new Error(`The ${this.profile?.name ?? "reader"} has no button ${event.name}.`);
       this.skew += event.long ? LONG_PRESS : SHORT_PRESS;
       this.step();
-      this.live.button(event.name, false);
+      this.live.button(event.name, false, this.clock());
       this.settle();
     });
   }
@@ -144,12 +151,14 @@ export class ShellReader {
     return { png: await png(image), width: image.width, height: image.height };
   }
 
-  /** paperpaw-dev's checks of the data plugin on the card, on the
-   *  author's device: its folder, its files, and its screens drawn. */
-  check(): Promise<Finding[]> {
+  /** paperpaw-dev's checks on the author's device: of the data plugin on
+   *  the card (its folder, its files, its screens drawn), and of the
+   *  plugins with code named (`plugins`, ids) as `check --plugin` does. */
+  check(plugins: string[] = []): Promise<Finding[]> {
     return this.guard(() => {
-      if (!this.plugin || Object.keys(this.plugin.files).length === 0) return [];
-      const report = this.live.check(CHECKS);
+      const data = !!this.plugin && Object.keys(this.plugin.files).length > 0;
+      if (!data && plugins.length === 0) return [];
+      const report = this.live.check(plugins.length ? CODE_CHECKS : CHECKS, plugins);
       return report.findings.map((f) => ({
         check: f.check,
         level: f.level,
@@ -166,14 +175,15 @@ export class ShellReader {
       return work();
     } catch (e) {
       if (!(e instanceof WebAssembly.RuntimeError)) throw e;
+      const refused = this.live.refused();
       await this.recover();
-      throw new Error(STOPPED);
+      throw new Error(stopped(refused));
     }
   }
 
   private async recover(): Promise<void> {
     clearTimeout(this.timer);
-    this.live = added(await this.live.fresh());
+    this.live = await this.live.fresh();
     this.screen = "home";
     if (this.profile) {
       boot(this.live, this.profile, this.dark, this.plugin);
@@ -186,16 +196,21 @@ export class ShellReader {
     if (!this.profile?.touch) return Promise.resolve();
     return this.guard(() => {
       if (phase === "down") this.step();
-      this.live.pointer(phase, x, y);
+      this.live.pointer(phase, x, y, this.clock());
       this.step();
     });
+  }
+
+  /** The device's time: the page's, and what presses held on top. */
+  private clock(): number {
+    return performance.now() - this.started + this.skew;
   }
 
   /** Lets the author's device's time pass, draws, and waits for what is
    *  due next; answers how soon that is. */
   private step(): number | null {
     clearTimeout(this.timer);
-    const next = this.live.advance(performance.now() - this.started + this.skew);
+    const next = this.live.advance(this.clock());
     this.requestDraw();
     if (next !== null) this.timer = setTimeout(() => this.tick(), Math.max(next, 1));
     return next;
@@ -250,13 +265,6 @@ async function device(url: URL): Promise<PaperPawDevice> {
   return PaperPawDevice.from(await WebAssembly.compile(bytes));
 }
 
-/** A module's device with its plugins with code added (a build's module
- *  has `pp_plugins`; the standard one has none). */
-function added(device: PaperPawDevice): PaperPawDevice {
-  const add = (device.exports as Record<string, unknown>).pp_plugins;
-  if (typeof add === "function") (add as () => void)();
-  return device;
-}
 
 /** A device of `profile`, the plugin on its card, started. */
 function boot(device: PaperPawDevice, profile: Profile, dark: boolean, plugin: PluginFiles | undefined): void {

@@ -245,11 +245,12 @@ All the same, the builder is closed in, here and on paperpaw.org:
 | Limits | 2 processors, 4 GB, 512 processes; 180 s a module, 300 s a file | the same, 300 s a build in all, gVisor where the host has it |
 | Builds | one at a time | one at a time, in a container of its own each |
 
-The web shell has no hook for added plugins yet, so the builder patches
-it in ([builder/web-plugins.patch](../builder/web-plugins.patch)); the
-patch goes when PaperPaw has the hook. The checks of paperpaw-dev run on
-data plugins only for now; for code, "What the checker says" shows the
-compiler's warnings and errors.
+The harness adds the plugin with PaperPaw's own hook
+(`paperpaw_web::set_plugins`, from its `pp_plugins`, which PaperPaw's
+loader calls first). paperpaw-dev checks the build in the reader as
+`paperpaw-dev check --plugin <id>` does (its texts, its screens drawn,
+reach, frame times and memory): the `check` tool, and "What the checker
+says" beside the compiler's warnings and errors.
 
 ## Sharing in the store
 

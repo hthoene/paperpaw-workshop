@@ -45,9 +45,12 @@ is the only crate there is: no `std`, no other crates. `alloc` is there
    beside the conversation; on errors it answers with the compiler's
    messages. Fix the first error first (later ones often follow from it),
    and build again. Warnings are worth fixing too.
-4. Once it builds, the reader runs it: `look` at it and `press` your way to
-   it (the tools menu, the home screen) on the X4 and on the Boox Go 7.
-   Judge it as a careful designer would.
+4. Once it builds, the reader runs it: `check` it (PaperPaw's own checker
+   on the build: its texts, its screens drawn on every device, reach by
+   buttons and by touch, frame times and memory) and fix what it finds.
+   Then `look` at it and `press` your way to it (the tools menu, the home
+   screen) on the X4 and on the Boox Go 7. Judge it as a careful designer
+   would.
 5. Tell the person what it does and how they reach it.
 
 ## Rules PaperPaw keeps

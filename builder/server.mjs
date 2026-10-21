@@ -24,6 +24,18 @@ import { bytesOf, cargo, diagnostics, harness, native, pluginManifest, problems 
 const PAPERPAW = process.env.PAPERPAW ?? "/paperpaw";
 const WORK = process.env.WORK ?? "/work";
 const CACHE = process.env.CACHE ?? "/cache";
+/** Which PaperPaw the image holds, and which one the compiled crates in
+ *  CACHE are of (written when the image was made). docker compose keeps a
+ *  container's volumes when the image changes: crates of another PaperPaw
+ *  would be compiled anew in every build, offline, and might not fit. */
+const COMMIT_FILE = path.join(CACHE, "paperpaw-commit");
+const IMAGE_COMMIT = (() => {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(import.meta.dirname, "paperpaw.json"), "utf8")).commit ?? "";
+  } catch {
+    return "";
+  }
+})();
 const BUILDS = process.env.BUILDS ?? "/builds";
 const PORT = Number(process.env.PORT ?? 8090);
 /** The most seconds a target may take. */
@@ -95,7 +107,7 @@ const server = http.createServer(async (req, res) => {
       const body = JSON.parse(await read(req, 40 * 1024 * 1024));
       const targets = (Array.isArray(body.targets) ? body.targets : ["web"]).filter((t) => TARGETS.includes(t));
       const files = body.files ?? {};
-      const found = problems(files);
+      const found = [...stale(), ...problems(files)];
       const build = { id: crypto.randomBytes(9).toString("hex"), state: "queued", targets, files, created: Date.now(), diagnostics: [], problems: found, outputs: [], log: "" };
       builds.set(build.id, build);
       if (found.length) {
@@ -144,6 +156,21 @@ const server = http.createServer(async (req, res) => {
     json(res, 400, { error: "bad-request", message: String(e.message ?? e) });
   }
 });
+
+/** Why the builder cannot build now, whatever the project: its compiled
+ *  crates are of another PaperPaw than the image's. */
+function stale() {
+  let cached = "";
+  try {
+    cached = fs.readFileSync(COMMIT_FILE, "utf8").trim();
+  } catch {
+    // No file: an image from before it was written.
+  }
+  if (!IMAGE_COMMIT || cached === IMAGE_COMMIT) return [];
+  return [
+    "The builder's compiled crates are of another PaperPaw than its image (docker compose keeps them when the image changes). Start it with fresh ones: docker compose --profile code up -d --renew-anon-volumes. Nothing is wrong with the plugin.",
+  ];
+}
 
 /** Runs the next build in the queue, one at a time. */
 async function next() {
@@ -335,6 +362,7 @@ if (process.argv[2] === "once") {
   run(build).then(
     () => {
       const failed = !build.outputs.length || build.diagnostics.some((d) => d.level === "error");
+      if (!failed) fs.writeFileSync(COMMIT_FILE, IMAGE_COMMIT);
       console.log(failed ? build.log.slice(-6000) : `prepared: ${build.outputs.map((o) => `${o.name} ${o.size}`).join(", ")}`);
       process.exit(failed ? 1 : 0);
     },
@@ -344,5 +372,8 @@ if (process.argv[2] === "once") {
     },
   );
 } else {
-  server.listen(PORT, () => console.log(`builder: listening on ${PORT}`));
+  server.listen(PORT, () => {
+    console.log(`builder: listening on ${PORT}, PaperPaw ${IMAGE_COMMIT.slice(0, 10)}`);
+    for (const why of stale()) console.error(`builder: ${why}`);
+  });
 }

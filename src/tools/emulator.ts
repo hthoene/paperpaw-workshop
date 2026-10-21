@@ -16,11 +16,12 @@ const STUB_NOTE =
 export const check: WorkshopTool<Record<string, never>> = {
   name: "check",
   description:
-    "Check the plugin as the store and PaperPaw would: its folder, the ini files, every setting, widget and action against this PaperPaw, values in range. Returns the findings, errors first. Run it after writing files.",
+    "Check the plugin as the store and PaperPaw would: its folder, the ini files, every setting, widget and action against this PaperPaw, values in range; a plugin with code once built, on the reader: its texts, its screens drawn, reach by buttons and touch, frame times and memory. Returns the findings, errors first. Run it after writing files, or after a build.",
   schema: z.object({}).strict(),
   async run(_input, context) {
     await context.sync();
-    const findings = await context.emulator.check();
+    const code = context.codePlugin?.();
+    const findings = await context.emulator.check(code ? [code] : undefined);
     const order = { error: 0, warning: 1, info: 2 } as const;
     findings.sort((a, b) => order[a.level] - order[b.level]);
     const lines = findings.map((f) => `${f.level}: [${f.check}] ${f.place}: ${f.message}`);

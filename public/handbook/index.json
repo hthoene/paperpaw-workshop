@@ -95,7 +95,7 @@
   "title": "What plugins contribute",
   "file": "docs--what-plugins-contribute.md",
   "summary": "| Contribution | Registrar | What it is |\n|---|---|---|\n| Actions | `add_action` | Something to do, bound to buttons and gestures, listed in menus |\n| Screens |",
-  "tokens": 10050
+  "tokens": 10615
  },
  {
   "id": "docs/what-a-slot-s-screen-does",
@@ -159,6 +159,13 @@
   "file": "docs--drawing-on-the-page.md",
   "summary": "A page layer (`layers::PageLayerSpec`) draws on every page a reader\nshows: side notes, a reading ruler, change bars.",
   "tokens": 463
+ },
+ {
+  "id": "docs/pictures-over-what-is-drawn",
+  "title": "Pictures over what is drawn",
+  "file": "docs--pictures-over-what-is-drawn.md",
+  "summary": "Any screen, widget, theme or overlay draws a picture over what is drawn\nalready: a PNG or GIF keeps its transparency (an alpha channel, a\npalette's or a colour ",
+  "tokens": 565
  },
  {
   "id": "docs/widgets",
@@ -270,7 +277,7 @@
   "title": "Plugins without code",
   "file": "docs--plugins-without-code.md",
   "summary": "A data plugin is a folder:\n\n```text\nplugins/large-print/\n  plugin.ini     [plugin] id, name, description, version, formats\n  i18n/*.ini     translation catalogs",
-  "tokens": 1825
+  "tokens": 1964
  },
  {
   "id": "docs/publishing",
@@ -382,7 +389,7 @@
   "title": "The SDK's top level (paperpaw_sdk::...)",
   "file": "sdk--root.md",
   "summary": "```rust\npub mod paperpaw_sdk\npub use paperpaw_sdk::Arg\npub use paperpaw_sdk::Battery\npub use paperpaw_sdk::ButtonState\npub use paperpaw_sdk::Canvas\npub use pape",
-  "tokens": 21656
+  "tokens": 21781
  },
  {
   "id": "sdk/annotations",
@@ -431,7 +438,7 @@
   "title": "The SDK's module contribution",
   "file": "sdk--contribution.md",
   "summary": "```rust\npub paperpaw_sdk::contribution::Contribution::Action(alloc::boxed::Box<paperpaw_sdk::ActionSpec>)\npub paperpaw_sdk::contribution::Contribution::ActionOb",
-  "tokens": 8978
+  "tokens": 9153
  },
  {
   "id": "sdk/data",
@@ -487,7 +494,7 @@
   "title": "The SDK's module ui",
   "file": "sdk--ui.md",
   "summary": "```rust\npub fn paperpaw_sdk::ui::choice::Picked::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>\npub fn paperpaw_sdk::ui::choice::Picked::to_pa",
-  "tokens": 13144
+  "tokens": 13303
  },
  {
   "id": "sdk/work",
@@ -556,8 +563,8 @@
   "id": "sdk/image",
   "title": "The SDK's module image",
   "file": "sdk--image.md",
-  "summary": "```rust\npub use paperpaw_sdk::image::ColorFile\npub use paperpaw_sdk::image::ColorWriter\npub use paperpaw_sdk::image::Downscaler\npub use paperpaw_sdk::image::Fit",
-  "tokens": 259
+  "summary": "```rust\npub use paperpaw_sdk::image::AlphaFile\npub use paperpaw_sdk::image::AlphaWriter\npub use paperpaw_sdk::image::ColorFile\npub use paperpaw_sdk::image::Colo",
+  "tokens": 359
  },
  {
   "id": "sdk/install",
@@ -928,7 +935,7 @@
   "title": "Settings of sleep",
   "file": "settings--sleep.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[sleep] show` | While asleep, show | `sleep.show.cover`, `sleep.show.picture`, `sl",
-  "tokens": 184
+  "tokens": 515
  },
  {
   "id": "settings/translate",
@@ -998,7 +1005,7 @@
   "title": "Settings in the group core.group.display",
   "file": "settings-group--core.group.display.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] night-mode` | Night mode | `true`, `false` | `false` | White text on black.",
-  "tokens": 597
+  "tokens": 927
  },
  {
   "id": "settings-group/core.group.controls",

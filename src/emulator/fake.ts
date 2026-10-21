@@ -54,7 +54,11 @@ export class FakeEmulator implements Emulator {
     this.modules.push(url);
   }
 
-  async check(): Promise<Finding[]> {
+  /** The plugins with code asked to be checked, in order. */
+  checked: (string[] | undefined)[] = [];
+
+  async check(plugins?: string[]): Promise<Finding[]> {
+    this.checked.push(plugins);
     return checkDataPlugin(this.plugin?.files ?? {}, this.registry);
   }
 }

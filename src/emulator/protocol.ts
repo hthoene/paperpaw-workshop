@@ -41,7 +41,9 @@ export type Request =
   | { type: "files"; plugin: PluginFiles }
   | { type: "input"; event: InputEvent }
   | { type: "screenshot"; profile?: Profile; dark?: boolean; screen?: Screen }
-  | { type: "check" }
+  /** paperpaw-dev's checks: of the data plugin on the card, and of the
+   *  plugins with code (ids) the module runs. */
+  | { type: "check"; plugins?: string[] }
   /** Another module for the reader: PaperPaw with a plugin with code
    *  compiled in (a build's), or `null` for PaperPaw as it is. */
   | { type: "module"; url: string | null };

@@ -25,7 +25,6 @@ export const DATA_TOOLS: WorkshopTool<any>[] = [
   placeFile,
 ];
 
-/** The tools for a plugin with code: its files, the docs, the build, and
- *  the reader to look and press (the checks of code plugins in the browser
- *  come with PaperPaw's web shell). */
-export const CODE_TOOLS: WorkshopTool<any>[] = [listFiles, readFile, writeFile, deleteFile, lookupDocs, build, look, press, setEntry];
+/** The tools for a plugin with code: its files, the docs, the build, the
+ *  reader to look and press, and paperpaw-dev's checks of the build. */
+export const CODE_TOOLS: WorkshopTool<any>[] = [listFiles, readFile, writeFile, deleteFile, lookupDocs, build, look, press, setEntry, check];

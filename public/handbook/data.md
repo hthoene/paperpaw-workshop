@@ -308,7 +308,22 @@ home.rows = 6
 ```
 
 So anyone can make a home screen layout and share it: it is offered
-with the home screen's own. [`samples/plugins`](../samples/plugins) has
+with the home screen's own. Pictures over the page for the sleep screen
+are presets of `sleep.overlay` the same way: the picture (or a widget,
+`sleep.overlay-widget`), and where it goes and how large it is if the
+preset likes (what it leaves out stays as the reader set it).
+
+```ini
+[owl]
+kind = sleep.overlay
+name = Owl
+sleep.overlay-picture = plugins/owls/owl.png
+sleep.overlay-position = sleep.position.bottom-right
+sleep.overlay-size = 40
+```
+
+The picture's clear parts show the page, so a PNG with transparency
+looks best. [`samples/plugins`](../samples/plugins) has
 five: large print, three themes (airy, paw, calm ink) and a layout
 (reading nook).
 

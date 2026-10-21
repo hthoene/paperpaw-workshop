@@ -30,6 +30,14 @@ export const KEYS = {
   p: "power",
 };
 
+/// Throws unless `now` is a time: input stamped with none would be taken
+/// as at the start, and a short press as a long one.
+function needsTime(now) {
+  if (!Number.isFinite(now)) {
+    throw new TypeError("the time it happens at is needed (ms, as advance takes it)");
+  }
+}
+
 export class PaperPawDevice {
   /// Loads the module from `url` (`paperpaw-web.wasm`).
   static async load(url) {
@@ -48,12 +56,15 @@ export class PaperPawDevice {
         log: (ptr, len) => {
           console.error("paperpaw:", decoder.decode(new Uint8Array(device.memory.buffer, ptr, len)));
         },
+        now: () => performance.now(),
       },
     };
     const instance = await WebAssembly.instantiate(module, imports);
     device.module = module;
     device.exports = instance.exports;
     device.memory = instance.exports.memory;
+    // A module built around plugins with code adds them first.
+    device.exports.pp_plugins?.();
     return device;
   }
 
@@ -131,16 +142,20 @@ export class PaperPawDevice {
     return JSON.parse(this.#result());
   }
 
-  /// A button pressed or let go; false if the device has none so named.
-  button(name, pressed) {
-    const status = this.#with([name], (p, l) => this.exports.pp_button(p, l, pressed ? 1 : 0));
+  /// A button pressed or let go at `now` (ms since the page started, as
+  /// `advance` takes it); false if the device has none so named.
+  button(name, pressed, now) {
+    needsTime(now);
+    const status = this.#with([name], (p, l) => this.exports.pp_button(p, l, pressed ? 1 : 0, now));
     if (status === STOPPED) this.#check(status);
     return status === 0;
   }
 
-  /// A finger on the screen (`phase` of PHASES) at the screen's pixel.
-  pointer(phase, x, y) {
-    this.exports.pp_pointer(PHASES[phase] ?? PHASES.cancel, Math.round(x), Math.round(y));
+  /// A finger on the screen (`phase` of PHASES) at the screen's pixel,
+  /// at `now` (as `button`).
+  pointer(phase, x, y, now) {
+    needsTime(now);
+    this.#check(this.exports.pp_pointer(PHASES[phase] ?? PHASES.cancel, Math.round(x), Math.round(y), now));
   }
 
   /// Lets time pass to `now` (ms since the page started); ms until
@@ -156,10 +171,11 @@ export class PaperPawDevice {
     return [this.exports.pp_width(), this.exports.pp_height()];
   }
 
-  /// How often the device ran out of its memory (the X4's heap budget):
-  /// in a browser it goes on, where the device would have stopped.
-  outOfMemory() {
-    return this.exports.pp_out_of_memory();
+  /// After a trap: the size of the allocation the device's heap budget
+  /// refused during the call that stopped, 0 if none was (then it was no
+  /// lack of memory).
+  refused() {
+    return this.exports.pp_refused();
   }
 
   /// Whether the panel still changes by itself (a full refresh flashing).
@@ -198,8 +214,8 @@ export class PaperPawDevice {
 
   /// paperpaw-dev's report of the data plugins on the card (`commands`:
   /// some of package, lint, visual, reach; none: all).
-  check(commands = []) {
-    this.#check(this.#with([commands.join(",")], (p, l) => this.exports.pp_check(p, l)));
+  check(commands = [], plugins = []) {
+    this.#check(this.#with([commands.join(","), plugins.join(",")], (...args) => this.exports.pp_check(...args)));
     return JSON.parse(this.#result());
   }
 }

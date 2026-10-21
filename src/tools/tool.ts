@@ -34,6 +34,9 @@ export interface ToolContext {
   /** Where plugins with code are built, if there is a builder. */
   builder?: Builder;
   /** Told of every build, for the page to show its messages. */
+  /** A plugin with code: its id, once the reader runs a build of it,
+   *  for its checks. */
+  codePlugin?(): string | undefined;
   lastBuild?(result: BuildResult): void;
 }
 

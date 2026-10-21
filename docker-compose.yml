@@ -5,7 +5,10 @@
 # With plugins with code (the builder needs PaperPaw's source first, see
 # the README):
 #
-#   docker compose --profile code up --build
+#   docker compose --profile code up --build --renew-anon-volumes
+#
+# (--renew-anon-volumes: the builder's writable folders start anew from a
+# new image; kept, they would hold the crates of the PaperPaw before.)
 #
 # Your Claude key stays in your browser: this container only serves the
 # workshop's pages, it never sees the key or your plugins.

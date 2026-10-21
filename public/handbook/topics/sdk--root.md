@@ -250,6 +250,8 @@ pub paperpaw_sdk::Contribution::ActionOverride(alloc::boxed::Box<paperpaw_sdk::A
 pub paperpaw_sdk::Contribution::BookBadge(alloc::boxed::Box<paperpaw_sdk::library::service::BookBadge>)
 pub paperpaw_sdk::Contribution::BookData(paperpaw_sdk::library::BookData)
 pub paperpaw_sdk::Contribution::BookField(alloc::boxed::Box<paperpaw_sdk::library::service::BookField>)
+pub paperpaw_sdk::Contribution::Choice::setting: paperpaw_sdk::Id
+pub paperpaw_sdk::Contribution::Choice::value: alloc::borrow::Cow<'static, str>
 pub paperpaw_sdk::Contribution::Chrome(alloc::boxed::Box<paperpaw_sdk::chrome::ChromeSpec>)
 pub paperpaw_sdk::Contribution::Decorator(alloc::boxed::Box<paperpaw_sdk::decorations::DecoratorSpec>)
 pub paperpaw_sdk::Contribution::EventDeclared(alloc::boxed::Box<paperpaw_sdk::services::EventSpec>)
@@ -433,6 +435,9 @@ pub paperpaw_sdk::SettingValue::Bool(bool)
 pub paperpaw_sdk::SettingValue::Int(i64)
 pub paperpaw_sdk::SettingValue::Text(alloc::borrow::Cow<'static, str>)
 pub fn paperpaw_sdk::SettingValue::to_config_text(&self) -> alloc::string::String
+pub paperpaw_sdk::ShowsThrough::All
+pub paperpaw_sdk::ShowsThrough::FullScreen
+pub paperpaw_sdk::ShowsThrough::Nothing
 pub paperpaw_sdk::SocketNotice::Answer
 pub paperpaw_sdk::SocketNotice::Answer::from: alloc::string::String
 pub paperpaw_sdk::SocketNotice::Answer::socket: paperpaw_sdk::Id
@@ -1009,10 +1014,12 @@ pub fn paperpaw_sdk::Speech::new(impl core::convert::Into<alloc::string::String>
 pub fn paperpaw_sdk::Speech::params(self, paperpaw_sdk::Params) -> Self
 pub fn paperpaw_sdk::Speech::queue(self, bool) -> Self
 pub fn paperpaw_sdk::Speech::rate(self, u16) -> Self
+pub paperpaw_sdk::StackEntry::guards: bool
 pub paperpaw_sdk::StackEntry::key: paperpaw_sdk::ScreenKey
 pub paperpaw_sdk::StackEntry::overlay: bool
 pub paperpaw_sdk::StackEntry::screen: paperpaw_sdk::Id
 pub paperpaw_sdk::StackEntry::slot: core::option::Option<paperpaw_sdk::Id>
+pub fn paperpaw_sdk::StackEntry::guarding(self, bool) -> Self
 pub fn paperpaw_sdk::StackEntry::is(&self, &paperpaw_sdk::Id) -> bool
 pub fn paperpaw_sdk::StackEntry::new(paperpaw_sdk::Id, core::option::Option<paperpaw_sdk::Id>, bool, paperpaw_sdk::ScreenKey) -> Self
 pub paperpaw_sdk::StatusFrame::area: paperpaw_platform::geometry::Rect
@@ -1090,6 +1097,7 @@ pub fn paperpaw_sdk::Screen::outside(&self) -> paperpaw_sdk::Outside
 pub fn paperpaw_sdk::Screen::passes_through(&self) -> bool
 pub fn paperpaw_sdk::Screen::region(&self, &paperpaw_sdk::Env<'_>) -> core::option::Option<paperpaw_platform::geometry::Rect>
 pub fn paperpaw_sdk::Screen::secret(&self) -> bool
+pub fn paperpaw_sdk::Screen::shows_through(&self) -> paperpaw_sdk::ShowsThrough
 pub fn paperpaw_sdk::Screen::takes_double_taps(&self) -> bool
 pub fn paperpaw_sdk::cover_fit(paperpaw_image::Fit) -> paperpaw_image::Fit
 pub fn paperpaw_sdk::read_file(&dyn paperpaw_platform::storage::Storage, &str, usize) -> core::result::Result<alloc::vec::Vec<u8>, paperpaw_platform::storage::StorageError>

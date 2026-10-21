@@ -14,7 +14,9 @@ export interface Emulator {
   input(event: InputEvent): Promise<void>;
   /** The screen of `profile` (the one shown, if none), as a PNG. */
   screenshot(profile?: Profile, dark?: boolean, screen?: Screen): Promise<ScreenshotResult>;
-  check(): Promise<Finding[]>;
+  /** paperpaw-dev's checks of the data plugin, and of `plugins` (ids of
+   *  plugins with code the module runs). */
+  check(plugins?: string[]): Promise<Finding[]>;
   /** Runs PaperPaw from another module (a build's), or `null` for the
    *  one the workshop brings. */
   useModule(url: string | null): Promise<void>;
@@ -117,8 +119,8 @@ export class FrameEmulator implements Emulator {
     return this.send({ type: "screenshot", profile, dark, screen });
   }
 
-  check(): Promise<CheckResult> {
-    return this.send({ type: "check" });
+  check(plugins?: string[]): Promise<CheckResult> {
+    return this.send({ type: "check", plugins });
   }
 
   takeStopped(): string | undefined {

@@ -140,11 +140,11 @@ incremental = true
     "src/lib.rs": `//! PaperPaw's web emulator with the plugin ${crate} compiled in.
 pub use paperpaw_web;
 
-/// Called by the page once the module is loaded: the plugin is added to
-/// every device started after.
+/// Called by PaperPaw's loader once the module is loaded: the plugin is
+/// added to every device started after.
 #[unsafe(no_mangle)]
 pub extern "C" fn pp_plugins() {
-    paperpaw_web::emulator::set_plugins(|app| app.plugin(${lib}::${plugin}));
+    paperpaw_web::set_plugins(|app| app.plugin(${lib}::${plugin}));
 }
 `,
   };

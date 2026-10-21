@@ -163,6 +163,7 @@ export class Workshop {
         useModule: (url) => this.useModule(url),
       },
       builder: this.code ? this.builder : undefined,
+      codePlugin: () => this.codePlugin(),
       lastBuild: (result) => {
         this.build = result;
         this.changed();
@@ -303,19 +304,27 @@ export class Workshop {
   async refreshFindings(): Promise<void> {
     if (!this.emulator) return;
     if (this.code) {
-      // A plugin with code: what the compiler said in its last build (the
-      // checks of code plugins in the browser come with PaperPaw's shell).
-      this.findings = (this.build?.diagnostics ?? []).map((d) => ({
+      // A plugin with code: what the compiler said in its last build, and
+      // paperpaw-dev's checks of the build the reader runs.
+      const compiler = (this.build?.diagnostics ?? []).map((d) => ({
         check: "build",
         level: d.level,
         place: d.file ? `${d.file}${d.line ? `:${d.line}` : ""}` : "(build)",
         message: d.message,
       }));
+      const id = this.codePlugin();
+      const checked = id ? await this.emulator.check([id]).catch(() => []) : [];
+      this.findings = [...compiler, ...checked];
       this.changed();
       return;
     }
     this.findings = Object.keys(this.project.files).length ? await this.emulator.check() : [];
     this.changed();
+  }
+
+  /** A plugin with code: its id, once the reader runs a build of it. */
+  private codePlugin(): string | undefined {
+    return this.code && this.project.module ? identity(this.project).id : undefined;
   }
 
   /** The person's words to the AI: one turn, as many rounds as it takes. */

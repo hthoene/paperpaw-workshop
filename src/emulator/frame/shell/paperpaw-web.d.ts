@@ -42,14 +42,20 @@ export class PaperPawDevice {
   removePlugin(plugin: string): void;
   start(): void;
   device(): DeviceInfo;
-  button(name: string, pressed: boolean): boolean;
-  pointer(phase: "down" | "move" | "up" | "cancel", x: number, y: number): void;
+  /** At `now`, as `advance` takes it. */
+  button(name: string, pressed: boolean, now: number): boolean;
+  pointer(phase: "down" | "move" | "up" | "cancel", x: number, y: number, now: number): void;
+  /** After a trap: the allocation the device's heap budget refused, 0 if
+   *  none was (then it was no lack of memory). */
+  refused(): number;
   advance(now: number): number | null;
   size(): [number, number];
   animating(): boolean;
   frame(): ImageData;
   shown(): ImageData;
-  check(commands?: string[]): Report;
+  /** paperpaw-dev's checks of the data plugins on the card, and of the
+   *  plugins with code named (`plugins`, ids) the module adds. */
+  check(commands?: string[], plugins?: string[]): Report;
   /** A fresh instance of the same module (after a panic). */
   fresh(): Promise<PaperPawDevice>;
   /** PaperPaw's version, and the commit it was built from. */
