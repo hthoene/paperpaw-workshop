@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "handbook": "node handbook/generate.mjs",
     "emulator": "node scripts/emulator.mjs",
-    "builder-source": "node scripts/builder-source.mjs"
+    "builder-source": "node scripts/builder-source.mjs",
+    "quota-copy": "node scripts/quota-copy.mjs"
   },
   "engines": {
     "node": ">=22"
