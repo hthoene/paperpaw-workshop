@@ -2,8 +2,10 @@
 // screen after pressing buttons. The stub is said to be one in every
 // answer, so the model weighs its pictures accordingly.
 
+import type Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 
+import { AI_LONG_SIDE } from "../pictures/kit";
 import { deviceNamed, shortName, type ToolContext, type WorkshopTool } from "./tool";
 
 const DEVICE = z.string().describe('"X4", "X4 Pro" or "Boox Go 7"');
@@ -37,6 +39,18 @@ async function screen(context: ToolContext, device: string | undefined, dark: bo
   return { profile, shot };
 }
 
+/** A screenshot as the AI sees it: no side longer than AI_LONG_SIDE (the
+ *  Boox's screen is), as every picture it is sent. Anthropic would reduce
+ *  it anyway; the free quota's proxy takes none larger. */
+async function seen(context: ToolContext, shot: { png: string; width: number; height: number }): Promise<Anthropic.ImageBlockParam> {
+  if (Math.max(shot.width, shot.height) <= AI_LONG_SIDE) {
+    return { type: "image", source: { type: "base64", media_type: "image/png", data: shot.png } };
+  }
+  const bytes = Uint8Array.from(atob(shot.png), (c) => c.charCodeAt(0));
+  const small = await context.pictures.forAi(bytes, "image/png");
+  return { type: "image", source: { type: "base64", media_type: small.mediaType, data: small.data } };
+}
+
 export const look: WorkshopTool<{ device?: string; dark?: boolean; screen?: "home" | "sleep" }> = {
   name: "look",
   description:
@@ -48,7 +62,7 @@ export const look: WorkshopTool<{ device?: string; dark?: boolean; screen?: "hom
     const note = context.emulator.stub ? ` ${STUB_NOTE}` : "";
     return {
       content: [
-        { type: "image", source: { type: "base64", media_type: "image/png", data: shot.png } },
+        await seen(context, shot),
         { type: "text", text: `${profile.name}, ${shot.width} x ${shot.height}${dark ? ", night mode" : ""}.${note}` },
       ],
       step: { key: "step.look", vars: { device: shortName(profile) } },
@@ -85,7 +99,7 @@ export const press: WorkshopTool<{ device?: string; buttons: string[] }> = {
     const shot = await context.emulator.screenshot(profile, undefined);
     return {
       content: [
-        { type: "image", source: { type: "base64", media_type: "image/png", data: shot.png } },
+        await seen(context, shot),
         { type: "text", text: `${profile.name} after ${buttons.join(", ")}.` },
       ],
       step: { key: "step.press", vars: { device: shortName(profile) } },

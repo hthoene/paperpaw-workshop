@@ -35,7 +35,7 @@
   "start.pay.key.remember": "Remember it on this computer",
   "start.pay.key.remember.help": "Kept in this browser only. Leave it off on a shared computer.",
   "start.pay.quota": "The free quota",
-  "start.pay.quota.text": "Coming soon: a monthly amount paperpaw.org pays, for authors who ask for it.",
+  "start.pay.quota.text": "A monthly amount paperpaw.org pays, for authors whose application was accepted. For plugins without code.",
   "start.pay.local": "On my computer",
   "start.pay.local.text": "Install the workshop with Docker and use your own key there.",
   "start.pay.local.link": "How",
@@ -252,5 +252,18 @@
   "workshop.ppn.failed": "It did not build for the {device}. Ask the AI to build it and fix what the compiler says.",
   "workshop.ppn.builder": "The builder is not running, so there is no package for the X4 (docker compose --profile code up).",
   "start.example.code": "or one with code (needs the builder)",
-  "workshop.ppn.device": "PaperPaw on the {device} takes plugins with code later. Show the X4 or the X4 Pro to download it for them."
+  "workshop.ppn.device": "PaperPaw on the {device} takes plugins with code later. Show the X4 or the X4 Pro to download it for them.",
+  "start.pay.quota.none": "Only in the workshop on paperpaw.org.",
+  "start.pay.quota.sign-in": "Sign in at paperpaw.org to apply for it",
+  "start.pay.quota.apply": "Apply for it",
+  "start.pay.quota.waiting": "Your application is waiting for an admin.",
+  "start.pay.quota.declined": "Your application was declined.",
+  "start.pay.quota.revoked": "The quota was taken back from your account.",
+  "start.pay.quota.left": "{left} of {budget} US dollars left this month (about {euros} euros).",
+  "start.pay.quota.closed": "The free quota is closed for now.",
+  "start.pay.quota.budget": "Your budget for this month is used up.",
+  "start.pay.quota.site-budget": "The site's budget for this month is used up.",
+  "start.pay.quota.not-accepted": "The free quota is for authors whose application was accepted.",
+  "start.pay.quota.code": "The free quota pays for plugins without code. For code, enter your own key.",
+  "provider.quota": "paperpaw.org's free quota"
 }

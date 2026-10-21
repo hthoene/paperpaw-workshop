@@ -52,7 +52,11 @@ A **provider** ([src/ai/provider.ts](../src/ai/provider.ts)) is who answers:
 - `AnthropicDirect`: the person's own key, straight from the browser.
 - `ReplayProvider`: a recorded conversation (`src/ai/examples/*.json`), for
   the example on the start page and for tests.
-- Later: the site's own proxy with a daily quota.
+- `QuotaProxy` ([src/ai/quota.ts](../src/ai/quota.ts)): paperpaw.org's
+  free quota, for data plugins. The page sends only the conversation to
+  the site's counting proxy, which asks Anthropic with the workshop's own
+  prompt and tools (copied there by `npm run quota-copy`) and streams the
+  answer back unchanged; the SDK reads it as with a key.
 
 A project is a data plugin or a plugin with code (`Project.kind`). The
 kind picks the model (Haiku for data, Sonnet for code), the tools

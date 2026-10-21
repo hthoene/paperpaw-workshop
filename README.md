@@ -34,6 +34,10 @@ On the start page you can:
   else (its Content-Security-Policy says so). You pay Anthropic for what
   you use; the workshop shows what each turn cost.
 
+On paperpaw.org there is a third way, **the free quota**: authors apply
+for it at paperpaw.org/account/workshop, and once an admin accepts, the
+site pays for their data plugins up to a monthly budget.
+
 Your projects are kept in your browser (IndexedDB), not on a server.
 
 **Pictures**: "Add a picture" beside the message field (or drop one on

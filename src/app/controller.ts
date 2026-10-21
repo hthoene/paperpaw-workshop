@@ -7,6 +7,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { runTurn, type Said, type TurnEnd } from "../ai/loop";
 import { MODELS, modelName } from "../ai/pricing";
 import type { Provider } from "../ai/provider";
+import { QuotaRefused } from "../ai/quota";
+import { BuilderUnavailable, HttpBuilder, projectFiles, type BuildResult, type Builder, type Target } from "../build/client";
 import type { Finding } from "../checks/data";
 import type { Emulator } from "../emulator/emulator";
 import { FrameEmulator } from "../emulator/emulator";
@@ -18,7 +20,6 @@ import { CARRIED, Files, identity, type Project } from "../project/project";
 import { browserUploads, saveProject } from "../project/storage";
 import { ADDED, MAX_PICTURES_A_MESSAGE, UploadRefused, Uploads, type UploadStore } from "../project/uploads";
 import { pluginZip } from "../project/zip";
-import { BuilderUnavailable, HttpBuilder, projectFiles, type BuildResult, type Builder, type Target } from "../build/client";
 import { CODE_TOOLS, DATA_TOOLS } from "../tools/registry";
 import type { ToolContext } from "../tools/tool";
 
@@ -452,6 +453,8 @@ export class Workshop {
 /** What went wrong, in the person's words: Anthropic's errors each in
  *  their own, the rest as they are. */
 export function message(e: unknown): string {
+  // paperpaw.org's refusals say why in their own words.
+  if (e instanceof QuotaRefused) return e.message;
   if (e instanceof Anthropic.AuthenticationError || e instanceof Anthropic.PermissionDeniedError) return t("workshop.error.key");
   if (e instanceof Anthropic.RateLimitError) return t("workshop.error.rate");
   if (e instanceof Anthropic.APIConnectionError) return t("workshop.error.network");

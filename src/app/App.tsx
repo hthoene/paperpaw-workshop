@@ -7,6 +7,7 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
 
 import { AnthropicDirect } from "../ai/anthropic";
+import { QuotaProxy } from "../ai/quota";
 import nightOwl from "../ai/examples/night-owl.json";
 import quoteADay from "../ai/examples/quote-a-day.json";
 import sleepPicture from "../ai/examples/sleep-picture.json";
@@ -19,10 +20,19 @@ import { FakeStore } from "../publish/fake";
 import { SiteStore, type StoreApi } from "../publish/store";
 import { Header } from "./Header";
 import { loadHosting, type Hosting } from "./hosting";
-import { Start } from "./Start";
+import { Start, type Payer } from "./Start";
 import { WorkshopPage } from "./WorkshopPage";
 
 const KEY_STORE = "paperpaw-workshop.key";
+const PAYER_STORE = "paperpaw-workshop.payer";
+
+function rememberedPayer(): Payer {
+  try {
+    return localStorage.getItem(PAYER_STORE) === "quota" ? "quota" : "key";
+  } catch {
+    return "key";
+  }
+}
 
 function rememberedKey(): string {
   try {
@@ -68,6 +78,7 @@ export function App() {
   const [hosting, setHosting] = useState<Hosting | null>(null);
   const [failed, setFailed] = useState("");
   const [key, setKey] = useState(rememberedKey);
+  const [payer, setPayer] = useState<Payer>(rememberedPayer);
   const [where, setWhere] = useState<Route>(route);
   const [project, setProject] = useState<Project | null>(null);
   const [first, setFirst] = useState("");
@@ -97,10 +108,13 @@ export function App() {
     }
   }, [shown(where), !!handbook]);
 
+  // The free quota pays for data plugins only; code needs a key.
+  const quota = payer === "quota" && project?.kind !== "code";
   const provider: Provider | null = useMemo(() => {
     if (where.page === "example") return new ReplayProvider(EXAMPLES[where.name]!, 900);
+    if (quota) return new QuotaProxy();
     return key ? new AnthropicDirect(key) : null;
-  }, [shown(where), key]);
+  }, [shown(where), key, quota]);
 
   // The store: paperpaw.org's own where the workshop runs there; a pretend
   // one for the example (nothing of it is sent) and in development.
@@ -109,6 +123,15 @@ export function App() {
     () => (pretend ? new FakeStore(undefined, 700) : new SiteStore(location.origin)),
     [pretend],
   );
+
+  const choosePayer = (value: Payer) => {
+    setPayer(value);
+    try {
+      localStorage.setItem(PAYER_STORE, value);
+    } catch {
+      // Storage may be off: the choice lives for this tab only.
+    }
+  };
 
   const useKey = (value: string, remember: boolean) => {
     setKey(value);
@@ -156,9 +179,11 @@ export function App() {
             <Start
               apiKey={key}
               remembered={!!rememberedKey()}
+              payer={payer}
+              onPayer={choosePayer}
               onKey={useKey}
               onStart={start}
-              needsKey={where.page === "project" && !key}
+              needsKey={where.page === "project" && !key && !quota}
             />
           )
         )}

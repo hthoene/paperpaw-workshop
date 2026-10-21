@@ -15,6 +15,7 @@ import { pictureSize } from "../src/pictures/size";
 import { ADDED, MemoryUploads, sniff, uploadName, Uploads, UploadRefused, MAX_UPLOADS } from "../src/project/uploads";
 import { newProject } from "../src/project/project";
 import { DATA_TOOLS } from "../src/tools/registry";
+import { look } from "../src/tools/emulator";
 import { convertPicture, listUploads, placeFile, viewUpload } from "../src/tools/uploads";
 import { bench, fakeKit, testPicture, testRaster } from "./helpers";
 
@@ -361,5 +362,20 @@ describe("a picture's size from its header", () => {
     const dark = (png: Uint8Array) => levelsOf(png).levels.filter((l) => l === 0).length / (480 * 800);
     expect(dark(a.files[0]!.png)).toBeGreaterThan(0.9);
     expect(dark(b.files[0]!.png)).toBeGreaterThan(0.9);
+  });
+});
+
+describe("screenshots for the AI", () => {
+  it("are no larger than any picture it is sent (the Boox's screen is)", async () => {
+    const b = bench();
+    const shots: { width: number; height: number }[] = [{ width: 1264, height: 1680 }, { width: 480, height: 800 }];
+    b.emulator.screenshot = async () => ({ png: btoa(String.fromCharCode(...testPicture(126, 168))), ...shots.shift()! });
+    const boox = await look.run({ device: "Boox Go 7" }, { ...b.context, pictures: fakeKit });
+    const x4 = await look.run({ device: "X4" }, { ...b.context, pictures: fakeKit });
+    const picture = (r: { content: unknown }) => (r.content as Anthropic.ImageBlockParam[])[0]!.source as Anthropic.Base64ImageSource;
+    // The reduced copy (the fake kit's) for the Boox, the screenshot itself for the X4.
+    expect(picture(boox).data).toBe("AAAA");
+    expect(picture(x4).data).not.toBe("AAAA");
+    expect(JSON.stringify(boox.content)).toContain("1264 x 1680");
   });
 });
