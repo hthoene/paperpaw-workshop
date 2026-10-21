@@ -6,6 +6,7 @@ import { useEffect, useState } from "preact/hooks";
 import { STRONGER } from "../ai/pricing";
 import { quotaStanding, type QuotaStanding } from "../ai/quota";
 import { t } from "../i18n";
+import { folderEntries, ImportProblem, MAX_IMPORT } from "../project/import";
 import { identity, type Kind, type Project } from "../project/project";
 import { listProjects } from "../project/storage";
 import { Steps } from "./Header";
@@ -18,6 +19,12 @@ const CODE_IDEAS = ["tool"];
  *  quota (whose model the site chooses). */
 export type Payer = "key" | "quota";
 
+/** What an import made: the new project and what it took and left out,
+ *  or why it took nothing. */
+export type ImportResult =
+  | { key: string; name: string; kind: Kind; taken: string[]; skipped: { path: string; why: string }[] }
+  | { error: string };
+
 interface Props {
   apiKey: string;
   remembered: boolean;
@@ -27,9 +34,13 @@ interface Props {
   onPayer(payer: Payer): void;
   /** `model` instead of the kind's: Opus, with one's own key. */
   onStart(idea: string, kind: Kind, model?: string): void;
+  imported: ImportResult | null;
+  /** A folder's files, by their paths in it. */
+  onImport(entries: Record<string, Uint8Array>): void;
+  onImportZip(bytes: Uint8Array): void;
 }
 
-export function Start({ apiKey, remembered, needsKey, payer, onKey, onPayer, onStart }: Props) {
+export function Start({ apiKey, remembered, needsKey, payer, onKey, onPayer, onStart, imported, onImport, onImportZip }: Props) {
   const [idea, setIdea] = useState("");
   const [key, setKey] = useState(apiKey);
   const [remember, setRemember] = useState(remembered);
@@ -180,6 +191,8 @@ export function Start({ apiKey, remembered, needsKey, payer, onKey, onPayer, onS
         </div>
       </section>
 
+      <ImportSection imported={imported} onImport={onImport} onImportZip={onImportZip} />
+
       <section class="projects" aria-labelledby="projects-head">
         <h2 id="projects-head">{t("start.projects")}</h2>
         {projects.length === 0 ? (
@@ -236,5 +249,90 @@ function QuotaLine({ quota }: { quota: QuotaStanding }) {
         euros: (quota.left * quota.eurosPerDollar).toFixed(2),
       })}
     </p>
+  );
+}
+
+/** Importing a plugin: a ZIP or a folder (what the workshop gives, or a
+ *  plugin's source), and what the last import took. */
+function ImportSection({
+  imported,
+  onImport,
+  onImportZip,
+}: {
+  imported: ImportResult | null;
+  onImport(entries: Record<string, Uint8Array>): void;
+  onImportZip(bytes: Uint8Array): void;
+}) {
+  const [problem, setProblem] = useState("");
+  const zip = async (input: HTMLInputElement) => {
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+    if (file.size > MAX_IMPORT) return setProblem(t("import.large", { mb: String(MAX_IMPORT / 1024 / 1024) }));
+    setProblem("");
+    onImportZip(new Uint8Array(await file.arrayBuffer()));
+  };
+  const folder = async (input: HTMLInputElement) => {
+    const files = input.files ? [...input.files] : [];
+    input.value = "";
+    if (!files.length) return;
+    setProblem("");
+    try {
+      onImport(await folderEntries(files));
+    } catch (e) {
+      setProblem(e instanceof ImportProblem ? e.message : String(e));
+    }
+  };
+  const shown = problem || (imported && "error" in imported ? imported.error : "");
+  return (
+    <section class="import" aria-labelledby="import-head">
+      <h2 id="import-head">{t("import.title")}</h2>
+      <p class="small">{t("import.text")}</p>
+      <div class="row">
+        <label class="btn quiet">
+          {t("import.zip")}
+          <input class="visually-hidden" type="file" accept=".zip,application/zip" onChange={(e) => void zip(e.target as HTMLInputElement)} />
+        </label>
+        <label class="btn quiet">
+          {t("import.folder")}
+          <input
+            class="visually-hidden"
+            type="file"
+            {...{ webkitdirectory: "" }}
+            onChange={(e) => void folder(e.target as HTMLInputElement)}
+          />
+        </label>
+      </div>
+      {shown && (
+        <p class="error" role="alert">
+          {shown}
+        </p>
+      )}
+      {imported && "key" in imported && (
+        <div class="box imported" role="status">
+          <p>
+            {t(imported.kind === "code" ? "import.done.code" : "import.done", {
+              name: imported.name,
+              n: String(imported.taken.length),
+            })}{" "}
+            <a class="btn main" href={`#/p/${imported.key}`}>
+              {t("start.projects.open")}
+            </a>
+          </p>
+          {imported.skipped.length > 0 && (
+            <details>
+              <summary>{t("import.skipped", { n: String(imported.skipped.length) })}</summary>
+              <ul class="small">
+                {imported.skipped.map((s) => (
+                  <li key={s.path}>
+                    <code>{s.path}</code>: {s.why}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </div>
+      )}
+    </section>
   );
 }

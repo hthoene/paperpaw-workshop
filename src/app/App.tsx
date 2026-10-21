@@ -1,8 +1,9 @@
 // The workshop's pages: the start (your idea, who pays, your plugins), the
 // workshop (the conversation beside the reader) with the person's key,
 // and the same with a recorded example instead (#/example); each with a
-// share page (…/share) for the store. The key lives here, in memory, and
-// in the browser's storage only if they ask.
+// share page (…/share) for the store. #/import/<address> imports a
+// plugin the store has (its page's "Edit in the workshop"). The key
+// lives here, in memory, and in the browser's storage only if they ask.
 
 import { useEffect, useMemo, useState } from "preact/hooks";
 
@@ -14,13 +15,15 @@ import sleepPicture from "../ai/examples/sleep-picture.json";
 import type { Provider } from "../ai/provider";
 import { ReplayProvider, type Recording } from "../ai/replay";
 import { Handbook } from "../handbook/handbook";
-import { newProject, type Project } from "../project/project";
+import { t } from "../i18n";
+import { importPlugin, ImportProblem, zipEntries } from "../project/import";
+import { identity, newProject, type Project } from "../project/project";
 import { loadProject, saveProject } from "../project/storage";
 import { FakeStore } from "../publish/fake";
 import { SiteStore, type StoreApi } from "../publish/store";
 import { Header } from "./Header";
 import { loadHosting, type Hosting } from "./hosting";
-import { Start, type Payer } from "./Start";
+import { Start, type ImportResult, type Payer } from "./Start";
 import { WorkshopPage } from "./WorkshopPage";
 
 const KEY_STORE = "paperpaw-workshop.key";
@@ -52,10 +55,20 @@ const EXAMPLES: Record<string, Recording> = {
 
 type Route =
   | { page: "start" }
+  | { page: "import"; from: string }
   | { page: "project"; key: string; share: boolean }
   | { page: "example"; name: string; share: boolean };
 
+/** What the store lets the workshop import from its own address: a
+ *  version's package or its kept source. */
+const STORE_FILE = /^\/plugins\/[a-z0-9-]{1,40}\/(?:[a-z0-9-]{1,40}-\d+\.\d+\.\d+\.zip|\d+\.\d+\.\d+\/source\.zip)$/;
+
 function route(): Route {
+  const from = /^#\/import\/(.+)$/.exec(location.hash);
+  if (from) {
+    const path = decodeURIComponent(from[1]!);
+    if (STORE_FILE.test(path)) return { page: "import", from: path };
+  }
   const m = /^#\/p\/([0-9a-f]+)(\/share)?$/.exec(location.hash);
   if (m) return { page: "project", key: m[1]!, share: !!m[2] };
   // #/example, #/example/share, #/example/<name>, #/example/<name>/share
@@ -83,6 +96,7 @@ export function App() {
   const [project, setProject] = useState<Project | null>(null);
   const [first, setFirst] = useState("");
   const [firstFiles, setFirstFiles] = useState<string[]>([]);
+  const [imported, setImported] = useState<ImportResult | null>(null);
 
   useEffect(() => {
     Handbook.load(new URL("handbook/", document.baseURI).href).then(setHandbook, (e) => setFailed(String(e)));
@@ -107,6 +121,19 @@ export function App() {
       setFirstFiles(recording.attach ?? []);
     }
   }, [shown(where), !!handbook]);
+
+  // A plugin the store has, by the address its page gave: fetched from
+  // this site (where the workshop runs, never from the sandbox host).
+  useEffect(() => {
+    if (where.page !== "import") return;
+    setImported(null);
+    void fetch(new URL(where.from, location.origin), { credentials: "same-origin" })
+      .then(async (answer) => {
+        if (!answer.ok) throw new ImportProblem(t("import.fetch", { status: String(answer.status) }));
+        return importZip(new Uint8Array(await answer.arrayBuffer()));
+      })
+      .catch((e) => setImported({ error: e instanceof Error ? e.message : String(e) }));
+  }, [where.page === "import" ? where.from : ""]);
 
   // The free quota pays for both kinds, with the model the site chooses;
   // a project started with another model (Opus) goes on with the key.
@@ -141,6 +168,26 @@ export function App() {
       else localStorage.removeItem(KEY_STORE);
     } catch {
       // Storage may be off: the key then lives for this tab only.
+    }
+  };
+
+  /** A new project of a plugin's files (a ZIP or a folder's), saved; the
+   *  start page says what was taken. */
+  const importEntries = async (entries: Record<string, Uint8Array>) => {
+    try {
+      const { project: p, taken, skipped } = importPlugin(entries);
+      await saveProject(p);
+      setImported({ key: p.key, name: identity(p).name ?? identity(p).id ?? p.key, kind: p.kind, taken, skipped });
+    } catch (e) {
+      setImported({ error: e instanceof ImportProblem ? e.message : t("import.failed", { message: String(e) }) });
+    }
+  };
+  const importZip = (bytes: Uint8Array) => {
+    try {
+      return importEntries(zipEntries(bytes));
+    } catch (e) {
+      setImported({ error: e instanceof Error ? e.message : String(e) });
+      return Promise.resolve();
     }
   };
 
@@ -184,6 +231,9 @@ export function App() {
               onPayer={choosePayer}
               onKey={useKey}
               onStart={start}
+              imported={imported}
+              onImport={(entries) => void importEntries(entries)}
+              onImportZip={(bytes) => void importZip(bytes)}
               needsKey={where.page === "project" && !key && !quota}
             />
           )

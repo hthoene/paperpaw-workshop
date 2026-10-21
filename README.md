@@ -42,6 +42,12 @@ Claude Opus 5.5 can be chosen at the start with your own key only, and
 stays the plugin's model.
 
 Your projects are kept in your browser (IndexedDB), not on a server.
+**Import** on the start page makes a project again of a plugin's folder or
+a ZIP of it: what the workshop gives as downloads, or a plugin's source
+(a ZIP of its repository); it says what it took and what it left out. On
+paperpaw.org a plugin's page offers its owner "Edit in the workshop",
+which imports the published version the same way (`#/import/<address>`,
+the version's package or kept source, fetched from the site itself).
 
 **Pictures**: "Add a picture" beside the message field (or drop one on
 the conversation). The AI builds it into the plugin, made for e-ink

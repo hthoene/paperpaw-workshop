@@ -265,5 +265,15 @@
   "start.pay.quota.budget": "Your budget for this month is used up.",
   "start.pay.quota.site-budget": "The site's budget for this month is used up.",
   "start.pay.quota.not-accepted": "The free quota is for authors whose application was accepted.",
-  "provider.quota": "paperpaw.org's free quota"
+  "provider.quota": "paperpaw.org's free quota",
+  "import.title": "Import a plugin",
+  "import.text": "A plugin's folder or a ZIP of it: what the workshop gives as downloads, or a plugin's source (such as a ZIP of its repository). It becomes a new project here, with its files and pictures.",
+  "import.zip": "Choose a ZIP",
+  "import.folder": "Choose a folder",
+  "import.done": "Imported {name}: {n} files.",
+  "import.done.code": "Imported {name}, a plugin with code: {n} files.",
+  "import.skipped": "{n} left out, and why",
+  "import.large": "The ZIP is larger than {mb} MB.",
+  "import.fetch": "The store did not give the plugin (it answered {status}).",
+  "import.failed": "The import went wrong: {message}"
 }
