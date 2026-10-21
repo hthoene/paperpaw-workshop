@@ -10,6 +10,9 @@ export const MAX_FILES = 64;
 export const MAX_PATH = 100;
 /** The most bytes of a data plugin, unpacked. */
 export const MAX_BYTES = 40 * 1024 * 1024;
+/** The most bytes of one text file the AI writes: settings, layouts and
+ *  translations are a few kilobytes; more is a mistake. */
+export const MAX_TEXT_FILE = 256 * 1024;
 
 /** File kinds a data plugin may hold outside `store/`. */
 export const DATA_KINDS = [".ini", ".css", ".ttf", ".otf", ".ttc", ".ppfp", ".txt", ".md", ".png"];

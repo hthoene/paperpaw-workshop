@@ -5,6 +5,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 
 import { t } from "../i18n";
+import { CARRIED } from "../project/project";
 import { ADDED } from "../project/uploads";
 
 export type Line =
@@ -30,6 +31,8 @@ export function lines(messages: Anthropic.MessageParam[]): Line[] {
       const added = block.type === "text" && m.role === "user" && block.text.startsWith(ADDED) ? /"(.+?)"/.exec(block.text) : null;
       if (added) {
         out.push({ kind: "added", text: added[1]! });
+      } else if (block.type === "text" && m.role === "user" && block.text.startsWith(CARRIED)) {
+        out.push({ kind: "step", text: t("workshop.carried"), failed: false });
       } else if (block.type === "text" && block.text.trim()) {
         out.push({ kind: m.role === "user" ? "me" : "ai", text: block.text.trim() });
       } else if (block.type === "tool_use") {

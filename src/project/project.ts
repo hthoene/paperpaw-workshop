@@ -5,7 +5,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 
 import { parseIni, iniValue } from "./ini";
-import { isText, pathProblem } from "./rules";
+import { MAX_BYTES, MAX_FILES, MAX_TEXT_FILE, isText, pathProblem } from "./rules";
 import type { UploadInfo } from "./uploads";
 
 export type Kind = "data";
@@ -38,9 +38,19 @@ export interface Project {
   uploads?: UploadInfo[];
   /** How many uploaded pictures the AI was shown in this conversation. */
   picturesShown?: number;
+  /** Conversations before this one, kept to read back: a conversation that
+   *  grew too long goes on in a fresh one (append-only, never cut). */
+  earlier?: Anthropic.MessageParam[][];
+  /** What the next message carries into a fresh conversation: a summary
+   *  of the one before. */
+  carried?: string;
   created: string;
   updated: string;
 }
+
+/** How a fresh conversation's first message begins: the summary of the
+ *  one before (the conversation shows it as such, not as the person's). */
+export const CARRIED = "This conversation continues an earlier one about the same plugin";
 
 export const NO_USAGE: Usage = {
   inputTokens: 0,
@@ -101,7 +111,7 @@ export class Files {
   }
 
   has(path: string): boolean {
-    return path in this.project.files;
+    return Object.hasOwn(this.project.files, path);
   }
 
   /** Writes a text file; why not, if it may not be written. */
@@ -109,23 +119,40 @@ export class Files {
     const problem = pathProblem(path);
     if (problem) return problem;
     if (!isText(path)) return "only text files (.ini, .css, .txt, .md) can be written here";
+    const size = new TextEncoder().encode(content).length;
+    if (size > MAX_TEXT_FILE) return `a text file holds at most ${MAX_TEXT_FILE / 1024} KB`;
+    const limit = this.limits(path, size);
+    if (limit) return limit;
     this.project.files[path] = content;
     this.touch();
     return null;
   }
 
-  /** Writes a picture (a screenshot for the store); why not, if it may
-   *  not be written. */
+  /** Writes a picture or a font; why not, if it may not be written. */
   writeBytes(path: string, bytes: Uint8Array): string | null {
-    const problem = pathProblem(path);
+    const problem = pathProblem(path) ?? this.limits(path, bytes.length);
     if (problem) return problem;
     this.project.files[path] = bytes;
     this.touch();
     return null;
   }
 
+  /** Why `size` bytes at `path` would break the store's limits, if they
+   *  would: the files a plugin holds (outside `store/`), its bytes. */
+  private limits(path: string, size: number): string | null {
+    const files = this.list();
+    const known = files.find((f) => f.path === path);
+    const counted = (p: string) => !p.startsWith(STORE_FOLDER);
+    if (!known && counted(path) && files.filter((f) => counted(f.path)).length >= MAX_FILES) {
+      return `a plugin holds at most ${MAX_FILES} files: delete one first`;
+    }
+    const total = files.reduce((n, f) => n + f.size, 0) - (known?.size ?? 0) + size;
+    if (total > MAX_BYTES) return `a plugin holds at most ${MAX_BYTES / 1024 / 1024} MB`;
+    return null;
+  }
+
   remove(path: string): boolean {
-    if (!(path in this.project.files)) return false;
+    if (!Object.hasOwn(this.project.files, path)) return false;
     delete this.project.files[path];
     this.touch();
     return true;

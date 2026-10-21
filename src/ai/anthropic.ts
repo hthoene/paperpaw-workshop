@@ -3,7 +3,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 
-import type { Provider, Request, Stream } from "./provider";
+import { CONTEXT_MANAGEMENT_BETA, type Provider, type Request, type Stream } from "./provider";
 
 export class AnthropicDirect implements Provider {
   readonly label = "provider.key";
@@ -17,8 +17,10 @@ export class AnthropicDirect implements Provider {
   }
 
   async send(request: Request, stream: Stream, signal?: AbortSignal): Promise<Anthropic.Message> {
-    const s = this.client.messages.stream(request, { signal });
+    const headers = request.context_management ? { "anthropic-beta": CONTEXT_MANAGEMENT_BETA } : undefined;
+    const s = this.client.messages.stream(request, { signal, headers });
     if (stream.onText) s.on("text", stream.onText);
+    if (stream.onThinking) s.on("thinking", stream.onThinking);
     return s.finalMessage();
   }
 }

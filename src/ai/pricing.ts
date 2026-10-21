@@ -1,7 +1,7 @@
 // What a request costs, from the usage Anthropic reports and the model's
 // prices (US dollars per million tokens). Cache reads cost a tenth of the
-// input price (a twentieth on Sonnet and Opus 5.5), cache writes 1.25
-// times it (5-minute cache).
+// input price (a twentieth on Opus 5.5), cache writes 1.25 times it
+// (5-minute cache).
 
 import type { Usage } from "../project/project";
 

@@ -47,7 +47,7 @@ export const ADDED = "The author added";
 export class UploadRefused extends Error {
   constructor(
     readonly key: string,
-    readonly vars: Record<string, string> = {},
+    readonly vars: Record<string, string | number> = {},
   ) {
     super(key);
   }
@@ -129,7 +129,7 @@ export class Uploads {
     }
     const limit = { picture: MAX_PICTURE_BYTES, font: MAX_FONT_BYTES, text: MAX_TEXT_BYTES }[what.kind];
     if (bytes.length > limit) throw new UploadRefused("upload.refused.large", { name: fileName, mb: String(Math.round(limit / 1024 / 1024)) });
-    if (this.list().length >= MAX_UPLOADS) throw new UploadRefused("upload.refused.count", { n: String(MAX_UPLOADS) });
+    if (this.list().length >= MAX_UPLOADS) throw new UploadRefused("upload.refused.count", { n: MAX_UPLOADS });
     const total = this.list().reduce((n, u) => n + u.bytes, 0);
     if (total + bytes.length > MAX_UPLOAD_TOTAL) throw new UploadRefused("upload.refused.total", { mb: String(MAX_UPLOAD_TOTAL / 1024 / 1024) });
     const info: UploadInfo = {

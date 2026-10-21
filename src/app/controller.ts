@@ -14,7 +14,7 @@ import { canSleep, type Screen } from "../emulator/protocol";
 import { SHOWN_PROFILES, type Handbook, type Profile } from "../handbook/handbook";
 import { t } from "../i18n";
 import { browserKit, type PictureKit } from "../pictures/kit";
-import { Files, identity, type Project } from "../project/project";
+import { CARRIED, Files, identity, type Project } from "../project/project";
 import { browserUploads, saveProject } from "../project/storage";
 import { ADDED, MAX_PICTURES_A_MESSAGE, UploadRefused, Uploads, type UploadStore } from "../project/uploads";
 import { pluginZip } from "../project/zip";
@@ -34,10 +34,15 @@ export class Workshop {
   busy = false;
   /** The AI's words of the round running, as they come. */
   live = "";
+  /** The summary of its thinking in the round running, as it comes. */
+  thinking = "";
+  /** Whether the conversation has grown too long to go on in. */
+  long = false;
   error = "";
   findings: Finding[] = [];
   stub = true;
   private emulator: Emulator | undefined;
+  private frameEmulator: FrameEmulator | undefined;
   private abort: AbortController | undefined;
   private listeners = new Set<() => void>();
 
@@ -92,6 +97,8 @@ export class Workshop {
   /** The emulator in `frame`, started on the device shown. */
   async attach(frame: HTMLIFrameElement): Promise<void> {
     const emulator = new FrameEmulator(frame, this.handbook.registry);
+    this.frameEmulator?.dispose();
+    this.frameEmulator = emulator;
     this.emulator = emulator;
     await this.restart();
     this.stub = emulator.stub;
@@ -105,7 +112,7 @@ export class Workshop {
 
   /** What the AI's tools work with. */
   toolContext(): ToolContext {
-    if (!this.emulator) throw new Error("the reader is not ready yet");
+    if (!this.emulator) throw new Error(t("workshop.error.reader"));
     return {
       files: this.files,
       emulator: this.emulator,
@@ -148,8 +155,39 @@ export class Workshop {
 
   /** The person's words with what they attached: each picture as the AI
    *  sees it (reduced), each named so the AI can use it with its tools. */
+  /** The conversation has grown too long: it goes on in a fresh one. The
+   *  files and uploads stay; the earlier conversation is kept to read
+   *  back; the next message carries a short summary of it. */
+  freshConversation(): void {
+    if (this.busy || this.project.messages.length === 0) return;
+    const asked = this.project.messages
+      .filter((m) => m.role === "user")
+      .flatMap((m) => (typeof m.content === "string" ? [m.content] : m.content.filter((b) => b.type === "text").map((b) => b.text)))
+      .filter((text) => !text.startsWith(ADDED) && !text.startsWith(CARRIED))
+      .map((text) => `- ${text.length > 300 ? `${text.slice(0, 300)} ...` : text}`);
+    const files = this.files.list().map((f) => `- ${f.path} (${f.size} bytes)`);
+    const uploads = this.uploads.list().map((u) => `- ${u.name}`);
+    this.project.carried = [
+      `${CARRIED}, which grew too long. What the person asked for in it:`,
+      ...asked.slice(-20),
+      "",
+      "The plugin's files now (read them with read_file before changing them):",
+      ...(files.length ? files : ["(none)"]),
+      ...(uploads.length ? ["", "The person's uploads (list_uploads, view_upload):", ...uploads] : []),
+    ].join("\n");
+    (this.project.earlier ??= []).push(this.project.messages);
+    this.project.messages = [];
+    this.project.lastPrompt = 0;
+    this.project.picturesShown = 0;
+    this.long = false;
+    this.error = "";
+    void saveProject(this.project);
+    this.changed();
+  }
+
   private async said(text: string): Promise<Said> {
-    if (this.attached.length === 0) return text;
+    const carried: Anthropic.ContentBlockParam[] = this.project.carried ? [{ type: "text", text: this.project.carried }] : [];
+    if (this.attached.length === 0) return carried.length ? [...carried, { type: "text", text }] : text;
     const pictures = this.attached.filter((n) => this.uploads.info(n)?.kind === "picture");
     if (pictures.length > this.uploads.showable) throw new Error(t("upload.refused.shown", { n: this.uploads.showable }));
     const blocks: Anthropic.ContentBlockParam[] = [];
@@ -166,7 +204,7 @@ export class Workshop {
     }
     this.uploads.shown(pictures.length);
     blocks.push({ type: "text", text });
-    return blocks;
+    return [...carried, ...blocks];
   }
 
   /** Whether the reader is there to take screenshots. */
@@ -231,9 +269,11 @@ export class Workshop {
       return;
     }
     this.attached = [];
+    this.project.carried = undefined;
     this.busy = true;
     this.error = "";
     this.live = "";
+    this.thinking = "";
     this.abort = new AbortController();
     this.changed();
     let end: TurnEnd | undefined;
@@ -254,8 +294,13 @@ export class Workshop {
             this.live += d;
             this.changed();
           },
+          onThinking: (d) => {
+            this.thinking += d;
+            this.changed();
+          },
           onRound: () => {
             this.live = "";
+            this.thinking = "";
             void saveProject(this.project);
             this.changed();
           },
@@ -267,17 +312,30 @@ export class Workshop {
     } finally {
       this.busy = false;
       this.live = "";
+      this.thinking = "";
       await saveProject(this.project);
       await this.refreshFindings();
     }
     if (end === "refusal") this.error = t("workshop.error.refusal");
-    if (end === "too_long") this.error = t("workshop.error.long");
+    if (end === "too_long") {
+      this.error = t("workshop.error.long");
+      this.long = true;
+    }
     if (end === "limit") this.error = t("workshop.limit");
+    if (end === "cut") this.error = t("workshop.error.cut");
     this.changed();
   }
 
   stop(): void {
     this.abort?.abort();
+  }
+
+  /** The page goes: a turn running stops, the reader's messages end. */
+  detach(): void {
+    this.stop();
+    this.frameEmulator?.dispose();
+    this.frameEmulator = undefined;
+    this.emulator = undefined;
   }
 
   /** The plugin as a ZIP for a reader's card: without the store's folder. */
@@ -293,10 +351,18 @@ export class Workshop {
   }
 }
 
-/** What went wrong, in the person's words. */
+/** What went wrong, in the person's words: Anthropic's errors each in
+ *  their own, the rest as they are. */
 export function message(e: unknown): string {
   if (e instanceof Anthropic.AuthenticationError || e instanceof Anthropic.PermissionDeniedError) return t("workshop.error.key");
   if (e instanceof Anthropic.RateLimitError) return t("workshop.error.rate");
   if (e instanceof Anthropic.APIConnectionError) return t("workshop.error.network");
+  if (e instanceof Anthropic.APIError) {
+    const said = e.message.toLowerCase();
+    if (said.includes("credit balance") || said.includes("billing")) return t("workshop.error.billing");
+    if (e.status === 529 || said.includes("overloaded")) return t("workshop.error.busy");
+    if (e.status !== undefined && e.status >= 500) return t("workshop.error.server");
+    if (e.status === 413) return t("workshop.error.long");
+  }
   return t("workshop.error.other", { message: e instanceof Error ? e.message : String(e) });
 }

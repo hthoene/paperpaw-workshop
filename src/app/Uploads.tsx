@@ -107,7 +107,7 @@ export function Thumb({ uploads, name }: { uploads: Uploads; name: string }) {
     });
     return () => made && URL.revokeObjectURL(made);
   }, [uploads, name, info?.type]);
-  if (info?.kind !== "picture") return <span class="thumb file" aria-hidden="true">{info?.kind === "font" ? "Aa" : "txt"}</span>;
+  if (info?.kind !== "picture") return <span class="thumb file" aria-hidden="true">{t(info?.kind === "font" ? "upload.mark.font" : "upload.mark.text")}</span>;
   return url ? <img class="thumb" src={url} alt="" /> : <span class="thumb" aria-hidden="true" />;
 }
 

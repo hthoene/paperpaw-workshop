@@ -72,7 +72,10 @@ export interface Made {
 export function makePicture(raster: Raster, path: string, targets: Target[], options: MakeOptions): { files: Made[]; preview: Uint8Array; drawn: boolean } {
   if (targets.length === 0) throw new Error("no screen to make it for");
   let gray = toGray(raster);
-  if (options.crop) gray = crop(gray, options.crop);
+  if (options.crop) {
+    const s = raster.scale ?? 1;
+    gray = crop(gray, { x: options.crop.x * s, y: options.crop.y * s, width: options.crop.width * s, height: options.crop.height * s });
+  }
   const drawn = looksDrawn(gray);
   const dither: Dither = !options.dither || options.dither === "auto" ? (drawn ? "lineart" : "diffusion") : options.dither;
 

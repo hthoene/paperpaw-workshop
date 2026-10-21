@@ -24,7 +24,8 @@ describe("the catalog", () => {
     for (const file of files(src, [".ts", ".tsx"])) {
       for (const m of fs.readFileSync(file, "utf8").matchAll(/\bt\("([a-z0-9.-]+)"/g)) used.add(m[1]!);
     }
-    const missing = [...used].filter((k) => !(k in en));
+    // A text with a number may have plural forms only (key.one, key.other).
+    const missing = [...used].filter((k) => !(k in en) && !(`${k}.other` in en));
     expect(missing).toEqual([]);
     expect(used.size).toBeGreaterThan(30);
   });
@@ -57,5 +58,14 @@ describe("the catalog", () => {
   it("has no dashes in its texts", () => {
     const dashes = Object.entries(en).filter(([, v]) => /[\u2013\u2014]/.test(v));
     expect(dashes).toEqual([]);
+  });
+
+  it("picks the plural form for the number", () => {
+    expect(t("units.cents", { n: 1 })).toBe("1 cent");
+    expect(t("units.cents", { n: 5 })).toBe("5 cents");
+    expect(t("share.problem.tags", { n: 5 })).toBe("at most 5 tags");
+    // Every text with plural forms has its "other" form.
+    const forms = Object.keys(en).filter((k) => /\.(zero|one|two|few|many)$/.test(k));
+    expect(forms.filter((k) => !(k.replace(/\.[a-z]+$/, ".other") in en))).toEqual([]);
   });
 });

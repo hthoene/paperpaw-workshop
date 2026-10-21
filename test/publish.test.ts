@@ -71,7 +71,9 @@ describe("the store entry", () => {
     expect(request.tool_choice).toBeUndefined();
     expect(request.tools?.map((t) => ("name" in t ? t.name : ""))).toEqual(["set_entry"]);
     expect(request.system).toContain("Call set_entry once");
-    expect(request.thinking).toEqual({ type: "disabled" });
+    // No thinking switch (Sonnet and Opus 5.5 refuse "disabled"); low effort.
+    expect(request.thinking).toBeUndefined();
+    expect(request.output_config).toEqual({ effort: "low" });
     expect(JSON.stringify(request.messages)).toContain("A calm dark look for reading at night.");
     // Not part of the conversation, but paid for.
     expect(project.messages).toHaveLength(1);

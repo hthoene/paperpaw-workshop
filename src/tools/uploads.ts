@@ -6,6 +6,7 @@
 import { z } from "zod";
 
 import { MAX_PICTURE_FILE, makePicture, targetsFor } from "../pictures/convert";
+import { isText } from "../project/rules";
 import type { WorkshopTool } from "./tool";
 import { deviceNamed, type ToolContext } from "./tool";
 
@@ -143,6 +144,13 @@ export const placeFile: WorkshopTool<{ upload: string; to: string }> = {
     const bytes = info && (await uploads.read(upload));
     if (!info || !bytes) return { content: `There is no upload ${upload}. list_uploads lists them.`, isError: true, step };
     if (info.kind === "picture") return { content: `${upload} is a picture: use convert_picture, which makes it for e-ink.`, isError: true, step };
+    // A font goes where fonts go, as its kind; a text where texts go.
+    const ext = to.toLowerCase().slice(to.lastIndexOf("."));
+    const fits = info.kind === "font" ? ext === (info.type === "font/otf" ? ".otf" : ".ttf") : isText(to);
+    if (!fits) {
+      const want = info.kind === "font" ? (info.type === "font/otf" ? ".otf" : ".ttf") : ".ini, .css, .txt or .md";
+      return { content: `${upload} is a ${info.kind}: its path must end in ${want}.`, isError: true, step };
+    }
     const problem = info.kind === "text" ? files.write(to, new TextDecoder().decode(bytes)) : files.writeBytes(to, bytes);
     if (problem) return { content: `Not written: ${problem}.`, isError: true, step };
     await sync();

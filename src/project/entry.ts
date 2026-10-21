@@ -85,17 +85,17 @@ export function writeEntry(files: Files, entry: Entry): string | null {
 
 /** What the store would refuse in the entry, as catalog keys with
  *  values. The name is plugin.ini's. */
-export function entryProblems(entry: Entry, name: string): { key: string; vars?: Record<string, string> }[] {
-  const problems: { key: string; vars?: Record<string, string> }[] = [];
+export function entryProblems(entry: Entry, name: string): { key: string; vars?: Record<string, string | number> }[] {
+  const problems: { key: string; vars?: Record<string, string | number> }[] = [];
   if (!name.trim()) problems.push({ key: "share.problem.name" });
-  if ([...name].length > MAX_NAME) problems.push({ key: "share.problem.name-long", vars: { n: String(MAX_NAME) } });
+  if ([...name].length > MAX_NAME) problems.push({ key: "share.problem.name-long", vars: { n: MAX_NAME } });
   if (!entry.summary.trim()) problems.push({ key: "share.problem.summary" });
-  if ([...entry.summary].length > MAX_SUMMARY) problems.push({ key: "share.problem.summary-long", vars: { n: String(MAX_SUMMARY) } });
+  if ([...entry.summary].length > MAX_SUMMARY) problems.push({ key: "share.problem.summary-long", vars: { n: MAX_SUMMARY } });
   if ([...entry.description].length > MAX_DESCRIPTION)
-    problems.push({ key: "share.problem.description-long", vars: { n: String(MAX_DESCRIPTION) } });
+    problems.push({ key: "share.problem.description-long", vars: { n: MAX_DESCRIPTION } });
   if (!entry.group) problems.push({ key: "share.problem.group" });
   if (!entry.licence.trim()) problems.push({ key: "share.problem.licence" });
-  if (entry.tags.length > MAX_TAGS) problems.push({ key: "share.problem.tags", vars: { n: String(MAX_TAGS) } });
+  if (entry.tags.length > MAX_TAGS) problems.push({ key: "share.problem.tags", vars: { n: MAX_TAGS } });
   for (const tag of entry.tags) {
     if (!validId(tag) || tag.length > MAX_TAG) problems.push({ key: "share.problem.tag", vars: { tag } });
   }

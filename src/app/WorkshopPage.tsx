@@ -60,6 +60,7 @@ export function WorkshopPage({ project, handbook, provider, first, firstFiles, o
       if (files.length) await workshop.addFiles(files);
       await workshop.send(first);
     });
+    return () => workshop.detach();
   }, [workshop]);
   useEffect(() => bottom.current?.scrollIntoView({ block: "end" }), [workshop.project.messages.length, workshop.live]);
 
@@ -126,22 +127,29 @@ export function WorkshopPage({ project, handbook, provider, first, firstFiles, o
         ) : (
           <DropZone workshop={workshop} class="box chat">
             <div class="messages" aria-live="polite">
-              {conversation.map((line, i) =>
-                line.kind === "step" ? (
-                  <div key={i} class={`step${line.failed ? " failed" : ""}`}>
-                    {line.text}
-                  </div>
-                ) : line.kind === "added" ? (
-                  <AddedLine key={i} uploads={workshop.uploads} name={line.text} />
-                ) : (
-                  <div key={i} class={line.kind}>
-                    {line.text}
-                  </div>
-                ),
-              )}
+              {(project.earlier ?? []).map((earlier, n) => (
+                <details key={`earlier-${n}`} class="earlier">
+                  <summary>{t("workshop.earlier")}</summary>
+                  {lines(earlier).map((line, i) => (
+                    <Line key={i} line={line} workshop={workshop} />
+                  ))}
+                </details>
+              ))}
+              {conversation.map((line, i) => (
+                <Line key={i} line={line} workshop={workshop} />
+              ))}
               {workshop.live && <div class="ai">{workshop.live}</div>}
-              {workshop.busy && !workshop.live && <div class="step busy">{t("workshop.thinking")}</div>}
+              {workshop.busy && !workshop.live && (
+                <div class="step busy">{workshop.thinking ? t("workshop.thinking.summary", { summary: lastLine(workshop.thinking) }) : t("workshop.thinking")}</div>
+              )}
               {workshop.error && <p class="error">{workshop.error}</p>}
+              {workshop.long && !workshop.busy && (
+                <p>
+                  <button class="btn main" onClick={() => workshop.freshConversation()}>
+                    {t("workshop.fresh")}
+                  </button>
+                </p>
+              )}
               <div ref={bottom} />
             </div>
             <Attached workshop={workshop} />
@@ -178,8 +186,8 @@ export function WorkshopPage({ project, handbook, provider, first, firstFiles, o
           </DropZone>
         )}
 
-        <section class="device" aria-label="The reader">
-          <div class="tabs" role="group" aria-label="Device">
+        <section class="device" aria-label={t("reader.label")}>
+          <div class="tabs" role="group" aria-label={t("reader.device")}>
             {workshop.profiles.map((p) => (
               <button key={p.id} aria-pressed={p.id === profile.id} onClick={() => void workshop.show(p)}>
                 {p.name.replace(/^Xteink /, "")}
@@ -209,7 +217,7 @@ export function WorkshopPage({ project, handbook, provider, first, firstFiles, o
               // key. The dev server cannot serve modules to an opaque origin
               // (CORS), so in development only the frame keeps the page's.
               sandbox={import.meta.env.DEV ? "allow-scripts allow-same-origin" : "allow-scripts"}
-              title="Emulated reader"
+              title={t("reader.frame")}
               style={{ aspectRatio: ratio }}
             />
           </div>
@@ -258,6 +266,19 @@ export function WorkshopPage({ project, handbook, provider, first, firstFiles, o
       )}
     </>
   );
+}
+
+/** A line of the conversation. */
+function Line({ line, workshop }: { line: ReturnType<typeof lines>[number]; workshop: Workshop }) {
+  if (line.kind === "step") return <div class={`step${line.failed ? " failed" : ""}`}>{line.text}</div>;
+  if (line.kind === "added") return <AddedLine uploads={workshop.uploads} name={line.text} />;
+  return <div class={line.kind}>{line.text}</div>;
+}
+
+/** The newest line of the thinking's summary, short. */
+function lastLine(text: string): string {
+  const last = text.trim().split("\n").filter(Boolean).pop() ?? "";
+  return last.length > 140 ? `${last.slice(0, 140)} ...` : last;
 }
 
 /** A button of the reader: a click is a short press; held half a second

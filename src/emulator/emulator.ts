@@ -25,6 +25,8 @@ export class FrameEmulator implements Emulator {
   private next = 1;
   private waiting = new Map<number, { resolve: (v: unknown) => void; reject: (e: Error) => void }>();
   private ready: Promise<void>;
+  private greeting: ReturnType<typeof setTimeout> | undefined;
+  private listener: (event: MessageEvent) => void;
 
   constructor(
     private frame: HTMLIFrameElement,
@@ -38,10 +40,10 @@ export class FrameEmulator implements Emulator {
       if (isReady) return;
       const hello: Hello = { type: "hello" };
       this.frame.contentWindow?.postMessage(hello, "*");
-      setTimeout(greet, 200);
+      this.greeting = setTimeout(greet, 200);
     };
     greet();
-    window.addEventListener("message", (event: MessageEvent) => {
+    this.listener = (event: MessageEvent) => {
       // The frame's origin is opaque ("null"): trust only its window.
       if (event.source !== this.frame.contentWindow) return;
       const data = event.data as Answer | Ready;
@@ -57,7 +59,17 @@ export class FrameEmulator implements Emulator {
       this.waiting.delete(answer.id);
       if (answer.ok) pending.resolve(answer.result);
       else pending.reject(new Error(answer.error));
-    });
+    };
+    window.addEventListener("message", this.listener);
+  }
+
+  /** Stops listening and greeting: the page with the frame is gone. Requests
+   *  still waiting fail. */
+  dispose(): void {
+    clearTimeout(this.greeting);
+    window.removeEventListener("message", this.listener);
+    for (const pending of this.waiting.values()) pending.reject(new Error("the reader was closed"));
+    this.waiting.clear();
   }
 
   private async send<T>(request: Request): Promise<T> {

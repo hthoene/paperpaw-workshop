@@ -11,6 +11,7 @@ import { checkDataPlugin } from "../src/checks/data";
 import { makePicture, targetsFor, variantPath } from "../src/pictures/convert";
 import { fit, looksDrawn, quantize, resize, toGray, tone, type Gray } from "../src/pictures/gray";
 import { grayPng, pngHeader } from "../src/pictures/png";
+import { pictureSize } from "../src/pictures/size";
 import { ADDED, MemoryUploads, sniff, uploadName, Uploads, UploadRefused, MAX_UPLOADS } from "../src/project/uploads";
 import { newProject } from "../src/project/project";
 import { DATA_TOOLS } from "../src/tools/registry";
@@ -307,5 +308,58 @@ describe("the example with a picture", () => {
     const results = b.project.messages.flatMap((m) => (Array.isArray(m.content) ? m.content : [])).filter((c) => c.type === "tool_result");
     expect(results.filter((r) => (r as Anthropic.ToolResultBlockParam).is_error)).toEqual([]);
     expect(checkDataPlugin(b.files.bytes(), b.handbook.registry).filter((f) => f.level !== "info")).toEqual([]);
+  });
+});
+
+describe("the plugin's limits, kept as files are written", () => {
+  it("counts files, bytes and the size of a text file", () => {
+    const { files } = bench();
+    expect(files.write("settings.ini", "x".repeat(300 * 1024))).toContain("at most 256 KB");
+    for (let i = 0; i < 64; i++) expect(files.write(`i18n/l${i}.ini`, "[meta]")).toBeNull();
+    expect(files.write("one-more.ini", "x")).toContain("at most 64 files");
+    expect(files.write("i18n/l0.ini", "[meta]\nlanguage = de\n")).toBeNull();
+    expect(files.write("store/store.ini", "[store]")).toBeNull();
+    expect(files.has("toString")).toBe(false);
+    expect(files.remove("toString")).toBe(false);
+  });
+
+  it("puts a font where fonts go, and a text where texts go", async () => {
+    const { context, uploads } = bench();
+    await uploads.add("Owl.ttf", new Uint8Array([0, 1, 0, 0, 7]), fakeKit.size);
+    expect((await placeFile.run({ upload: "owl.ttf", to: "settings.ini" }, context)).isError).toBe(true);
+    expect((await placeFile.run({ upload: "owl.ttf", to: "fonts/Owl.otf" }, context)).isError).toBe(true);
+    expect((await placeFile.run({ upload: "owl.ttf", to: "fonts/Owl.ttf" }, context)).isError).toBeFalsy();
+  });
+});
+
+describe("a picture's size from its header", () => {
+  it("reads PNG, GIF, WebP and JPEG without decoding", () => {
+    expect(pictureSize(grayPng(7, 3, new Uint8Array(21), 8))).toEqual({ width: 7, height: 3 });
+    const gif = new Uint8Array([0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x40, 0x01, 0xc8, 0x00]);
+    expect(pictureSize(gif)).toEqual({ width: 320, height: 200 });
+    // A JPEG: SOI, an APP0 of 16 bytes, then a baseline frame of 6000 x 4000.
+    const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, ...new Array(14).fill(0), 0xff, 0xc0, 0x00, 0x11, 0x08, 0x0f, 0xa0, 0x17, 0x70, 0x03]);
+    expect(pictureSize(jpeg)).toEqual({ width: 6000, height: 4000 });
+    const webp = new Uint8Array(30);
+    webp.set([..."RIFF"].map((c) => c.charCodeAt(0)), 0);
+    webp.set([..."WEBPVP8X"].map((c) => c.charCodeAt(0)), 8);
+    webp.set([0xff, 0x0f, 0x00, 0x9f, 0x0f, 0x00], 24);
+    expect(pictureSize(webp)).toEqual({ width: 4096, height: 4000 });
+    expect(pictureSize(new Uint8Array([1, 2, 3]))).toBeUndefined();
+  });
+
+  it("scales a crop for a picture decoded smaller", () => {
+    const { context } = bench();
+    const x4 = targetsFor(context.profiles.filter((p) => p.id === "xteink-x4"));
+    // The picture is 2000 x 2000; decoded at half its size.
+    const half = { ...testRaster(1000, 1000, false), scale: 0.5 };
+    const whole = { ...testRaster(2000, 2000, false) };
+    const crop = { x: 800, y: 800, width: 400, height: 400 };
+    const a = makePicture(half, "a.png", x4, { fit: "fill", crop, dither: "none" });
+    const b = makePicture(whole, "a.png", x4, { fit: "fill", crop, dither: "none" });
+    // The same part of it: the dark square in the middle, both times.
+    const dark = (png: Uint8Array) => levelsOf(png).levels.filter((l) => l === 0).length / (480 * 800);
+    expect(dark(a.files[0]!.png)).toBeGreaterThan(0.9);
+    expect(dark(b.files[0]!.png)).toBeGreaterThan(0.9);
   });
 });

@@ -9,13 +9,30 @@ import type { Handbook } from "../handbook/handbook";
 import type { Project } from "../project/project";
 import { definition, type Step, type ToolContext, type WorkshopTool } from "../tools/tool";
 import { addUsage, priced } from "./pricing";
-import type { Provider, Request } from "./provider";
+import type { ContextManagement, Provider, Request } from "./provider";
 
 /** The most rounds (requests) one turn of the person may take. */
 export const MAX_ROUNDS = 25;
 /** Past this many prompt tokens the conversation is too long to go on
- *  cheaply (Haiku's lower price holds up to 100,000). */
+ *  cheaply (Haiku's lower price holds up to 100,000): checked before every
+ *  round, as one turn of 25 rounds could pass it. */
 export const MAX_PROMPT = 90_000;
+/** The most one answer may hold, thinking included. */
+export const MAX_TOKENS = 32_000;
+
+/** Old tool results (screenshots, files read) cleared on Anthropic's side
+ *  once the prompt grows: the conversation here stays whole (append-only,
+ *  so thinking and the cache hold), the model sees the recent ones. */
+export const CLEARING: ContextManagement = {
+  edits: [
+    {
+      type: "clear_tool_uses_20250919",
+      trigger: { type: "input_tokens", value: 40_000 },
+      keep: { type: "tool_uses", value: 6 },
+      clear_at_least: { type: "input_tokens", value: 10_000 },
+    },
+  ],
+};
 
 export interface Session {
   provider: Provider;
@@ -30,13 +47,17 @@ export interface Session {
 export interface TurnEvents {
   /** Text of the model as it is written. */
   onText?(delta: string): void;
+  /** The summary of its thinking as it is written. */
+  onThinking?(delta: string): void;
   /** A tool ran: the line the conversation shows. */
   onStep?(step: Step, ok: boolean): void;
   /** A round ended: the project changed (messages, usage). */
   onRound?(): void;
 }
 
-export type TurnEnd = "done" | "stopped" | "limit" | "refusal" | "too_long";
+/** How a turn ended: `cut` when an answer reached its length limit with
+ *  nothing more to do, so the person should know it is not finished. */
+export type TurnEnd = "done" | "stopped" | "limit" | "refusal" | "too_long" | "cut";
 
 /** The prompt's size in the last request, in tokens. */
 export function lastPrompt(project: Project): number {
@@ -69,20 +90,24 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
   ];
 
   for (let round = 0; round < MAX_ROUNDS; round++) {
+    // Every round, not only the first: a long turn grows the prompt too.
+    if (round > 0 && lastPrompt(project) > MAX_PROMPT) return "too_long";
     const request: Request = {
       model: session.model,
-      max_tokens: 16_000,
+      max_tokens: MAX_TOKENS,
       system,
       tools,
       messages: project.messages,
       // The conversation so far is cached too, up to its last block.
       cache_control: { type: "ephemeral" },
-      thinking: { type: "adaptive" },
+      // A summary of its thinking, for the person to see it working.
+      thinking: { type: "adaptive", display: "summarized" },
       output_config: { effort: session.effort },
+      context_management: CLEARING,
     };
     let message: Anthropic.Message;
     try {
-      message = await provider.send(request, { onText: events.onText }, signal);
+      message = await provider.send(request, { onText: events.onText, onThinking: events.onThinking }, signal);
     } catch (error) {
       if (round === 0) undo(project, added);
       if (signal?.aborted) return "stopped";
@@ -98,7 +123,7 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
     if (message.stop_reason === "pause_turn") continue;
 
     const calls = message.content.filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
-    if (calls.length === 0) return "done";
+    if (calls.length === 0) return message.stop_reason === "max_tokens" ? "cut" : "done";
 
     const results: Anthropic.ToolResultBlockParam[] = [];
     for (const call of calls) {

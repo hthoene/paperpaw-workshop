@@ -5,11 +5,27 @@
 
 import type Anthropic from "@anthropic-ai/sdk";
 
-export type Request = Anthropic.MessageCreateParamsNonStreaming;
+/** A request, and the server-side clearing of old tool results (a beta
+ *  the SDK types only in its beta namespace; providers send its header). */
+export type Request = Anthropic.MessageCreateParamsNonStreaming & { context_management?: ContextManagement };
+
+export interface ContextManagement {
+  edits: {
+    type: "clear_tool_uses_20250919";
+    trigger: { type: "input_tokens"; value: number };
+    keep: { type: "tool_uses"; value: number };
+    clear_at_least: { type: "input_tokens"; value: number };
+  }[];
+}
+
+/** The beta header `context_management` needs. */
+export const CONTEXT_MANAGEMENT_BETA = "context-management-2025-06-27";
 
 export interface Stream {
   /** Text as it is written, for the conversation to grow while it comes. */
   onText?: (delta: string) => void;
+  /** The summary of the model's thinking as it is written: progress to show. */
+  onThinking?: (delta: string) => void;
 }
 
 export interface Provider {

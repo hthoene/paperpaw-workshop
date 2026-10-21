@@ -8,6 +8,9 @@ export interface Raster {
   width: number;
   height: number;
   data: Uint8ClampedArray;
+  /** Its pixels per pixel of the picture it was decoded from, if it was
+   *  decoded smaller (a crop is given in the picture's own pixels). */
+  scale?: number;
 }
 
 /** A gray picture: one lightness a pixel, 0 (black) to 255 (white). */

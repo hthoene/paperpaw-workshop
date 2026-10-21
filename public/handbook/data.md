@@ -39,6 +39,9 @@ little memory: keep plugins small.
 - Never paste file contents into the conversation; the person sees the
   reader on the right, and can open the files if curious.
 - Say what you changed in terms of what they will see.
+- Plain text, no Markdown: the conversation shows your words as they
+  are, so no asterisks, hashes or backticks. For a list, start each line
+  with a dash.
 - When something cannot be done with a plugin without code, say so in
   one sentence and say what is possible instead.
 

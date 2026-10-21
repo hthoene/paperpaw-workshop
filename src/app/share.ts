@@ -11,7 +11,7 @@ import { saveProject } from "../project/storage";
 import { draftEntry } from "../publish/draft";
 import { plannedShots, shotsIn, takeShots } from "../publish/screenshots";
 import { StoreError, type Draft, type StoreApi, type StoreState } from "../publish/store";
-import type { Workshop } from "./controller";
+import { message, type Workshop } from "./controller";
 
 /** Where the sharing stands: what the page shows at the bottom. */
 export type Stage =
@@ -89,7 +89,7 @@ export class Share {
       this.entry = readEntry(this.workshop.files);
       await saveProject(this.workshop.project);
     } catch (e) {
-      this.error = t("share.error.draft", { message: e instanceof Error ? e.message : String(e) });
+      this.error = t("share.error.draft", { message: message(e) });
     } finally {
       this.drafting = false;
       this.changed();

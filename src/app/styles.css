@@ -136,6 +136,10 @@ button, input, textarea { font: inherit; color: inherit; }
 .panel pre { font: .85rem/1.5 var(--mono); background: color-mix(in srgb, var(--sheet) 60%, var(--card)); padding: .8rem 1rem; border-radius: .4rem; overflow-x: auto; }
 .panel .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .8rem; }
 
+.earlier { color: var(--ink-2); font-size: .92rem; border-bottom: 1px solid var(--rule); padding-bottom: .6rem; }
+.earlier summary { cursor: pointer; }
+.earlier > * + * { margin-top: .5rem; }
+
 /* Uploads */
 .chat { position: relative; }
 .chat.dropping { outline: 3px dashed var(--rose); outline-offset: -6px; }
