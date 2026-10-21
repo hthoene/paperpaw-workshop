@@ -7,3 +7,4 @@ handbook/.work/
 coverage/
 test-results/
 handbook/registry/Cargo.lock
+scripts/*.png

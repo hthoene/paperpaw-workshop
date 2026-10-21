@@ -13,7 +13,7 @@ export interface Stream {
 }
 
 export interface Provider {
-  /** Shown to the person: "Claude Haiku 5.5 with your key". */
+  /** Who pays, as a catalog key: "with your key". */
   readonly label: string;
   /** Whether tools may stream their input as it is written. */
   readonly eagerTools: boolean;

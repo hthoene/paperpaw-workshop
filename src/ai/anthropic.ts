@@ -6,7 +6,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { Provider, Request, Stream } from "./provider";
 
 export class AnthropicDirect implements Provider {
-  readonly label = "your key";
+  readonly label = "provider.key";
   readonly eagerTools = true;
   private client: Anthropic;
 

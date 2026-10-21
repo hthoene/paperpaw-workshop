@@ -2,7 +2,7 @@
 // (protocol.ts) with the stub until PaperPaw's web shell takes its place.
 // It runs in a sandboxed iframe without access to the workshop's storage.
 
-import type { Answer, Ready, Request } from "../protocol";
+import type { Answer, Hello, Ready, Request } from "../protocol";
 import { StubDevice } from "./stub";
 
 const device = new StubDevice();
@@ -22,8 +22,14 @@ function fail(id: number, error: unknown): void {
   parent.postMessage(message, "*");
 }
 
+const ready: Ready = { type: "ready", stub: true, version: "stub-1" };
+
 window.addEventListener("message", (event: MessageEvent) => {
   if (event.source !== parent) return;
+  if ((event.data as Hello).type === "hello") {
+    parent.postMessage(ready, "*");
+    return;
+  }
   const request = event.data as Request & { id: number };
   try {
     switch (request.type) {
@@ -55,5 +61,4 @@ window.addEventListener("message", (event: MessageEvent) => {
   }
 });
 
-const ready: Ready = { type: "ready", stub: true, version: "stub-1" };
 parent.postMessage(ready, "*");

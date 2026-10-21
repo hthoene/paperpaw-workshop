@@ -35,7 +35,13 @@ export type Answer =
   | { id: number; ok: true; result?: unknown }
   | { id: number; ok: false; error: string };
 
-/** Sent once by the frame when it can take requests. */
+/** Sent by the workshop until the frame answers with `Ready`: either may
+ *  load first. */
+export interface Hello {
+  type: "hello";
+}
+
+/** Sent by the frame when it can take requests, and to every `Hello`. */
 export interface Ready {
   type: "ready";
   /** True for the stub, false for PaperPaw's web shell. */

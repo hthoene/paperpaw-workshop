@@ -4,7 +4,7 @@
 
 import type { Finding } from "../checks/data";
 import type { Profile, Registry } from "../handbook/handbook";
-import type { Answer, CheckResult, InputEvent, PluginFiles, Ready, Request, ScreenshotResult } from "./protocol";
+import type { Answer, CheckResult, Hello, InputEvent, PluginFiles, Ready, Request, ScreenshotResult } from "./protocol";
 
 export interface Emulator {
   /** Whether it is the stub rather than PaperPaw's real emulator. */
@@ -31,13 +31,23 @@ export class FrameEmulator implements Emulator {
     private registry: Registry,
   ) {
     let resolveReady!: () => void;
+    let isReady = false;
     this.ready = new Promise((r) => (resolveReady = r));
+    // Either side may load first: greet the frame until it answers.
+    const greet = () => {
+      if (isReady) return;
+      const hello: Hello = { type: "hello" };
+      this.frame.contentWindow?.postMessage(hello, "*");
+      setTimeout(greet, 200);
+    };
+    greet();
     window.addEventListener("message", (event: MessageEvent) => {
       // The frame's origin is opaque ("null"): trust only its window.
       if (event.source !== this.frame.contentWindow) return;
       const data = event.data as Answer | Ready;
       if ("type" in data && data.type === "ready") {
         this.stub = data.stub;
+        isReady = true;
         resolveReady();
         return;
       }

@@ -12,7 +12,7 @@ import { DATA_TOOLS } from "../src/tools/registry";
 import { bench } from "./helpers";
 
 function recording(name: string): Recording {
-  return JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, "conversations", `${name}.json`), "utf8"));
+  return JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, "../src/ai/examples", `${name}.json`), "utf8"));
 }
 
 function session(provider: ReplayProvider) {

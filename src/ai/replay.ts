@@ -1,6 +1,7 @@
 // A recorded conversation played back: the model's answers come from a
 // file, the tools run for real. Tests use it to check the loop and the
-// tools without a key and without cost (test/conversations/*.json).
+// tools without a key and without cost, and the start page offers one as
+// an example to watch (src/ai/examples/*.json).
 
 import type Anthropic from "@anthropic-ai/sdk";
 
@@ -16,16 +17,21 @@ export interface Recording {
 }
 
 export class ReplayProvider implements Provider {
-  readonly label = "a recording";
+  readonly label = "provider.example";
   readonly eagerTools = false;
   /** Every request the loop sent, for tests to look at. */
   readonly requests: Request[] = [];
   private next = 0;
 
-  constructor(private recording: Recording) {}
+  /** `pause`: milliseconds before each answer, for an example to watch. */
+  constructor(
+    private recording: Recording,
+    private pause = 0,
+  ) {}
 
   async send(request: Request, stream: Stream): Promise<Anthropic.Message> {
     this.requests.push(structuredClone(request));
+    if (this.pause) await new Promise((r) => setTimeout(r, this.pause));
     const answer = this.recording.answers[this.next++];
     if (!answer) throw new Error(`the recording "${this.recording.title}" has no answer ${this.next}`);
     for (const block of answer.content) {
