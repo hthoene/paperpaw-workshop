@@ -5,6 +5,9 @@ import preact from "@preact/preset-vite";
 // which runs in a sandboxed iframe apart from the workshop's storage.
 export default defineConfig({
   plugins: [preact()],
+  // Addresses beside the page: the same files work at a root (docker
+  // compose) and at paperpaw.org/workshop/.
+  base: "./",
   // The builder for plugins with code (docker compose up builder).
   server: { proxy: { "/api/v1/workshop/builds": "http://127.0.0.1:8090" } },
   build: {

@@ -4,12 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="referrer" content="no-referrer" />
-    <!-- The page talks to itself and to Anthropic only: a key typed here
-         goes nowhere else. -->
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.anthropic.com; frame-src 'self'"
-    />
+    <!-- The page talks to itself and to Anthropic only, so a key typed
+         here goes nowhere else: its Content-Security-Policy comes from the
+         server (local/nginx.conf; paperpaw.org's names its sandbox host
+         for the frame, which a policy here would forbid). -->
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>PaperPaw plugin workshop</title>
   </head>
