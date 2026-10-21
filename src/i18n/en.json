@@ -34,8 +34,9 @@
   "start.pay.key.label": "Your Claude API key",
   "start.pay.key.remember": "Remember it on this computer",
   "start.pay.key.remember.help": "Kept in this browser only. Leave it off on a shared computer.",
+  "start.pay.key.stronger": "Use Claude Opus 5.5: more capable, about twice the price of Sonnet. Fixed for the plugin once started; only with your own key.",
   "start.pay.quota": "The free quota",
-  "start.pay.quota.text": "A monthly amount paperpaw.org pays, for authors whose application was accepted. For plugins without code.",
+  "start.pay.quota.text": "A monthly amount paperpaw.org pays, for authors whose application was accepted: Claude Haiku 5.5 for plugins without code, Claude Sonnet 5.5 for code.",
   "start.pay.local": "On my computer",
   "start.pay.local.text": "Install the workshop with Docker and use your own key there.",
   "start.pay.local.link": "How",
@@ -264,6 +265,5 @@
   "start.pay.quota.budget": "Your budget for this month is used up.",
   "start.pay.quota.site-budget": "The site's budget for this month is used up.",
   "start.pay.quota.not-accepted": "The free quota is for authors whose application was accepted.",
-  "start.pay.quota.code": "The free quota pays for plugins without code. For code, enter your own key.",
   "provider.quota": "paperpaw.org's free quota"
 }

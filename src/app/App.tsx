@@ -108,13 +108,14 @@ export function App() {
     }
   }, [shown(where), !!handbook]);
 
-  // The free quota pays for data plugins only; code needs a key.
-  const quota = payer === "quota" && project?.kind !== "code";
+  // The free quota pays for both kinds, with the model the site chooses;
+  // a project started with another model (Opus) goes on with the key.
+  const quota = payer === "quota" && !!project && !project.model;
   const provider: Provider | null = useMemo(() => {
     if (where.page === "example") return new ReplayProvider(EXAMPLES[where.name]!, 900);
-    if (quota) return new QuotaProxy();
+    if (quota) return new QuotaProxy(project!.kind);
     return key ? new AnthropicDirect(key) : null;
-  }, [shown(where), key, quota]);
+  }, [shown(where), key, quota, project?.kind]);
 
   // The store: paperpaw.org's own where the workshop runs there; a pretend
   // one for the example (nothing of it is sent) and in development.
@@ -143,9 +144,9 @@ export function App() {
     }
   };
 
-  const start = async (idea: string, kind: "data" | "code" = "data") => {
+  const start = async (idea: string, kind: "data" | "code" = "data", model?: string) => {
     // A plugin with code starts from PaperPaw's sample.
-    const p = newProject(kind, kind === "code" ? handbook?.codeSample : undefined);
+    const p = newProject(kind, kind === "code" ? handbook?.codeSample : undefined, model);
     await saveProject(p);
     setFirst(idea);
     location.hash = `#/p/${p.key}`;

@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "preact/hooks";
 
+import { STRONGER } from "../ai/pricing";
 import { quotaStanding, type QuotaStanding } from "../ai/quota";
 import { t } from "../i18n";
 import { identity, type Kind, type Project } from "../project/project";
@@ -14,7 +15,7 @@ const IDEAS = ["look", "home", "keys", "text", "tool"];
 const CODE_IDEAS = ["tool"];
 
 /** Who pays for the AI: the person's own key, or paperpaw.org's free
- *  quota (data plugins only). */
+ *  quota (whose model the site chooses). */
 export type Payer = "key" | "quota";
 
 interface Props {
@@ -24,7 +25,8 @@ interface Props {
   payer: Payer;
   onKey(key: string, remember: boolean): void;
   onPayer(payer: Payer): void;
-  onStart(idea: string, kind: Kind): void;
+  /** `model` instead of the kind's: Opus, with one's own key. */
+  onStart(idea: string, kind: Kind, model?: string): void;
 }
 
 export function Start({ apiKey, remembered, needsKey, payer, onKey, onPayer, onStart }: Props) {
@@ -34,6 +36,7 @@ export function Start({ apiKey, remembered, needsKey, payer, onKey, onPayer, onS
   const [projects, setProjects] = useState<Project[]>([]);
   const [warn, setWarn] = useState(needsKey);
   const [code, setCode] = useState(false);
+  const [stronger, setStronger] = useState(false);
   const [quota, setQuota] = useState<QuotaStanding>({ kind: "none" });
 
   useEffect(() => {
@@ -45,8 +48,9 @@ export function Start({ apiKey, remembered, needsKey, payer, onKey, onPayer, onS
   const onQuota = payer === "quota" && quotaOpen;
 
   const go = () => {
-    if (onQuota && !code) {
-      if (idea.trim()) onStart(idea.trim(), "data");
+    const kind = code ? "code" : "data";
+    if (onQuota) {
+      if (idea.trim()) onStart(idea.trim(), kind);
       return;
     }
     if (!key.trim()) {
@@ -55,7 +59,7 @@ export function Start({ apiKey, remembered, needsKey, payer, onKey, onPayer, onS
       return;
     }
     onKey(key.trim(), remember);
-    if (idea.trim()) onStart(idea.trim(), code ? "code" : "data");
+    if (idea.trim()) onStart(idea.trim(), kind, stronger ? STRONGER : undefined);
   };
 
   return (
@@ -147,7 +151,11 @@ export function Start({ apiKey, remembered, needsKey, payer, onKey, onPayer, onS
                 <span>{t("start.pay.key.remember")}</span>
               </label>
               <span class="small">{t("start.pay.key.remember.help")}</span>
-              {warn && <span class="error">{t(onQuota && code ? "start.pay.quota.code" : "start.needs-key")}</span>}
+              <label class="check">
+                <input type="checkbox" checked={stronger} onChange={(e) => setStronger((e.target as HTMLInputElement).checked)} />
+                <span>{t("start.pay.key.stronger")}</span>
+              </label>
+              {warn && <span class="error">{t("start.needs-key")}</span>}
             </div>
           </div>
           <div class={`box way${onQuota ? " on" : quotaOpen ? "" : " off"}`} aria-disabled={!quotaOpen}>

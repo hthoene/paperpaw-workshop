@@ -48,6 +48,10 @@ export interface Project {
   /** A plugin with code: the emulator's module of its last build, which
    *  the reader runs (the builder keeps it a day). */
   module?: string;
+  /** A model chosen at the start instead of the kind's (Opus 5.5, with
+   *  the person's own key): fixed for the project, as the model's thinking
+   *  in the conversation holds only with the model that wrote it. */
+  model?: string;
   created: string;
   updated: string;
 }
@@ -65,12 +69,13 @@ export const NO_USAGE: Usage = {
 };
 
 /** A new project; a plugin with code starts from `files` (PaperPaw's
- *  sample, from the handbook). */
-export function newProject(kind: Kind = "data", files: Record<string, string> = {}): Project {
+ *  sample, from the handbook); `model` instead of the kind's. */
+export function newProject(kind: Kind = "data", files: Record<string, string> = {}, model?: string): Project {
   const now = new Date().toISOString();
   return {
     key: randomKey(),
     kind,
+    ...(model ? { model } : {}),
     files: { ...files },
     messages: [],
     usage: { ...NO_USAGE },

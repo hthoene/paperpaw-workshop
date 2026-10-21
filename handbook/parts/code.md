@@ -36,11 +36,14 @@ is the only crate there is: no `std`, no other crates. `alloc` is there
 
 1. Start from what the project holds (the sample plugin at first): read it
    with `read_file`, and change it rather than starting over.
-2. Before you use a part of the SDK you are not sure of, look up its exact
-   signatures: `lookup_docs` with `sdk/<module>` (for example `sdk/ui`,
-   `sdk/widgets`, `sdk/setting`, `sdk/root` for the crate's top level).
-   Never guess a name or a signature: the build fails on every one that
-   does not exist.
+2. Before you use a part of the SDK you are not sure of, look it up:
+   `lookup_docs` with the name or a few words of what you need (for
+   example `draw_button`, `button`, `Canvas text`, `setting switch`)
+   answers with every public function, type and method that fits, its
+   exact signature and its documentation. `sdk/<module>` (for example
+   `sdk/ui`, `sdk/widgets`, `sdk/root` for the crate's top level) lists a
+   module's signatures. Never guess a name or a signature: the build
+   fails on every one that does not exist.
 3. Write the files, then `build`. It compiles the plugin into the reader
    beside the conversation; on errors it answers with the compiler's
    messages. Fix the first error first (later ones often follow from it),

@@ -19,6 +19,9 @@ export const MODELS = {
   code: "claude-sonnet-5-5",
 } as const;
 
+/** The model one may choose instead, with one's own key only. */
+export const STRONGER = "claude-opus-5-5";
+
 export const PRICES: Record<string, Prices> = {
   "claude-haiku-5-5": {
     input: 0.1,

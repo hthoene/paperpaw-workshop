@@ -79,7 +79,7 @@ export class Workshop {
 
 
   get model(): string {
-    return this.project.kind === "code" ? MODELS.code : MODELS.data;
+    return this.project.model ?? (this.project.kind === "code" ? MODELS.code : MODELS.data);
   }
 
   get code(): boolean {

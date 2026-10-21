@@ -62,11 +62,12 @@ describe("the free quota's provider", () => {
     });
     let streamed = "";
     let thought = "";
-    const answer = await new QuotaProxy().send(request, { onText: (d) => (streamed += d), onThinking: (d) => (thought += d) });
+    const answer = await new QuotaProxy("code").send(request, { onText: (d) => (streamed += d), onThinking: (d) => (thought += d) });
 
-    expect(sent[1]!.url).toBe("/api/v1/workshop/messages");
+    // The kind, of which the site chooses the model; the model not.
+    expect(sent[1]!.url).toBe("/api/v1/workshop/messages?kind=code");
     expect((sent[1]!.init.headers as Record<string, string>)["x-paperpaw-csrf"]).toBe("token-1");
-    expect(JSON.parse(sent[1]!.init.body as string)).toEqual({ kind: "data", messages: request.messages });
+    expect(JSON.parse(sent[1]!.init.body as string)).toEqual({ kind: "code", messages: request.messages });
     expect(streamed).toBe("Writing the look.");
     expect(thought).toBe("Margins first.");
     expect(answer.stop_reason).toBe("tool_use");

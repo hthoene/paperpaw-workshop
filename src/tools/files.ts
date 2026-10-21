@@ -1,9 +1,17 @@
 // The plugin's files: list, read, write, delete. Paths are inside the
-// plugin's folder; writing keeps to the store's rules (rules.ts).
+// plugin's folder; writing keeps to the store's rules (rules.ts). The
+// translations stay: a language file (`i18n/<lang>.ini`) is removed only
+// when the person asked (`person_asked`).
 
 import { z } from "zod";
 
 import type { WorkshopTool } from "./tool";
+
+/** The language of a translation file at `path`, if it is one. */
+export function languageOf(path: string): string | undefined {
+  return /(?:^|\/)i18n\/([^/]+)\.ini$/.exec(path)?.[1];
+}
+
 
 export const listFiles: WorkshopTool<Record<string, never>> = {
   name: "list_files",
@@ -53,11 +61,25 @@ export const writeFile: WorkshopTool<{ path: string; content: string }> = {
   },
 };
 
-export const deleteFile: WorkshopTool<{ path: string }> = {
+export const deleteFile: WorkshopTool<{ path: string; person_asked?: boolean }> = {
   name: "delete_file",
-  description: "Remove a file from the plugin being made.",
-  schema: z.object({ path: z.string() }).strict(),
-  async run({ path }, { files, sync }) {
+  description:
+    "Remove a file from the plugin being made. A language file (i18n/<lang>.ini) is removed only when the person asked for it, with person_asked: true.",
+  schema: z
+    .object({
+      path: z.string(),
+      person_asked: z.boolean().optional().describe("For a language file (i18n/<lang>.ini) only: true when the person asked to remove that language"),
+    })
+    .strict(),
+  async run({ path, person_asked }, { files, sync }) {
+    const language = languageOf(path);
+    if (language && files.has(path) && !person_asked) {
+      return {
+        content: `Not removed: ${path} is the plugin's translation into "${language}", and the translations stay. Writing another language never needs it gone; remove a language only when the person asks for it, then with person_asked: true.`,
+        isError: true,
+        step: { key: "step.delete_file", vars: { path } },
+      };
+    }
     const removed = files.remove(path);
     if (removed) await sync();
     return {

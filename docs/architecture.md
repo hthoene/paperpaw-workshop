@@ -53,10 +53,13 @@ A **provider** ([src/ai/provider.ts](../src/ai/provider.ts)) is who answers:
 - `ReplayProvider`: a recorded conversation (`src/ai/examples/*.json`), for
   the example on the start page and for tests.
 - `QuotaProxy` ([src/ai/quota.ts](../src/ai/quota.ts)): paperpaw.org's
-  free quota, for data plugins. The page sends only the conversation to
-  the site's counting proxy, which asks Anthropic with the workshop's own
-  prompt and tools (copied there by `npm run quota-copy`) and streams the
-  answer back unchanged; the SDK reads it as with a key.
+  free quota, for both kinds. The page sends only the conversation and
+  the project's kind to the site's counting proxy, which chooses the
+  model by the kind and asks Anthropic with the workshop's own prompt and
+  tools for it (copied there by `npm run quota-copy`) and streams the
+  answer back unchanged; the SDK reads it as with a key. A project
+  started with Opus (`Project.model`, with one's own key) stays on the
+  key.
 
 A project is a data plugin or a plugin with code (`Project.kind`). The
 kind picks the model (Haiku for data, Sonnet for code), the tools

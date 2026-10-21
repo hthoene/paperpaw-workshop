@@ -36,7 +36,10 @@ On the start page you can:
 
 On paperpaw.org there is a third way, **the free quota**: authors apply
 for it at paperpaw.org/account/workshop, and once an admin accepts, the
-site pays for their data plugins up to a monthly budget.
+site pays for their plugins up to a monthly budget (Claude Haiku 5.5 for
+data plugins, Claude Sonnet 5.5 for code; admins need no application).
+Claude Opus 5.5 can be chosen at the start with your own key only, and
+stays the plugin's model.
 
 Your projects are kept in your browser (IndexedDB), not on a server.
 

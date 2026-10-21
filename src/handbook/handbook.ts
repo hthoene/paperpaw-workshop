@@ -1,7 +1,8 @@
 // The AI handbook generated from a PaperPaw ref (handbook/generate.mjs),
 // served as static files: the system prompt for data plugins, the topics
-// `lookup_docs` answers from, and the registry of every setting, widget,
-// action and device profile that PaperPaw has.
+// `lookup_docs` answers from, every public item of the SDK with its
+// documentation (searched by name), and the registry of every setting,
+// widget, action and device profile that PaperPaw has.
 
 export interface Choice {
   value: string;
@@ -50,6 +51,18 @@ export interface Topic {
   tokens: number;
 }
 
+/** A public item a plugin reaches through the SDK (sdk-items.json). */
+export interface SdkItem {
+  /** After `paperpaw_sdk::`, e.g. `ui::draw_button`, `Canvas::fill`. */
+  path: string;
+  kind: string;
+  signature: string;
+  doc: string;
+}
+
+/** The most items a search answers with. */
+export const MAX_ITEMS = 12;
+
 export interface Meta {
   ref: string;
   commit: string;
@@ -74,7 +87,12 @@ export class Handbook {
     readonly code = "",
     /** The project a plugin with code starts from: PaperPaw's sample. */
     readonly codeSample: Record<string, string> = {},
+    /** The SDK's items, fetched when first searched (none if the handbook
+     *  has none). */
+    private fetchItems: () => Promise<SdkItem[]> = async () => [],
   ) {}
+
+  private sdk?: Promise<SdkItem[]>;
 
   /** The system prompt for a kind of plugin. */
   promptFor(kind: "data" | "code"): string {
@@ -96,7 +114,13 @@ export class Handbook {
       get("code.md").then((r) => r.text()),
       get("code-sample.json").then((r) => r.json()),
     ]);
-    return new Handbook(meta, prompt, topics, registry, (file) => get(`topics/${file}`).then((r) => r.text()), code, sample);
+    // An older handbook has no sdk-items.json: then nothing is found.
+    const items = () =>
+      fetch(base + "sdk-items.json").then(
+        (r) => (r.ok ? (r.json() as Promise<SdkItem[]>) : []),
+        () => [],
+      );
+    return new Handbook(meta, prompt, topics, registry, (file) => get(`topics/${file}`).then((r) => r.text()), code, sample, items);
   }
 
   profile(id: string): Profile | undefined {
@@ -128,6 +152,40 @@ export class Handbook {
     return { candidates: scored.slice(0, 8).map((x) => x.t) };
   }
 
+  /** The SDK's items that `query` names or describes, best first: by
+   *  their name (`draw_button`, `Canvas::fill`), else by the words of
+   *  their path and documentation (`button`, `canvas text`). */
+  async items(query: string): Promise<SdkItem[]> {
+    const all = await (this.sdk ??= this.fetchItems().catch(() => []));
+    const q = query.trim().replace(/^paperpaw_sdk::/, "").toLowerCase();
+    if (!q) return [];
+    const words = q.split(/[^a-z0-9_:]+/).filter((w) => w.length > 1);
+    // "draw button" may mean draw_button.
+    const joined = words.join("_");
+    const scored = all
+      .map((item) => {
+        const path = item.path.toLowerCase();
+        const name = path.split("::").at(-1)!;
+        let score = 0;
+        if (path === q || path.endsWith(`::${q}`)) score += 100;
+        else if (name === q || name === joined) score += 60;
+        else if (words.length > 1 && words.every((w) => name.includes(w))) score += 10;
+        for (const w of words) {
+          if (name === w) score += 20;
+          else if (name.includes(w)) score += 8;
+          else if (path.includes(w)) score += 4;
+          else if (item.doc.toLowerCase().includes(w)) score += 1;
+          else score -= 3;
+        }
+        // Functions and types before fields and re-exports.
+        if (score > 0 && ["fn", "struct", "enum", "trait", "const"].includes(item.kind)) score += 2;
+        return { item, score };
+      })
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score || a.item.path.length - b.item.path.length);
+    return scored.slice(0, MAX_ITEMS).map((x) => x.item);
+  }
+
   /** The text of `topic`, cut to [`MAX_TOPIC_TOKENS`] with a note. */
   async read(topic: Topic): Promise<string> {
     const text = await this.fetchTopic(topic.file);
@@ -137,7 +195,9 @@ export class Handbook {
     const end = cut.lastIndexOf("\n");
     const narrower = topic.id.startsWith("settings/")
       ? ` Ask for a narrower one, such as settings-group/<group> for one group of these settings.`
-      : "";
+      : topic.id.startsWith("sdk/")
+        ? ` Look up an item by its name or a few words instead (e.g. draw_button, "canvas text"): the answer has its signature and documentation.`
+        : "";
     return `${cut.slice(0, end > 0 ? end : limit)}\n\n(Cut here: the topic is longer than one answer.${narrower})`;
   }
 }

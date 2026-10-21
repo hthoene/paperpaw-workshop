@@ -11,6 +11,9 @@
 // - topics/*.md and index.json: what `lookup_docs` serves, one topic each
 //   (every section of docs/plugins.md, the settings of each plugin or
 //   group, widgets, actions, key maps, samples, device profiles);
+// - sdk-items.json: every public item of the SDK (api.txt) with its
+//   documentation from the SDK's source, which `lookup_docs` searches by
+//   name and words;
 // - registry.json: every setting, widget, action and profile, as the
 //   standard app at that ref reports them (handbook/registry), for the
 //   workshop's own checks;
@@ -24,6 +27,8 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { sdkItems } from "./sdk-items.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
@@ -247,6 +252,14 @@ if (exists("crates/paperpaw-sdk/api.txt")) {
     add(`sdk/${module}`, module === "root" ? "The SDK's top level (paperpaw_sdk::...)" : `The SDK's module ${module}`, "```rust\n" + lines.join("\n") + "\n```");
   }
 }
+
+// 7b. Every public item a plugin reaches through the SDK, with its
+// documentation, to search by name (sdk-items.mjs).
+const rustFiles = (rel) =>
+  fs
+    .readdirSync(path.join(tree, rel), { withFileTypes: true })
+    .flatMap((e) => (e.isDirectory() ? rustFiles(`${rel}/${e.name}`) : e.name.endsWith(".rs") ? [`${rel}/${e.name}`] : []));
+const sdkItemList = sdkItems({ read, exists, files: rustFiles });
 const byPlugin = new Map();
 for (const s of registry.settings) {
   const plugin = s.id.split(".")[0];
@@ -288,8 +301,11 @@ const index = topics.map((t) => {
 });
 fs.writeFileSync(path.join(out, "index.json"), JSON.stringify(index, null, 1) + "\n");
 fs.writeFileSync(path.join(out, "registry.json"), JSON.stringify(registry) + "\n");
+fs.writeFileSync(path.join(out, "sdk-items.json"), JSON.stringify(sdkItemList) + "\n");
 fs.writeFileSync(
   path.join(out, "meta.json"),
   JSON.stringify({ ref, commit, generated: new Date().toISOString().slice(0, 10), dataTokens: tokens(data), codeTokens: tokens(code) }, null, 2) + "\n",
 );
-console.log(`handbook: data.md about ${tokens(data)} tokens, code.md about ${tokens(code)}, ${topics.length} topics, in ${path.relative(root, out)}`);
+console.log(
+  `handbook: data.md about ${tokens(data)} tokens, code.md about ${tokens(code)}, ${topics.length} topics, ${sdkItemList.length} SDK items (${sdkItemList.filter((i) => i.doc).length} documented), in ${path.relative(root, out)}`,
+);

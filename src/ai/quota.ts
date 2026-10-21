@@ -1,8 +1,10 @@
 // paperpaw.org's free quota: the conversation goes to the site's counting
 // proxy (POST /api/v1/workshop/messages), which sends it to Anthropic on
 // the site's key with the workshop's own prompt and tools, and streams the
-// answer back unchanged. Only the conversation leaves the page; the
-// session's cookie and its form token say who asks. For data plugins only.
+// answer back unchanged. Only the conversation and the project's kind
+// leave the page; the session's cookie and its form token say who asks.
+// The site chooses the model by the kind (Haiku for data plugins, Sonnet
+// for code), never the page.
 
 import Anthropic from "@anthropic-ai/sdk";
 import { MessageStream } from "@anthropic-ai/sdk/lib/MessageStream";
@@ -27,7 +29,10 @@ export class QuotaProxy implements Provider {
   readonly eagerTools = true;
   private csrf: string | null = null;
 
-  constructor(private base = "") {}
+  constructor(
+    private kind: "data" | "code" = "data",
+    private base = "",
+  ) {}
 
   async send(request: Request, stream: Stream, signal?: AbortSignal): Promise<Anthropic.Message> {
     let answer = await this.post(request, signal);
@@ -50,10 +55,12 @@ export class QuotaProxy implements Provider {
 
   private async post(request: Request, signal?: AbortSignal): Promise<Response> {
     const csrf = await this.token();
-    return fetch(`${this.base}/api/v1/workshop/messages`, {
+    // The kind in the address too: the site reserves what a request may
+    // cost before it reads the body.
+    return fetch(`${this.base}/api/v1/workshop/messages?kind=${this.kind}`, {
       method: "POST",
       headers: { "content-type": "application/json", accept: "text/event-stream", ...(csrf ? { "x-paperpaw-csrf": csrf } : {}) },
-      body: JSON.stringify({ kind: "data", messages: request.messages }),
+      body: JSON.stringify({ kind: this.kind, messages: request.messages }),
       signal,
     });
   }

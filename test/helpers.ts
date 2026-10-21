@@ -24,6 +24,7 @@ export function handbook(): Handbook {
     async (file) => fs.readFileSync(path.join(dir, "topics", file), "utf8"),
     fs.readFileSync(path.join(dir, "code.md"), "utf8"),
     json("code-sample.json"),
+    async () => json("sdk-items.json"),
   );
 }
 
