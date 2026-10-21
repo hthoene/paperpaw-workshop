@@ -16,6 +16,7 @@ import { Files, identity, type Project } from "../project/project";
 import { saveProject } from "../project/storage";
 import { pluginZip } from "../project/zip";
 import { DATA_TOOLS } from "../tools/registry";
+import type { ToolContext } from "../tools/tool";
 
 export class Workshop {
   readonly files: Files;
@@ -83,8 +84,31 @@ export class Workshop {
     await this.refreshFindings();
   }
 
+  /** The plugin as readers install it: without the store's folder. */
   private plugin() {
-    return { id: identity(this.project).id ?? "plugin", files: this.files.bytes() };
+    return { id: identity(this.project).id ?? "plugin", files: this.files.bytes({ store: false }) };
+  }
+
+  /** What the AI's tools work with. */
+  toolContext(): ToolContext {
+    if (!this.emulator) throw new Error("the reader is not ready yet");
+    return {
+      files: this.files,
+      emulator: this.emulator,
+      handbook: this.handbook,
+      profiles: this.profiles,
+      sync: () => this.sync(),
+    };
+  }
+
+  /** Whether the reader is there to take screenshots. */
+  get ready(): boolean {
+    return !!this.emulator;
+  }
+
+  /** Who answers the AI's requests, for the share page's draft. */
+  get ai(): Provider {
+    return this.provider;
   }
 
   async restart(): Promise<void> {
@@ -115,7 +139,6 @@ export class Workshop {
   /** The person's words to the AI: one turn, as many rounds as it takes. */
   async send(text: string): Promise<void> {
     if (this.busy || !text.trim() || !this.emulator) return;
-    const emulator = this.emulator;
     this.busy = true;
     this.error = "";
     this.live = "";
@@ -129,13 +152,7 @@ export class Workshop {
           project: this.project,
           tools: DATA_TOOLS,
           handbook: this.handbook,
-          context: {
-            files: this.files,
-            emulator,
-            handbook: this.handbook,
-            profiles: this.profiles,
-            sync: () => this.sync(),
-          },
+          context: this.toolContext(),
           model: this.model,
           effort: "medium",
         },
@@ -171,10 +188,16 @@ export class Workshop {
     this.abort?.abort();
   }
 
-  /** The plugin as a ZIP, for the card or the store. */
+  /** The plugin as a ZIP for a reader's card: without the store's folder. */
   zip(): Blob {
     const id = identity(this.project).id ?? "plugin";
-    return new Blob([pluginZip(id, this.files.bytes()) as BlobPart], { type: "application/zip" });
+    return new Blob([pluginZip(id, this.files.bytes({ store: false })) as BlobPart], { type: "application/zip" });
+  }
+
+  /** The plugin as the store's form takes it: with its entry and
+   *  screenshots in `store/`. */
+  storePackage(): Uint8Array {
+    return pluginZip(identity(this.project).id ?? "plugin", this.files.bytes());
   }
 }
 

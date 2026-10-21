@@ -59,3 +59,21 @@ export function parseIni(text: string): Ini {
 export function iniValue(ini: Ini, section: string, key: string): string | undefined {
   return ini.entries.find((e) => e.section === section && e.key === key)?.value;
 }
+
+/** `text` with `key` in `section` set to `value`: the line changed where
+ *  it is, else added at the end of the section (or a new section). */
+export function setIniValue(text: string, section: string, key: string, value: string): string {
+  const ini = parseIni(text);
+  const lines = text.split(/\r?\n/);
+  const line = `${key} = ${value}`;
+  const found = ini.entries.find((e) => e.section === section && e.key === key);
+  if (found) {
+    lines[found.line - 1] = line;
+    return lines.join("\n");
+  }
+  const last = ini.entries.filter((e) => e.section === section).pop();
+  const header = lines.findIndex((l) => l.trim() === `[${section}]`);
+  if (header < 0) return `${text.replace(/\n*$/, "")}${text.trim() ? "\n\n" : ""}[${section}]\n${line}\n`;
+  lines.splice((last ? last.line : header + 1), 0, line);
+  return lines.join("\n");
+}

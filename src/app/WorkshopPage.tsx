@@ -7,9 +7,11 @@ import type { Provider } from "../ai/provider";
 import type { Handbook } from "../handbook/handbook";
 import { t } from "../i18n";
 import { identity, type Project } from "../project/project";
+import type { StoreApi } from "../publish/store";
 import { lines } from "./conversation";
 import { Workshop } from "./controller";
 import { Steps } from "./Header";
+import { SharePanel } from "./SharePanel";
 
 interface Props {
   project: Project;
@@ -18,11 +20,15 @@ interface Props {
   /** The idea from the start page, sent once the reader is ready. */
   first: string;
   onFirstSent(): void;
+  /** The share page instead of the conversation, the reader beside it. */
+  sharing: boolean;
+  store: StoreApi;
+  pretend: boolean;
 }
 
 const BUTTONS = ["page-back", "up", "down", "left", "right", "confirm", "back", "page-forward"];
 
-export function WorkshopPage({ project, handbook, provider, first, onFirstSent }: Props) {
+export function WorkshopPage({ project, handbook, provider, first, onFirstSent, sharing, store, pretend }: Props) {
   const workshop = useMemo(() => new Workshop(project, handbook, provider), [project, handbook, provider]);
   const [, setTick] = useState(0);
   const redraw = () => setTick((n) => n + 1);
@@ -49,14 +55,21 @@ export function WorkshopPage({ project, handbook, provider, first, onFirstSent }
     void workshop.send(text);
   };
 
-  const download = () => {
-    const url = URL.createObjectURL(workshop.zip());
+  const save = (blob: Blob, name: string) => {
+    const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${identity(project).id ?? "plugin"}.zip`;
+    a.download = name;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
+  const id = identity(project).id ?? "plugin";
+  const download = () => save(workshop.zip(), `${id}.zip`);
+  const downloadForStore = () =>
+    save(new Blob([workshop.storePackage() as BlobPart], { type: "application/zip" }), `${id}-for-the-store.zip`);
+  // This page's address with and without the share page.
+  const here = location.hash.replace(/\/share$/, "");
+  const back = `${location.pathname}${here}/share`;
 
   const conversation = lines(project.messages);
   const cost = costText(project.usage.dollars);
@@ -65,7 +78,7 @@ export function WorkshopPage({ project, handbook, provider, first, onFirstSent }
 
   return (
     <>
-      <Steps now={1} />
+      <Steps now={sharing ? 3 : 1} />
       <div class="title">
         <h1>{workshop.name || "..."}</h1>
         <span class="small">{t("workshop.saved")}</span>
@@ -75,60 +88,77 @@ export function WorkshopPage({ project, handbook, provider, first, onFirstSent }
         <button class="btn quiet" onClick={() => setShowFiles(true)}>
           {t("workshop.files")}
         </button>
-        <button class="btn main" onClick={download} disabled={!identity(project).id}>
+        <button class={`btn ${sharing ? "quiet" : "main"}`} onClick={download} disabled={!identity(project).id}>
           {t("workshop.download")}
         </button>
+        {sharing ? (
+          <a class="btn main" href={here}>
+            {t("workshop.back")}
+          </a>
+        ) : (
+          <a
+            class={`btn${identity(project).id ? "" : " quiet disabled"}`}
+            href={identity(project).id ? `${here}/share` : undefined}
+            aria-disabled={!identity(project).id}
+          >
+            {t("workshop.share")}
+          </a>
+        )}
       </div>
 
       <div class="bench">
-        <section class="box chat" aria-label="Conversation">
-          <div class="messages" aria-live="polite">
-            {conversation.map((line, i) =>
-              line.kind === "step" ? (
-                <div key={i} class={`step${line.failed ? " failed" : ""}`}>
-                  {line.text}
-                </div>
+        {sharing ? (
+          <SharePanel workshop={workshop} store={store} back={back} pretend={pretend} onDownload={downloadForStore} />
+        ) : (
+          <section class="box chat" aria-label="Conversation">
+            <div class="messages" aria-live="polite">
+              {conversation.map((line, i) =>
+                line.kind === "step" ? (
+                  <div key={i} class={`step${line.failed ? " failed" : ""}`}>
+                    {line.text}
+                  </div>
+                ) : (
+                  <div key={i} class={line.kind}>
+                    {line.text}
+                  </div>
+                ),
+              )}
+              {workshop.live && <div class="ai">{workshop.live}</div>}
+              {workshop.busy && !workshop.live && <div class="step busy">{t("workshop.thinking")}</div>}
+              {workshop.error && <p class="error">{workshop.error}</p>}
+              <div ref={bottom} />
+            </div>
+            <div class="composer">
+              <label class="visually-hidden" for="say">
+                {t("workshop.input")}
+              </label>
+              <textarea
+                id="say"
+                rows={2}
+                value={draft}
+                placeholder={t("workshop.input")}
+                onInput={(e) => setDraft((e.target as HTMLTextAreaElement).value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if (!workshop.busy) send();
+                  }
+                }}
+              />
+              {workshop.busy ? (
+                <button class="btn quiet" onClick={() => workshop.stop()}>
+                  {t("workshop.stop")}
+                </button>
               ) : (
-                <div key={i} class={line.kind}>
-                  {line.text}
-                </div>
-              ),
-            )}
-            {workshop.live && <div class="ai">{workshop.live}</div>}
-            {workshop.busy && !workshop.live && <div class="step busy">{t("workshop.thinking")}</div>}
-            {workshop.error && <p class="error">{workshop.error}</p>}
-            <div ref={bottom} />
-          </div>
-          <div class="composer">
-            <label class="visually-hidden" for="say">
-              {t("workshop.input")}
-            </label>
-            <textarea
-              id="say"
-              rows={2}
-              value={draft}
-              placeholder={t("workshop.input")}
-              onInput={(e) => setDraft((e.target as HTMLTextAreaElement).value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  if (!workshop.busy) send();
-                }
-              }}
-            />
-            {workshop.busy ? (
-              <button class="btn quiet" onClick={() => workshop.stop()}>
-                {t("workshop.stop")}
-              </button>
-            ) : (
-              <button class="btn main" onClick={send} disabled={!draft.trim()}>
-                {t("workshop.send")}
-              </button>
-            )}
-          </div>
-          <p class="small cost">{t("workshop.cost", { model: workshop.modelLabel, who: workshop.who, cost })}</p>
-          {workshop.example && <p class="small">{t("workshop.example")}</p>}
-        </section>
+                <button class="btn main" onClick={send} disabled={!draft.trim()}>
+                  {t("workshop.send")}
+                </button>
+              )}
+            </div>
+            <p class="small cost">{t("workshop.cost", { model: workshop.modelLabel, who: workshop.who, cost })}</p>
+            {workshop.example && <p class="small">{t("workshop.example")}</p>}
+          </section>
+        )}
 
         <section class="device" aria-label="The reader">
           <div class="tabs" role="group" aria-label="Device">

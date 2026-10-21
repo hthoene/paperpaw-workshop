@@ -34,6 +34,13 @@ On the start page you can:
 
 Your projects are kept in your browser (IndexedDB), not on a server.
 
+When you like your plugin, **Share it in the store** fills in everything
+the store asks for: the AI writes its description from your conversation
+(change what you like), the screenshots are taken on the reader for you,
+and on paperpaw.org you send it with two clicks once signed in. Here on
+your own computer there is no store: download it for the store instead
+and upload it at paperpaw.org/submit.
+
 > **About the reader:** until PaperPaw's web emulator is ready, the reader
 > in the workshop is a stand-in. It draws the home screen roughly from the
 > plugin's colours, sizes and layout, so the AI and you see the right idea,

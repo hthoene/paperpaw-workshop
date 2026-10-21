@@ -135,6 +135,36 @@ button, input, textarea { font: inherit; color: inherit; }
 .panel pre { font: .85rem/1.5 var(--mono); background: color-mix(in srgb, var(--sheet) 60%, var(--card)); padding: .8rem 1rem; border-radius: .4rem; overflow-x: auto; }
 .panel .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .8rem; }
 
+/* Share */
+.btn.disabled { opacity: .5; pointer-events: none; }
+.share { padding: 1.2rem 1.4rem 1.4rem; display: flex; flex-direction: column; gap: 1.2rem; }
+.share h2 { font-size: 1.5rem; }
+.share > .small { margin: -.6rem 0 0; }
+.share fieldset { border: 0; border-top: 1px solid var(--rule); margin: 0; padding: 1rem 0 0; display: grid; gap: .9rem; min-width: 0; }
+.share fieldset:disabled { opacity: .7; }
+.share fieldset > .btn { justify-self: start; }
+.share legend { font: 700 1.1rem/1.2 var(--display); padding: 0 .5rem 0 0; }
+.field { display: grid; gap: .3rem; }
+.field > label, .field > .label { font-weight: 600; font-size: .95rem; }
+.share input:not([type="radio"]), .share select, .share textarea { width: 100%; padding: .55rem .7rem; border: 1px solid var(--rule); border-radius: .4rem; background: var(--card); }
+.share textarea { resize: vertical; }
+.share .row { display: flex; align-items: center; gap: .6rem 1rem; flex-wrap: wrap; margin: 0; }
+.licences { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr)); gap: .6rem; }
+.licence { display: grid; grid-template-columns: auto 1fr; gap: .1rem .5rem; padding: .6rem .7rem; border: 1px solid var(--rule); border-radius: .5rem; cursor: pointer; }
+.licence input { grid-row: span 2; margin-top: .3rem; accent-color: var(--rose); }
+.licence.on { border-color: var(--rose); box-shadow: inset 0 0 0 1px var(--rose); }
+.shots { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(9.5rem, 100%), 1fr)); gap: .9rem; }
+.shots li { display: grid; gap: .4rem; align-content: start; }
+.shots img { width: 100%; aspect-ratio: 3 / 4; object-fit: contain; border: 1px solid var(--rule); border-radius: .3rem; background: var(--sheet); }
+.shots input { font-size: .85rem; }
+.shots .btn { padding: .3rem .8rem; font-size: .85rem; justify-self: start; }
+.send { border-top: 1px solid var(--rule); padding-top: 1rem; display: grid; gap: .7rem; }
+.send h3 { font-size: 1.1rem; }
+.send p { margin: 0; }
+.missing ul, .checks { margin: .3rem 0 0; padding-left: 1.2rem; font-size: .92rem; }
+.checks .fail { color: var(--bad); }
+.sent b { color: var(--ok); }
+
 @media (max-width: 60rem) {
   .bench { grid-template-columns: minmax(0, 1fr); }
   .chat { height: 60vh; }

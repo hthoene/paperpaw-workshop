@@ -1,7 +1,8 @@
 // The workshop's pages: the start (your idea, who pays, your plugins), the
 // workshop (the conversation beside the reader) with the person's key,
-// and the same with a recorded example instead (#/example). The key lives
-// here, in memory, and in the browser's storage only if they ask.
+// and the same with a recorded example instead (#/example); each with a
+// share page (…/share) for the store. The key lives here, in memory, and
+// in the browser's storage only if they ask.
 
 import { useEffect, useMemo, useState } from "preact/hooks";
 
@@ -12,6 +13,8 @@ import { ReplayProvider, type Recording } from "../ai/replay";
 import { Handbook } from "../handbook/handbook";
 import { newProject, type Project } from "../project/project";
 import { loadProject, saveProject } from "../project/storage";
+import { FakeStore } from "../publish/fake";
+import { SiteStore, type StoreApi } from "../publish/store";
 import { Header } from "./Header";
 import { Start } from "./Start";
 import { WorkshopPage } from "./WorkshopPage";
@@ -26,13 +29,19 @@ function rememberedKey(): string {
   }
 }
 
-type Route = { page: "start" } | { page: "project"; key: string } | { page: "example" };
+type Route = { page: "start" } | { page: "project"; key: string; share: boolean } | { page: "example"; share: boolean };
 
 function route(): Route {
-  const m = /^#\/p\/([0-9a-f]+)$/.exec(location.hash);
-  if (m) return { page: "project", key: m[1]! };
-  if (location.hash === "#/example") return { page: "example" };
+  const m = /^#\/p\/([0-9a-f]+)(\/share)?$/.exec(location.hash);
+  if (m) return { page: "project", key: m[1]!, share: !!m[2] };
+  const e = /^#\/example(\/share)?$/.exec(location.hash);
+  if (e) return { page: "example", share: !!e[1] };
   return { page: "start" };
+}
+
+/** Which project a route shows: the same while only its page changes. */
+function shown(where: Route): string {
+  return where.page === "project" ? where.key : where.page;
 }
 
 export function App() {
@@ -59,12 +68,20 @@ export function App() {
       setProject(newProject());
       setFirst((example as Recording).user[0]!);
     }
-  }, [where]);
+  }, [shown(where)]);
 
   const provider: Provider | null = useMemo(() => {
     if (where.page === "example") return new ReplayProvider(example as Recording, 900);
     return key ? new AnthropicDirect(key) : null;
-  }, [where, key]);
+  }, [shown(where), key]);
+
+  // The store: paperpaw.org's own where the workshop runs there; a pretend
+  // one for the example (nothing of it is sent) and in development.
+  const pretend = where.page === "example" || import.meta.env.DEV;
+  const store: StoreApi = useMemo(
+    () => (pretend ? new FakeStore(undefined, 700) : new SiteStore(location.origin)),
+    [pretend],
+  );
 
   const useKey = (value: string, remember: boolean) => {
     setKey(value);
@@ -97,6 +114,9 @@ export function App() {
             provider={provider}
             first={first}
             onFirstSent={() => setFirst("")}
+            sharing={"share" in where && where.share}
+            store={store}
+            pretend={pretend}
           />
         ) : (
           handbook && (

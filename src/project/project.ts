@@ -9,6 +9,9 @@ import { isText, pathProblem } from "./rules";
 
 export type Kind = "data";
 
+/** What only the store reads: the entry and the screenshots. */
+export const STORE_FOLDER = "store/";
+
 export interface Usage {
   inputTokens: number;
   cacheWriteTokens: number;
@@ -105,6 +108,16 @@ export class Files {
     return null;
   }
 
+  /** Writes a picture (a screenshot for the store); why not, if it may
+   *  not be written. */
+  writeBytes(path: string, bytes: Uint8Array): string | null {
+    const problem = pathProblem(path);
+    if (problem) return problem;
+    this.project.files[path] = bytes;
+    this.touch();
+    return null;
+  }
+
   remove(path: string): boolean {
     if (!(path in this.project.files)) return false;
     delete this.project.files[path];
@@ -112,10 +125,12 @@ export class Files {
     return true;
   }
 
-  /** Every file as bytes, for the emulator and the ZIP. */
-  bytes(): Record<string, Uint8Array> {
+  /** Every file as bytes, for the emulator and the ZIPs. `store: false`
+   *  leaves out the store's folder, which readers do not install. */
+  bytes({ store = true } = {}): Record<string, Uint8Array> {
     const out: Record<string, Uint8Array> = {};
     for (const [path, content] of Object.entries(this.project.files)) {
+      if (!store && path.startsWith(STORE_FOLDER)) continue;
       out[path] = typeof content === "string" ? new TextEncoder().encode(content) : content;
     }
     return out;

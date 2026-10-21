@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 
 import en from "../src/i18n/en.json";
 import { t } from "../src/i18n";
+import { GROUPS, LICENCES } from "../src/project/entry";
+import { STORE_ERRORS } from "../src/publish/store";
 
 /** Every file under `dir` ending in one of `ends`. */
 function files(dir: string, ends: string[]): string[] {
@@ -34,6 +36,16 @@ describe("the catalog", () => {
       expect(en).toHaveProperty(`reader.button.${b}`);
     }
     for (const level of ["error", "warning", "info"]) expect(en).toHaveProperty(`findings.level.${level}`);
+  });
+
+  it("has a text for each group, licence, store answer and store check", () => {
+    const keys = [
+      ...GROUPS.map((g) => `share.group.${g}`),
+      ...LICENCES.flatMap((l) => [`share.licence.${l}`, `share.licence.${l}.text`]),
+      ...STORE_ERRORS.map((c) => `store.error.${c}`),
+      ...["pass", "warn", "fail"].map((s) => `share.check.${s}`),
+    ];
+    expect(keys.filter((k) => !(k in en))).toEqual([]);
   });
 
   it("fills in values and shows a missing key as itself", () => {

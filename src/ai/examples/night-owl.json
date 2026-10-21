@@ -8,8 +8,18 @@
     {
       "stop_reason": "tool_use",
       "content": [
-        { "type": "text", "text": "I'll look up the look settings first." },
-        { "type": "tool_use", "id": "toolu_01", "name": "lookup_docs", "input": { "topic": "settings-group/core.group.look" } }
+        {
+          "type": "text",
+          "text": "I'll look up the look settings first."
+        },
+        {
+          "type": "tool_use",
+          "id": "toolu_01",
+          "name": "lookup_docs",
+          "input": {
+            "topic": "settings-group/core.group.look"
+          }
+        }
       ]
     },
     {
@@ -37,12 +47,22 @@
     },
     {
       "stop_reason": "tool_use",
-      "content": [{ "type": "tool_use", "id": "toolu_04", "name": "check", "input": {} }]
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "toolu_04",
+          "name": "check",
+          "input": {}
+        }
+      ]
     },
     {
       "stop_reason": "tool_use",
       "content": [
-        { "type": "text", "text": "The row height was too large; fixing it." },
+        {
+          "type": "text",
+          "text": "The row height was too large; fixing it."
+        },
         {
           "type": "tool_use",
           "id": "toolu_05",
@@ -52,14 +72,34 @@
             "content": "[core]\nui-header = core.header.dark\nui-margin = 7\nui-row = 220\nnight-mode = true\n"
           }
         },
-        { "type": "tool_use", "id": "toolu_06", "name": "check", "input": {} }
+        {
+          "type": "tool_use",
+          "id": "toolu_06",
+          "name": "check",
+          "input": {}
+        }
       ]
     },
     {
       "stop_reason": "tool_use",
       "content": [
-        { "type": "tool_use", "id": "toolu_07", "name": "look", "input": { "device": "X4" } },
-        { "type": "tool_use", "id": "toolu_08", "name": "look", "input": { "device": "Boox Go 7", "dark": true } }
+        {
+          "type": "tool_use",
+          "id": "toolu_07",
+          "name": "look",
+          "input": {
+            "device": "X4"
+          }
+        },
+        {
+          "type": "tool_use",
+          "id": "toolu_08",
+          "name": "look",
+          "input": {
+            "device": "Boox Go 7",
+            "dark": true
+          }
+        }
       ]
     },
     {
@@ -73,7 +113,16 @@
     },
     {
       "stop_reason": "tool_use",
-      "content": [{ "type": "tool_use", "id": "toolu_09", "name": "read_file", "input": { "path": "settings.ini" } }]
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "toolu_09",
+          "name": "read_file",
+          "input": {
+            "path": "settings.ini"
+          }
+        }
+      ]
     },
     {
       "stop_reason": "tool_use",
@@ -87,12 +136,42 @@
             "content": "[core]\nui-header = core.header.dark\nui-margin = 7\nui-row = 220\nui-corners = core.corners.round\nnight-mode = true\n"
           }
         },
-        { "type": "tool_use", "id": "toolu_11", "name": "check", "input": {} }
+        {
+          "type": "tool_use",
+          "id": "toolu_11",
+          "name": "check",
+          "input": {}
+        }
       ]
     },
     {
       "stop_reason": "end_turn",
-      "content": [{ "type": "text", "text": "Done: the corners are round now, so buttons look like pills." }]
+      "content": [
+        {
+          "type": "text",
+          "text": "Done: the corners are round now, so buttons look like pills."
+        }
+      ]
     }
-  ]
+  ],
+  "entry": {
+    "stop_reason": "tool_use",
+    "content": [
+      {
+        "type": "tool_use",
+        "id": "toolu_entry",
+        "name": "set_entry",
+        "input": {
+          "summary": "A calm dark look for reading at night, with wide margins and round corners.",
+          "description": "Light letters on a dark page, so the screen glows less in a dark room. The margins are wider, so lines are shorter and easier to follow, and buttons and lists have soft round corners. Made for the X4, the X4 Pro and the Boox Go 7, in light and night mode.",
+          "group": "look",
+          "tags": [
+            "dark",
+            "night",
+            "margins"
+          ]
+        }
+      }
+    ]
+  }
 }

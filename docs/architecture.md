@@ -12,7 +12,8 @@ src/
   handbook/   finding and reading topics of the handbook
   checks/     the rules a data plugin must follow
   emulator/   the interface to the reader, and the frame behind it
-  project/    a project, its files, storage, the ZIP
+  publish/    sharing in the store: its API, screenshots, the AI's draft
+  project/    a project, its files, its store entry, storage, the ZIP
   i18n/       every text, and t()
 handbook/     how the handbook is made from PaperPaw (Node and Rust)
 public/       fonts, the icon, the made handbook
@@ -22,7 +23,7 @@ test/         the tests (Vitest)
 Each folder knows only the ones below it in this list of who uses whom:
 
 ```
-app  ->  ai  ->  tools  ->  emulator, handbook, checks, project
+app  ->  publish  ->  ai  ->  tools  ->  emulator, handbook, checks, project
 ```
 
 `ai` does not know `app`, and `tools` do not know `ai`. The loop gets its
@@ -124,6 +125,35 @@ PaperPaw tag or branch:
 `registry.json` is also what the checks in
 [src/checks/data.ts](../src/checks/data.ts) use, so the rules the AI reads
 and the rules its files are checked against are the same.
+
+## Sharing in the store
+
+The share page (`#/p/<project>/share`) takes a plugin from "works on the
+reader" to "sent to the moderators" in as few steps as there can be:
+
+1. **Its page in the store** is drafted by the AI from the conversation
+   ([src/publish/draft.ts](../src/publish/draft.ts): one request that must
+   call `set_entry`), and the author changes what they like. The entry
+   lives in `store/store.ini` ([src/project/entry.ts](../src/project/entry.ts)),
+   with the store's own limits.
+2. **Screenshots** are taken on the emulator, on each device and once at
+   night ([src/publish/screenshots.ts](../src/publish/screenshots.ts)), and
+   kept in `store/` as the store reads them.
+3. **Send**: sign in on paperpaw.org (a mail link that leads back), then
+   "Check it in the store" uploads the package as the store's form does,
+   the store checks it and keeps a draft, and "Send it to the moderators"
+   sends that draft.
+
+The page knows the store only through `StoreApi`
+([src/publish/store.ts](../src/publish/store.ts)): `SiteStore` is
+paperpaw.org's, `FakeStore` stands in for tests, the example and
+`npm run dev`. The requests are described in [store-api.md](store-api.md).
+Where there is no store (the workshop on your own computer) or it has
+not opened yet, the page offers the same package as a download, to upload
+at paperpaw.org/submit.
+
+`store/` goes to the store only: the ZIP for a reader's card and the
+files the emulator gets leave it out.
 
 ## Texts
 
