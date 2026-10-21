@@ -4,7 +4,21 @@
 
 import type { Finding } from "../checks/data";
 import type { Profile, Registry } from "../handbook/handbook";
-import type { Answer, CheckResult, Hello, InputEvent, PluginFiles, Ready, Request, Screen, ScreenshotResult, Stopped } from "./protocol";
+import type {
+  Answer,
+  CheckResult,
+  Fixture,
+  Hello,
+  InputEvent,
+  NetworkMode,
+  PluginFiles,
+  Ready,
+  Request,
+  Screen,
+  ScreenshotResult,
+  SeenRequest,
+  Stopped,
+} from "./protocol";
 
 export interface Emulator {
   /** Whether it is the stub rather than PaperPaw's real emulator. */
@@ -23,6 +37,15 @@ export interface Emulator {
   /** Why PaperPaw was stopped and started again while nothing was asked
    *  of it, since this was last asked; undefined if it was not. */
   takeStopped(): string | undefined;
+  /** The remote control's command on the reader shown (an x4-remote line);
+   *  its answer. */
+  command(line: string): Promise<Record<string, unknown>>;
+  /** Waits until the screen is `text` (its id) or shows it. */
+  until(text: string, timeout?: number): Promise<void>;
+  /** The recorded answers for plugins' requests, and the network's mode. */
+  setNetwork(fixtures: Fixture[], mode: NetworkMode): Promise<void>;
+  /** The requests plugins made since asked last. */
+  requests(): Promise<SeenRequest[]>;
 }
 
 /** How long a request to the frame may take: longer than the frame's own
@@ -133,5 +156,21 @@ export class FrameEmulator implements Emulator {
     // The frame may live on another origin (paperpaw.org's sandbox host):
     // the address as this page means it.
     return this.send({ type: "module", url: url && new URL(url, location.href).href });
+  }
+
+  command(line: string): Promise<Record<string, unknown>> {
+    return this.send({ type: "command", line });
+  }
+
+  until(text: string, timeout?: number): Promise<void> {
+    return this.send({ type: "until", text, timeout });
+  }
+
+  setNetwork(fixtures: Fixture[], mode: NetworkMode): Promise<void> {
+    return this.send({ type: "network", fixtures, mode });
+  }
+
+  requests(): Promise<SeenRequest[]> {
+    return this.send({ type: "requests" });
   }
 }

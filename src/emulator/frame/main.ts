@@ -62,6 +62,13 @@ async function handle(reader: Reader, request: Request & { id: number }): Promis
         return device.check();
       case "module":
         throw new Error("The stub runs no plugins with code: PaperPaw's emulator is not built here (npm run emulator).");
+      case "command":
+      case "until":
+        throw new Error("The stub takes no commands: PaperPaw's emulator is not built here (npm run emulator).");
+      case "network":
+        return undefined;
+      case "requests":
+        return [];
     }
   }
   throw new Error("unknown request");

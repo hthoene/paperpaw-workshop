@@ -22,6 +22,35 @@ export interface PluginFiles {
   files: Record<string, Uint8Array>;
 }
 
+/** A recorded answer for a plugin's requests (PaperPaw's
+ *  docs/web-emulator.md): `url` a pattern where `*` stands for any text,
+ *  `method` any where none is named, `status` 200 unless said, `body`
+ *  text or a JSON value, `delay` in ms of the device's time. */
+export interface Fixture {
+  method?: string;
+  url: string;
+  status?: number;
+  headers?: Record<string, string>;
+  body?: unknown;
+  delay?: number;
+}
+
+/** Whether a request no recorded answer answers fails as without a
+ *  network (`fixtures`), or the frame fetches it (`real`: only on one's
+ *  own computer, never on paperpaw.org). */
+export type NetworkMode = "fixtures" | "real";
+
+/** A request a plugin made, as the reader reports it: answered by a
+ *  recorded answer (`fixture`, with its status), by none (`none`, failed
+ *  as without a network) or fetched (`fetch`). */
+export interface SeenRequest {
+  id: number;
+  method: string;
+  url: string;
+  source: "fixture" | "none" | "fetch";
+  status: number | null;
+}
+
 /** What a person or the AI does on the reader. */
 export type InputEvent =
   | { kind: "button"; name: string; long?: boolean }
@@ -46,7 +75,19 @@ export type Request =
   | { type: "check"; plugins?: string[] }
   /** Another module for the reader: PaperPaw with a plugin with code
    *  compiled in (a build's), or `null` for PaperPaw as it is. */
-  | { type: "module"; url: string | null };
+  | { type: "module"; url: string | null }
+  /** The remote control's command on the reader shown, a line as PaperPaw's
+   *  x4-remote sends it (`describe`, `show <screen> key=<hex>` ...); the
+   *  answer is the command's JSON. */
+  | { type: "command"; line: string }
+  /** Waits until the screen is `text` (its id) or shows it, the device
+   *  running meanwhile, at most `timeout` ms. */
+  | { type: "until"; text: string; timeout?: number }
+  /** The recorded answers for plugins' requests, and the network's mode,
+   *  for this device and every one started after. */
+  | { type: "network"; fixtures: Fixture[]; mode: NetworkMode }
+  /** The requests plugins made since asked last (`SeenRequest[]`). */
+  | { type: "requests" };
 
 export type Answer =
   | { id: number; ok: true; result?: unknown }

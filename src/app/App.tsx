@@ -221,6 +221,7 @@ export function App() {
             store={store}
             pretend={pretend}
             frame={hosting.frame}
+            realNetwork={hosting.realNetwork}
           />
         ) : (
           handbook && (

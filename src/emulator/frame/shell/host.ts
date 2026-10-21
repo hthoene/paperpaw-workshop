@@ -22,6 +22,11 @@ const TIME: Record<Request["type"], number> = {
   screenshot: 20_000,
   check: 60_000,
   module: 90_000,
+  command: 15_000,
+  // Its own wait is at most UNTIL_MOST (reader.ts).
+  until: 40_000,
+  network: 10_000,
+  requests: 10_000,
 };
 /** How often an idle worker is asked whether it is there, and how long it
  *  may go without answering. */

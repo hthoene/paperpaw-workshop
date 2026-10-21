@@ -55,6 +55,14 @@ async function handle(r: ShellReader, request: Request): Promise<unknown> {
       return r.check(request.plugins);
     case "module":
       return r.useModule(request.url === null ? null : new URL(request.url));
+    case "command":
+      return r.command(request.line);
+    case "until":
+      return r.until(request.text, request.timeout);
+    case "network":
+      return r.setNetwork(request.fixtures, request.mode);
+    case "requests":
+      return r.takeRequests();
   }
 }
 

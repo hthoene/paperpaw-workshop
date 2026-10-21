@@ -64,4 +64,17 @@ export class PaperPawDevice {
   outOfMemory(): number;
   /** Another device, night mode or the sleep screen, made apart. */
   snapshot(options?: { profile?: string; dark?: boolean; asleep?: boolean }): ImageData;
+  /** The remote control's command (an x4-remote line) at `now`; its JSON. */
+  command(line: string, now: number): Record<string, unknown>;
+  /** Whether the screen shown is `text` (its id) or shows it. */
+  shows(text: string): boolean;
+  /** Recorded answers for plugins' requests, in place of those before. */
+  setFixtures(fixtures?: { method?: string; url: string; status?: number; headers?: Record<string, string>; body?: unknown; delay?: number }[]): void;
+  setNetwork(mode: "fixtures" | "real"): void;
+  /** The requests plugins made since asked last. */
+  requests(): { id: number; method: string; url: string; source: "fixture" | "none" | "fetch"; status: number | null }[];
+  /** The requests for the page to fetch since asked last (`"real"`). */
+  outbox(): { id: number; method: string; url: string; headers: [string, string][]; body: string | null; timeout_ms: number }[];
+  /** The answer to request `id` the page fetched (status 0: failed). */
+  fetched(id: number, status: number, headers: string, body: Uint8Array, now: number): void;
 }

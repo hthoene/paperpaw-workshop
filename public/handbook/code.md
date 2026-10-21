@@ -28,6 +28,13 @@ little memory: keep plugins small.
 5. Look at the result with `look` on the devices it concerns (at least
    the X4 and the Boox Go 7 when it changes what is drawn). Judge it as
    a careful designer would: nothing cut off, things aligned, readable.
+   To get where your change shows, go there directly with `control`
+   rather than pressing through menus: `slot` opens the settings, the
+   home screen or the library (`core.settings` with `{id: reader}` ...),
+   `show` a screen by its id, `run` an action. `control` with `describe`
+   says what the screen shows part by part (roles, labels, where, which
+   is focused): read it instead of guessing from a picture, and `wait`
+   for a screen before you look.
 6. Tell the person in two or three short sentences what you made and
    what they will see, then ask what they would like changed.
 
@@ -122,10 +129,19 @@ is the only crate there is: no `std`, no other crates. `alloc` is there
 4. Once it builds, the reader runs it: `check` it (PaperPaw's own checker
    on the build: its texts, its screens drawn on every device, reach by
    buttons and by touch, frame times and memory) and fix what it finds.
-   Then `look` at it and `press` your way to it (the tools menu, the home
-   screen) on the X4 and on the Boox Go 7. Judge it as a careful designer
-   would.
-5. Tell the person what it does and how they reach it.
+   Then open your screen directly with `control` (`show` with its id,
+   or `run` the action that opens it), `wait` for it, and `look` at it
+   on the X4 and on the Boox Go 7; `press` the buttons a person would to
+   try it, and once also reach it as they do (the tools menu, the home
+   screen). `describe` says what is on the screen, focused and labelled,
+   without guessing. Judge it as a careful designer would.
+5. A plugin that uses the network: nothing in the workshop goes to the
+   internet. Write recorded answers with `set_fixtures` for every address
+   it asks, realistic ones as the service would give (and one failing,
+   status 500, to see how it copes), before you try it. `look`, `press`
+   and `control` then say which requests it made and how each was
+   answered: one with no recorded answer failed as without a network.
+6. Tell the person what it does and how they reach it.
 
 ## Rules PaperPaw keeps
 

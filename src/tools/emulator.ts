@@ -6,6 +6,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 
 import { AI_LONG_SIDE } from "../pictures/kit";
+import { requestsSince } from "./control";
 import { deviceNamed, shortName, type ToolContext, type WorkshopTool } from "./tool";
 
 const DEVICE = z.string().describe('"X4", "X4 Pro" or "Boox Go 7"');
@@ -71,7 +72,10 @@ export const look: WorkshopTool<{ device?: string; dark?: boolean; screen?: "hom
     return {
       content: [
         await seen(context, shot),
-        { type: "text", text: `${profile.name}, ${shot.width} x ${shot.height}${dark ? ", night mode" : ""}.${note}${since(context)}` },
+        {
+          type: "text",
+          text: `${profile.name}, ${shot.width} x ${shot.height}${dark ? ", night mode" : ""}.${note}${since(context)}${await requestsSince(context)}`,
+        },
       ],
       step: { key: "step.look", vars: { device: shortName(profile) } },
     };
@@ -108,7 +112,7 @@ export const press: WorkshopTool<{ device?: string; buttons: string[] }> = {
     return {
       content: [
         await seen(context, shot),
-        { type: "text", text: `${profile.name} after ${buttons.join(", ")}.${since(context)}` },
+        { type: "text", text: `${profile.name} after ${buttons.join(", ")}.${since(context)}${await requestsSince(context)}` },
       ],
       step: { key: "step.press", vars: { device: shortName(profile) } },
     };

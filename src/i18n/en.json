@@ -275,5 +275,8 @@
   "import.skipped": "{n} left out, and why",
   "import.large": "The ZIP is larger than {mb} MB.",
   "import.fetch": "The store did not give the plugin (it answered {status}).",
-  "import.failed": "The import went wrong: {message}"
+  "import.failed": "The import went wrong: {message}",
+  "step.control": "Controlled the {device}: {what}",
+  "step.set_fixtures": "Recorded {n} answers for its requests",
+  "workshop.network.real": "Plugins may reach the internet (on this computer only)"
 }

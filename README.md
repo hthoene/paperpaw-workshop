@@ -49,6 +49,16 @@ paperpaw.org a plugin's page offers its owner "Edit in the workshop",
 which imports the published version the same way (`#/import/<address>`,
 the version's package or kept source, fetched from the site itself).
 
+**The reader, driven directly**: the AI opens a plugin's screen, a slot or
+an action at once, reads what the screen shows part by part instead of
+guessing from a picture, and waits for a screen (`control`, PaperPaw's
+remote-control commands in its web emulator). **The network**: nothing a
+plugin asks goes to the internet on paperpaw.org; the AI writes recorded
+answers for its requests (`set_fixtures`, kept with the project) and is
+told which requests the plugin made. On your own computer (docker compose,
+npm run dev) a switch below the reader lets the rest go to the internet
+(on by default), as far as the services allow a browser (CORS).
+
 **Pictures**: "Add a picture" beside the message field (or drop one on
 the conversation). The AI builds it into the plugin, made for e-ink
 (a picture while the reader sleeps, a logo), or takes ideas from it (a

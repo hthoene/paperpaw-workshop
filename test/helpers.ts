@@ -60,6 +60,13 @@ export function bench(project: Project = newProject()): Bench {
       },
       useModule: (url) => emulator.useModule(url),
     },
+    network: {
+      set: async (fixtures) => {
+        await emulator.setNetwork(fixtures, "fixtures");
+        project.fixtures = fixtures;
+      },
+      real: () => false,
+    },
   };
   return { project, files, emulator, uploads, context, handbook: book };
 }

@@ -37,6 +37,13 @@ export interface ToolContext {
   /** A plugin with code: its id, once the reader runs a build of it,
    *  for its checks. */
   codePlugin?(): string | undefined;
+  /** The recorded answers for the plugin's requests, kept with the
+   *  project; whether requests none answers go to the internet (only on
+   *  one's own computer). */
+  network?: {
+    set(fixtures: import("../emulator/protocol").Fixture[]): Promise<void>;
+    real(): boolean;
+  };
   lastBuild?(result: BuildResult): void;
 }
 

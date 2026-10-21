@@ -5,9 +5,13 @@
 export interface Hosting {
   /** The frame's address, absolute or beside the page. */
   frame: string;
+  /** Whether plugins' requests may go to the internet: on one's own
+   *  computer only (a switch, on by default); paperpaw.org forwards
+   *  nothing, its plugins get recorded answers alone. */
+  realNetwork: boolean;
 }
 
-const ON_ITS_OWN: Hosting = { frame: "frame.html" };
+const ON_ITS_OWN: Hosting = { frame: "frame.html", realNetwork: true };
 
 export async function loadHosting(): Promise<Hosting> {
   try {
@@ -15,7 +19,7 @@ export async function loadHosting(): Promise<Hosting> {
     if (!answer.ok) return ON_ITS_OWN;
     // On its own the address answers the page itself (HTML), not JSON.
     const config = (await answer.json()) as { frame?: unknown };
-    return typeof config.frame === "string" ? { frame: config.frame } : ON_ITS_OWN;
+    return typeof config.frame === "string" ? { frame: config.frame, realNetwork: false } : ON_ITS_OWN;
   } catch {
     return ON_ITS_OWN;
   }

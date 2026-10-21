@@ -12,7 +12,7 @@ import { BuilderUnavailable, HttpBuilder, projectFiles, type BuildResult, type B
 import type { Finding } from "../checks/data";
 import type { Emulator } from "../emulator/emulator";
 import { FrameEmulator } from "../emulator/emulator";
-import { canSleep, type Screen } from "../emulator/protocol";
+import { canSleep, type NetworkMode, type Screen } from "../emulator/protocol";
 import { SHOWN_PROFILES, type Handbook, type Profile } from "../handbook/handbook";
 import { t } from "../i18n";
 import { browserKit, type PictureKit } from "../pictures/kit";
@@ -54,6 +54,10 @@ export class Workshop {
   error = "";
   findings: Finding[] = [];
   stub = true;
+  /** Whether plugins' requests may go to the internet here (one's own
+   *  computer: hosting.ts), and whether the person lets them (the switch). */
+  realNetworkAllowed = false;
+  realNetwork = true;
   private emulator: Emulator | undefined;
   private frameEmulator: FrameEmulator | undefined;
   private abort: AbortController | undefined;
@@ -164,6 +168,13 @@ export class Workshop {
       },
       builder: this.code ? this.builder : undefined,
       codePlugin: () => this.codePlugin(),
+      network: {
+        set: async (fixtures) => {
+          await this.emulator?.setNetwork(fixtures, this.networkMode);
+          this.project.fixtures = fixtures;
+        },
+        real: () => this.networkMode === "real",
+      },
       lastBuild: (result) => {
         this.build = result;
         this.changed();
@@ -260,8 +271,34 @@ export class Workshop {
     return this.provider;
   }
 
+  /** How plugins' requests are answered: recorded answers alone, or the
+   *  internet for the rest where that is allowed and switched on. */
+  get networkMode(): NetworkMode {
+    return this.realNetworkAllowed && this.realNetwork ? "real" : "fixtures";
+  }
+
+  /** The recorded answers and the network's mode to the reader. */
+  private async applyNetwork(): Promise<void> {
+    await this.emulator?.setNetwork(this.project.fixtures ?? [], this.networkMode);
+  }
+
+  /** The person's switch for the internet (one's own computer only). */
+  async setRealNetwork(on: boolean): Promise<void> {
+    this.realNetwork = on;
+    try {
+      await this.applyNetwork();
+    } catch (e) {
+      this.error = e instanceof Error ? e.message : String(e);
+    }
+    this.changed();
+  }
+
   async restart(): Promise<void> {
     try {
+      // Recorded answers first: they hold for the device started next.
+      await this.applyNetwork().catch((e) => {
+        if (this.project.fixtures?.length) this.error = e instanceof Error ? e.message : String(e);
+      });
       await this.emulator?.start(this.profile, this.dark, this.plugin(), this.screen);
     } catch (e) {
       // The reader stopped (PaperPaw panicked, or ran out of memory) and

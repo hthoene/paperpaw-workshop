@@ -52,6 +52,9 @@ export interface Project {
    *  the person's own key): fixed for the project, as the model's thinking
    *  in the conversation holds only with the model that wrote it. */
   model?: string;
+  /** Recorded answers for the plugin's network requests in the workshop
+   *  (set_fixtures): the project's, never part of the plugin. */
+  fixtures?: import("../emulator/protocol").Fixture[];
   created: string;
   updated: string;
 }

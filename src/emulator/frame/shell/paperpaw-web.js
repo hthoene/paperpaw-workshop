@@ -212,6 +212,74 @@ export class PaperPawDevice {
     return new ImageData(bytes, width, height);
   }
 
+  /// The remote control's command (a line as tools/x4-remote.py sends it,
+  /// e.g. `run calibre.open`, `describe`) at `now` (as `advance` takes
+  /// it); its answer, from JSON.
+  command(line, now) {
+    needsTime(now);
+    this.#check(this.#with([line], (p, l) => this.exports.pp_command(p, l, now)));
+    return JSON.parse(this.#result());
+  }
+
+  /// Whether the screen shown is `text` (its id) or shows it.
+  shows(text) {
+    const status = this.#with([text], (p, l) => this.exports.pp_shows(p, l));
+    if (status === STOPPED) this.#check(status);
+    return status === 1;
+  }
+
+  /// Recorded answers for plugins' requests (those before let go), each
+  /// `{ method?, url, status?, headers?, body?, delay? }`: `url` a pattern
+  /// where `*` stands for any text, `method` any where none is named,
+  /// `status` 200 unless said, `headers` an object, `body` text, bytes
+  /// or an object (sent as JSON), `delay` in ms of the device's time.
+  setFixtures(fixtures = []) {
+    this.#check(this.exports.pp_fixtures_clear());
+    for (const fixture of fixtures) {
+      const headers = Object.entries(fixture.headers ?? {})
+        .map(([name, value]) => `${name}: ${value}`)
+        .join("\n");
+      const body = fixture.body ?? "";
+      const bytes =
+        typeof body === "string" || body instanceof Uint8Array || body instanceof ArrayBuffer
+          ? body
+          : JSON.stringify(body);
+      const args = [fixture.method ?? "", fixture.url, headers, bytes];
+      this.#check(
+        this.#with(args, (m, ml, u, ul, h, hl, b, bl) =>
+          this.exports.pp_fixture_add(m, ml, u, ul, fixture.status ?? 200, h, hl, b, bl, fixture.delay ?? 0),
+        ),
+      );
+    }
+  }
+
+  /// Whether the page fetches what no recorded answer answers (`"real"`)
+  /// or it fails as without a network (`"fixtures"`).
+  setNetwork(mode) {
+    this.#check(this.exports.pp_network(mode === "real" ? 1 : 0));
+  }
+
+  /// The requests plugins made since asked last: `[{ id, method, url,
+  /// source: "fixture" | "none" | "fetch", status }]`.
+  requests() {
+    this.#check(this.exports.pp_requests());
+    return JSON.parse(this.#result());
+  }
+
+  /// The requests for the page to fetch since asked last: `[{ id, method,
+  /// url, headers: [[name, value]], body: hex or null, timeout_ms }]`.
+  outbox() {
+    this.#check(this.exports.pp_outbox());
+    return JSON.parse(this.#result());
+  }
+
+  /// The answer to the request `id` the page fetched (`status` 0: failed,
+  /// the reason as the body), `headers` as `name: value` lines, at `now`.
+  fetched(id, status, headers, body, now) {
+    needsTime(now);
+    this.#check(this.#with([headers, body], (h, hl, b, bl) => this.exports.pp_fetched(id, status, h, hl, b, bl, now)));
+  }
+
   /// paperpaw-dev's report of the data plugins on the card (`commands`:
   /// some of package, lint, visual, reach; none: all).
   check(commands = [], plugins = []) {

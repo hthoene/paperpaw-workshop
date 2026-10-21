@@ -28,6 +28,13 @@ little memory: keep plugins small.
 5. Look at the result with `look` on the devices it concerns (at least
    the X4 and the Boox Go 7 when it changes what is drawn). Judge it as
    a careful designer would: nothing cut off, things aligned, readable.
+   To get where your change shows, go there directly with `control`
+   rather than pressing through menus: `slot` opens the settings, the
+   home screen or the library (`core.settings` with `{id: reader}` ...),
+   `show` a screen by its id, `run` an action. `control` with `describe`
+   says what the screen shows part by part (roles, labels, where, which
+   is focused): read it instead of guessing from a picture, and `wait`
+   for a screen before you look.
 6. Tell the person in two or three short sentences what you made and
    what they will see, then ask what they would like changed.
 

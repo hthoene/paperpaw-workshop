@@ -20,7 +20,7 @@
 
 import type { Finding } from "../../../checks/data";
 import type { Profile } from "../../../handbook/handbook";
-import { canSleep, type InputEvent, type PluginFiles, type Screen } from "../../protocol";
+import { canSleep, type Fixture, type InputEvent, type NetworkMode, type PluginFiles, type Screen, type SeenRequest } from "../../protocol";
 import { PaperPawDevice } from "./paperpaw-web.js";
 
 /** paperpaw-dev's checks the module runs here: of the data plugin on the
@@ -36,6 +36,17 @@ const LONG_PRESS = 1000;
  *  what is due within SOON, up to SETTLE in all. */
 const SOON = 400;
 const SETTLE = 1500;
+
+/** The longest `until` waits, in ms (the frame's watchdog gives it a
+ *  little more). */
+export const UNTIL_MOST = 30_000;
+/** The most requests kept until the workshop asks for them. */
+const MAX_SEEN = 200;
+
+/** What a request is told when the module is older than what it asks. */
+export function older(what: string): string {
+  return `This reader's PaperPaw is older than ${what} (its module has none): the workshop's emulator needs building anew (npm run emulator), and a plugin with code building again.`;
+}
 
 /** The largest module the reader runs: PaperPaw's own is some 13 MB, a
  *  build's some 16. */
@@ -62,6 +73,10 @@ export class ShellReader {
   private drawing: ReturnType<typeof setTimeout> | undefined;
   /** The module the workshop brings, for going back to it. */
   private readonly standard: URL;
+  /** The recorded answers and the network's mode, for every device
+   *  started; the requests plugins made, until the workshop asks. */
+  private network: { fixtures: Fixture[]; mode: NetworkMode } = { fixtures: [], mode: "fixtures" };
+  private seen: SeenRequest[] = [];
 
   private constructor(
     private live: PaperPawDevice,
@@ -92,7 +107,7 @@ export class ShellReader {
     this.plugin = plugin;
     this.screen = screen;
     return this.guard(() => {
-      boot(this.live, profile, dark, plugin);
+      boot(this.live, profile, dark, plugin, this.network);
       this.step();
       if (screen === "sleep" && canSleep(profile)) {
         // The power button, pressed and let go in the device's own time.
@@ -186,9 +201,91 @@ export class ShellReader {
     this.live = await this.live.fresh();
     this.screen = "home";
     if (this.profile) {
-      boot(this.live, this.profile, this.dark, this.plugin);
+      boot(this.live, this.profile, this.dark, this.plugin, this.network);
       this.step();
     }
+  }
+
+  /** The remote control's command on the author's device (an x4-remote
+   *  line, see PaperPaw's docs/web-emulator.md); its answer. What it set
+   *  off runs on a moment, as after a press. */
+  command(line: string): Promise<Record<string, unknown>> {
+    return this.guard(() => {
+      if (!has(this.live, "pp_command")) throw new Error(older("direct commands"));
+      this.step();
+      const answer = this.live.command(line, this.clock());
+      this.settle();
+      return answer;
+    });
+  }
+
+  /** Waits until the screen is `text` (its id) or shows it, the device
+   *  running meanwhile; fails after `timeout` ms. */
+  async until(text: string, timeout = 10_000): Promise<void> {
+    if (!has(this.live, "pp_shows")) throw new Error(older("waiting for a screen"));
+    const end = performance.now() + Math.min(Math.max(timeout, 0), UNTIL_MOST);
+    for (;;) {
+      if (await this.guard(() => (this.step(), this.live.shows(text)))) return;
+      if (performance.now() >= end) throw new Error(`Not shown in ${Math.round(Math.min(timeout, UNTIL_MOST))} ms: ${text}.`);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
+
+  /** The recorded answers and the network's mode: for this device and
+   *  every one started after. */
+  setNetwork(fixtures: Fixture[], mode: NetworkMode): Promise<void> {
+    this.network = { fixtures, mode };
+    return this.guard(() => applyNetwork(this.live, this.network));
+  }
+
+  /** The requests plugins made since asked last. */
+  takeRequests(): SeenRequest[] {
+    this.collect();
+    const seen = this.seen;
+    this.seen = [];
+    return seen;
+  }
+
+  /** The requests the device told of since, kept for the workshop; in
+   *  `real` mode, those for the page to fetch, fetched. */
+  private collect(): void {
+    if (has(this.live, "pp_requests")) {
+      this.seen.push(...this.live.requests());
+      if (this.seen.length > MAX_SEEN) this.seen.splice(0, this.seen.length - MAX_SEEN);
+    }
+    if (this.network.mode === "real" && has(this.live, "pp_outbox")) {
+      for (const call of this.live.outbox()) void this.fetchFor(call);
+    }
+  }
+
+  /** Fetches a request for the device, within the frame's own rules (its
+   *  Content-Security-Policy, CORS): what it may not reach fails, status 0
+   *  with the reason. */
+  private async fetchFor(call: ReturnType<PaperPawDevice["outbox"]>[number]): Promise<void> {
+    let status = 0;
+    let headers = "";
+    let body = new Uint8Array();
+    const stop = new AbortController();
+    const timer = setTimeout(() => stop.abort(), call.timeout_ms);
+    try {
+      const answer = await fetch(call.url, {
+        method: call.method,
+        headers: call.headers,
+        body: call.body === null ? undefined : new Blob([bytesOf(call.body) as BlobPart]),
+        signal: stop.signal,
+      });
+      status = answer.status;
+      headers = [...answer.headers].map(([name, value]) => `${name}: ${value}`).join("\n");
+      body = new Uint8Array(await answer.arrayBuffer());
+    } catch (e) {
+      body = new TextEncoder().encode(e instanceof Error ? e.message : String(e));
+    } finally {
+      clearTimeout(timer);
+    }
+    await this.guard(() => {
+      this.live.fetched(call.id, status, headers, body, this.clock());
+      this.step();
+    }).catch(() => {});
   }
 
   /** A finger on the screen (the frame maps it to the device's pixels). */
@@ -211,6 +308,7 @@ export class ShellReader {
   private step(): number | null {
     clearTimeout(this.timer);
     const next = this.live.advance(this.clock());
+    this.collect();
     this.requestDraw();
     if (next !== null) this.timer = setTimeout(() => this.tick(), Math.max(next, 1));
     return next;
@@ -266,11 +364,40 @@ async function device(url: URL): Promise<PaperPawDevice> {
 }
 
 
-/** A device of `profile`, the plugin on its card, started. */
-function boot(device: PaperPawDevice, profile: Profile, dark: boolean, plugin: PluginFiles | undefined): void {
+/** A device of `profile`, the plugin on its card, its requests answered
+ *  as `network` says, started. */
+function boot(
+  device: PaperPawDevice,
+  profile: Profile,
+  dark: boolean,
+  plugin: PluginFiles | undefined,
+  network: { fixtures: Fixture[]; mode: NetworkMode },
+): void {
   device.create({ profile: profile.id, language: "en", dark });
+  // An older module starts all the same; setNetwork says what it lacks.
+  if (has(device, "pp_fixtures_clear")) applyNetwork(device, network);
   for (const [path, bytes] of Object.entries(plugin?.files ?? {})) device.putFile(plugin!.id, path, bytes);
   device.start();
+}
+
+/** Whether the module has the function `name` (an older one lacks the
+ *  commands and the recorded answers). */
+function has(device: PaperPawDevice, name: string): boolean {
+  return typeof (device.exports as Record<string, unknown>)[name] === "function";
+}
+
+function applyNetwork(device: PaperPawDevice, network: { fixtures: Fixture[]; mode: NetworkMode }): void {
+  if (!has(device, "pp_fixtures_clear")) {
+    if (network.fixtures.length) throw new Error(older("recorded answers for requests"));
+    return;
+  }
+  device.setFixtures(network.fixtures);
+  device.setNetwork(network.mode);
+}
+
+/** Bytes written in hexadecimal. */
+function bytesOf(hex: string): Uint8Array {
+  return Uint8Array.from(hex.match(/../g) ?? [], (pair) => parseInt(pair, 16));
 }
 
 async function png(image: ImageData): Promise<string> {

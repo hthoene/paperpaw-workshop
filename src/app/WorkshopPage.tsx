@@ -30,6 +30,8 @@ interface Props {
   pretend: boolean;
   /** The emulator frame's address (src/app/hosting.ts). */
   frame: string;
+  /** Whether plugins may reach the internet here (one's own computer). */
+  realNetwork?: boolean;
 }
 
 /** The device's buttons in the order the reader shows them: the row on its
@@ -41,8 +43,24 @@ function buttonsOf(buttons: string[]): string[] {
   return [...BUTTON_ORDER.filter((b) => buttons.includes(b)), ...buttons.filter((b) => !BUTTON_ORDER.includes(b))];
 }
 
-export function WorkshopPage({ project, handbook, provider, first, firstFiles, onFirstSent, sharing, store, pretend, frame: frameUrl }: Props) {
-  const workshop = useMemo(() => new Workshop(project, handbook, provider), [project, handbook, provider]);
+export function WorkshopPage({
+  project,
+  handbook,
+  provider,
+  first,
+  firstFiles,
+  onFirstSent,
+  sharing,
+  store,
+  pretend,
+  frame: frameUrl,
+  realNetwork = false,
+}: Props) {
+  const workshop = useMemo(() => {
+    const made = new Workshop(project, handbook, provider);
+    made.realNetworkAllowed = realNetwork;
+    return made;
+  }, [project, handbook, provider]);
   const [, setTick] = useState(0);
   const redraw = () => setTick((n) => n + 1);
   const [draft, setDraft] = useState("");
@@ -240,6 +258,12 @@ export function WorkshopPage({ project, handbook, provider, first, firstFiles, o
             ))}
           </div>
           {workshop.stub && <p class="small">{t("reader.stub")}</p>}
+          {realNetwork && (
+            <label class="check small">
+              <input type="checkbox" checked={workshop.realNetwork} onChange={(e) => void workshop.setRealNetwork((e.target as HTMLInputElement).checked)} />
+              <span>{t("workshop.network.real")}</span>
+            </label>
+          )}
           <div class="box findings">
             <h2>{t("findings.title")}</h2>
             {workshop.findings.filter((f) => f.level !== "info").length === 0 ? (
