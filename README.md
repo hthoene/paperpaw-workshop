@@ -8,8 +8,10 @@ the clock and my last book"). The AI writes the plugin's files, checks them,
 looks at the result on an emulated reader and fixes what it sees. When you
 like it, you download the plugin as a ZIP and put it on your reader.
 
-For now the workshop makes **data plugins**: themes, home screen layouts,
-key bindings, fonts and texts. Plugins with code come later.
+The workshop makes **data plugins**: themes, home screen layouts, key
+bindings, fonts and texts. And, with the builder running on your own
+computer, **plugins with code**: new screens, widgets and tools, written
+in Rust by the AI (see below).
 
 ## Try it
 
@@ -47,6 +49,32 @@ and on paperpaw.org you send it with two clicks once signed in. Here on
 your own computer there is no store: download it for the store instead
 and upload it at paperpaw.org/submit.
 
+### Plugins with code
+
+A plugin with code needs the **builder**, a container that compiles it
+together with PaperPaw. It is made from a copy of PaperPaw next to this
+folder, once:
+
+```bash
+npm run builder-source -- --repo ../paperpaw --ref claude/web-shell
+```
+
+```bash
+docker compose --profile code up --build
+```
+
+The first build of the builder takes a while (it compiles PaperPaw for
+the browser and for the X4 ahead, so your builds take seconds). Then tick
+**This needs code** on the start page, or watch the third example
+(`#/example/quote-a-day`): the AI starts from PaperPaw's sample plugin,
+writes Rust, builds it, reads the compiler's errors and fixes them, and
+the reader beside the conversation runs PaperPaw with the plugin in it.
+**Download** then builds it for the X4 and saves a `.ppn` (not signed
+yet) for the `plugins` folder of the reader's card.
+
+Plugins with code use Claude Sonnet 5.5: some cents to a dollar a
+plugin, more than a data plugin.
+
 > **About the reader:** the reader beside the conversation is PaperPaw
 > itself, its web emulator (`public/emulator/`), so you see your plugin as
 > an X4, an X4 Pro or a Boox will show it. "What the checker says" is
@@ -75,6 +103,8 @@ Changes show at once.
 | `npm run build` | The finished site in `dist/` |
 | `npm run handbook -- --repo ../paperpaw --ref main` | Makes the handbook anew (see below) |
 | `npm run emulator -- --repo ../paperpaw --ref main` | Builds the reader anew from PaperPaw (needs Rust and `rustup target add wasm32-unknown-unknown`) |
+| `npm run builder-source -- --repo ../paperpaw --ref main` | PaperPaw's source for the builder (`builder/paperpaw.tar`) |
+| `docker compose --profile code up builder` | The builder alone, for `npm run dev` (port 8090) |
 
 How the parts fit together is in [docs/architecture.md](docs/architecture.md).
 Start there if you want to add a tool, a check or a text.

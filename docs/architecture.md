@@ -17,7 +17,9 @@ src/
   publish/    sharing in the store: its API, screenshots, the AI's draft
   project/    a project, its files, its uploads, its store entry, storage, the ZIP
   i18n/       every text, and t()
+  build/      the build API's client: a plugin with code to the builder
 handbook/     how the handbook is made from PaperPaw (Node and Rust)
+builder/      the builder's container: compiles plugins with code (Node, Rust)
 public/       fonts, the icon, the made handbook
 test/         the tests (Vitest)
 ```
@@ -51,6 +53,11 @@ A **provider** ([src/ai/provider.ts](../src/ai/provider.ts)) is who answers:
 - `ReplayProvider`: a recorded conversation (`src/ai/examples/*.json`), for
   the example on the start page and for tests.
 - Later: the site's own proxy with a daily quota.
+
+A project is a data plugin or a plugin with code (`Project.kind`). The
+kind picks the model (Haiku for data, Sonnet for code), the tools
+(`DATA_TOOLS` or `CODE_TOOLS`) and the system prompt
+(`handbook.promptFor(kind)`).
 
 ## Tools
 
@@ -146,6 +153,46 @@ PaperPaw tag or branch:
 `registry.json` is also what the checks in
 [src/checks/data.ts](../src/checks/data.ts) use, so the rules the AI reads
 and the rules its files are checked against are the same.
+
+## Plugins with code
+
+A plugin with code is a Rust crate: `Cargo.toml` (with
+`[package.metadata.paperpaw] plugin = "Type"`), `src/*.rs`, `i18n/*.ini`
+and `plugin/` (its `plugin.ini`). A new one starts from PaperPaw's sample
+plugin (`public/handbook/code-sample.json`).
+
+The `build` tool ([src/tools/build.ts](../src/tools/build.ts)) sends the
+files to the builder through
+[src/build/client.ts](../src/build/client.ts) and answers the AI with
+the compiler's messages about the plugin's own files (errors first), or,
+when it built, puts the new module into the reader. The page reaches the
+builder on its own origin, `/api/v1/workshop/builds`: nginx and
+`npm run dev` pass it on to the builder at port 8090.
+
+The builder ([builder/](../builder/)) is a container with PaperPaw's
+source, every crate it needs (no network while building) and PaperPaw
+compiled ahead for `wasm32` and the X4's `riscv32imc`. For a build it:
+
+1. checks the files ([builder/project.mjs](../builder/project.mjs)): only
+   the paths above, no `build.rs`, no crates but `paperpaw-sdk`, no
+   sections of Cargo's own;
+2. for the reader, compiles a small **harness** crate: PaperPaw's web
+   shell with the plugin added (`pp_plugins`, which the reader calls on
+   each new instance), into one WebAssembly module;
+3. for the X4, compiles a native wrapper (`paperpaw_sdk::plugin!`) and
+   packs it with `paperpaw-sign pack` into a `.ppn`, not signed;
+4. keeps the files a day at `/api/v1/workshop/builds/{id}/files/{name}`.
+
+One build runs at a time; others wait their turn (the answer says where
+they are). Since PaperPaw is compiled ahead, a plugin's
+first build takes a few seconds (7 for the quote example, the reader's
+module and the X4's file) and a build after a change about one.
+
+The web shell has no hook for added plugins yet, so the builder patches
+it in ([builder/web-plugins.patch](../builder/web-plugins.patch)); the
+patch goes when PaperPaw has the hook. The checks of paperpaw-dev run on
+data plugins only for now; for code, "What the checker says" shows the
+compiler's warnings and errors.
 
 ## Sharing in the store
 

@@ -2,6 +2,11 @@
 #
 #   docker compose up --build
 #
+# With plugins with code (the builder needs PaperPaw's source first, see
+# the README):
+#
+#   docker compose --profile code up --build
+#
 # Your Claude key stays in your browser: this container only serves the
 # workshop's pages, it never sees the key or your plugins.
 services:
@@ -20,6 +25,7 @@ services:
   # and the plugin as a file for the X4 (builder/Dockerfile). The workshop
   # reaches it at /api/v1/workshop/builds; npm run dev at this port.
   builder:
+    profiles: [code]
     build:
       context: .
       dockerfile: builder/Dockerfile

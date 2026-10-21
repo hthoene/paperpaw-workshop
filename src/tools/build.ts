@@ -17,7 +17,7 @@ export const build: WorkshopTool<Record<string, never>> = {
   schema: z.object({}).strict(),
   async run(_input, context) {
     const step = { key: "step.build" };
-    if (!context.builder) return { content: "There is no builder here: plugins with code need it (docker compose up builder).", isError: true, step };
+    if (!context.builder) return { content: "There is no builder here: plugins with code need it (docker compose --profile code up).", isError: true, step };
     let result: BuildResult;
     try {
       result = await context.builder.build(projectFiles(context.files.all()), ["web"]);
