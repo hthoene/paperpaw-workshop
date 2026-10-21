@@ -4,14 +4,19 @@
 // X4 Pro and the Boox; for a plugin with code, a build's module with the
 // plugin compiled in.
 //
-// The frame answers the workshop's messages (../../protocol.ts) with it.
+// It runs in a worker of the frame's (worker.ts), so a plugin's code that
+// never returns blocks the worker, not the frame or the workshop's page;
+// the frame's watchdog (host.ts) then starts a new one. The frames it
+// draws go to the frame by `draw`.
+//
 // The device the author sees and presses stays as it is while the AI looks
 // at another device, at night mode or at the sleep screen: those are made
 // apart (`snapshot`).
 //
-// A module that stops (a WebAssembly trap: PaperPaw panicked) cannot go
-// on; a fresh instance of it starts the reader again on its home screen,
-// and the request says what happened.
+// A module that stops (a WebAssembly trap: PaperPaw panicked, or its
+// memory reached the cap a build links it with) cannot go on; a fresh
+// instance of it starts the reader again on its home screen, and the
+// request says what happened.
 
 import type { Finding } from "../../../checks/data";
 import type { Profile } from "../../../handbook/handbook";
@@ -30,6 +35,10 @@ const LONG_PRESS = 1000;
 const SOON = 400;
 const SETTLE = 1500;
 
+/** The largest module the reader runs: PaperPaw's own is some 13 MB, a
+ *  build's some 16. */
+export const MAX_MODULE = 48 * 1024 * 1024;
+
 /** What a request is told when the module stopped. */
 export const STOPPED =
   "PaperPaw stopped on this reader while doing this (it panicked or ran out of the device's memory). The reader was started again on its home screen.";
@@ -43,22 +52,21 @@ export class ShellReader {
   /** Device time added to the clock: a press holds without waiting. */
   private skew = 0;
   private timer: ReturnType<typeof setTimeout> | undefined;
-  private drawing = false;
+  private drawing: ReturnType<typeof setTimeout> | undefined;
   /** The module the workshop brings, for going back to it. */
   private readonly standard: URL;
 
   private constructor(
     private live: PaperPawDevice,
     private url: URL,
-    private canvas: HTMLCanvasElement,
+    private draw: (frame: ImageData) => void,
   ) {
     this.standard = url;
-    this.touch();
   }
 
-  /** The module from `url`, drawing into `canvas`. */
-  static async load(url: URL, canvas: HTMLCanvasElement): Promise<ShellReader> {
-    return new ShellReader(added(await PaperPawDevice.load(url)), url, canvas);
+  /** The module from `url`, its frames to `draw`. */
+  static async load(url: URL, draw: (frame: ImageData) => void): Promise<ShellReader> {
+    return new ShellReader(added(await device(url)), url, draw);
   }
 
   /** Runs PaperPaw from another module: a build's, with a plugin with code
@@ -67,7 +75,7 @@ export class ShellReader {
   async useModule(url: URL | null): Promise<void> {
     clearTimeout(this.timer);
     this.url = url ?? this.standard;
-    this.live = added(await PaperPawDevice.load(this.url));
+    this.live = added(await device(this.url));
     if (this.profile) await this.start(this.profile, this.dark, this.plugin, this.screen);
   }
 
@@ -173,33 +181,14 @@ export class ShellReader {
     }
   }
 
-  /** Fingers on the screen, where the device has a touch screen: the
-   *  canvas's pointer events as the device's own, in its pixels. */
-  private touch(): void {
-    const at = (event: PointerEvent): [number, number] => {
-      // The canvas shows the panel whole (object-fit: contain), centred.
-      const rect = this.canvas.getBoundingClientRect();
-      const scale = Math.min(rect.width / this.canvas.width, rect.height / this.canvas.height);
-      const left = rect.left + (rect.width - this.canvas.width * scale) / 2;
-      const top = rect.top + (rect.height - this.canvas.height * scale) / 2;
-      return [(event.clientX - left) / scale, (event.clientY - top) / scale];
-    };
-    const phases = { pointerdown: "down", pointermove: "move", pointerup: "up", pointercancel: "cancel" } as const;
-    for (const [type, phase] of Object.entries(phases)) {
-      this.canvas.addEventListener(type, (event) => {
-        const e = event as PointerEvent;
-        if (!this.profile?.touch || (phase === "move" && !e.buttons)) return;
-        if (phase === "down") {
-          this.canvas.setPointerCapture(e.pointerId);
-          this.step();
-        }
-        const [x, y] = at(e);
-        void this.guard(() => {
-          this.live.pointer(phase, x, y);
-          this.step();
-        }).catch(() => {});
-      });
-    }
+  /** A finger on the screen (the frame maps it to the device's pixels). */
+  pointer(phase: "down" | "move" | "up" | "cancel", x: number, y: number): Promise<void> {
+    if (!this.profile?.touch) return Promise.resolve();
+    return this.guard(() => {
+      if (phase === "down") this.step();
+      this.live.pointer(phase, x, y);
+      this.step();
+    });
   }
 
   /** Lets the author's device's time pass, draws, and waits for what is
@@ -233,25 +222,32 @@ export class ShellReader {
     }
   }
 
+  /** The next frame to the frame, soon: one at a time, and on while the
+   *  device animates. */
   private requestDraw(): void {
     if (this.drawing) return;
-    this.drawing = true;
-    requestAnimationFrame(() => {
-      this.drawing = false;
+    this.drawing = setTimeout(() => {
+      this.drawing = undefined;
       try {
-        const [width, height] = this.live.size();
-        if (this.canvas.width !== width || this.canvas.height !== height) {
-          this.canvas.width = width;
-          this.canvas.height = height;
-        }
-        this.canvas.getContext("2d")!.putImageData(this.live.frame(), 0, 0);
+        this.draw(this.live.frame());
         if (this.live.animating()) this.requestDraw();
       } catch (e) {
         if (e instanceof WebAssembly.RuntimeError) void this.recover();
         else throw e;
       }
-    });
+    }, 16);
   }
+}
+
+/** The module at `url`, if it is not too large, compiled. */
+async function device(url: URL): Promise<PaperPawDevice> {
+  const answer = await fetch(url);
+  if (!answer.ok) throw new Error(`The reader's module could not be fetched (${answer.status}).`);
+  const size = Number(answer.headers.get("content-length") ?? 0);
+  if (size > MAX_MODULE) throw new Error(`The reader's module is larger than ${MAX_MODULE / 1024 / 1024} MB.`);
+  const bytes = await answer.arrayBuffer();
+  if (bytes.byteLength > MAX_MODULE) throw new Error(`The reader's module is larger than ${MAX_MODULE / 1024 / 1024} MB.`);
+  return PaperPawDevice.from(await WebAssembly.compile(bytes));
 }
 
 /** A module's device with its plugins with code added (a build's module

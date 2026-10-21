@@ -136,6 +136,30 @@ instead of `'self'` (for scripts, and for fetching the module), with
 In `npm run dev` the frame gets `allow-same-origin`, because Vite's dev
 server sends no CORS headers.
 
+**What a plugin's code can do to the page.** A plugin with code runs in
+the reader, so its mistakes do too: a loop that never ends, a check that
+takes minutes, memory that only grows. None of it may reach the
+workshop's page:
+
+- PaperPaw runs in a worker of the frame's
+  ([shell/worker.ts](../src/emulator/frame/shell/worker.ts)), made from a
+  blob (a sandboxed page may start no worker from an address; the frame's
+  policy allows `worker-src blob:`). The frame's own thread only draws
+  the frames the worker sends and passes touches on, so the page and the
+  frame stay usable whatever the plugin does.
+- A watchdog in the frame
+  ([shell/host.ts](../src/emulator/frame/shell/host.ts)) gives each
+  request its time (15 s for a press, 60 for the checks, 90 for a new
+  module) and asks an idle worker every 2 s whether it is there. A
+  worker that does not answer is ended; a new one starts with the same
+  module and device, on its home screen, and the request says what
+  happened, for the AI to fix. The page's own timeout (120 s) is longer,
+  so the frame always answers first.
+- The module's memory may grow to 512 MB at most (linked so: PaperPaw
+  needs some 70, the Boox's screen included); at the cap it traps, and
+  the reader starts again as after a panic. A module larger than 48 MB
+  is not run.
+
 Tests use `FakeEmulator` ([src/emulator/fake.ts](../src/emulator/fake.ts)).
 
 ## The handbook

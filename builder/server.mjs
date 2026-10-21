@@ -30,6 +30,11 @@ const PORT = Number(process.env.PORT ?? 8090);
 const LIMITS = { web: 180, x4: 300, "x4-pro": 300 };
 const KEEP_HOURS = 24;
 const TARGETS = ["web", "x4", "x4-pro"];
+/** The most memory the reader's module may grow to, in bytes. PaperPaw
+ *  needs some 70 MB (the Boox's screen); without a cap a plugin's code
+ *  could grow it to 4 GB in the author's browser. At the cap it traps,
+ *  and the reader starts again. */
+const MAX_MEMORY = 512 * 1024 * 1024;
 /** The readers a plugin file is made for: the target Rust builds for, the
  *  toolchain (the X4 Pro's is espup's `esp`, which builds `core` too) and
  *  the chip the file must name. */
@@ -178,7 +183,18 @@ async function run(build, out = path.join(BUILDS, build.id)) {
 
   if (build.targets.includes("web")) {
     const dir = write("web", harness(manifest.name, manifest.plugin, path.join(PAPERPAW, "shells", "web")));
-    const result = await cargoBuild(build, dir, ["--release", "--target", "wasm32-unknown-unknown"], path.join(CACHE, "target-web"), LIMITS.web);
+    // `cargo rustc`: the cap for the module's own link only, so PaperPaw's
+    // crates compiled ahead are used as they are.
+    const result = await cargoBuild(
+      build,
+      dir,
+      ["--lib", "--release", "--target", "wasm32-unknown-unknown", "--", "-C", `link-arg=--max-memory=${MAX_MEMORY}`],
+      path.join(CACHE, "target-web"),
+      LIMITS.web,
+      [],
+      {},
+      "rustc",
+    );
     build.diagnostics.push(...diagnostics(result.output, plugin));
     const wasm = path.join(CACHE, "target-web", "wasm32-unknown-unknown", "release", "workshop_web.wasm");
     if (result.ok) keep(build, "web", "web.wasm", wasm, out);
@@ -238,9 +254,9 @@ function keep(build, target, name, from, out) {
 /** Offline but while the image is made: every crate is in the image. */
 const OFFLINE = process.argv[2] !== "prepare";
 
-function cargoBuild(build, dir, args, target, limit, toolchain = [], env = {}) {
+function cargoBuild(build, dir, args, target, limit, toolchain = [], env = {}, verb = "build") {
   const offline = OFFLINE ? ["--offline"] : [];
-  return exec(build, "cargo", [...toolchain, "build", ...offline, "--message-format=json", ...args], dir, limit, { ...env, CARGO_TARGET_DIR: target });
+  return exec(build, "cargo", [...toolchain, verb, ...offline, "--message-format=json", ...args], dir, limit, { ...env, CARGO_TARGET_DIR: target });
 }
 
 /** Runs a command, its output kept for the log and the diagnostics. */

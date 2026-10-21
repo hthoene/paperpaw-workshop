@@ -31,6 +31,10 @@ export interface Report {
 
 export class PaperPawDevice {
   static load(url: URL | string): Promise<PaperPawDevice>;
+  /** A device of a compiled module: a fresh instance, its own memory. */
+  static from(module: WebAssembly.Module): Promise<PaperPawDevice>;
+  /** The module's memory. */
+  memory: WebAssembly.Memory;
   /** The module's own functions (`pp_...`). */
   exports: WebAssembly.Exports;
   create(options?: { profile?: string; language?: string; dark?: boolean }): void;

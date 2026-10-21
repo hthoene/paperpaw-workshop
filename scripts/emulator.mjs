@@ -8,7 +8,9 @@
 // Needs Rust with the target wasm32-unknown-unknown
 // (rustup target add wasm32-unknown-unknown). The ref is built in a
 // worktree of its own (never the checkout as it is), and the module's
-// names section, only for stack traces, is left out.
+// names section, only for stack traces, is left out. Its memory may grow
+// to 512 MB at most, as a build's module (builder/server.mjs): PaperPaw
+// needs some 70; without a cap it could grow to 4 GB in the browser.
 
 import { execFileSync } from "node:child_process";
 import crypto from "node:crypto";
@@ -28,7 +30,12 @@ const commit = run("git", ["-C", repo, "rev-parse", ref]).trim();
 const work = path.join(here, ".work", `paperpaw-${commit.slice(0, 12)}`);
 if (!fs.existsSync(work)) run("git", ["-C", repo, "worktree", "add", "--detach", work, commit]);
 console.log(`emulator: PaperPaw ${ref} (${commit.slice(0, 10)}), building ...`);
-execFileSync("cargo", ["build", "-p", "paperpaw-web", "--release", "--target", "wasm32-unknown-unknown"], { cwd: work, stdio: "inherit" });
+// `cargo rustc`: the cap for the module's own link only.
+execFileSync(
+  "cargo",
+  ["rustc", "-p", "paperpaw-web", "--lib", "--release", "--target", "wasm32-unknown-unknown", "--", "-C", `link-arg=--max-memory=${512 * 1024 * 1024}`],
+  { cwd: work, stdio: "inherit" },
+);
 
 const target = JSON.parse(run("cargo", ["metadata", "--format-version", "1", "--no-deps"], work)).target_directory;
 const built = fs.readFileSync(path.join(target, "wasm32-unknown-unknown", "release", "paperpaw_web.wasm"));

@@ -20,8 +20,10 @@ export interface Emulator {
   useModule(url: string | null): Promise<void>;
 }
 
-/** How long a request to the frame may take. */
-const TIMEOUT = 20_000;
+/** How long a request to the frame may take: longer than the frame's own
+ *  watchdog (frame/shell/host.ts), which answers every request in time,
+ *  if need be by stopping PaperPaw and starting it again. */
+const TIMEOUT = 120_000;
 
 export class FrameEmulator implements Emulator {
   stub = true;

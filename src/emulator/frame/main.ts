@@ -1,11 +1,12 @@
 // The emulator frame (frame.html): answers the workshop's requests
-// (protocol.ts) with PaperPaw's own web emulator (shell/reader.ts), or
+// (protocol.ts) with PaperPaw's own web emulator, run in a worker with a
+// watchdog (shell/host.ts, shell/worker.ts, shell/reader.ts), or
 // with the stub (stub.ts) where the emulator's module is not there (a
 // checkout without public/emulator/paperpaw-web.wasm). It runs in a
 // sandboxed iframe without access to the workshop's storage.
 
 import type { Answer, Hello, Ready, Request } from "../protocol";
-import { ShellReader } from "./shell/reader";
+import { WorkerReader } from "./shell/host";
 import { StubDevice } from "./stub";
 
 const canvas = document.getElementById("screen") as HTMLCanvasElement;
@@ -21,11 +22,11 @@ function fail(id: number, error: unknown): void {
 }
 
 /** What answers: the real emulator, or the stub. */
-type Reader = { kind: "shell"; reader: ShellReader } | { kind: "stub"; device: StubDevice };
+type Reader = { kind: "shell"; reader: WorkerReader } | { kind: "stub"; device: StubDevice };
 
 async function load(): Promise<Reader> {
   try {
-    const reader = await ShellReader.load(new URL("emulator/paperpaw-web.wasm", document.baseURI), canvas);
+    const reader = await WorkerReader.load(new URL("emulator/paperpaw-web.wasm", document.baseURI).href, canvas);
     return { kind: "shell", reader };
   } catch (e) {
     console.warn("paperpaw: the emulator's module is not there, the stub answers:", e);
@@ -35,21 +36,8 @@ async function load(): Promise<Reader> {
 
 async function handle(reader: Reader, request: Request & { id: number }): Promise<unknown> {
   if (reader.kind === "shell") {
-    const r = reader.reader;
-    switch (request.type) {
-      case "start":
-        return r.start(request.profile, request.dark, request.plugins[0], request.screen);
-      case "files":
-        return r.setFiles(request.plugin);
-      case "input":
-        return r.input(request.event);
-      case "screenshot":
-        return r.screenshot(request.profile, request.dark, request.screen);
-      case "check":
-        return r.check();
-      case "module":
-        return r.useModule(request.url === null ? null : new URL(request.url, document.baseURI));
-    }
+    const { id: _, ...asked } = request;
+    return reader.reader.request(asked as Request);
   } else {
     const device = reader.device;
     const redraw = () => device.draw(canvas);
