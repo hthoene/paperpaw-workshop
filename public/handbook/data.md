@@ -157,7 +157,7 @@ plugins/large-print/
   plugin.ini     [plugin] id, name, description, version, formats
   i18n/*.ini     translation catalogs (also whole new languages)
   keymap.ini     key bindings
-  settings.ini   new defaults for any plugin's settings ([reader] font-size = 14)
+  settings.ini   new defaults for any plugin's settings ([core] font-size = 14)
   fonts/*.ttf    fonts to read with (also .otf, .ttc), by family
   fonts/*.ppfp   packs with letters other fonts lack, named in plugin.ini:
                  [extends] cyrillic.ppfp = fonts-default.literata
@@ -349,6 +349,23 @@ it (`Command::PreviewSettings`: the values show on every screen without
 being kept, until the screen that asked closes) and keep it
 (`presets::commands`).
 
+A theme is a preset of the kind `core.theme` (`presets::THEME`): values
+for the appearance settings. Where any plugin brings one, the
+appearance settings begin with *Theme*, which lists them; the one
+chosen gives the appearance settings its values and those it leaves
+out their defaults, so two themes installed never fight. A data plugin
+brings themes in its `presets.ini`:
+
+```ini
+[paw]
+kind = core.theme
+name = Paw
+description = Round and friendly: a frame for the focus, no lines.
+core.ui-corners = core.corners.soft
+core.ui-focus = core.focus.ring
+core.ui-separators = core.separators.none
+```
+
 ## Customisation at a glance
 
 A plain text file (`paperpaw.ini`) on the device changes behaviour without
@@ -526,8 +543,6 @@ large-print.plugin.description = Größere Schrift in Büchern und Menüs.
 # What you choose in the settings still wins.
 [core]
 ui-size = 14
-
-[reader]
 font-size = 14
 line-spacing = 145
 ```
@@ -615,6 +630,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `[core] ui-row` | Row height | 120 to 300 | `160` | Height of the rows of menus and lists, relative to their text. |
 | `[core] ui-lines` | Lines | 1 to 10 | `3` | How thick lines and frames are drawn. |
 | `[core] logo` | Logo picture | text | `` | A picture (JPEG, PNG) shown in place of PaperPaw's logo, e.g. plugins/mine/logo.png. Empty for PaperPaw's own. |
+| `[core] ui-palette` | Grays | text | `` | The grays of the interface by what they are for, e.g. muted=60 line=170 (0 black, 255 white). Empty for the usual ones. |
 | `[core] text-color` | Text colour | `core.color.black`, `core.color.dark-gray`, `core.color.gray`, `core.color.brown`, `core.color.dark-blue`, `core.color.dark-green`, `core.color.burgundy`, `core.color.violet`, `core.color.own` | `core.color.black` | Softer than black on white, easier on the eyes on bright screens. Pictures take the colours too; night mode swaps them. |
 | `[core] text-color-own` | Own text colour | text | `#5b4636` | A colour code such as #5b4636 (red, green, blue), used when the colour above is "Own colour". |
 | `[core] paper-color` | Paper colour | `core.paper.white`, `core.paper.cream`, `core.paper.sepia`, `core.paper.sand`, `core.paper.light-gray`, `core.paper.mint`, `core.paper.light-blue`, `core.paper.rose`, `core.paper.own` | `core.paper.white` | Softer than black on white, easier on the eyes on bright screens. Pictures take the colours too; night mode swaps them. |
@@ -656,6 +672,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `[core] paragraph-spacing` | Space between paragraphs | `true`, `false` | `false` | Leave some space between paragraphs, with or without indented first lines. |
 | `[core] widows` | Lines kept at the top | 1 to 4 | `1` | The fewest lines of a paragraph alone at the top of a page: more go on with them. |
 | `[core] orphans` | Lines kept at the bottom | 1 to 4 | `1` | The fewest lines of a paragraph alone at the bottom of a page: with fewer, the paragraph begins on the next page. |
+| `[core] reading-app` | Reading app | `core.reading-app.default` | `core.reading-app.default` | The app books open in; each format may have its own, and a book or a folder too (Open with). |
 | `[core] footnotes` | Footnotes | `core.footnotes.popup`, `core.footnotes.jump` | `core.footnotes.popup` | A tapped note mark (1, [2], *) shows its note over the page, or goes to it. |
 | `[core] page-frame` | Page frame | `core.page-frame.single` | `core.page-frame.single` | How the text is set on the page: in one column, or as a plugin frames it (two columns, two pages side by side). |
 | `[core] scope-only` | Only this book | `true`, `false` | `false` | Changes to font and layout apply to this book only (marked •). Off: the book uses the general settings again. |
@@ -726,6 +743,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `about.open` | About PaperPaw |
 | `battery.open` | Battery |
 | `calibre.open` | Calibre |
+| `core.apps` | Apps |
 | `core.back` | Back |
 | `core.clean-up` | Clean up storage |
 | `core.confirm` | Select |
@@ -740,6 +758,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `core.next` | Next |
 | `core.next-page` | Next page |
 | `core.nothing` | Nothing |
+| `core.open-with` | Open with … |
 | `core.prev-page` | Previous page |
 | `core.previous` | Previous |
 | `core.quick-panel` | Quick panel |
@@ -774,6 +793,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `opds.open` | Catalogs |
 | `opds.sync` | Sync catalogs |
 | `plugin-manager.open` | Plugins |
+| `power.open` | Power |
 | `profiles.next` | Next profile |
 | `profiles.open` | Profiles |
 | `reader.auto-turn` | Turn pages automatically |
@@ -817,6 +837,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `weather.choose-place` | Place |
 | `weather.refresh` | Fetch the weather |
 | `widgets.todo.open` | To do |
+| `wifi.open` | Wi-Fi |
 
 ## The devices
 

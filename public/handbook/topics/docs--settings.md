@@ -46,3 +46,13 @@ r.add_settings(&SETTINGS)?;
 
 Such settings are read like any other; those that need a unit, a step,
 a section or an editor screen are made as above.
+
+A setting may show only while another has a value
+(`SettingExtra::shown_if("hello.sync", "on")`, the server's address
+while syncing is on), and check a value before it is set
+(`SettingExtra::check(fn)`): a value it refuses is not set, and the
+reader is told the translation of the key it returns. Screens of your
+own that list settings open them as the settings pages do with
+`ui::setting_opens` (its editor, the keyboard for text, the list of a
+choice's values); text typed there comes back to the kernel as
+`events::SETTING_TYPED`, which sets it.

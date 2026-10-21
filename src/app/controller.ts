@@ -18,7 +18,8 @@ import { CARRIED, Files, identity, type Project } from "../project/project";
 import { browserUploads, saveProject } from "../project/storage";
 import { ADDED, MAX_PICTURES_A_MESSAGE, UploadRefused, Uploads, type UploadStore } from "../project/uploads";
 import { pluginZip } from "../project/zip";
-import { DATA_TOOLS } from "../tools/registry";
+import { HttpBuilder, type BuildResult, type Builder } from "../build/client";
+import { CODE_TOOLS, DATA_TOOLS } from "../tools/registry";
 import type { ToolContext } from "../tools/tool";
 
 export class Workshop {
@@ -38,6 +39,8 @@ export class Workshop {
   thinking = "";
   /** Whether the conversation has grown too long to go on in. */
   long = false;
+  /** A plugin with code: its last build. */
+  build: BuildResult | undefined;
   error = "";
   findings: Finding[] = [];
   stub = true;
@@ -52,6 +55,8 @@ export class Workshop {
     private provider: Provider,
     readonly pictures: PictureKit = browserKit,
     store: UploadStore = browserUploads,
+    /** Where plugins with code are built. */
+    private builder: Builder = new HttpBuilder(),
   ) {
     this.files = new Files(project, () => void this.sync());
     this.uploads = new Uploads(project, store, () => {
@@ -64,7 +69,11 @@ export class Workshop {
 
 
   get model(): string {
-    return MODELS.data;
+    return this.project.kind === "code" ? MODELS.code : MODELS.data;
+  }
+
+  get code(): boolean {
+    return this.project.kind === "code";
   }
 
   get modelLabel(): string {
@@ -101,13 +110,23 @@ export class Workshop {
     this.frameEmulator = emulator;
     this.emulator = emulator;
     await this.restart();
+    // A plugin with code: its last build's module, while the builder keeps it.
+    if (this.code && this.project.module) {
+      await emulator.useModule(this.project.module).catch(() => {
+        this.project.module = undefined;
+      });
+    }
     this.stub = emulator.stub;
     await this.refreshFindings();
   }
 
   /** The plugin as readers install it: without the store's folder. */
   private plugin() {
-    return { id: identity(this.project).id ?? "plugin", files: this.files.bytes({ store: false }) };
+    const id = identity(this.project).id ?? "plugin";
+    // A plugin with code is compiled into the reader's module; its crate's
+    // files are no data plugin for the card.
+    if (this.code) return { id, files: {} };
+    return { id, files: this.files.bytes({ store: false }) };
   }
 
   /** What the AI's tools work with. */
@@ -124,6 +143,12 @@ export class Workshop {
       reader: {
         shown: () => this.profile,
         show: (profile) => this.show(profile),
+        useModule: (url) => this.useModule(url),
+      },
+      builder: this.code ? this.builder : undefined,
+      lastBuild: (result) => {
+        this.build = result;
+        this.changed();
       },
     };
   }
@@ -251,8 +276,27 @@ export class Workshop {
     await this.emulator?.setFiles(this.plugin());
   }
 
+  /** The reader runs a build's module (or the standard one, `null`). */
+  async useModule(url: string | null): Promise<void> {
+    await this.emulator?.useModule(url);
+    this.project.module = url ?? undefined;
+    void saveProject(this.project);
+  }
+
   async refreshFindings(): Promise<void> {
     if (!this.emulator) return;
+    if (this.code) {
+      // A plugin with code: what the compiler said in its last build (the
+      // checks of code plugins in the browser come with PaperPaw's shell).
+      this.findings = (this.build?.diagnostics ?? []).map((d) => ({
+        check: "build",
+        level: d.level,
+        place: d.file ? `${d.file}${d.line ? `:${d.line}` : ""}` : "(build)",
+        message: d.message,
+      }));
+      this.changed();
+      return;
+    }
     this.findings = Object.keys(this.project.files).length ? await this.emulator.check() : [];
     this.changed();
   }
@@ -282,11 +326,13 @@ export class Workshop {
         {
           provider: this.provider,
           project: this.project,
-          tools: DATA_TOOLS,
+          tools: this.code ? CODE_TOOLS : DATA_TOOLS,
           handbook: this.handbook,
+          prompt: this.handbook.promptFor(this.project.kind),
           context: this.toolContext(),
           model: this.model,
-          effort: "medium",
+          // Rust against an SDK the model has not seen: more thought.
+          effort: this.code ? "high" : "medium",
         },
         said,
         {

@@ -1,40 +1,29 @@
 // The real reader: PaperPaw's web emulator (its `shells/web`, built to
 // public/emulator/paperpaw-web.wasm by `npm run emulator`), the same
 // kernel, plugins, device profiles and panel as PaperPaw on the X4, the
-// X4 Pro and the Boox.
+// X4 Pro and the Boox; for a plugin with code, a build's module with the
+// plugin compiled in.
 //
 // The frame answers the workshop's messages (../../protocol.ts) with it.
-// One instance of the module is the reader the author sees and presses;
-// a second one, made when first needed, takes the screenshots the AI asks
-// for on another device, in night mode or asleep, so the author's reader
-// stays as it is.
+// The device the author sees and presses stays as it is while the AI looks
+// at another device, at night mode or at the sleep screen: those are made
+// apart (`snapshot`).
 //
-// A module that stops (a WebAssembly trap: PaperPaw panicked or ran out
-// of the device's memory) cannot go on; it is loaded anew and the reader
-// started again on its home screen, and the request says what happened.
+// A module that stops (a WebAssembly trap: PaperPaw panicked) cannot go
+// on; a fresh instance of it starts the reader again on its home screen,
+// and the request says what happened.
 
 import type { Finding } from "../../../checks/data";
 import type { Profile } from "../../../handbook/handbook";
 import { canSleep, type InputEvent, type PluginFiles, type Screen } from "../../protocol";
 import { PaperPawDevice } from "./paperpaw-web.js";
 
-/** paperpaw-dev's checks the module runs here. Not `reach`: it measures
- *  time with std::time, which panics in WebAssembly (and leaves the
- *  module unusable), so it waits for PaperPaw's fix. */
+/** paperpaw-dev's checks the module runs here, of the data plugin on the
+ *  card. */
 const CHECKS = ["package", "lint", "visual"];
-/** A plugin of the workshop's own on every card: it switches off the tip on
- *  gestures that PaperPaw shows over everything on a touch screen's first
- *  start, as PaperPaw's own tests do. Its findings are left out. */
-const PREVIEW_ID = "workshop-preview";
-const PREVIEW: Record<string, Uint8Array> = {
-  "plugin.ini": new TextEncoder().encode("[plugin]\nid = workshop-preview\nname = Workshop preview\nversion = 1.0.0\nformats = 1\n"),
-  "settings.ini": new TextEncoder().encode("[home]\ngesture-tips = false\n"),
-};
 /** How long a press holds, in the device's time: a short one, a long one. */
 const SHORT_PRESS = 150;
 const LONG_PRESS = 1000;
-/** How far a screenshot lets the device's time run to settle, at most. */
-const SETTLE = 10_000;
 
 /** What a request is told when the module stopped. */
 export const STOPPED =
@@ -45,24 +34,36 @@ export class ShellReader {
   dark = false;
   screen: Screen = "home";
   private plugin: PluginFiles | undefined;
-  private shots: PaperPawDevice | undefined;
   private started = performance.now();
-  /** Device time added to the clock: a long press holds without waiting. */
+  /** Device time added to the clock: a press holds without waiting. */
   private skew = 0;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private drawing = false;
+  /** The module the workshop brings, for going back to it. */
+  private readonly standard: URL;
 
   private constructor(
     private live: PaperPawDevice,
     private url: URL,
     private canvas: HTMLCanvasElement,
   ) {
+    this.standard = url;
     this.touch();
   }
 
   /** The module from `url`, drawing into `canvas`. */
   static async load(url: URL, canvas: HTMLCanvasElement): Promise<ShellReader> {
-    return new ShellReader(await PaperPawDevice.load(url), url, canvas);
+    return new ShellReader(added(await PaperPawDevice.load(url)), url, canvas);
+  }
+
+  /** Runs PaperPaw from another module: a build's, with a plugin with code
+   *  compiled in, or `null` for the standard one. The device starts again
+   *  as it was. */
+  async useModule(url: URL | null): Promise<void> {
+    clearTimeout(this.timer);
+    this.url = url ?? this.standard;
+    this.live = added(await PaperPawDevice.load(this.url));
+    if (this.profile) await this.start(this.profile, this.dark, this.plugin, this.screen);
   }
 
   start(profile: Profile, dark: boolean, plugin: PluginFiles | undefined, screen: Screen = "home"): Promise<void> {
@@ -76,7 +77,7 @@ export class ShellReader {
       if (screen === "sleep" && canSleep(profile)) {
         // The power button, pressed and let go in the device's own time.
         this.live.button("power", true);
-        this.skew += 200;
+        this.skew += SHORT_PRESS;
         this.step();
         this.live.button("power", false);
         this.skew += 2000;
@@ -114,6 +115,59 @@ export class ShellReader {
     });
   }
 
+  /** A screen as a PNG: the author's reader as it shows, or another device,
+   *  night mode or the sleep screen, made apart. */
+  async screenshot(profile?: Profile, dark?: boolean, screen?: Screen): Promise<{ png: string; width: number; height: number }> {
+    const target = profile ?? this.profile!;
+    const asleep = (screen ?? this.screen) === "sleep";
+    if (asleep && !canSleep(target)) {
+      throw new Error(`The ${target.name} runs Android, which shows its own screen while it sleeps: PaperPaw draws none there.`);
+    }
+    const same = target.id === this.profile?.id && (dark ?? this.dark) === this.dark && asleep === (this.screen === "sleep");
+    const image = await this.guard(() => {
+      this.step();
+      return same ? this.live.shown() : this.live.snapshot({ profile: target.id, dark: dark ?? this.dark, asleep });
+    });
+    return { png: await png(image), width: image.width, height: image.height };
+  }
+
+  /** paperpaw-dev's checks of the data plugin on the card, on the
+   *  author's device: its folder, its files, and its screens drawn. */
+  check(): Promise<Finding[]> {
+    return this.guard(() => {
+      if (!this.plugin || Object.keys(this.plugin.files).length === 0) return [];
+      const report = this.live.check(CHECKS);
+      return report.findings.map((f) => ({
+        check: f.check,
+        level: f.level,
+        place: f.place || "(folder)",
+        message: f.message + (f.variants.length > 1 ? ` (${f.variants.join(", ")})` : ""),
+      }));
+    });
+  }
+
+  /** Runs `work` on the author's reader; if the module stops, a fresh
+   *  instance starts on the home screen, and the request fails saying so. */
+  private async guard<T>(work: () => T): Promise<T> {
+    try {
+      return work();
+    } catch (e) {
+      if (!(e instanceof WebAssembly.RuntimeError)) throw e;
+      await this.recover();
+      throw new Error(STOPPED);
+    }
+  }
+
+  private async recover(): Promise<void> {
+    clearTimeout(this.timer);
+    this.live = added(await this.live.fresh());
+    this.screen = "home";
+    if (this.profile) {
+      boot(this.live, this.profile, this.dark, this.plugin);
+      this.step();
+    }
+  }
+
   /** Fingers on the screen, where the device has a touch screen: the
    *  canvas's pointer events as the device's own, in its pixels. */
   private touch(): void {
@@ -143,84 +197,6 @@ export class ShellReader {
     }
   }
 
-  /** A screen as a PNG: the author's reader, or another device, in night
-   *  mode or asleep, from the second instance. */
-  async screenshot(profile?: Profile, dark?: boolean, screen?: Screen): Promise<{ png: string; width: number; height: number }> {
-    const target = profile ?? this.profile!;
-    const asleep = (screen ?? this.screen) === "sleep";
-    if (asleep && !canSleep(target)) {
-      throw new Error(`The ${target.name} runs Android, which shows its own screen while it sleeps: PaperPaw draws none there.`);
-    }
-    const same = target.id === this.profile?.id && (dark ?? this.dark) === this.dark && asleep === (this.screen === "sleep");
-    let image: ImageData;
-    if (same) {
-      image = await this.guard(() => {
-        this.step();
-        return this.live.shown();
-      });
-    } else {
-      this.shots ??= await PaperPawDevice.load(this.url);
-      const device = this.shots;
-      try {
-        boot(device, target, dark ?? this.dark, this.plugin);
-        settle(device);
-        if (asleep) this.sleep(device, target);
-        image = device.shown();
-      } catch (e) {
-        if (!(e instanceof WebAssembly.RuntimeError)) throw e;
-        this.shots = undefined;
-        throw new Error(STOPPED.replace(" The reader was started again on its home screen.", ""));
-      }
-    }
-    return { png: await png(image), width: image.width, height: image.height };
-  }
-
-  /** paperpaw-dev's checks of the plugin, on the author's device: its
-   *  folder, its files, and its screens drawn. */
-  check(): Promise<Finding[]> {
-    return this.guard(() => {
-      if (!this.plugin || Object.keys(this.plugin.files).length === 0) return [];
-      const report = this.live.check(CHECKS);
-      return report.findings.filter((f) => f.plugin !== PREVIEW_ID).map((f) => ({
-        check: f.check,
-        level: f.level,
-        place: f.place || "(folder)",
-        message: f.message + (f.variants.length > 1 ? ` (${f.variants.join(", ")})` : ""),
-      }));
-    });
-  }
-
-  /** Runs `work` on the author's reader; if the module stops, it is loaded
-   *  anew, started on its home screen, and the request fails saying so. */
-  private async guard<T>(work: () => T): Promise<T> {
-    try {
-      return work();
-    } catch (e) {
-      if (!(e instanceof WebAssembly.RuntimeError)) throw e;
-      await this.reload();
-      throw new Error(STOPPED);
-    }
-  }
-
-  private async reload(): Promise<void> {
-    clearTimeout(this.timer);
-    this.live = await PaperPawDevice.load(this.url);
-    this.screen = "home";
-    if (this.profile) {
-      boot(this.live, this.profile, this.dark, this.plugin);
-      this.step();
-    }
-  }
-
-  /** Puts the device to sleep, as its power button does. */
-  private sleep(device: PaperPawDevice, profile: Profile): void {
-    if (!canSleep(profile)) return;
-    device.button("power", true);
-    settle(device);
-    device.button("power", false);
-    settle(device);
-  }
-
   /** Lets the author's device's time pass, draws, and waits for what is
    *  due next. */
   private step(): void {
@@ -230,12 +206,12 @@ export class ShellReader {
     if (next !== null) this.timer = setTimeout(() => this.tick(), Math.max(next, 1));
   }
 
-  /** A step of its own (a timer, a frame drawn): a stop reloads it. */
+  /** A step of its own (a timer): a stop starts it fresh. */
   private tick(): void {
     try {
       this.step();
     } catch (e) {
-      if (e instanceof WebAssembly.RuntimeError) void this.reload();
+      if (e instanceof WebAssembly.RuntimeError) void this.recover();
       else throw e;
     }
   }
@@ -254,34 +230,26 @@ export class ShellReader {
         this.canvas.getContext("2d")!.putImageData(this.live.frame(), 0, 0);
         if (this.live.animating()) this.requestDraw();
       } catch (e) {
-        if (e instanceof WebAssembly.RuntimeError) void this.reload();
+        if (e instanceof WebAssembly.RuntimeError) void this.recover();
         else throw e;
       }
     });
   }
 }
 
+/** A module's device with its plugins with code added (a build's module
+ *  has `pp_plugins`; the standard one has none). */
+function added(device: PaperPawDevice): PaperPawDevice {
+  const add = (device.exports as Record<string, unknown>).pp_plugins;
+  if (typeof add === "function") (add as () => void)();
+  return device;
+}
+
 /** A device of `profile`, the plugin on its card, started. */
 function boot(device: PaperPawDevice, profile: Profile, dark: boolean, plugin: PluginFiles | undefined): void {
   device.create({ profile: profile.id, language: "en", dark });
-  for (const [path, bytes] of Object.entries(PREVIEW)) device.putFile(PREVIEW_ID, path, bytes);
   for (const [path, bytes] of Object.entries(plugin?.files ?? {})) device.putFile(plugin!.id, path, bytes);
   device.start();
-}
-
-/** Each device's own clock, run by `settle`. */
-const clocks = new WeakMap<PaperPawDevice, number>();
-
-/** Lets a device's time run, without waiting, until nothing is due soon. */
-function settle(device: PaperPawDevice): void {
-  let now = clocks.get(device) ?? 0;
-  const end = now + SETTLE;
-  for (let i = 0; i < 500 && now < end; i++) {
-    const next = device.advance(now);
-    if (next === null || next > 2000) break;
-    now += Math.max(next, 1);
-  }
-  clocks.set(device, now);
 }
 
 async function png(image: ImageData): Promise<string> {

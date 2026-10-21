@@ -6,8 +6,10 @@
 | `[core] night-pictures` | Pictures in night mode inverted | `true`, `false` | `false` | Off: covers and photos as they are, not as negatives. |
 | `[core] mono-text` | Text darkness | `core.mono-text.light`, `core.mono-text.normal`, `core.mono-text.full` | `core.mono-text.normal` | How full letters are drawn without grays; full helps on pale screens. |
 | `[core] speak-focus` | Say what is chosen | `true`, `false` | `false` | Says the row or button the buttons move to, for using PaperPaw without looking. |
+| `[core] voice` | Voice | `core.voice.system` | `core.voice.system` | What reads aloud. Automatic: the system's voice, or where the device has none, a plugin's that speaks the language; or a plugin's for the languages it speaks. |
 | `[core] edge-ends` | Edges for swipes: top and bottom | 0 to 25 | `10` | How far in from the edge a swipe still counts as one in from the edge (home, quick panel, back); 0: none there. On Android the outermost strip is the system's. |
 | `[core] edge-sides` | Edges for swipes: left and right | 0 to 25 | `5` | How far in from the edge a swipe still counts as one in from the edge (home, quick panel, back); 0: none there. On Android the outermost strip is the system's. |
+| `[core] library-folder` | Library folder | text | `books` | The folder with your books. |
 | `[core] ui-size` | Menu text size | 7 to 24 | `9` | Size of menus, lists and the status line. |
 | `[core] ui-contrast` | Contrast | `core.contrast.normal`, `core.contrast.strong` | `core.contrast.normal` | Strong draws gray hints and notes in black, easier to read on screens with few grays. |
 | `[core] ui-header` | Headers | `core.header.plain`, `core.header.light`, `core.header.dark` | `core.header.plain` | The top of menus and lists: the title on the page, black on white with a line below, or white on black. |
@@ -20,6 +22,7 @@
 | `[core] ui-row` | Row height | 120 to 300 | `160` | Height of the rows of menus and lists, relative to their text. |
 | `[core] ui-lines` | Lines | 1 to 10 | `3` | How thick lines and frames are drawn. |
 | `[core] logo` | Logo picture | text | `` | A picture (JPEG, PNG) shown in place of PaperPaw's logo, e.g. plugins/mine/logo.png. Empty for PaperPaw's own. |
+| `[core] ui-palette` | Grays | text | `` | The grays of the interface by what they are for, e.g. muted=60 line=170 (0 black, 255 white). Empty for the usual ones. |
 | `[core] keymap-preset` | Button layout | `core.standard`, `core.two-buttons`, `core.left-handed` | `core.standard` | What the device's buttons do. |
 | `[core] full-refresh-interval` | Full refresh | 0 to 1000 | `6` | A flashing refresh after this many page turns removes ghosting; 0 never flashes. |
 | `[core] flash-screens` | Flash when screens change | `true`, `false` | `false` | A full refresh when another screen opens leaves no trace of the last one, but takes longer: three and a half seconds on the X4. |
@@ -29,6 +32,11 @@
 | `[core] swap-page-buttons` | Swap the page buttons | `true`, `false` | `false` | While reading, the page buttons turn the other way: the one that went forward goes back, and the other way round. Menus and lists keep them as they are. |
 | `[core] notice-seconds` | Messages show for | 1 to 60 | `4` | How long short messages such as “Sync done” stay on the screen. |
 | `[core] long-press-ms` | Long press | 200 to 3000 | `500` | How long to hold a button or finger for a long press. |
+| `[core] double-tap-ms` | Double tap | 150 to 1000 | `300` | How quickly a second tap or press must follow the first to count as a double tap, where something is bound to one. |
+| `[core] tap-slop` | Tap tolerance | 1 to 20 | `3` | How far a finger may move and still tap. |
+| `[core] swipe-distance` | Swipe distance | 2 to 50 | `8` | How far a finger must move to swipe. |
+| `[core] frontlight` | Front light | 0 to 100 | `0` | How bright the front light is; 0 switches it off. |
+| `[core] frontlight-warmth` | Front light warmth | 0 to 100 | `50` | How warm the front light is: 0 cold, 100 warm. |
 | `[core] space.size` | Size | `core.space.small`, `core.space.medium`, `core.space.large` | `core.space.medium` | The height of every space. |
 | `[core] text-color` | Text colour | `core.color.black`, `core.color.dark-gray`, `core.color.gray`, `core.color.brown`, `core.color.dark-blue`, `core.color.dark-green`, `core.color.burgundy`, `core.color.violet`, `core.color.own` | `core.color.black` | Softer than black on white, easier on the eyes on bright screens. Pictures take the colours too; night mode swaps them. |
 | `[core] text-color-own` | Own text colour | text | `#5b4636` | A colour code such as #5b4636 (red, green, blue), used when the colour above is "Own colour". |
@@ -49,6 +57,7 @@
 | `[core] paragraph-spacing` | Space between paragraphs | `true`, `false` | `false` | Leave some space between paragraphs, with or without indented first lines. |
 | `[core] widows` | Lines kept at the top | 1 to 4 | `1` | The fewest lines of a paragraph alone at the top of a page: more go on with them. |
 | `[core] orphans` | Lines kept at the bottom | 1 to 4 | `1` | The fewest lines of a paragraph alone at the bottom of a page: with fewer, the paragraph begins on the next page. |
+| `[core] reading-app` | Reading app | `core.reading-app.default` | `core.reading-app.default` | The app books open in; each format may have its own, and a book or a folder too (Open with). |
 | `[core] footnotes` | Footnotes | `core.footnotes.popup`, `core.footnotes.jump` | `core.footnotes.popup` | A tapped note mark (1, [2], *) shows its note over the page, or goes to it. |
 | `[core] page-frame` | Page frame | `core.page-frame.single` | `core.page-frame.single` | How the text is set on the page: in one column, or as a plugin frames it (two columns, two pages side by side). |
 | `[core] scope-only` | Only this book | `true`, `false` | `false` | Changes to font and layout apply to this book only (marked •). Off: the book uses the general settings again. |

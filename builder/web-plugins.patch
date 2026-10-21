@@ -1,0 +1,39 @@
+diff --git a/shells/web/src/emulator.rs b/shells/web/src/emulator.rs
+index d7a7e01b..43965c24 100644
+--- a/shells/web/src/emulator.rs
++++ b/shells/web/src/emulator.rs
+@@ -43,6 +43,25 @@ pub fn version() -> String {
+     }
+ }
+ 
++thread_local! {
++    /// Plugins with code compiled into the module, added to the app
++    /// (`set_plugins`, called by a harness crate). PROTOTYPE PATCH.
++    static ADDED: std::cell::Cell<Option<paperpaw_emulator::device::AddPlugins>> = const { std::cell::Cell::new(None) };
++}
++
++/// Adds plugins with code to every device started after.
++pub fn set_plugins(add: paperpaw_emulator::device::AddPlugins) {
++    ADDED.with(|a| a.set(Some(add)));
++}
++
++struct Added;
++impl Added {
++    fn get(&self) -> Option<paperpaw_emulator::device::AddPlugins> {
++        ADDED.with(|a| a.get())
++    }
++}
++static PLUGINS: Added = Added;
++
+ /// Wake-ups handled in one call of [`Emulator::advance`], at most.
+ const MAX_TICKS: usize = 100;
+ 
+@@ -144,7 +163,7 @@ impl Emulator {
+             self.language
+         );
+         let mut device =
+-            Device::in_memory(self.profile, Some(config), self.files.clone(), true, None)
++            Device::in_memory(self.profile, Some(config), self.files.clone(), true, PLUGINS.get())
+                 .map_err(|e| e.to_string())?;
+         device.start();
+         self.device = Some(device);

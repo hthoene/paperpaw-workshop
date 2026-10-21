@@ -70,7 +70,16 @@ export class Handbook {
     readonly topics: Topic[],
     readonly registry: Registry,
     private fetchTopic: (file: string) => Promise<string>,
+    /** The system prompt for plugins with code. */
+    readonly code = "",
+    /** The project a plugin with code starts from: PaperPaw's sample. */
+    readonly codeSample: Record<string, string> = {},
   ) {}
+
+  /** The system prompt for a kind of plugin. */
+  promptFor(kind: "data" | "code"): string {
+    return kind === "code" ? this.code : this.prompt;
+  }
 
   /** Loads it from `base` (a URL folder, `./handbook/` by default). */
   static async load(base = "./handbook/"): Promise<Handbook> {
@@ -79,15 +88,15 @@ export class Handbook {
       if (!r.ok) throw new Error(`the handbook's ${name} could not be loaded (${r.status})`);
       return r;
     };
-    const [meta, prompt, topics, registry] = await Promise.all([
+    const [meta, prompt, topics, registry, code, sample] = await Promise.all([
       get("meta.json").then((r) => r.json()),
       get("data.md").then((r) => r.text()),
       get("index.json").then((r) => r.json()),
       get("registry.json").then((r) => r.json()),
+      get("code.md").then((r) => r.text()),
+      get("code-sample.json").then((r) => r.json()),
     ]);
-    return new Handbook(meta, prompt, topics, registry, (file) =>
-      get(`topics/${file}`).then((r) => r.text()),
-    );
+    return new Handbook(meta, prompt, topics, registry, (file) => get(`topics/${file}`).then((r) => r.text()), code, sample);
   }
 
   profile(id: string): Profile | undefined {

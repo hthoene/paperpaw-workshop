@@ -72,6 +72,8 @@ button, input, textarea { font: inherit; color: inherit; }
 .ask { padding: 1.2rem 1.3rem; max-width: 60rem; }
 .ask textarea { width: 100%; min-height: 6.5rem; resize: vertical; background: transparent; border: 0; font-size: 1.15rem; outline: none; }
 .ask .row { display: flex; align-items: center; gap: 1rem; margin-top: .5rem; flex-wrap: wrap; }
+.code-choice { margin-top: .4rem; font-size: .92rem; color: var(--ink-2); }
+.code-choice b { color: var(--ink); }
 .ask .row .small { margin-right: auto; }
 .ideas { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(14rem, 100%), 1fr)); gap: 1rem; margin: 1.3rem 0 0; max-width: 75rem; padding: 0; list-style: none; }
 .idea { text-align: left; padding: 1.1rem; cursor: pointer; width: 100%; height: 100%; }

@@ -42,6 +42,9 @@ export interface Session {
   context: ToolContext;
   model: string;
   effort: "low" | "medium" | "high";
+  /** The system prompt: the handbook for the plugin's kind (data's if not
+   *  given). */
+  prompt?: string;
 }
 
 export interface TurnEvents {
@@ -86,7 +89,7 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
 
   const tools = session.tools.map((t) => definition(t, provider.eagerTools));
   const system: Anthropic.TextBlockParam[] = [
-    { type: "text", text: session.handbook.prompt, cache_control: { type: "ephemeral" } },
+    { type: "text", text: session.prompt ?? session.handbook.prompt, cache_control: { type: "ephemeral" } },
   ];
 
   for (let round = 0; round < MAX_ROUNDS; round++) {

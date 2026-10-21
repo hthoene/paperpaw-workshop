@@ -195,6 +195,28 @@ const data = [
   .filter(Boolean)
   .join("\n\n");
 
+// 6b. The code handbook (the system prompt for plugins with code): the
+// rules, PaperPaw's own docs on writing plugins, the sample complete.
+const sampleCode = exists("samples/hello-plugin/src/lib.rs")
+  ? [
+      "# The sample plugin, complete\n\nPaperPaw's own sample (`samples/hello-plugin`), which a new project starts from.",
+      "`src/lib.rs`:\n\n```rust\n" + read("samples/hello-plugin/src/lib.rs").trim() + "\n```",
+      "`i18n/en.ini`:\n\n```ini\n" + read("samples/hello-plugin/i18n/en.ini").trim() + "\n```",
+    ]
+  : [];
+const code = [
+  part("common.md"),
+  part("code.md"),
+  "# From PaperPaw's documentation",
+  ...["The sample plugin", "Reading and changing: `Env` and commands", "Screens", "Settings", "Events", "Translations", "What plugins contribute", "Memory"]
+    .filter((t) => plugins.some((s) => s.title === t))
+    .map((t) => section(t)),
+  ...sampleCode,
+  "## The devices\n\n" + profilesTable,
+]
+  .filter(Boolean)
+  .join("\n\n");
+
 // 7. Topics for lookup_docs.
 const slug = (t) =>
   t
@@ -211,6 +233,20 @@ for (const s of sampleList) add(`samples/${s.id}`, `Sample data plugin: ${s.id}`
 add("widgets", "Widgets for home screen layouts", widgetsTable);
 add("actions", "Actions for key maps", actionsTable);
 add("devices", "The devices (emulator profiles)", profilesTable);
+// The SDK's public items with their signatures (crates/paperpaw-sdk/api.txt),
+// by module: what a plugin with code may call, exactly.
+if (exists("crates/paperpaw-sdk/api.txt")) {
+  const byModule = new Map();
+  for (const line of read("crates/paperpaw-sdk/api.txt").split("\n")) {
+    const m = /^pub (?:[a-z ]+ )?paperpaw_sdk::([a-z_]+)::/.exec(line);
+    if (!line.startsWith("pub ")) continue;
+    const module = m ? m[1] : "root";
+    byModule.set(module, [...(byModule.get(module) || []), line]);
+  }
+  for (const [module, lines] of byModule) {
+    add(`sdk/${module}`, module === "root" ? "The SDK's top level (paperpaw_sdk::...)" : `The SDK's module ${module}`, "```rust\n" + lines.join("\n") + "\n```");
+  }
+}
 const byPlugin = new Map();
 for (const s of registry.settings) {
   const plugin = s.id.split(".")[0];
@@ -226,6 +262,21 @@ const tokens = (text) => Math.round(text.length / 3.6);
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(path.join(out, "topics"), { recursive: true });
 fs.writeFileSync(path.join(out, "data.md"), data + "\n");
+fs.writeFileSync(path.join(out, "code.md"), code + "\n");
+// The project a plugin with code starts from: PaperPaw's sample, as the
+// workshop and its builder take a project (builder/project.mjs).
+if (exists("samples/hello-plugin/src/lib.rs")) {
+  const sample = {
+    "Cargo.toml": '[package]\nname = "hello"\nversion = "0.1.0"\n\n[package.metadata.paperpaw]\nplugin = "Hello"\n\n[dependencies]\npaperpaw-sdk = "0.5"\n',
+    "src/lib.rs": read("samples/hello-plugin/src/lib.rs"),
+    "i18n/en.ini": read("samples/hello-plugin/i18n/en.ini"),
+    "plugin/plugin.ini": exists("samples/hello-native/plugin/plugin.ini")
+      ? read("samples/hello-native/plugin/plugin.ini")
+      : "[plugin]\nid = hello\nname = Hello\ndescription = A sample plugin to start from.\nversion = 0.1.0\n",
+  };
+  if (exists("samples/hello-plugin/i18n/de.ini")) sample["i18n/de.ini"] = read("samples/hello-plugin/i18n/de.ini");
+  fs.writeFileSync(path.join(out, "code-sample.json"), JSON.stringify(sample, null, 1) + "\n");
+}
 const index = topics.map((t) => {
   const file = `${t.id.replace(/\//g, "--")}.md`;
   fs.writeFileSync(path.join(out, "topics", file), t.body + "\n");
@@ -239,6 +290,6 @@ fs.writeFileSync(path.join(out, "index.json"), JSON.stringify(index, null, 1) + 
 fs.writeFileSync(path.join(out, "registry.json"), JSON.stringify(registry) + "\n");
 fs.writeFileSync(
   path.join(out, "meta.json"),
-  JSON.stringify({ ref, commit, generated: new Date().toISOString().slice(0, 10), dataTokens: tokens(data) }, null, 2) + "\n",
+  JSON.stringify({ ref, commit, generated: new Date().toISOString().slice(0, 10), dataTokens: tokens(data), codeTokens: tokens(code) }, null, 2) + "\n",
 );
-console.log(`handbook: data.md about ${tokens(data)} tokens, ${topics.length} topics, in ${path.relative(root, out)}`);
+console.log(`handbook: data.md about ${tokens(data)} tokens, code.md about ${tokens(code)}, ${topics.length} topics, in ${path.relative(root, out)}`);

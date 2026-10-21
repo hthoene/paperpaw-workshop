@@ -22,6 +22,8 @@ export function handbook(): Handbook {
     json("index.json"),
     json("registry.json"),
     async (file) => fs.readFileSync(path.join(dir, "topics", file), "utf8"),
+    fs.readFileSync(path.join(dir, "code.md"), "utf8"),
+    json("code-sample.json"),
   );
 }
 
@@ -55,6 +57,7 @@ export function bench(project: Project = newProject()): Bench {
         shown = profile;
         await emulator.start(profile, false, { id: "plugin", files: files.bytes() });
       },
+      useModule: (url) => emulator.useModule(url),
     },
   };
   return { project, files, emulator, uploads, context, handbook: book };

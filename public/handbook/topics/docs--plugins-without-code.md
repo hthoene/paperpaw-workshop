@@ -7,7 +7,7 @@ plugins/large-print/
   plugin.ini     [plugin] id, name, description, version, formats
   i18n/*.ini     translation catalogs (also whole new languages)
   keymap.ini     key bindings
-  settings.ini   new defaults for any plugin's settings ([reader] font-size = 14)
+  settings.ini   new defaults for any plugin's settings ([core] font-size = 14)
   fonts/*.ttf    fonts to read with (also .otf, .ttc), by family
   fonts/*.ppfp   packs with letters other fonts lack, named in plugin.ini:
                  [extends] cyrillic.ppfp = fonts-default.literata

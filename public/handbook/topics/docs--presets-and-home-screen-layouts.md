@@ -34,3 +34,20 @@ what one changes (`Preset::changes` with the settings it covers), show
 it (`Command::PreviewSettings`: the values show on every screen without
 being kept, until the screen that asked closes) and keep it
 (`presets::commands`).
+
+A theme is a preset of the kind `core.theme` (`presets::THEME`): values
+for the appearance settings. Where any plugin brings one, the
+appearance settings begin with *Theme*, which lists them; the one
+chosen gives the appearance settings its values and those it leaves
+out their defaults, so two themes installed never fight. A data plugin
+brings themes in its `presets.ini`:
+
+```ini
+[paw]
+kind = core.theme
+name = Paw
+description = Round and friendly: a frame for the focus, no lines.
+core.ui-corners = core.corners.soft
+core.ui-focus = core.focus.ring
+core.ui-separators = core.separators.none
+```

@@ -6,6 +6,9 @@
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
+/// What a call returns once a panic stopped the module.
+const STOPPED = 2;
+
 /// The phases of a finger on the screen, as the module numbers them.
 export const PHASES = { down: 0, move: 1, up: 2, cancel: 3 };
 
@@ -30,6 +33,11 @@ export const KEYS = {
 export class PaperPawDevice {
   /// Loads the module from `url` (`paperpaw-web.wasm`).
   static async load(url) {
+    return PaperPawDevice.from(await WebAssembly.compileStreaming(fetch(url)));
+  }
+
+  /// A device of the compiled `module`: a fresh instance, its own memory.
+  static async from(module) {
     const device = new PaperPawDevice();
     const imports = {
       paperpaw: {
@@ -42,10 +50,17 @@ export class PaperPawDevice {
         },
       },
     };
-    const { instance } = await WebAssembly.instantiateStreaming(fetch(url), imports);
+    const instance = await WebAssembly.instantiate(module, imports);
+    device.module = module;
     device.exports = instance.exports;
     device.memory = instance.exports.memory;
     return device;
+  }
+
+  /// A fresh instance of the same module: after a panic, which leaves
+  /// this one stopped for good (a trap, `WebAssembly.RuntimeError`).
+  fresh() {
+    return PaperPawDevice.from(this.module);
   }
 
   /// Calls `f` with `values` (strings or bytes) copied into the module's
@@ -75,8 +90,10 @@ export class PaperPawDevice {
     return decoder.decode(new Uint8Array(this.memory.buffer, ptr, len).slice());
   }
 
-  /// Throws the module's error when `status` says it failed.
+  /// Throws the module's error when `status` says it failed; once a
+  /// panic stopped it (2), as the trap did: start a fresh one.
   #check(status) {
+    if (status === STOPPED) throw new WebAssembly.RuntimeError("the device stopped after a panic");
     if (status !== 0) throw new Error(this.#result());
   }
 
@@ -101,8 +118,14 @@ export class PaperPawDevice {
     this.#check(this.exports.pp_start());
   }
 
+  /// PaperPaw's version, and the commit the module was built from.
+  version() {
+    this.exports.pp_version();
+    return this.#result();
+  }
+
   /// The device: `{ id, name, width, height, dpi, grays, color, touch,
-  /// buttons, row }`.
+  /// buttons, row, version }`.
   device() {
     this.#check(this.exports.pp_device());
     return JSON.parse(this.#result());
@@ -110,7 +133,9 @@ export class PaperPawDevice {
 
   /// A button pressed or let go; false if the device has none so named.
   button(name, pressed) {
-    return this.#with([name], (p, l) => this.exports.pp_button(p, l, pressed ? 1 : 0)) === 0;
+    const status = this.#with([name], (p, l) => this.exports.pp_button(p, l, pressed ? 1 : 0));
+    if (status === STOPPED) this.#check(status);
+    return status === 0;
   }
 
   /// A finger on the screen (`phase` of PHASES) at the screen's pixel.
@@ -122,6 +147,7 @@ export class PaperPawDevice {
   /// something is due, or null.
   advance(now) {
     const next = this.exports.pp_advance(now);
+    if (next === -2) throw new WebAssembly.RuntimeError("the device stopped after a panic");
     return next < 0 ? null : next;
   }
 
@@ -130,12 +156,19 @@ export class PaperPawDevice {
     return [this.exports.pp_width(), this.exports.pp_height()];
   }
 
+  /// How often the device ran out of its memory (the X4's heap budget):
+  /// in a browser it goes on, where the device would have stopped.
+  outOfMemory() {
+    return this.exports.pp_out_of_memory();
+  }
+
   /// Whether the panel still changes by itself (a full refresh flashing).
   animating() {
     return this.exports.pp_animating() === 1;
   }
 
   #image(ptr) {
+    if (ptr === 0) throw new WebAssembly.RuntimeError("the device stopped after a panic");
     const [width, height] = this.size();
     const bytes = new Uint8ClampedArray(this.memory.buffer, ptr, width * height * 4).slice();
     return new ImageData(bytes, width, height);
@@ -149,6 +182,18 @@ export class PaperPawDevice {
   /// What the panel shows once settled: for screenshots.
   shown() {
     return this.#image(this.exports.pp_shown());
+  }
+
+  /// What another device (`profile`), night mode or not (`dark`), or the
+  /// sleep screen (`asleep`) shows with the card as it is, made apart:
+  /// what this device shows stays.
+  snapshot({ profile = "", dark, asleep = false } = {}) {
+    const night = dark === undefined ? 2 : dark ? 1 : 0;
+    this.#check(this.#with([profile], (p, l) => this.exports.pp_snapshot(p, l, night, asleep ? 1 : 0)));
+    const [width, height] = this.#result().split("x").map(Number);
+    const ptr = this.exports.pp_snapshot_pixels();
+    const bytes = new Uint8ClampedArray(this.memory.buffer, ptr, width * height * 4).slice();
+    return new ImageData(bytes, width, height);
   }
 
   /// paperpaw-dev's report of the data plugins on the card (`commands`:

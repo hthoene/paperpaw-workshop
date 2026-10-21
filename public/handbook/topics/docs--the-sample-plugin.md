@@ -139,7 +139,10 @@ Screens say what they show, for reading the interface aloud,
 automation and tests: the `ui` helpers (list rows, buttons, switches,
 headers, labels) tell what they draw by themselves. A screen that draws
 in its own way tells it with `canvas.describe(role, text, area,
-focused, on)`.
+focused, on)`, with the role of what it is (`Row`, `Button`, `Switch`,
+`Check`, `Radio`, `Field`, `Image`, `Link`, `Dialog`, `Progress` …). A
+screen reader of one's own hears where the focus of the buttons goes
+(`events::FOCUS_CHANGED`: its role, label and area).
 
 ### Settings
 
@@ -190,6 +193,16 @@ r.add_settings(&SETTINGS)?;
 Such settings are read like any other; those that need a unit, a step,
 a section or an editor screen are made as above.
 
+A setting may show only while another has a value
+(`SettingExtra::shown_if("hello.sync", "on")`, the server's address
+while syncing is on), and check a value before it is set
+(`SettingExtra::check(fn)`): a value it refuses is not set, and the
+reader is told the translation of the key it returns. Screens of your
+own that list settings open them as the settings pages do with
+`ui::setting_opens` (its editor, the keyboard for text, the list of a
+choice's values); text typed there comes back to the kernel as
+`events::SETTING_TYPED`, which sets it.
+
 ### Events
 
 ```rust
@@ -228,10 +241,12 @@ What is known of books is a service, not a screen's: `library` has a
 book's details (title, author, series, tags, cover, progress, and
 fields plugins add with `library::set_field`), the books read last and
 the favourites, so any plugin can show or use them. Views of many books
-show covers made small and kept on the storage (`library::cover`, a few
-kilobytes each, not the picture) and take a book's details with the
-size a listing told (`library::listing`, `library::book_sized`): on a
-card, each file looked up again is a search through its folder.
+read the catalog rather than each book (below, "What every library
+offers"), show covers made small and kept on the storage
+(`library::cover_variant`, a few kilobytes each, not the picture, one
+for each size a view shows) and take a book's details with the size a
+listing told (`library::listing`, `library::book_sized`): on a card,
+each file looked up again is a search through its folder.
 
 The bookmarks and highlights of books are shared: `annotations` reads
 and keeps them, and whoever changes them emits

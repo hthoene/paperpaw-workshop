@@ -72,4 +72,7 @@ Screens say what they show, for reading the interface aloud,
 automation and tests: the `ui` helpers (list rows, buttons, switches,
 headers, labels) tell what they draw by themselves. A screen that draws
 in its own way tells it with `canvas.describe(role, text, area,
-focused, on)`.
+focused, on)`, with the role of what it is (`Row`, `Button`, `Switch`,
+`Check`, `Radio`, `Field`, `Image`, `Link`, `Dialog`, `Progress` …). A
+screen reader of one's own hears where the focus of the buttons goes
+(`events::FOCUS_CHANGED`: its role, label and area).

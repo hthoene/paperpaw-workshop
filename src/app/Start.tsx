@@ -4,18 +4,20 @@
 import { useEffect, useState } from "preact/hooks";
 
 import { t } from "../i18n";
-import { identity, type Project } from "../project/project";
+import { identity, type Kind, type Project } from "../project/project";
 import { listProjects } from "../project/storage";
 import { Steps } from "./Header";
 
-const IDEAS = ["look", "home", "keys", "text"];
+/** The ideas to start from; `tool` needs code. */
+const IDEAS = ["look", "home", "keys", "text", "tool"];
+const CODE_IDEAS = ["tool"];
 
 interface Props {
   apiKey: string;
   remembered: boolean;
   needsKey: boolean;
   onKey(key: string, remember: boolean): void;
-  onStart(idea: string): void;
+  onStart(idea: string, kind: Kind): void;
 }
 
 export function Start({ apiKey, remembered, needsKey, onKey, onStart }: Props) {
@@ -24,6 +26,7 @@ export function Start({ apiKey, remembered, needsKey, onKey, onStart }: Props) {
   const [remember, setRemember] = useState(remembered);
   const [projects, setProjects] = useState<Project[]>([]);
   const [warn, setWarn] = useState(needsKey);
+  const [code, setCode] = useState(false);
 
   useEffect(() => {
     listProjects().then(setProjects, () => setProjects([]));
@@ -36,7 +39,7 @@ export function Start({ apiKey, remembered, needsKey, onKey, onStart }: Props) {
       return;
     }
     onKey(key.trim(), remember);
-    if (idea.trim()) onStart(idea.trim());
+    if (idea.trim()) onStart(idea.trim(), code ? "code" : "data");
   };
 
   return (
@@ -60,6 +63,12 @@ export function Start({ apiKey, remembered, needsKey, onKey, onStart }: Props) {
             if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) go();
           }}
         />
+        <label class="check code-choice">
+          <input type="checkbox" checked={code} onChange={(e) => setCode((e.target as HTMLInputElement).checked)} />
+          <span>
+            <b>{t("start.code")}</b> {t("start.code.text")}
+          </span>
+        </label>
         <div class="row">
           <span class="small">
             {t("start.hint")} <a href="#/example">{t("start.example")}</a>{" "}
@@ -74,7 +83,13 @@ export function Start({ apiKey, remembered, needsKey, onKey, onStart }: Props) {
       <ul class="ideas">
         {IDEAS.map((id) => (
           <li key={id}>
-            <button class="box idea" onClick={() => setIdea(t(`start.ideas.${id}.prompt`))}>
+            <button
+              class="box idea"
+              onClick={() => {
+                setIdea(t(`start.ideas.${id}.prompt`));
+                setCode(CODE_IDEAS.includes(id));
+              }}
+            >
               <b>{t(`start.ideas.${id}`)}</b>
               <span>{t(`start.ideas.${id}.text`)}</span>
               <em>{t(`start.ideas.${id}.kind`)}</em>

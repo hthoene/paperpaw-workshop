@@ -3,6 +3,7 @@
 | `[core] developer` | Developer options | `true`, `false` | `false` | Settings and numbers for developers: measuring what uses the battery, trying things out, finding faults. |
 | `[core] language` | Language | language | `en` | Language of menus and messages. |
 | `[core] speak-focus` | Say what is chosen | `true`, `false` | `false` | Says the row or button the buttons move to, for using PaperPaw without looking. |
+| `[core] voice` | Voice | `core.voice.system` | `core.voice.system` | What reads aloud. Automatic: the system's voice, or where the device has none, a plugin's that speaks the language; or a plugin's for the languages it speaks. |
 | `[core] sleep-after` | Sleep after | 0 to 120 | `10` | Minutes without use after which the device goes to sleep by itself; 0: never. Not while reading aloud or downloading. |
 | `[core] clock-format` | Clock | `core.clock.24h`, `core.clock.12h` | `core.clock.24h` | How the time shows: 14:30 or 2:30 PM. |
 | `[core] week-start` | First day of the week | `core.week.auto`, `core.week.monday`, `core.week.sunday` | `core.week.auto` | Where weeks begin in calendars and the reading statistics. |

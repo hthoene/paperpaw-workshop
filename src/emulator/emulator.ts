@@ -15,6 +15,9 @@ export interface Emulator {
   /** The screen of `profile` (the one shown, if none), as a PNG. */
   screenshot(profile?: Profile, dark?: boolean, screen?: Screen): Promise<ScreenshotResult>;
   check(): Promise<Finding[]>;
+  /** Runs PaperPaw from another module (a build's), or `null` for the
+   *  one the workshop brings. */
+  useModule(url: string | null): Promise<void>;
 }
 
 /** How long a request to the frame may take. */
@@ -103,5 +106,9 @@ export class FrameEmulator implements Emulator {
 
   check(): Promise<CheckResult> {
     return this.send({ type: "check" });
+  }
+
+  useModule(url: string | null): Promise<void> {
+    return this.send({ type: "module", url });
   }
 }

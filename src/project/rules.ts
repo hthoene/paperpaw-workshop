@@ -35,8 +35,40 @@ export function validVersion(version: string): boolean {
   return /^\d+\.\d+\.\d+$/.test(version);
 }
 
-/** Why `path` cannot be in a plugin's folder, or null if it can. */
-export function pathProblem(path: string): string | null {
+/** Paths a plugin with code holds (as the builder takes them,
+ *  builder/project.mjs): its crate, its translations, its folder. */
+const CODE_PATHS = [/^Cargo\.toml$/, /^src\/[a-z0-9_/]+\.rs$/, /^i18n\/[a-z]{2,3}(-[A-Za-z]+)?\.ini$/, /^plugin\/.+$/, /^(README|LICENCE|LICENSE)(\.md|\.txt)?$/];
+/** The most files a plugin with code's project holds. */
+export const MAX_CODE_FILES = 200;
+
+/** Why `path` cannot be in a plugin's project, or null if it can. A data
+ *  plugin is its folder; a plugin with code is a crate, its folder in
+ *  `plugin/`. */
+export function pathProblem(path: string, kind: "data" | "code" = "data"): string | null {
+  if (kind === "code") {
+    const base = basicProblem(path);
+    if (base) return base;
+    if (path.startsWith("plugin/")) return pathProblem(path.slice("plugin/".length));
+    if (!CODE_PATHS.some((p) => p.test(path))) {
+      return "a plugin with code holds Cargo.toml, src/*.rs, i18n/<language>.ini and its folder plugin/ (plugin.ini and what it brings)";
+    }
+    return null;
+  }
+  return dataProblem(path);
+}
+
+function basicProblem(path: string): string | null {
+  if (path.length === 0) return "the path is empty";
+  if (path.length > MAX_PATH) return `the path is longer than ${MAX_PATH} characters`;
+  for (const part of path.split("/")) {
+    if (part.length === 0) return "the path has an empty folder name";
+    if (part.startsWith(".")) return "a name starts with a dot";
+    if (!/^[A-Za-z0-9._-]+$/.test(part)) return "names may hold only letters, digits, '.', '_' and '-'";
+  }
+  return null;
+}
+
+function dataProblem(path: string): string | null {
   if (path.length === 0) return "the path is empty";
   if (path.length > MAX_PATH) return `the path is longer than ${MAX_PATH} characters`;
   const parts = path.split("/");
@@ -64,5 +96,5 @@ export function extension(path: string): string {
 
 /** Whether `path` holds text (what the AI writes and reads). */
 export function isText(path: string): boolean {
-  return [".ini", ".css", ".txt", ".md"].includes(extension(path));
+  return [".ini", ".css", ".txt", ".md", ".rs", ".toml"].includes(extension(path));
 }

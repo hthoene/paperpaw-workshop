@@ -239,5 +239,12 @@
   "upload.mark.text": "txt",
   "reader.label": "The reader",
   "reader.device": "Device",
-  "reader.frame": "The emulated reader"
+  "reader.frame": "The emulated reader",
+  "step.build": "Built it",
+  "start.ideas.tool": "A small tool of my own",
+  "start.ideas.tool.text": "A new screen or widget: a timer, a quote a day, a counter.",
+  "start.ideas.tool.kind": "With code",
+  "start.ideas.tool.prompt": "A screen in the tools menu that shows a short quote, a different one each day.",
+  "start.code": "This needs code:",
+  "start.code.text": "a new screen, widget or tool. The AI writes Rust and builds it (Claude Sonnet 5.5: some cents to a dollar a plugin), which needs the builder (docker compose up)."
 }

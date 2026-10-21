@@ -5,10 +5,11 @@
 import type Anthropic from "@anthropic-ai/sdk";
 
 import { parseIni, iniValue } from "./ini";
-import { MAX_BYTES, MAX_FILES, MAX_TEXT_FILE, isText, pathProblem } from "./rules";
+import { MAX_BYTES, MAX_CODE_FILES, MAX_FILES, MAX_TEXT_FILE, isText, pathProblem } from "./rules";
 import type { UploadInfo } from "./uploads";
 
-export type Kind = "data";
+/** A plugin without code (a folder of files) or with code (a Rust crate). */
+export type Kind = "data" | "code";
 
 /** What only the store reads: the entry and the screenshots. */
 export const STORE_FOLDER = "store/";
@@ -44,6 +45,9 @@ export interface Project {
   /** What the next message carries into a fresh conversation: a summary
    *  of the one before. */
   carried?: string;
+  /** A plugin with code: the emulator's module of its last build, which
+   *  the reader runs (the builder keeps it a day). */
+  module?: string;
   created: string;
   updated: string;
 }
@@ -60,12 +64,14 @@ export const NO_USAGE: Usage = {
   dollars: 0,
 };
 
-export function newProject(kind: Kind = "data"): Project {
+/** A new project; a plugin with code starts from `files` (PaperPaw's
+ *  sample, from the handbook). */
+export function newProject(kind: Kind = "data", files: Record<string, string> = {}): Project {
   const now = new Date().toISOString();
   return {
     key: randomKey(),
     kind,
-    files: {},
+    files: { ...files },
     messages: [],
     usage: { ...NO_USAGE },
     created: now,
@@ -79,9 +85,10 @@ function randomKey(): string {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-/** The plugin's id and name as its `plugin.ini` says, if it says. */
+/** The plugin's id and name as its `plugin.ini` says, if it says (a
+ *  plugin with code has it in `plugin/`). */
 export function identity(project: Project): { id?: string; name?: string; version?: string } {
-  const ini = project.files["plugin.ini"];
+  const ini = project.files[project.kind === "code" ? "plugin/plugin.ini" : "plugin.ini"];
   if (typeof ini !== "string") return {};
   const parsed = parseIni(ini);
   return {
@@ -105,6 +112,11 @@ export class Files {
       .sort((a, b) => a.path.localeCompare(b.path));
   }
 
+  /** Every file as the project keeps it: text as text, the rest as bytes. */
+  all(): Record<string, string | Uint8Array> {
+    return { ...this.project.files };
+  }
+
   read(path: string): string | undefined {
     const content = this.project.files[path];
     return typeof content === "string" ? content : undefined;
@@ -116,9 +128,9 @@ export class Files {
 
   /** Writes a text file; why not, if it may not be written. */
   write(path: string, content: string): string | null {
-    const problem = pathProblem(path);
+    const problem = pathProblem(path, this.project.kind);
     if (problem) return problem;
-    if (!isText(path)) return "only text files (.ini, .css, .txt, .md) can be written here";
+    if (!isText(path)) return "only text files (.ini, .css, .txt, .md, .rs, .toml) can be written here";
     const size = new TextEncoder().encode(content).length;
     if (size > MAX_TEXT_FILE) return `a text file holds at most ${MAX_TEXT_FILE / 1024} KB`;
     const limit = this.limits(path, size);
@@ -130,7 +142,7 @@ export class Files {
 
   /** Writes a picture or a font; why not, if it may not be written. */
   writeBytes(path: string, bytes: Uint8Array): string | null {
-    const problem = pathProblem(path) ?? this.limits(path, bytes.length);
+    const problem = pathProblem(path, this.project.kind) ?? this.limits(path, bytes.length);
     if (problem) return problem;
     this.project.files[path] = bytes;
     this.touch();
@@ -143,8 +155,9 @@ export class Files {
     const files = this.list();
     const known = files.find((f) => f.path === path);
     const counted = (p: string) => !p.startsWith(STORE_FOLDER);
-    if (!known && counted(path) && files.filter((f) => counted(f.path)).length >= MAX_FILES) {
-      return `a plugin holds at most ${MAX_FILES} files: delete one first`;
+    const most = this.project.kind === "code" ? MAX_CODE_FILES : MAX_FILES;
+    if (!known && counted(path) && files.filter((f) => counted(f.path)).length >= most) {
+      return `a plugin holds at most ${most} files: delete one first`;
     }
     const total = files.reduce((n, f) => n + f.size, 0) - (known?.size ?? 0) + size;
     if (total > MAX_BYTES) return `a plugin holds at most ${MAX_BYTES / 1024 / 1024} MB`;

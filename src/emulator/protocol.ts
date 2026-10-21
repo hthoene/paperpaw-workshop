@@ -41,7 +41,10 @@ export type Request =
   | { type: "files"; plugin: PluginFiles }
   | { type: "input"; event: InputEvent }
   | { type: "screenshot"; profile?: Profile; dark?: boolean; screen?: Screen }
-  | { type: "check" };
+  | { type: "check" }
+  /** Another module for the reader: PaperPaw with a plugin with code
+   *  compiled in (a build's), or `null` for PaperPaw as it is. */
+  | { type: "module"; url: string | null };
 
 export type Answer =
   | { id: number; ok: true; result?: unknown }

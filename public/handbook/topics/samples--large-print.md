@@ -33,8 +33,6 @@ large-print.plugin.description = Größere Schrift in Büchern und Menüs.
 # What you choose in the settings still wins.
 [core]
 ui-size = 14
-
-[reader]
 font-size = 14
 line-spacing = 145
 ```

@@ -4,7 +4,7 @@
   "title": "The sample plugin",
   "file": "docs--the-sample-plugin.md",
   "summary": "[`samples/hello-plugin`](../samples/hello-plugin/src/lib.rs) is a small\nplugin to start from.",
-  "tokens": 3337
+  "tokens": 3591
  },
  {
   "id": "docs/the-plugin",
@@ -25,21 +25,21 @@
   "title": "Screens",
   "file": "docs--screens.md",
   "summary": "A screen implements [`Screen`].",
-  "tokens": 1049
+  "tokens": 1118
  },
  {
   "id": "docs/settings",
   "title": "Settings",
   "file": "docs--settings.md",
   "summary": "A setting is a constant with its id and the type of its value\n(`Setting<bool>`, `Setting<i64>` or `Setting<Text>` for choices,\nlanguages, lists and text):\n\n```r",
-  "tokens": 529
+  "tokens": 681
  },
  {
   "id": "docs/events",
   "title": "Events",
   "file": "docs--events.md",
   "summary": "```rust\nr.on(events::BOOK_OPENED, move |env, reading, out| {\n    opened.set(opened.get() + 1);\n    // reading.path, reading.title, reading.progress, reading.at(",
-  "tokens": 700
+  "tokens": 733
  },
  {
   "id": "docs/translations",
@@ -95,14 +95,49 @@
   "title": "What plugins contribute",
   "file": "docs--what-plugins-contribute.md",
   "summary": "| Contribution | Registrar | What it is |\n|---|---|---|\n| Actions | `add_action` | Something to do, bound to buttons and gestures, listed in menus |\n| Screens |",
-  "tokens": 6231
+  "tokens": 10050
+ },
+ {
+  "id": "docs/what-a-slot-s-screen-does",
+  "title": "What a slot's screen does",
+  "file": "docs--what-a-slot-s-screen-does.md",
+  "summary": "A screen bound to a standard slot takes the parameters the others open\nit with and answers as they expect, so that every plugin works with it:\n\n| Slot | Opened ",
+  "tokens": 614
+ },
+ {
+  "id": "docs/which-one-wins",
+  "title": "Which one wins",
+  "file": "docs--which-one-wins.md",
+  "summary": "- **Slots.** The screen the user chose in `[slots]`; else the binding\n  with the highest `Priority` (`FALLBACK`, `DEFAULT`, `PREFERRED`, or\n  any number); betwe",
+  "tokens": 239
+ },
+ {
+  "id": "docs/examples",
+  "title": "Examples",
+  "file": "docs--examples.md",
+  "summary": "A format: files with these extensions open as a `Document`.",
+  "tokens": 486
  },
  {
   "id": "docs/what-every-reader-offers",
   "title": "What every reader offers",
   "file": "docs--what-every-reader-offers.md",
   "summary": "A plugin that works with books never names the reader plugin: it uses\nwhat `builtin` defines for every reader, so a reader of one's own (bound\nto `core.reader`)",
-  "tokens": 932
+  "tokens": 909
+ },
+ {
+  "id": "docs/what-the-other-slots-promise",
+  "title": "What the other slots promise",
+  "file": "docs--what-the-other-slots-promise.md",
+  "summary": "A screen bound to one of these slots replaces the shipped one; it is\nopened with what the table says and keeps its promises, so the plugins\naround it go on work",
+  "tokens": 797
+ },
+ {
+  "id": "docs/what-every-library-offers",
+  "title": "What every library offers",
+  "file": "docs--what-every-library-offers.md",
+  "summary": "A view of the library of one's own (bound to `core.library`) is as\nfast as the shipped one, on the X4 too, as both ask the same service\nand read the same catalo",
+  "tokens": 853
  },
  {
   "id": "docs/services-and-points-of-your-own",
@@ -144,14 +179,14 @@
   "title": "Presets and home screen layouts",
   "file": "docs--presets-and-home-screen-layouts.md",
   "summary": "A preset is a ready-made set of setting values chosen as a whole\n(`paperpaw_sdk::presets`), such as a layout of the home screen.",
-  "tokens": 450
+  "tokens": 617
  },
  {
   "id": "docs/passwords-and-keys",
   "title": "Passwords and keys",
   "file": "docs--passwords-and-keys.md",
   "summary": "Plugins keep passwords, API keys and tokens with\n`Command::SetSecret(SecretChange::keep(id, label, value))` and read them\nwith `env.secrets.get(id)`.",
-  "tokens": 143
+  "tokens": 235
  },
  {
   "id": "docs/the-network",
@@ -235,7 +270,7 @@
   "title": "Plugins without code",
   "file": "docs--plugins-without-code.md",
   "summary": "A data plugin is a folder:\n\n```text\nplugins/large-print/\n  plugin.ini     [plugin] id, name, description, version, formats\n  i18n/*.ini     translation catalogs",
-  "tokens": 1826
+  "tokens": 1825
  },
  {
   "id": "docs/publishing",
@@ -298,7 +333,7 @@
   "title": "Sample data plugin: large-print",
   "file": "samples--large-print.md",
   "summary": "`plugin.ini`:\n\n```ini\n# A data plugin: no code, just files.",
-  "tokens": 201
+  "tokens": 198
  },
  {
   "id": "samples/reading-nook",
@@ -332,8 +367,8 @@
   "id": "actions",
   "title": "Actions for key maps",
   "file": "actions.md",
-  "summary": "| Action id | Name |\n|---|---|\n| `about.open` | About PaperPaw |\n| `battery.open` | Battery |\n| `calibre.open` | Calibre |\n| `core.back` | Back |\n| `core.clean-",
-  "tokens": 956
+  "summary": "| Action id | Name |\n|---|---|\n| `about.open` | About PaperPaw |\n| `battery.open` | Battery |\n| `calibre.open` | Calibre |\n| `core.apps` | Apps |\n| `core.back` ",
+  "tokens": 986
  },
  {
   "id": "devices",
@@ -343,11 +378,424 @@
   "tokens": 244
  },
  {
+  "id": "sdk/root",
+  "title": "The SDK's top level (paperpaw_sdk::...)",
+  "file": "sdk--root.md",
+  "summary": "```rust\npub mod paperpaw_sdk\npub use paperpaw_sdk::Arg\npub use paperpaw_sdk::Battery\npub use paperpaw_sdk::ButtonState\npub use paperpaw_sdk::Canvas\npub use pape",
+  "tokens": 21656
+ },
+ {
+  "id": "sdk/annotations",
+  "title": "The SDK's module annotations",
+  "file": "sdk--annotations.md",
+  "summary": "```rust\npub paperpaw_sdk::annotations::Kind::Bookmark\npub paperpaw_sdk::annotations::Kind::Highlight\npub struct paperpaw_sdk::annotations::Annotation\npub paperp",
+  "tokens": 690
+ },
+ {
+  "id": "sdk/ask",
+  "title": "The SDK's module ask",
+  "file": "sdk--ask.md",
+  "summary": "```rust\npub struct paperpaw_sdk::ask::ChoiceQuestion\npub fn paperpaw_sdk::ask::ChoiceQuestion::about(self, impl core::convert::Into<alloc::string::String>) -> S",
+  "tokens": 549
+ },
+ {
+  "id": "sdk/builtin",
+  "title": "The SDK's module builtin",
+  "file": "sdk--builtin.md",
+  "summary": "```rust\npub mod paperpaw_sdk::builtin::actions\npub const paperpaw_sdk::builtin::actions::BACK: paperpaw_sdk::Id\npub const paperpaw_sdk::builtin::actions::CLEAN_",
+  "tokens": 14591
+ },
+ {
+  "id": "sdk/chrome",
+  "title": "The SDK's module chrome",
+  "file": "sdk--chrome.md",
+  "summary": "```rust\npub paperpaw_sdk::chrome::Edge::Bottom\npub paperpaw_sdk::chrome::Edge::Left\npub paperpaw_sdk::chrome::Edge::Right\npub paperpaw_sdk::chrome::Edge::Top\npu",
+  "tokens": 371
+ },
+ {
+  "id": "sdk/collections",
+  "title": "The SDK's module collections",
+  "file": "sdk--collections.md",
+  "summary": "```rust\npub struct paperpaw_sdk::collections::VecMap<K, V>\npub fn paperpaw_sdk::collections::VecMap<K, V>::clear(&mut self)\npub fn paperpaw_sdk::collections::Ve",
+  "tokens": 661
+ },
+ {
+  "id": "sdk/config",
+  "title": "The SDK's module config",
+  "file": "sdk--config.md",
+  "summary": "```rust\npub use paperpaw_sdk::config::Entry\npub use paperpaw_sdk::config::ErrorKind\npub use paperpaw_sdk::config::ParseError\npub use paperpaw_sdk::config::Parse",
+  "tokens": 106
+ },
+ {
+  "id": "sdk/contribution",
+  "title": "The SDK's module contribution",
+  "file": "sdk--contribution.md",
+  "summary": "```rust\npub paperpaw_sdk::contribution::Contribution::Action(alloc::boxed::Box<paperpaw_sdk::ActionSpec>)\npub paperpaw_sdk::contribution::Contribution::ActionOb",
+  "tokens": 8978
+ },
+ {
+  "id": "sdk/data",
+  "title": "The SDK's module data",
+  "file": "sdk--data.md",
+  "summary": "```rust\npub paperpaw_sdk::data::Error::Newer(u32)\npub paperpaw_sdk::data::Error::Storage(paperpaw_platform::storage::StorageError)\npub paperpaw_sdk::data::Error",
+  "tokens": 384
+ },
+ {
+  "id": "sdk/decorations",
+  "title": "The SDK's module decorations",
+  "file": "sdk--decorations.md",
+  "summary": "```rust\npub paperpaw_sdk::decorations::LineKind::Dashed\npub paperpaw_sdk::decorations::LineKind::Dotted\npub paperpaw_sdk::decorations::LineKind::Double\npub pape",
+  "tokens": 2548
+ },
+ {
+  "id": "sdk/digest",
+  "title": "The SDK's module digest",
+  "file": "sdk--digest.md",
+  "summary": "```rust\npub use paperpaw_sdk::digest::fnv1a64\npub use paperpaw_sdk::digest::hex\npub use paperpaw_sdk::digest::md5\npub use paperpaw_sdk::digest::sha1\npub use pap",
+  "tokens": 53
+ },
+ {
+  "id": "sdk/document",
+  "title": "The SDK's module document",
+  "file": "sdk--document.md",
+  "summary": "```rust\npub use paperpaw_sdk::document::Align\npub use paperpaw_sdk::document::Block\npub use paperpaw_sdk::document::BlockKind\npub use paperpaw_sdk::document::Do",
+  "tokens": 199
+ },
+ {
+  "id": "sdk/event",
+  "title": "The SDK's module event",
+  "file": "sdk--event.md",
+  "summary": "```rust\npub struct paperpaw_sdk::event::Event<P: paperpaw_sdk::event::EventData>\npub fn paperpaw_sdk::event::Event<P>::as_str(&self) -> &str\npub fn paperpaw_sdk",
+  "tokens": 707
+ },
+ {
+  "id": "sdk/reading",
+  "title": "The SDK's module reading",
+  "file": "sdk--reading.md",
+  "summary": "```rust\npub fn paperpaw_sdk::reading::PageWords::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>\npub fn paperpaw_sdk::reading::PageWords::to_pa",
+  "tokens": 2031
+ },
+ {
+  "id": "sdk/replies",
+  "title": "The SDK's module replies",
+  "file": "sdk--replies.md",
+  "summary": "```rust\npub fn paperpaw_sdk::replies::Chosen::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>\npub fn paperpaw_sdk::replies::Chosen::to_params(&",
+  "tokens": 2404
+ },
+ {
+  "id": "sdk/ui",
+  "title": "The SDK's module ui",
+  "file": "sdk--ui.md",
+  "summary": "```rust\npub fn paperpaw_sdk::ui::choice::Picked::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>\npub fn paperpaw_sdk::ui::choice::Picked::to_pa",
+  "tokens": 13144
+ },
+ {
+  "id": "sdk/work",
+  "title": "The SDK's module work",
+  "file": "sdk--work.md",
+  "summary": "```rust\npub fn paperpaw_sdk::work::WorkRefused::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>\npub fn paperpaw_sdk::work::WorkRefused::to_para",
+  "tokens": 2444
+ },
+ {
+  "id": "sdk/wifi",
+  "title": "The SDK's module wifi",
+  "file": "sdk--wifi.md",
+  "summary": "```rust\npub fn paperpaw_sdk::wifi::JoinFailure::from_param(&str) -> core::option::Option<Self>\npub fn paperpaw_sdk::wifi::JoinFailure::missing() -> core::option",
+  "tokens": 835
+ },
+ {
+  "id": "sdk/files",
+  "title": "The SDK's module files",
+  "file": "sdk--files.md",
+  "summary": "```rust\npub struct paperpaw_sdk::files::Entry\npub paperpaw_sdk::files::Entry::is_dir: bool\npub paperpaw_sdk::files::Entry::name: alloc::string::String\npub paper",
+  "tokens": 876
+ },
+ {
+  "id": "sdk/filters",
+  "title": "The SDK's module filters",
+  "file": "sdk--filters.md",
+  "summary": "```rust\npub paperpaw_sdk::filters::InputVerdict::Cancel\npub paperpaw_sdk::filters::InputVerdict::Pass\npub paperpaw_sdk::filters::InputVerdict::Replace(paperpaw_",
+  "tokens": 1722
+ },
+ {
+  "id": "sdk/firmware",
+  "title": "The SDK's module firmware",
+  "file": "sdk--firmware.md",
+  "summary": "```rust\npub use paperpaw_sdk::firmware::APP_HEAD_LEN\npub use paperpaw_sdk::firmware::AppInfo\npub use paperpaw_sdk::firmware::CHIP_ESP32_C3\npub use paperpaw_sdk:",
+  "tokens": 1108
+ },
+ {
+  "id": "sdk/host",
+  "title": "The SDK's module host",
+  "file": "sdk--host.md",
+  "summary": "```rust\npub struct paperpaw_sdk::host::ScreenHost\npub fn paperpaw_sdk::host::ScreenHost::area(&self) -> core::option::Option<paperpaw_platform::geometry::Rect>\n",
+  "tokens": 508
+ },
+ {
+  "id": "sdk/http_params",
+  "title": "The SDK's module http_params",
+  "file": "sdk--http_params.md",
+  "summary": "```rust\npub const paperpaw_sdk::http_params::BODY: &str\npub const paperpaw_sdk::http_params::CONTENT_TYPE: &str\npub const paperpaw_sdk::http_params::ETAG: &str\n",
+  "tokens": 88
+ },
+ {
+  "id": "sdk/hyphen",
+  "title": "The SDK's module hyphen",
+  "file": "sdk--hyphen.md",
+  "summary": "```rust\npub use paperpaw_sdk::hyphen::BLOCK\npub use paperpaw_sdk::hyphen::InvalidPatterns\npub use paperpaw_sdk::hyphen::Patterns\npub use paperpaw_sdk::hyphen::c",
+  "tokens": 47
+ },
+ {
+  "id": "sdk/icons",
+  "title": "The SDK's module icons",
+  "file": "sdk--icons.md",
+  "summary": "```rust\npub const paperpaw_sdk::icons::BACK: &str\npub const paperpaw_sdk::icons::BUSY: &str\npub const paperpaw_sdk::icons::DELETE: &str\npub const paperpaw_sdk::",
+  "tokens": 169
+ },
+ {
+  "id": "sdk/image",
+  "title": "The SDK's module image",
+  "file": "sdk--image.md",
+  "summary": "```rust\npub use paperpaw_sdk::image::ColorFile\npub use paperpaw_sdk::image::ColorWriter\npub use paperpaw_sdk::image::Downscaler\npub use paperpaw_sdk::image::Fit",
+  "tokens": 259
+ },
+ {
+  "id": "sdk/install",
+  "title": "The SDK's module install",
+  "file": "sdk--install.md",
+  "summary": "```rust\npub enum paperpaw_sdk::install::Digest\npub paperpaw_sdk::install::Digest::Sha1(alloc::string::String)\npub paperpaw_sdk::install::Digest::Sha256(alloc::s",
+  "tokens": 964
+ },
+ {
+  "id": "sdk/json",
+  "title": "The SDK's module json",
+  "file": "sdk--json.md",
+  "summary": "```rust\npub use paperpaw_sdk::json::Value\npub use paperpaw_sdk::json::number\npub use paperpaw_sdk::json::object\npub use paperpaw_sdk::json::raw_member\npub use p",
+  "tokens": 93
+ },
+ {
+  "id": "sdk/keys",
+  "title": "The SDK's module keys",
+  "file": "sdk--keys.md",
+  "summary": "```rust\npub paperpaw_sdk::keys::BindingOrigin::Device\npub paperpaw_sdk::keys::BindingOrigin::Plugin\npub paperpaw_sdk::keys::BindingOrigin::Preset\npub paperpaw_s",
+  "tokens": 855
+ },
+ {
+  "id": "sdk/layers",
+  "title": "The SDK's module layers",
+  "file": "sdk--layers.md",
+  "summary": "```rust\npub paperpaw_sdk::layers::Side::Bottom\npub paperpaw_sdk::layers::Side::Left\npub paperpaw_sdk::layers::Side::Right\npub paperpaw_sdk::layers::Side::Top\npu",
+  "tokens": 1843
+ },
+ {
+  "id": "sdk/library",
+  "title": "The SDK's module library",
+  "file": "sdk--library.md",
+  "summary": "```rust\npub mod paperpaw_sdk::library::catalog\npub paperpaw_sdk::library::catalog::Reading::Begun\npub paperpaw_sdk::library::catalog::Reading::Finished\npub pape",
+  "tokens": 10075
+ },
+ {
+  "id": "sdk/logo",
+  "title": "The SDK's module logo",
+  "file": "sdk--logo.md",
+  "summary": "```rust\npub paperpaw_sdk::logo::Logo::Drawn\npub paperpaw_sdk::logo::Logo::Picture(paperpaw_document::ImageRef)\npub fn paperpaw_sdk::logo::Logo::draw(&self, &mut",
+  "tokens": 200
+ },
+ {
+  "id": "sdk/lookup",
+  "title": "The SDK's module lookup",
+  "file": "sdk--lookup.md",
+  "summary": "```rust\npub paperpaw_sdk::lookup::LookupAnswer::Pending(alloc::vec::Vec<paperpaw_sdk::Command>)\npub paperpaw_sdk::lookup::LookupAnswer::Ready(alloc::vec::Vec<pa",
+  "tokens": 990
+ },
+ {
+  "id": "sdk/native",
+  "title": "The SDK's module native",
+  "file": "sdk--native.md",
+  "summary": "```rust\npub use paperpaw_sdk::native::BadSignature\npub use paperpaw_sdk::native::Chip\npub use paperpaw_sdk::native::HEADER_LEN\npub use paperpaw_sdk::native::Hea",
+  "tokens": 1499
+ },
+ {
+  "id": "sdk/numbers",
+  "title": "The SDK's module numbers",
+  "file": "sdk--numbers.md",
+  "summary": "```rust\npub const paperpaw_sdk::numbers::DECIMAL_MARK: &str\npub fn paperpaw_sdk::numbers::decimal_mark<'e>(&paperpaw_sdk::Env<'e>) -> &'e str\npub fn paperpaw_sd",
+  "tokens": 62
+ },
+ {
+  "id": "sdk/pattern",
+  "title": "The SDK's module pattern",
+  "file": "sdk--pattern.md",
+  "summary": "```rust\npub paperpaw_sdk::pattern::PatternError::Syntax(usize)\npub paperpaw_sdk::pattern::PatternError::TooLong\npub paperpaw_sdk::pattern::PatternError::TooMany",
+  "tokens": 288
+ },
+ {
+  "id": "sdk/positions",
+  "title": "The SDK's module positions",
+  "file": "sdk--positions.md",
+  "summary": "```rust\npub paperpaw_sdk::positions::Position::at: paperpaw_document::Locator\npub paperpaw_sdk::positions::Position::conversion: core::option::Option<u64>\npub p",
+  "tokens": 378
+ },
+ {
+  "id": "sdk/power",
+  "title": "The SDK's module power",
+  "file": "sdk--power.md",
+  "summary": "```rust\npub enum paperpaw_sdk::power::PowerLevel\npub paperpaw_sdk::power::PowerLevel::Normal\npub paperpaw_sdk::power::PowerLevel::Offline\npub paperpaw_sdk::powe",
+  "tokens": 432
+ },
+ {
+  "id": "sdk/presets",
+  "title": "The SDK's module presets",
+  "file": "sdk--presets.md",
+  "summary": "```rust\npub paperpaw_sdk::presets::Preset::description: alloc::borrow::Cow<'static, str>\npub paperpaw_sdk::presets::Preset::id: paperpaw_sdk::Id\npub paperpaw_sd",
+  "tokens": 733
+ },
+ {
+  "id": "sdk/qr",
+  "title": "The SDK's module qr",
+  "file": "sdk--qr.md",
+  "summary": "```rust\npub use paperpaw_sdk::qr::QrCode\n```",
+  "tokens": 12
+ },
+ {
+  "id": "sdk/random",
+  "title": "The SDK's module random",
+  "file": "sdk--random.md",
+  "summary": "```rust\npub struct paperpaw_sdk::random::Random\npub const paperpaw_sdk::random::Random::NONE: Self\npub fn paperpaw_sdk::random::Random::available(&self) -> bool",
+  "tokens": 143
+ },
+ {
+  "id": "sdk/readers",
+  "title": "The SDK's module readers",
+  "file": "sdk--readers.md",
+  "summary": "```rust\npub paperpaw_sdk::readers::Choice::Book(&'a str)\npub paperpaw_sdk::readers::Choice::Folder(&'a str)\npub paperpaw_sdk::readers::ReaderSpec::formats: allo",
+  "tokens": 888
+ },
+ {
+  "id": "sdk/secrets",
+  "title": "The SDK's module secrets",
+  "file": "sdk--secrets.md",
+  "summary": "```rust\npub struct paperpaw_sdk::secrets::Anyone\npub fn paperpaw_sdk::secrets::Anyone::runs(&self, &str) -> bool\npub struct paperpaw_sdk::secrets::Listed<'a>\npu",
+  "tokens": 768
+ },
+ {
+  "id": "sdk/semantics",
+  "title": "The SDK's module semantics",
+  "file": "sdk--semantics.md",
+  "summary": "```rust\npub use paperpaw_sdk::semantics::Described\npub use paperpaw_sdk::semantics::Role\npub struct paperpaw_sdk::semantics::Part\npub paperpaw_sdk::semantics::P",
+  "tokens": 269
+ },
+ {
+  "id": "sdk/server_params",
+  "title": "The SDK's module server_params",
+  "file": "sdk--server_params.md",
+  "summary": "```rust\npub const paperpaw_sdk::server_params::ADDRESS: &str\npub const paperpaw_sdk::server_params::BODY_FILE: &str\npub const paperpaw_sdk::server_params::FAILE",
+  "tokens": 149
+ },
+ {
+  "id": "sdk/services",
+  "title": "The SDK's module services",
+  "file": "sdk--services.md",
+  "summary": "```rust\npub paperpaw_sdk::services::EventSpec::id: paperpaw_sdk::Id\npub paperpaw_sdk::services::EventSpec::params: &'static [&'static str]\npub paperpaw_sdk::ser",
+  "tokens": 808
+ },
+ {
+  "id": "sdk/setting",
+  "title": "The SDK's module setting",
+  "file": "sdk--setting.md",
+  "summary": "```rust\npub enum paperpaw_sdk::setting::Text\npub type paperpaw_sdk::setting::Text::Input = alloc::borrow::Cow<'static, str>\npub type paperpaw_sdk::setting::Text",
+  "tokens": 919
+ },
+ {
+  "id": "sdk/setup",
+  "title": "The SDK's module setup",
+  "file": "sdk--setup.md",
+  "summary": "```rust\npub paperpaw_sdk::setup::SetupPage::Screen(paperpaw_sdk::Id)\npub paperpaw_sdk::setup::SetupPage::Setting(paperpaw_sdk::Id)\npub paperpaw_sdk::setup::Setu",
+  "tokens": 418
+ },
+ {
+  "id": "sdk/socket_params",
+  "title": "The SDK's module socket_params",
+  "file": "sdk--socket_params.md",
+  "summary": "```rust\npub const paperpaw_sdk::socket_params::ANSWER: &str\npub const paperpaw_sdk::socket_params::CLOSED: &str\npub const paperpaw_sdk::socket_params::CONNECTED",
+  "tokens": 175
+ },
+ {
+  "id": "sdk/speech_params",
+  "title": "The SDK's module speech_params",
+  "file": "sdk--speech_params.md",
+  "summary": "```rust\npub const paperpaw_sdk::speech_params::FAILED: &str\n```",
+  "tokens": 18
+ },
+ {
+  "id": "sdk/status",
+  "title": "The SDK's module status",
+  "file": "sdk--status.md",
+  "summary": "```rust\npub mod paperpaw_sdk::status::context\npub const paperpaw_sdk::status::context::CHAPTER: &str\npub const paperpaw_sdk::status::context::CHAPTERS: &str\npub",
+  "tokens": 3033
+ },
+ {
+  "id": "sdk/text",
+  "title": "The SDK's module text",
+  "file": "sdk--text.md",
+  "summary": "```rust\npub use paperpaw_sdk::text::OUTLINES\npub use paperpaw_sdk::text::sfnt\n```",
+  "tokens": 23
+ },
+ {
+  "id": "sdk/time",
+  "title": "The SDK's module time",
+  "file": "sdk--time.md",
+  "summary": "```rust\npub struct paperpaw_sdk::time::LocalTime\npub paperpaw_sdk::time::LocalTime::day: u8\npub paperpaw_sdk::time::LocalTime::hour: u8\npub paperpaw_sdk::time::",
+  "tokens": 738
+ },
+ {
+  "id": "sdk/usage",
+  "title": "The SDK's module usage",
+  "file": "sdk--usage.md",
+  "summary": "```rust\npub struct paperpaw_sdk::usage::PluginUsage\npub paperpaw_sdk::usage::PluginUsage::busy_us: u64\npub paperpaw_sdk::usage::PluginUsage::calls: u32\npub pape",
+  "tokens": 270
+ },
+ {
+  "id": "sdk/voices",
+  "title": "The SDK's module voices",
+  "file": "sdk--voices.md",
+  "summary": "```rust\npub paperpaw_sdk::voices::VoiceSpec::id: paperpaw_sdk::Id\npub paperpaw_sdk::voices::VoiceSpec::languages: alloc::vec::Vec<alloc::borrow::Cow<'static, st",
+  "tokens": 484
+ },
+ {
+  "id": "sdk/web",
+  "title": "The SDK's module web",
+  "file": "sdk--web.md",
+  "summary": "```rust\npub const paperpaw_sdk::web::USER_AGENT: &str\npub fn paperpaw_sdk::web::base64(&[u8]) -> alloc::string::String\npub fn paperpaw_sdk::web::base_url(&str) ",
+  "tokens": 233
+ },
+ {
+  "id": "sdk/widgets",
+  "title": "The SDK's module widgets",
+  "file": "sdk--widgets.md",
+  "summary": "```rust\npub mod paperpaw_sdk::widgets::categories\npub const paperpaw_sdk::widgets::categories::ALL: &[&str]\npub const paperpaw_sdk::widgets::categories::BOOKS: ",
+  "tokens": 7136
+ },
+ {
+  "id": "sdk/words",
+  "title": "The SDK's module words",
+  "file": "sdk--words.md",
+  "summary": "```rust\npub struct paperpaw_sdk::words::WordSet\npub fn paperpaw_sdk::words::WordSet::contains(&self, &str) -> bool\npub fn paperpaw_sdk::words::WordSet::decorate",
+  "tokens": 273
+ },
+ {
+  "id": "sdk/xml",
+  "title": "The SDK's module xml",
+  "file": "sdk--xml.md",
+  "summary": "```rust\npub use paperpaw_sdk::xml::Attrs\npub use paperpaw_sdk::xml::Token\npub use paperpaw_sdk::xml::Tokenizer\npub use paperpaw_sdk::xml::decode\npub use paperpa",
+  "tokens": 61
+ },
+ {
   "id": "settings/core",
   "title": "Settings of core",
   "file": "settings--core.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] developer` | Developer options | `true`, `false` | `false` | Settings and n",
-  "tokens": 6611
+  "tokens": 6968
  },
  {
   "id": "settings/dictionary",
@@ -367,8 +815,8 @@
   "id": "settings/files",
   "title": "Settings of files",
   "file": "settings--files.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[files] root` | Library folder | text | `books` | The folder with your books.",
-  "tokens": 170
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[files] archive` | Archive folder | text | `books/Archive` | Where “Move to the ar",
+  "tokens": 147
  },
  {
   "id": "settings/home",
@@ -543,28 +991,35 @@
   "title": "Settings in the group core.group.system",
   "file": "settings-group--core.group.system.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] developer` | Developer options | `true`, `false` | `false` | Settings and n",
-  "tokens": 859
+  "tokens": 923
  },
  {
   "id": "settings-group/core.group.display",
   "title": "Settings in the group core.group.display",
   "file": "settings-group--core.group.display.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] night-mode` | Night mode | `true`, `false` | `false` | White text on black.",
-  "tokens": 534
+  "tokens": 597
  },
  {
   "id": "settings-group/core.group.controls",
   "title": "Settings in the group core.group.controls",
   "file": "settings-group--core.group.controls.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] edge-ends` | Edges for swipes: top and bottom | 0 to 25 | `10` | How far in",
-  "tokens": 454
+  "tokens": 559
+ },
+ {
+  "id": "settings-group/core.group.library",
+  "title": "Settings in the group core.group.library",
+  "file": "settings-group--core.group.library.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] library-folder` | Library folder | text | `books` | The folder with your bo",
+  "tokens": 333
  },
  {
   "id": "settings-group/core.group.look",
   "title": "Settings in the group core.group.look",
   "file": "settings-group--core.group.look.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] ui-size` | Menu text size | 7 to 24 | `9` | Size of menus, lists and the st",
-  "tokens": 1688
+  "tokens": 1734
  },
  {
   "id": "settings-group/core.space",
@@ -585,7 +1040,7 @@
   "title": "Settings in the group core.group.reading",
   "file": "settings-group--core.group.reading.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] reading-font` | Font | `core.font.default`, `Literata`, `Source Sans 3` | `",
-  "tokens": 1485
+  "tokens": 1539
  },
  {
   "id": "settings-group/core.group.marks",
@@ -593,13 +1048,6 @@
   "file": "settings-group--core.group.marks.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] highlight.background` | Background | `core.tone.none`, `core.tone.light-gra",
   "tokens": 2318
- },
- {
-  "id": "settings-group/core.group.library",
-  "title": "Settings in the group core.group.library",
-  "file": "settings-group--core.group.library.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[files] root` | Library folder | text | `books` | The folder with your books.",
-  "tokens": 331
  },
  {
   "id": "settings-group/home.status",

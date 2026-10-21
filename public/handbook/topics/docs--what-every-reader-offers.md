@@ -2,7 +2,21 @@
 
 A plugin that works with books never names the reader plugin: it uses
 what `builtin` defines for every reader, so a reader of one's own (bound
-to `core.reader`) replaces the shipped one in full.
+to `core.reader`) replaces the shipped one in full. A reader of some
+formats only registers as a reading app instead (`readers::ReaderSpec`,
+`Registrar::add_reader`): books open in the app chosen for them, and
+whatever opens a book opens it with `readers::open(path)` (never by
+opening `slots::READER` itself). The reader chooses with
+`readers::ask_once` (*Open with …* in the book menu: this time, or kept
+when asked; plugins add other ways to open a book to `menus::OPEN_WITH`),
+`readers::ask` (a book's or a folder's reading app, kept) and in the reading
+settings (`settings::READING_APP`, and one per format that more than one
+app reads). A reading app's screen is its own; one that cannot open a
+book after all answers `readers::cannot_open` instead of an error of
+its own, and the next app in that order opens it. One reading app is
+open at a time. What moves folders calls `readers::folder_moved`, so
+that their choices go along; a shell opens a book with
+`Kernel::open_book`.
 
 | What | Standard | |
 |---|---|---|
@@ -15,6 +29,7 @@ to `core.reader`) replaces the shipped one in full.
 | Where a book was left | `positions::{load, save}`, `Reading::xpointer` with `BOOK_CLOSED` | readers keep it; syncs and lists read it without opening the book |
 | The contents, search, the marks, a footnote, skimming | `slots::TOC`, `SEARCH`, `ANNOTATIONS`, `FOOTNOTE`, `SKIM`, `events::FOLLOW_LINK`, `SKIM`, `SKIMMED` | bind a screen of one's own; readers open the slots, follow the links and go where skimming asks |
 | A book opened as the reader opens it | `reading::open_options`, `reading::conversion` | its places fit the reader's (a search, contents, an XPointer) |
+| Pages that go right to left | `Metadata::direction` (`PageProgression`), `Screen::mirrored` | readers mirror taps and swipes (an EPUB's `page-progression-direction`) |
 | Status lines' settings | `groups::STATUS_LINES` | the group readers put them in |
 | Reading aloud's settings | `setting_sections::ALOUD` | the section readers and shells put them in |
 | Key bindings while reading | the layer `[keymap.core.reader]` | the slot's layer, whichever screen fills it |
@@ -22,23 +37,3 @@ to `core.reader`) replaces the shipped one in full.
 A reader in turn sends the reading events (`BOOK_OPENED`, `PAGE_TURNED`,
 `BOOK_CLOSED`, `BOOK_FINISHED`), takes `GOTO`, and offers its actions
 in these menus.
-
-A reader of one's own builds on the shipped one's parts in
-`paperpaw_sdk::reading` rather than copying them: `FilteredDocument` (a
-book through the plugins' text filters; kept `DroppedRuns` read the
-blocks they leave out once), `PageIndex` (the starts of its
-pages, kept on the device), and with the feature `unstable` (as the
-layout, until 1.0) `PageType` (the page's box and type from the standard
-settings, its layout key), `ReadingFaces` (the faces with the book's own
-fonts and small capitals), `word_boxes`, `draw_lines` and `draw_image`;
-`reading::note_text` is the text a footnote shows. The layout keeps at
-least `Style::widows` lines of a paragraph at the top of a page and
-`orphans` at the bottom (`Style::lines_kept`, from the settings
-`WIDOWS` and `ORPHANS`; a paragraph that goes on whole takes its
-heading along), and
-`layout::wrap_lines_hyphenated` breaks lines of one's own as pages do.
-
-A text filter that needs to know where a block is, or leaves blocks out
-(a web page's adverts, printed page numbers in a book), is a block
-filter: `TextFilterSpec::block` gets a `FilterContext` (the book, its
-language, the place) and answers `Verdict::Keep` or `Verdict::Drop`.

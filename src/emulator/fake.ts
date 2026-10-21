@@ -38,6 +38,13 @@ export class FakeEmulator implements Emulator {
     return { png: TINY_PNG, width: 1, height: 1 };
   }
 
+  /** The modules it was told to run, in order. */
+  modules: (string | null)[] = [];
+
+  async useModule(url: string | null): Promise<void> {
+    this.modules.push(url);
+  }
+
   async check(): Promise<Finding[]> {
     return checkDataPlugin(this.plugin?.files ?? {}, this.registry);
   }

@@ -9,3 +9,4 @@ test-results/
 handbook/registry/Cargo.lock
 scripts/*.png
 .work/
+builder/paperpaw.tar

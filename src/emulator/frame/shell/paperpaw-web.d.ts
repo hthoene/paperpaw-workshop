@@ -31,6 +31,8 @@ export interface Report {
 
 export class PaperPawDevice {
   static load(url: URL | string): Promise<PaperPawDevice>;
+  /** The module's own functions (`pp_...`). */
+  exports: WebAssembly.Exports;
   create(options?: { profile?: string; language?: string; dark?: boolean }): void;
   putFile(plugin: string, path: string, bytes: Uint8Array): void;
   removePlugin(plugin: string): void;
@@ -44,4 +46,12 @@ export class PaperPawDevice {
   frame(): ImageData;
   shown(): ImageData;
   check(commands?: string[]): Report;
+  /** A fresh instance of the same module (after a panic). */
+  fresh(): Promise<PaperPawDevice>;
+  /** PaperPaw's version, and the commit it was built from. */
+  version(): string;
+  /** How often the device ran out of its memory. */
+  outOfMemory(): number;
+  /** Another device, night mode or the sleep screen, made apart. */
+  snapshot(options?: { profile?: string; dark?: boolean; asleep?: boolean }): ImageData;
 }

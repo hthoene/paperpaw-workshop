@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import type { Emulator } from "../emulator/emulator";
 import type { Handbook, Profile } from "../handbook/handbook";
+import type { BuildResult, Builder } from "../build/client";
 import type { PictureKit } from "../pictures/kit";
 import type { Files } from "../project/project";
 import type { Uploads } from "../project/uploads";
@@ -27,7 +28,13 @@ export interface ToolContext {
   reader: {
     shown(): Profile;
     show(profile: Profile): Promise<void>;
+    /** Runs a build's module (PaperPaw with the plugin with code in it). */
+    useModule(url: string | null): Promise<void>;
   };
+  /** Where plugins with code are built, if there is a builder. */
+  builder?: Builder;
+  /** Told of every build, for the page to show its messages. */
+  lastBuild?(result: BuildResult): void;
 }
 
 /** One line the conversation shows for a step: a catalog key and its values. */

@@ -3,6 +3,7 @@
 | `about.open` | About PaperPaw |
 | `battery.open` | Battery |
 | `calibre.open` | Calibre |
+| `core.apps` | Apps |
 | `core.back` | Back |
 | `core.clean-up` | Clean up storage |
 | `core.confirm` | Select |
@@ -17,6 +18,7 @@
 | `core.next` | Next |
 | `core.next-page` | Next page |
 | `core.nothing` | Nothing |
+| `core.open-with` | Open with … |
 | `core.prev-page` | Previous page |
 | `core.previous` | Previous |
 | `core.quick-panel` | Quick panel |
@@ -51,6 +53,7 @@
 | `opds.open` | Catalogs |
 | `opds.sync` | Sync catalogs |
 | `plugin-manager.open` | Plugins |
+| `power.open` | Power |
 | `profiles.next` | Next profile |
 | `profiles.open` | Profiles |
 | `reader.auto-turn` | Turn pages automatically |
@@ -94,3 +97,4 @@
 | `weather.choose-place` | Place |
 | `weather.refresh` | Fetch the weather |
 | `widgets.todo.open` | To do |
+| `wifi.open` | Wi-Fi |

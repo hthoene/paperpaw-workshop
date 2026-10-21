@@ -36,10 +36,12 @@ What is known of books is a service, not a screen's: `library` has a
 book's details (title, author, series, tags, cover, progress, and
 fields plugins add with `library::set_field`), the books read last and
 the favourites, so any plugin can show or use them. Views of many books
-show covers made small and kept on the storage (`library::cover`, a few
-kilobytes each, not the picture) and take a book's details with the
-size a listing told (`library::listing`, `library::book_sized`): on a
-card, each file looked up again is a search through its folder.
+read the catalog rather than each book (below, "What every library
+offers"), show covers made small and kept on the storage
+(`library::cover_variant`, a few kilobytes each, not the picture, one
+for each size a view shows) and take a book's details with the size a
+listing told (`library::listing`, `library::book_sized`): on a card,
+each file looked up again is a search through its folder.
 
 The bookmarks and highlights of books are shared: `annotations` reads
 and keeps them, and whoever changes them emits

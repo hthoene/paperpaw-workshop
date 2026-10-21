@@ -47,6 +47,8 @@ async function handle(reader: Reader, request: Request & { id: number }): Promis
         return r.screenshot(request.profile, request.dark, request.screen);
       case "check":
         return r.check();
+      case "module":
+        return r.useModule(request.url === null ? null : new URL(request.url, document.baseURI));
     }
   } else {
     const device = reader.device;
@@ -69,6 +71,8 @@ async function handle(reader: Reader, request: Request & { id: number }): Promis
       }
       case "check":
         return device.check();
+      case "module":
+        throw new Error("The stub runs no plugins with code: PaperPaw's emulator is not built here (npm run emulator).");
     }
   }
   throw new Error("unknown request");

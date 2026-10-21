@@ -112,8 +112,9 @@ export function App() {
     }
   };
 
-  const start = async (idea: string) => {
-    const p = newProject();
+  const start = async (idea: string, kind: "data" | "code" = "data") => {
+    // A plugin with code starts from PaperPaw's sample.
+    const p = newProject(kind, kind === "code" ? handbook?.codeSample : undefined);
     await saveProject(p);
     setFirst(idea);
     location.hash = `#/p/${p.key}`;
