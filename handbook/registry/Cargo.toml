@@ -1,0 +1,18 @@
+# The registry dump (see src/main.rs). Its PaperPaw is the checkout the
+# handbook generator unpacks into handbook/.work/paperpaw at the ref it is
+# given; it copies PaperPaw's Cargo.lock beside this file first, so the
+# dump builds with the versions that release pins.
+[package]
+name = "paperpaw-workshop-registry"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+
+# A workspace of its own, apart from PaperPaw's.
+[workspace]
+
+[dependencies]
+paperpaw-emulator = { path = "../.work/paperpaw/shells/desktop" }
+paperpaw-sdk = { path = "../.work/paperpaw/crates/paperpaw-sdk" }
+serde_json = "1"

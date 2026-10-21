@@ -1,0 +1,27 @@
+| Setting | Name | Values | Default | What it does |
+|---|---|---|---|---|
+| `[vocabulary] collect` | Keep words looked up | `true`, `false` | `true` | Each word you look up goes into Vocabulary in the main menu, with its sentence. |
+| `[vocabulary] mark` | Mark vocabulary | `true`, `false` | `false` | The words in Vocabulary are marked where they occur in books of their language; choosing one looks it up again. |
+| `[vocabulary] learning.background` | Background | `core.tone.none`, `core.tone.light-gray`, `core.tone.gray`, `core.tone.dark-gray`, `core.tone.black`, `core.tone.white`, `core.tone.yellow`, `core.tone.green`, `core.tone.blue`, `core.tone.pink`, `core.tone.orange`, `core.tone.red` | `core.tone.none` | A colour behind the marked words; shown as a gray where there is no colour. |
+| `[vocabulary] learning.ink` | Text | `core.tone.as-is`, `core.tone.light-gray`, `core.tone.gray`, `core.tone.dark-gray`, `core.tone.black`, `core.tone.white`, `core.tone.yellow`, `core.tone.green`, `core.tone.blue`, `core.tone.pink`, `core.tone.orange`, `core.tone.red` | `core.tone.as-is` | The colour of the marked words themselves; as it is, or a tone of its own. |
+| `[vocabulary] learning.line` | Line under the text | `core.tone.none`, `core.line.solid`, `core.line.dotted`, `core.line.dashed`, `core.line.wavy`, `core.line.double` | `core.line.dotted` | A line under the marked words: solid, dotted, dashed, wavy or double. |
+| `[vocabulary] learning.line-tone` | Line and frame | `core.tone.as-is`, `core.tone.light-gray`, `core.tone.gray`, `core.tone.dark-gray`, `core.tone.black`, `core.tone.white`, `core.tone.yellow`, `core.tone.green`, `core.tone.blue`, `core.tone.pink`, `core.tone.orange`, `core.tone.red` | `core.tone.as-is` | The colour of the line and the frame. |
+| `[vocabulary] learning.thickness` | Thickness | 1 to 20 | `4` | How thick the line and the frame are. |
+| `[vocabulary] learning.frame` | Frame | `true`, `false` | `false` | A box around the marked words. |
+| `[vocabulary] learning.struck` | Struck through | `true`, `false` | `false` | A line through the marked words. |
+| `[vocabulary] widget.word.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.frame.card`, `core.frame.dark` | `core.frame.none` | What the widget is drawn in: nothing, a line round it, a light card or a dark card with light text. |
+| `[vocabulary] widget.word.padding` | Spacing | `core.padding.auto`, `core.padding.none`, `core.padding.small`, `core.padding.normal`, `core.padding.large` | `core.padding.auto` | How far what the widget shows keeps from its edges, or from its frame. Automatic suits most widgets. |
+| `[vocabulary] widget.word.size` | Size | `core.size.small`, `core.size.medium`, `core.size.large`, `core.size.fit` | `core.size.medium` | How large the widget's text is. Where it does not fit, it is made smaller. |
+| `[vocabulary] widget.word.align` | Alignment | `core.align.left`, `core.align.center`, `core.align.right` | `core.align.left` | Where the widget's text sits in its place: at the left, in the middle or at the right. |
+| `[vocabulary] widget.word.pick` | Word | `vocabulary.pick.daily`, `vocabulary.pick.newest` | `vocabulary.pick.daily` |  |
+| `[vocabulary] widget.word.caption` | Caption | `true`, `false` | `true` | Whether the widget shows this. Where there is too little room, it may be left out anyway. |
+| `[vocabulary] widget.word.sentence` | Its sentence | `true`, `false` | `true` | Whether the widget shows this. Where there is too little room, it may be left out anyway. |
+| `[vocabulary] widget.word.book` | Its book | `true`, `false` | `false` | Whether the widget shows this. Where there is too little room, it may be left out anyway. |
+| `[vocabulary] widget.saved.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.frame.card`, `core.frame.dark` | `core.frame.none` | What the widget is drawn in: nothing, a line round it, a light card or a dark card with light text. |
+| `[vocabulary] widget.saved.padding` | Spacing | `core.padding.auto`, `core.padding.none`, `core.padding.small`, `core.padding.normal`, `core.padding.large` | `core.padding.auto` | How far what the widget shows keeps from its edges, or from its frame. Automatic suits most widgets. |
+| `[vocabulary] widget.saved.size` | Size | `core.size.small`, `core.size.medium`, `core.size.large`, `core.size.fit` | `core.size.medium` | How large the widget's text is. Where it does not fit, it is made smaller. |
+| `[vocabulary] widget.saved.align` | Alignment | `core.align.left`, `core.align.center`, `core.align.right` | `core.align.left` | Where the widget's text sits in its place: at the left, in the middle or at the right. |
+| `[vocabulary] widget.saved.caption` | Caption | `true`, `false` | `true` | Whether the widget shows this. Where there is too little room, it may be left out anyway. |
+| `[vocabulary] widget.saved.newest` | The newest word | `true`, `false` | `true` | Whether the widget shows this. Where there is too little room, it may be left out anyway. |
+| `[vocabulary] widget.saved.books` | How many books | `true`, `false` | `false` | Whether the widget shows this. Where there is too little room, it may be left out anyway. |
+| `[vocabulary] widget.saved.languages` | How many languages | `true`, `false` | `false` | Whether the widget shows this. Where there is too little room, it may be left out anyway. |

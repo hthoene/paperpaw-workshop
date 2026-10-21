@@ -1,0 +1,244 @@
+#!/usr/bin/env node
+// Generates the AI handbook from PaperPaw's own docs and its standard
+// app, at a tag or branch, into public/handbook/ (served with the
+// workshop):
+//
+//   npm run handbook -- --repo ../paperpaw --ref plugin-store
+//
+// - data.md: the system prompt for data plugins (handbook/parts/*.md,
+//   sections of PaperPaw's docs, the samples, tables of the settings,
+//   widgets and actions that matter most);
+// - topics/*.md and index.json: what `lookup_docs` serves, one topic each
+//   (every section of docs/plugins.md, the settings of each plugin or
+//   group, widgets, actions, key maps, samples, device profiles);
+// - registry.json: every setting, widget, action and profile, as the
+//   standard app at that ref reports them (handbook/registry), for the
+//   workshop's own checks;
+// - meta.json: the ref, its commit, when.
+//
+// Options: --repo <path to a PaperPaw clone> (default ../paperpaw),
+// --ref <tag or branch> (default main), --skip-registry (reuse the last
+// handbook/.work/registry.json), --out <folder> (default public/handbook).
+
+import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(here, "..");
+const work = path.join(here, ".work");
+
+function option(name, fallback) {
+  const i = process.argv.indexOf(`--${name}`);
+  return i > 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
+}
+const repo = path.resolve(root, option("repo", "../paperpaw"));
+const ref = option("ref", "main");
+const out = path.resolve(root, option("out", "public/handbook"));
+const skipRegistry = process.argv.includes("--skip-registry");
+
+function run(cmd, args, opts = {}) {
+  const r = spawnSync(cmd, args, { encoding: "utf8", maxBuffer: 1 << 28, ...opts });
+  if (r.status !== 0) {
+    throw new Error(`${cmd} ${args.join(" ")} failed:\n${r.stderr || r.error}`);
+  }
+  return r.stdout;
+}
+
+// 1. PaperPaw at the ref, unpacked (never the working tree: what the ref says).
+const commit = run("git", ["-C", repo, "rev-parse", ref]).trim();
+const tree = path.join(work, "paperpaw");
+fs.rmSync(tree, { recursive: true, force: true });
+fs.mkdirSync(tree, { recursive: true });
+const archive = path.join(work, "paperpaw.tar");
+run("git", ["-C", repo, "archive", "--format=tar", "-o", archive, ref]);
+// Relative paths: GNU tar takes "C:" in a path for a host.
+run("tar", ["-x", "-f", "../paperpaw.tar"], { cwd: tree });
+fs.rmSync(archive);
+const read = (p) => fs.readFileSync(path.join(tree, p), "utf8").replace(/\r\n/g, "\n");
+const exists = (p) => fs.existsSync(path.join(tree, p));
+console.log(`handbook: PaperPaw ${ref} (${commit.slice(0, 10)})`);
+
+// 2. The registry, from the standard app at that ref.
+const registryFile = path.join(work, "registry.json");
+if (!skipRegistry) {
+  fs.copyFileSync(path.join(tree, "Cargo.lock"), path.join(here, "registry", "Cargo.lock"));
+  console.log("handbook: building the registry dump (the first time takes minutes)");
+  const r = spawnSync(
+    "cargo",
+    ["run", "--release", "--manifest-path", path.join(here, "registry", "Cargo.toml"), "--", registryFile],
+    { stdio: "inherit", env: { ...process.env, CARGO_TARGET_DIR: path.join(work, "target") } },
+  );
+  if (r.status !== 0) throw new Error("the registry dump failed");
+}
+const registry = JSON.parse(fs.readFileSync(registryFile, "utf8"));
+
+// 3. Sections of markdown, by heading.
+function sections(markdown) {
+  const lines = markdown.split("\n");
+  const found = [];
+  let fence = false;
+  lines.forEach((line, i) => {
+    if (line.startsWith("```")) fence = !fence;
+    const m = !fence && /^(#{1,4}) (.+)$/.exec(line);
+    if (m) found.push({ level: m[1].length, title: m[2].trim(), start: i });
+  });
+  return found.map((s, n) => {
+    const next = found.slice(n + 1).find((t) => t.level <= s.level);
+    const end = next ? next.start : lines.length;
+    return { ...s, body: lines.slice(s.start, end).join("\n").trim() };
+  });
+}
+const plugins = sections(read("docs/plugins.md"));
+const section = (title) => {
+  const s = plugins.find((x) => x.title === title);
+  if (!s) throw new Error(`docs/plugins.md has no section "${title}" at ${ref}`);
+  return s.body;
+};
+const readme = sections(read("README.md"));
+const customisation = (() => {
+  const s = readme.find((x) => x.title === "Customisation at a glance");
+  // Without its subsections: "Plugins without code" there repeats the docs.
+  return s && { ...s, body: s.body.split("\n### ")[0].trim() };
+})();
+
+// 4. Tables from the registry.
+const cell = (t) => String(t ?? "").replace(/\|/g, "\\|").replace(/\n/g, " ");
+function valuesOf(s) {
+  switch (s.kind) {
+    case "number":
+      return `${s.min} to ${s.max}`;
+    case "choice":
+      return s.choices.map((c) => `\`${c.value}\``).join(", ");
+    case "switch":
+      return "`true`, `false`";
+    default:
+      return s.kind;
+  }
+}
+function settingsTable(list) {
+  const rows = list.map((s) => {
+    const [section, ...key] = s.id.split(".");
+    return `| \`[${section}] ${key.join(".")}\` | ${cell(s.title)} | ${valuesOf(s)} | \`${cell(s.default)}\` | ${cell(s.help)} |`;
+  });
+  return ["| Setting | Name | Values | Default | What it does |", "|---|---|---|---|---|", ...rows].join("\n");
+}
+const widgetsTable = [
+  "| Widget id | Name |",
+  "|---|---|",
+  ...registry.widgets.map((w) => `| \`${w.id}\` | ${cell(w.title)} |`),
+].join("\n");
+const actionsTable = [
+  "| Action id | Name |",
+  "|---|---|",
+  ...registry.actions.map((a) => `| \`${a.id}\` | ${cell(a.title)} |`),
+].join("\n");
+const profilesTable = [
+  "| Profile | Device | Screen | Touch | Buttons |",
+  "|---|---|---|---|---|",
+  ...registry.profiles.map(
+    (p) => `| \`${p.id}\` | ${p.name} | ${p.width} x ${p.height}, ${p.dpi} dpi | ${p.touch ? "yes" : "no"} | ${p.buttons.join(", ")} |`,
+  ),
+].join("\n");
+const inGroup = (g) => registry.settings.filter((s) => s.group === g);
+
+// 5. The samples: every file of samples/plugins, by plugin.
+function samples() {
+  const dir = path.join(tree, "samples/plugins");
+  return fs
+    .readdirSync(dir, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => {
+      const files = [];
+      const walk = (rel) => {
+        for (const e of fs.readdirSync(path.join(dir, d.name, rel), { withFileTypes: true })) {
+          const p = rel ? `${rel}/${e.name}` : e.name;
+          if (e.isDirectory()) walk(p);
+          else files.push(p);
+        }
+      };
+      walk("");
+      files.sort((a, b) => (a === "plugin.ini" ? -1 : b === "plugin.ini" ? 1 : a.localeCompare(b)));
+      const body = files
+        .map((f) => `\`${f}\`:\n\n\`\`\`ini\n${read(`samples/plugins/${d.name}/${f}`).trim()}\n\`\`\``)
+        .join("\n\n");
+      return { id: d.name, body: `## Sample: ${d.name}\n\n${body}` };
+    });
+}
+const sampleList = samples();
+const keymap = exists("crates/paperpaw-core/keymaps/default.ini")
+  ? read("crates/paperpaw-core/keymaps/default.ini").trim()
+  : "";
+
+// 6. The data handbook (the system prompt).
+const part = (name) => fs.readFileSync(path.join(here, "parts", name), "utf8").trim();
+const data = [
+  part("common.md"),
+  part("data.md"),
+  "# From PaperPaw's documentation",
+  section("Plugins without code").replace(/^## /, "## "),
+  section("Presets and home screen layouts"),
+  customisation ? customisation.body : "",
+  "## The default key map\n\nInputs (`button.<name>`, `long.<name>`, `tap.<zone>`, `swipe.<direction>` ...) and the actions they run, as PaperPaw ships them; a plugin's `keymap.ini` overrides single bindings in the same layers.\n\n```ini\n" +
+    keymap +
+    "\n```",
+  "# Samples\n\nComplete data plugins that come with PaperPaw.",
+  ...sampleList.filter((s) => ["airy-theme", "reading-nook", "large-print"].includes(s.id)).map((s) => s.body),
+  "# What this PaperPaw has\n\nOnly these ids exist. `lookup_docs` has the settings of every other plugin (`settings/<plugin>`) and more.",
+  "## The look settings\n\n" + settingsTable(inGroup("core.group.look")),
+  "## The reading settings\n\n" + settingsTable(inGroup("core.group.reading")),
+  "## Widgets for home screen layouts\n\n" + widgetsTable,
+  "## Actions for key maps\n\n" + actionsTable,
+  "## The devices\n\n" + profilesTable,
+]
+  .filter(Boolean)
+  .join("\n\n");
+
+// 7. Topics for lookup_docs.
+const slug = (t) =>
+  t
+    .toLowerCase()
+    .replace(/`/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+const topics = [];
+const add = (id, title, body) => topics.push({ id, title, body: body.trim() });
+for (const s of plugins.filter((s) => s.level >= 2)) add(`docs/${slug(s.title)}`, s.title, s.body);
+if (customisation) add("docs/customisation", "Customisation at a glance (paperpaw.ini)", customisation.body);
+add("keymap/default", "The default key map", "```ini\n" + keymap + "\n```");
+for (const s of sampleList) add(`samples/${s.id}`, `Sample data plugin: ${s.id}`, s.body);
+add("widgets", "Widgets for home screen layouts", widgetsTable);
+add("actions", "Actions for key maps", actionsTable);
+add("devices", "The devices (emulator profiles)", profilesTable);
+const byPlugin = new Map();
+for (const s of registry.settings) {
+  const plugin = s.id.split(".")[0];
+  byPlugin.set(plugin, [...(byPlugin.get(plugin) || []), s]);
+}
+for (const [plugin, list] of byPlugin) add(`settings/${plugin}`, `Settings of ${plugin}`, settingsTable(list));
+const groups = new Map();
+for (const s of registry.settings) groups.set(s.group, [...(groups.get(s.group) || []), s]);
+for (const [group, list] of groups) add(`settings-group/${group}`, `Settings in the group ${group}`, settingsTable(list));
+
+// 8. Write it out.
+const tokens = (text) => Math.round(text.length / 3.6);
+fs.rmSync(out, { recursive: true, force: true });
+fs.mkdirSync(path.join(out, "topics"), { recursive: true });
+fs.writeFileSync(path.join(out, "data.md"), data + "\n");
+const index = topics.map((t) => {
+  const file = `${t.id.replace(/\//g, "--")}.md`;
+  fs.writeFileSync(path.join(out, "topics", file), t.body + "\n");
+  const summary = t.body
+    .replace(/^#+ .*\n+/, "")
+    .split(/(?<=\.)\s/)[0]
+    .slice(0, 160);
+  return { id: t.id, title: t.title, file, summary, tokens: tokens(t.body) };
+});
+fs.writeFileSync(path.join(out, "index.json"), JSON.stringify(index, null, 1) + "\n");
+fs.writeFileSync(path.join(out, "registry.json"), JSON.stringify(registry) + "\n");
+fs.writeFileSync(
+  path.join(out, "meta.json"),
+  JSON.stringify({ ref, commit, generated: new Date().toISOString().slice(0, 10), dataTokens: tokens(data) }, null, 2) + "\n",
+);
+console.log(`handbook: data.md about ${tokens(data)} tokens, ${topics.length} topics, in ${path.relative(root, out)}`);

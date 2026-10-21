@@ -1,0 +1,9 @@
+node_modules/
+dist/
+handbook/.work/
+*.log
+.DS_Store
+.env
+coverage/
+test-results/
+handbook/registry/Cargo.lock
