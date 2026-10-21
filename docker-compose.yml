@@ -1,0 +1,17 @@
+# The workshop on your own computer, at http://localhost:8080
+#
+#   docker compose up --build
+#
+# Your Claude key stays in your browser: this container only serves the
+# workshop's pages, it never sees the key or your plugins.
+services:
+  workshop:
+    build: .
+    ports:
+      - "127.0.0.1:${WORKSHOP_PORT:-8080}:8080"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
