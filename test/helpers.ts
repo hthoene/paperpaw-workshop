@@ -40,6 +40,7 @@ export function bench(project: Project = newProject()): Bench {
   const emulator = new FakeEmulator(book.registry);
   const profiles = SHOWN_PROFILES.map((id) => book.profile(id)!);
   const uploads = new Uploads(project, new MemoryUploads());
+  let shown = profiles[0]!;
   const context: ToolContext = {
     files,
     emulator,
@@ -48,6 +49,13 @@ export function bench(project: Project = newProject()): Bench {
     sync: () => emulator.setFiles({ id: "plugin", files: files.bytes() }),
     uploads,
     pictures: fakeKit,
+    reader: {
+      shown: () => shown,
+      show: async (profile) => {
+        shown = profile;
+        await emulator.start(profile, false, { id: "plugin", files: files.bytes() });
+      },
+    },
   };
   return { project, files, emulator, uploads, context, handbook: book };
 }

@@ -30,7 +30,14 @@ interface Props {
   pretend: boolean;
 }
 
-const BUTTONS = ["page-back", "up", "down", "left", "right", "confirm", "back", "page-forward"];
+/** The device's buttons in the order the reader shows them: the row on its
+ *  front (the X4: back, OK, left, right), then the page buttons on its
+ *  side, home and power. Only those the device has. */
+const BUTTON_ORDER = ["back", "confirm", "left", "right", "page-back", "page-forward", "home", "power"];
+
+function buttonsOf(buttons: string[]): string[] {
+  return [...BUTTON_ORDER.filter((b) => buttons.includes(b)), ...buttons.filter((b) => !BUTTON_ORDER.includes(b))];
+}
 
 export function WorkshopPage({ project, handbook, provider, first, firstFiles, onFirstSent, sharing, store, pretend }: Props) {
   const workshop = useMemo(() => new Workshop(project, handbook, provider), [project, handbook, provider]);
@@ -207,10 +214,8 @@ export function WorkshopPage({ project, handbook, provider, first, firstFiles, o
             />
           </div>
           <div class="buttons" role="group" aria-label={t("reader.buttons")}>
-            {BUTTONS.map((b) => (
-              <button key={b} onClick={() => void workshop.press(b)}>
-                {t(`reader.button.${b}`)}
-              </button>
+            {buttonsOf(profile.buttons).map((b) => (
+              <ReaderButton key={b} name={b} onPress={(long) => void workshop.press(b, long)} />
             ))}
           </div>
           {workshop.stub && <p class="small">{t("reader.stub")}</p>}
@@ -254,6 +259,34 @@ export function WorkshopPage({ project, handbook, provider, first, firstFiles, o
     </>
   );
 }
+
+/** A button of the reader: a click is a short press; held half a second
+ *  or more, a long press, as on the device. Keys (Enter, Space) press it
+ *  short. */
+function ReaderButton({ name, onPress }: { name: string; onPress(long: boolean): void }) {
+  const down = useRef(0);
+  return (
+    <button
+      onPointerDown={() => (down.current = performance.now())}
+      onPointerUp={() => {
+        if (down.current) onPress(performance.now() - down.current >= LONG_HOLD);
+        down.current = 0;
+      }}
+      onPointerLeave={() => (down.current = 0)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onPress(false);
+        }
+      }}
+    >
+      {t(`reader.button.${name}`)}
+    </button>
+  );
+}
+
+/** How long a reader's button is held for a long press, in ms. */
+const LONG_HOLD = 500;
 
 function costText(dollars: number): string {
   const cents = dollars * 100;

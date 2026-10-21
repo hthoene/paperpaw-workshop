@@ -23,6 +23,11 @@ export interface ToolContext {
   /** The author's uploads, and what decodes their pictures. */
   uploads: Uploads;
   pictures: PictureKit;
+  /** The reader the author sees: which device, and showing another. */
+  reader: {
+    shown(): Profile;
+    show(profile: Profile): Promise<void>;
+  };
 }
 
 /** One line the conversation shows for a step: a catalog key and its values. */

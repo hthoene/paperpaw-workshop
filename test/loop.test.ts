@@ -8,6 +8,7 @@ import { runTurn, type Session } from "../src/ai/loop";
 import { MODELS } from "../src/ai/pricing";
 import { ReplayProvider, type Recording } from "../src/ai/replay";
 import type { Step } from "../src/tools/tool";
+import { press } from "../src/tools/emulator";
 import { DATA_TOOLS } from "../src/tools/registry";
 import { bench } from "./helpers";
 
@@ -199,5 +200,29 @@ describe("the AI loop, with a recorded conversation", () => {
     const { session: s, project } = session(provider);
     await expect(runTurn(s, "hello")).rejects.toThrow("has no answer");
     expect(project.messages).toEqual([]);
+  });
+});
+
+describe("the press tool", () => {
+  it("presses the device's own buttons, on the reader the person sees", async () => {
+    const { context, emulator } = bench();
+    const pro = context.profiles.find((p) => p.id === "xteink-x4-pro")!;
+    const wrong = await press.run({ device: "X4 Pro", buttons: ["confirm"] }, context);
+    expect(wrong.isError).toBe(true);
+    expect(String(wrong.content)).toContain("page-back, page-forward, home, power");
+    expect(emulator.inputs).toEqual([]);
+
+    const ok = await press.run({ device: "X4 Pro", buttons: ["page-forward", "home:long"] }, context);
+    expect(ok.isError).toBeFalsy();
+    expect(context.reader.shown().id).toBe(pro.id);
+    expect(emulator.inputs).toEqual([
+      { kind: "button", name: "page-forward", long: false },
+      { kind: "button", name: "home", long: true },
+    ]);
+    expect(emulator.screenshots.at(-1)?.profile).toBe(pro.id);
+
+    // Without a device: the one shown.
+    await press.run({ buttons: ["power"] }, context);
+    expect(emulator.inputs.at(-1)).toEqual({ kind: "button", name: "power", long: false });
   });
 });

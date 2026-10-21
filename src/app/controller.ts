@@ -114,6 +114,10 @@ export class Workshop {
       sync: () => this.sync(),
       uploads: this.uploads,
       pictures: this.pictures,
+      reader: {
+        shown: () => this.profile,
+        show: (profile) => this.show(profile),
+      },
     };
   }
 
@@ -196,8 +200,13 @@ export class Workshop {
     await this.restart();
   }
 
-  async press(name: string): Promise<void> {
-    await this.emulator?.input({ kind: "button", name });
+  async press(name: string, long = false): Promise<void> {
+    try {
+      await this.emulator?.input({ kind: "button", name, long });
+    } catch (e) {
+      this.error = e instanceof Error ? e.message : String(e);
+      this.changed();
+    }
   }
 
   async sync(): Promise<void> {

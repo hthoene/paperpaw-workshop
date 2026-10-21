@@ -59,17 +59,30 @@ export const look: WorkshopTool<{ device?: string; dark?: boolean; screen?: "hom
 export const press: WorkshopTool<{ device?: string; buttons: string[] }> = {
   name: "press",
   description:
-    "Press the reader's buttons in order (up, down, left, right, confirm, back, page-forward, page-back), then see the screen. For checking how the focus moves.",
+    'Press buttons of the reader the person sees, in order, as on the device, then see its screen. Each device has its own: the X4 back, confirm (OK, "Select"), left, right, page-back, page-forward, power; the X4 Pro page-back, page-forward, home, power (and a touch screen); the Boox Go 7 page-back, page-forward, back. Add ":long" for a long press ("confirm:long"). Naming another device shows that one first.',
   schema: z
     .object({
       device: DEVICE.optional(),
-      buttons: z.array(z.enum(["up", "down", "left", "right", "confirm", "back", "page-forward", "page-back"])).min(1).max(20),
+      buttons: z
+        .array(z.string().regex(/^[a-z-]+(:long)?$/))
+        .min(1)
+        .max(20),
     })
     .strict(),
   async run({ device, buttons }, context) {
     await context.sync();
-    for (const name of buttons) await context.emulator.input({ kind: "button", name });
-    const { profile, shot } = await screen(context, device, undefined);
+    const profile = device ? deviceNamed(context, device) : context.reader.shown();
+    const wrong = buttons.map((b) => b.replace(/:long$/, "")).filter((b) => !profile.buttons.includes(b));
+    if (wrong.length) {
+      return {
+        content: `The ${profile.name} has no ${wrong.join(", ")}: its buttons are ${profile.buttons.join(", ")}.`,
+        isError: true,
+        step: { key: "step.press", vars: { device: shortName(profile) } },
+      };
+    }
+    if (profile.id !== context.reader.shown().id) await context.reader.show(profile);
+    for (const b of buttons) await context.emulator.input({ kind: "button", name: b.replace(/:long$/, ""), long: b.endsWith(":long") });
+    const shot = await context.emulator.screenshot(profile, undefined);
     return {
       content: [
         { type: "image", source: { type: "base64", media_type: "image/png", data: shot.png } },

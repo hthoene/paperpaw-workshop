@@ -33,7 +33,7 @@ describe("the catalog", () => {
     for (const tool of DATA_TOOLS.map((t) => t.name)) {
       expect(en).toHaveProperty(`step.${tool}`);
     }
-    for (const b of ["page-back", "up", "down", "left", "right", "confirm", "back", "page-forward"]) {
+    for (const b of ["page-back", "left", "right", "confirm", "back", "page-forward", "home", "power"]) {
       expect(en).toHaveProperty(`reader.button.${b}`);
     }
     for (const level of ["error", "warning", "info"]) expect(en).toHaveProperty(`findings.level.${level}`);

@@ -90,8 +90,6 @@
   "start.example": "Watch an example first, no key needed",
   "workshop.example": "This is a recorded example: the AI's answers are played back, the tools and the reader are real.",
   "reader.button.page-back": "Page back",
-  "reader.button.up": "Up",
-  "reader.button.down": "Down",
   "reader.button.left": "Left",
   "reader.button.right": "Right",
   "reader.button.confirm": "OK",
@@ -217,5 +215,7 @@
   "step.place_file": "Copied {path} into the plugin",
   "reader.asleep": "Asleep",
   "start.example.picture": "or one with a picture",
-  "reader.asleep.none": "This reader runs Android, which shows its own screen while it sleeps."
+  "reader.asleep.none": "This reader runs Android, which shows its own screen while it sleeps.",
+  "reader.button.home": "Home",
+  "reader.button.power": "Power"
 }

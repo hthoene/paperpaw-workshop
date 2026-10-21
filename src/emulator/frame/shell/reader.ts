@@ -30,7 +30,8 @@ const PREVIEW: Record<string, Uint8Array> = {
   "plugin.ini": new TextEncoder().encode("[plugin]\nid = workshop-preview\nname = Workshop preview\nversion = 1.0.0\nformats = 1\n"),
   "settings.ini": new TextEncoder().encode("[home]\ngesture-tips = false\n"),
 };
-/** How long a long press holds, in the device's time. */
+/** How long a press holds, in the device's time: a short one, a long one. */
+const SHORT_PRESS = 150;
 const LONG_PRESS = 1000;
 /** How far a screenshot lets the device's time run to settle, at most. */
 const SETTLE = 10_000;
@@ -55,7 +56,9 @@ export class ShellReader {
     private live: PaperPawDevice,
     private url: URL,
     private canvas: HTMLCanvasElement,
-  ) {}
+  ) {
+    this.touch();
+  }
 
   /** The module from `url`, drawing into `canvas`. */
   static async load(url: URL, canvas: HTMLCanvasElement): Promise<ShellReader> {
@@ -88,21 +91,56 @@ export class ShellReader {
     await this.start(this.profile, this.dark, plugin, this.screen);
   }
 
+  /** A button pressed and let go (or a tap), as on the device. The
+   *  device's clock is brought to now first: its time stands while nothing
+   *  is due, and a press taken in at the old time would last until now, a
+   *  long press. */
   input(event: InputEvent): Promise<void> {
     return this.guard(() => {
+      this.step();
       if (event.kind === "tap") {
         this.live.pointer("down", event.x, event.y);
+        this.skew += SHORT_PRESS;
         this.step();
         this.live.pointer("up", event.x, event.y);
         this.step();
         return;
       }
-      if (!this.live.button(event.name, true)) return;
+      if (!this.live.button(event.name, true)) throw new Error(`The ${this.profile?.name ?? "reader"} has no button ${event.name}.`);
+      this.skew += event.long ? LONG_PRESS : SHORT_PRESS;
       this.step();
-      if (event.long) this.skew += LONG_PRESS;
       this.live.button(event.name, false);
       this.step();
     });
+  }
+
+  /** Fingers on the screen, where the device has a touch screen: the
+   *  canvas's pointer events as the device's own, in its pixels. */
+  private touch(): void {
+    const at = (event: PointerEvent): [number, number] => {
+      // The canvas shows the panel whole (object-fit: contain), centred.
+      const rect = this.canvas.getBoundingClientRect();
+      const scale = Math.min(rect.width / this.canvas.width, rect.height / this.canvas.height);
+      const left = rect.left + (rect.width - this.canvas.width * scale) / 2;
+      const top = rect.top + (rect.height - this.canvas.height * scale) / 2;
+      return [(event.clientX - left) / scale, (event.clientY - top) / scale];
+    };
+    const phases = { pointerdown: "down", pointermove: "move", pointerup: "up", pointercancel: "cancel" } as const;
+    for (const [type, phase] of Object.entries(phases)) {
+      this.canvas.addEventListener(type, (event) => {
+        const e = event as PointerEvent;
+        if (!this.profile?.touch || (phase === "move" && !e.buttons)) return;
+        if (phase === "down") {
+          this.canvas.setPointerCapture(e.pointerId);
+          this.step();
+        }
+        const [x, y] = at(e);
+        void this.guard(() => {
+          this.live.pointer(phase, x, y);
+          this.step();
+        }).catch(() => {});
+      });
+    }
   }
 
   /** A screen as a PNG: the author's reader, or another device, in night
