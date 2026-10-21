@@ -58,7 +58,7 @@ describe("the store entry", () => {
     expect(readEntry(files)).toMatchObject({ summary: "Calm.", group: "look", licence: "MIT", alts: { "1-x4.png": "Mine" } });
   });
 
-  it("is drafted from the conversation in one request that must call set_entry", async () => {
+  it("is drafted from the conversation in one request that offers set_entry alone", async () => {
     const { project, files, context } = bench();
     files.write("plugin.ini", PLUGIN_INI);
     project.messages.push({ role: "user", content: "A calm dark look for reading at night." });
@@ -67,8 +67,11 @@ describe("the store entry", () => {
     expect(input.group).toBe("look");
     expect(readEntry(files).summary).toMatch(/^A calm dark look/);
     const request = provider.requests[0]!;
-    expect(request.tool_choice).toEqual({ type: "tool", name: "set_entry" });
-    expect(request.thinking).toBeUndefined();
+    // Named in the prompt, not forced: current models refuse a forced choice.
+    expect(request.tool_choice).toBeUndefined();
+    expect(request.tools?.map((t) => ("name" in t ? t.name : ""))).toEqual(["set_entry"]);
+    expect(request.system).toContain("Call set_entry once");
+    expect(request.thinking).toEqual({ type: "disabled" });
     expect(JSON.stringify(request.messages)).toContain("A calm dark look for reading at night.");
     // Not part of the conversation, but paid for.
     expect(project.messages).toHaveLength(1);

@@ -14,8 +14,9 @@ export interface Recording {
   /** What the person wrote, turn by turn. */
   user: string[];
   answers: Answer[];
-  /** The answer to the share page's request for a store entry (one that
-   *  forces a tool), if the recording goes that far. */
+  /** The answer to the share page's request for a store entry (the one
+   *  request that offers `set_entry` alone), if the recording goes that
+   *  far. */
   entry?: Answer;
 }
 
@@ -40,9 +41,10 @@ export class ReplayProvider implements Provider {
   async send(request: Request, stream: Stream): Promise<Anthropic.Message> {
     this.requests.push(structuredClone(request));
     if (this.pause) await new Promise((r) => setTimeout(r, this.pause));
-    const forced = request.tool_choice?.type === "tool";
-    const answer = forced ? this.recording.entry : this.recording.answers[this.next++];
-    if (!answer) throw new Error(`the recording "${this.recording.title}" has no ${forced ? "entry" : `answer ${this.next}`}`);
+    const only = request.tools?.length === 1 ? request.tools[0] : undefined;
+    const entry = !!only && "name" in only && only.name === "set_entry";
+    const answer = entry ? this.recording.entry : this.recording.answers[this.next++];
+    if (!answer) throw new Error(`the recording "${this.recording.title}" has no ${entry ? "entry" : `answer ${this.next}`}`);
     for (const block of answer.content) {
       if (block.type === "text") stream.onText?.(block.text);
     }

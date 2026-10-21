@@ -1,7 +1,8 @@
 // The store entry drafted by the AI from the conversation, for the author
-// to change: one request that must answer with `set_entry`. It is not
-// part of the conversation (so its cache stays as it is) and needs no
-// thinking: it only sums up what was made.
+// to change: one request whose only tool is `set_entry`, asked for by
+// name in the prompt (current models refuse a forced `tool_choice`). It
+// is not part of the conversation (so its cache stays as it is) and needs
+// no thinking: it only sums up what was made.
 
 import type Anthropic from "@anthropic-ai/sdk";
 
@@ -48,7 +49,7 @@ export async function draftEntry(
     max_tokens: 1500,
     system: SYSTEM,
     tools: [definition(setEntry, false)],
-    tool_choice: { type: "tool", name: setEntry.name },
+    thinking: { type: "disabled" },
     messages: [{ role: "user", content: draftPrompt(project, context.files) }],
   };
   const answer = await provider.send(request, {}, signal);
