@@ -5,12 +5,38 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { open, save } from "@tauri-apps/plugin-dialog";
+import { relaunch } from "@tauri-apps/plugin-process";
+import { check } from "@tauri-apps/plugin-updater";
 
 import type { BuildResult } from "../build/client";
 import type { CheckApi } from "./checks";
 import type { FolderApi } from "./folders";
 import { memoryHistory, type History, type HistoryApi } from "./history";
 import type { PictureApi } from "./pictures";
+
+/** A plugin installed on a reader: its id, and whether its code runs
+ *  only after the reader starts again. */
+export interface Installed {
+  id: string;
+  restart: boolean;
+}
+
+/** A newer workshop, as its release says. */
+export interface AppUpdate {
+  version: string;
+  notes: string | null;
+}
+
+/** A reader found on the USB cable, as it says what it is. */
+export interface CableReader {
+  port: string;
+  device: string | null;
+  name: string | null;
+  version: string | null;
+  fingerprint: string | null;
+  /** Why it did not answer, where it did not. */
+  problem: string | null;
+}
 
 /** A frame of the reader's panel, as the Rust side sends it. */
 export interface Frame {
@@ -78,9 +104,21 @@ export interface Backend extends FolderApi, PictureApi, CheckApi, HistoryApi {
   emulatorTold(): Promise<[string[], string[]]>;
   /** Which PaperPaw answers, once it said so. */
   emulatorReady(): Promise<Ready | null>;
-  /** The project's plugin to a reader over Wi-Fi, at the transfer address
-   *  it shows; the plugin's id. */
-  sendWifi(project: string, address: string): Promise<string>;
+  /** The project's plugin installed on a reader over Wi-Fi, at the
+   *  transfer address it shows. */
+  sendWifi(project: string, address: string): Promise<Installed>;
+  /** A newer workshop, if its releases have one; null if not, or where
+   *  it could not be asked (offline). */
+  updateCheck(): Promise<AppUpdate | null>;
+  /** Fetches and installs the newer workshop, then starts it again. */
+  updateInstall(): Promise<void>;
+  /** The readers on the USB cable. */
+  usbReaders(): Promise<CableReader[]>;
+  /** The project's plugin installed on the reader on the cable at `port`. */
+  sendUsb(project: string, port: string): Promise<Installed>;
+  /** How sending goes: `asking` while the reader asks on its screen,
+   *  `sending n/m`, `installing`. */
+  onSendProgress(told: (step: string) => void): Promise<() => void>;
   /** The project's plugin onto a reader's card at `card`; where it went. */
   sendCard(project: string, card: string): Promise<string>;
   /** Where to save a file, asked of the person; null if they did not say. */
@@ -180,6 +218,24 @@ export const appBackend: Backend = {
   emulatorTold: () => invoke("emulator_told"),
   emulatorReady: () => invoke("emulator_ready"),
   sendWifi: (project, address) => invoke("send_wifi", { project, address }),
+  updateCheck: async () => {
+    try {
+      const found = await check();
+      return found ? { version: found.version, notes: found.body ?? null } : null;
+    } catch {
+      // Offline, or the releases not reached: asked again next time.
+      return null;
+    }
+  },
+  updateInstall: async () => {
+    const found = await check();
+    if (!found) return;
+    await found.downloadAndInstall();
+    await relaunch();
+  },
+  usbReaders: () => invoke("usb_readers"),
+  sendUsb: (project, port) => invoke("send_usb", { project, port }),
+  onSendProgress: async (told) => listen<string>("send-progress", (event) => told(event.payload)),
   sendCard: (project, card) => invoke("send_card", { project, card }),
   askSave: (name) => save({ defaultPath: name, filters: [{ name: "Plugin", extensions: ["zip"] }] }),
   askFolder: async () => {
@@ -284,6 +340,11 @@ export function standInBackend(): Backend {
     emulatorTold: async () => [[], []],
     emulatorReady: async () => null,
     sendWifi: async () => { throw new Error("Sending to a reader needs the app."); },
+    updateCheck: async () => null,
+    updateInstall: async () => {},
+    usbReaders: async () => [],
+    sendUsb: async () => { throw new Error("Sending to a reader needs the app."); },
+    onSendProgress: async () => () => {},
     sendCard: async () => { throw new Error("Sending to a reader needs the app."); },
     askSave: async () => null,
     askFolder: async () => null,

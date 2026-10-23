@@ -27,8 +27,9 @@ Xteink X4 and X4 Pro.
 </p>
 
 When it looks right, **Send to reader**: over Wi-Fi (open Transfer on the
-reader and type the address it shows), or onto its card. Or keep it as a
-zip with **Export zip** in the menu.
+reader and type the address it shows), over the USB cable, or onto its
+card. The reader asks before it takes a plugin with code, or anything
+over the cable. Or keep it as a zip with **Export zip** in the menu.
 
 ## No Claude key?
 
@@ -94,6 +95,8 @@ conversation instead of asking the model.
 Tests: `npm test`, and `cargo test` in `src-tauri`. The key service for
 PaperPaw keys is in [`proxy/`](proxy/README.md). The Windows installer
 comes from `npm run app:installer`, with `PAPERPAW_EMU` naming the
-PaperPaw build it brings along.
+PaperPaw build it brings along; with the update key in
+`TAURI_SIGNING_PRIVATE_KEY` it is signed for updates, and
+`dist-installer/` holds what a release attaches.
 
 Licensed under the [Apache License 2.0](LICENSE).

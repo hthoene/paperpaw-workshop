@@ -69,6 +69,8 @@ window may call. Each file is one concern:
 | `toolchain.rs` | Rust for plugins with code, set up in the app's folder, the compiler the emulator names; on Windows, Microsoft's C++ build tools |
 | `pictures.rs` | Pictures made smaller, as the person chose; the AI's shape of an upload made so |
 | `send.rs` | The plugin onto a reader: over Wi-Fi, onto its card, or as a zip |
+| `install.rs` | A plugin installed on a reader in one step, through PaperPaw's install requests, the same over Wi-Fi and the cable |
+| `usb.rs` | The reader on the USB cable: PaperPaw's cable transfer, lines over the chip's own serial link |
 | `history.rs` | The project's history: a state after every answer that changed the plugin, going back to one, the versions packed for the store |
 | `export.rs` | Projects to another computer: one file with everything of a project, or of all, and bringing it back |
 
@@ -371,12 +373,40 @@ PaperPaw's checks found to fix and which pictures could be smaller, and
 stops nothing. Then:
 
 - **Wi-Fi**: through the reader's Transfer page, its address with its key
-  as the reader shows it (`http://<reader>/?k=<key>`). The Transfer API
-  never overwrites (a file sent where one is gets a free name), so the
-  plugin's folder there is removed first and made again. PaperPaw's
-  atomic `POST /api/plugin/<id>` takes its place once a release has it.
+  as the reader shows it (`http://<reader>/?k=<key>`). Each file goes
+  with its SHA-256 (`PUT /api/plugin/<id>/<path>`), then the reader
+  installs the plugin in one step (`POST /api/plugin/<id>`): the one there
+  before stays until the new one is whole. A plugin with code is asked
+  about on the reader first; the window says "Allow it on the reader"
+  while the workshop waits for the answer (two minutes at most).
+- **Cable**: the same requests as lines over the reader's USB serial link
+  ([src-tauri/src/usb.rs](../src-tauri/src/usb.rs), PaperPaw's
+  docs/usb-transfer.md). The workshop looks only at Espressif's USB
+  serial units (an X4's or X4 Pro's chip), opens the port without
+  resetting the chip, and waits for each answer a bounded time. It first
+  says what is to come, each file with its size and SHA-256; the reader
+  asks on its screen, and nothing is written before the person allows
+  it there.
 - **Card**: into `plugins/<id>/` of the reader's card in this computer.
 - **Export zip**: the plugin as a zip to keep or share.
+
+A plugin with code goes as its folder (`plugin/`) with its build for the
+reader (`code.ppn`) that Publish… made; for now the X4's alone, until
+the workshop builds for the X4 Pro too.
+
+## Updates of the workshop
+
+The workshop updates itself through Tauri's updater
+([src/desktop/Updates.tsx](../src/desktop/Updates.tsx)): it asks the
+workshop's latest GitHub release for `latest.json` when Settings open,
+and says "Update available" there, never in a popup. The update is
+fetched and installed only when the person says so, and only when it is
+signed with the workshop's update key, whose public half is in
+[src-tauri/tauri.conf.json](../src-tauri/tauri.conf.json); then the
+workshop starts again. `npm run app:installer` signs the installer when
+the private key is in `TAURI_SIGNING_PRIVATE_KEY` and writes the
+release's files (`dist-installer/`: the installer, its signature,
+`latest.json`). The private key is never in the repository.
 
 The store's own files (`store/`) stay home.
 

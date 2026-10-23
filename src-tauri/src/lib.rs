@@ -9,6 +9,7 @@ mod code;
 mod emulator;
 mod export;
 mod history;
+mod install;
 mod key;
 mod paths;
 mod pictures;
@@ -17,6 +18,7 @@ mod publish;
 mod sample;
 mod send;
 mod toolchain;
+mod usb;
 
 use tauri::Manager;
 
@@ -24,6 +26,8 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .setup(|app| {
             app.manage(emulator::for_app(app.handle().clone()));
             app.manage(emulator::Shown(std::sync::Mutex::new(None)));
@@ -50,6 +54,8 @@ pub fn run() {
             send::send_wifi,
             send::send_card,
             send::save_file,
+            usb::usb_readers,
+            usb::send_usb,
             pictures::picture_make,
             pictures::picture_info,
             publish::publish_save,

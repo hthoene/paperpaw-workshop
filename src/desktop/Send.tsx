@@ -1,16 +1,19 @@
 // "Send to reader": the plugin onto a real reader, over Wi-Fi through the
-// reader's transfer page, or onto its card in this computer. First what
-// PaperPaw's checks found and pictures that could be smaller: said, never
-// in the way; the person decides.
+// reader's transfer page, over the USB cable, or onto its card in this
+// computer. Over Wi-Fi and the cable the reader installs it in one step,
+// after asking on its screen where it must (a plugin with code; anything
+// over the cable). First what PaperPaw's checks found and pictures that
+// could be smaller: said, never in the way; the person decides.
 
 import { useEffect, useState } from "preact/hooks";
 
 import { identity } from "../project/project";
-import type { Backend } from "./backend";
+import type { Backend, CableReader } from "./backend";
 import { forModel, shown } from "./checks";
 import type { Desk } from "./desk";
 import { toBase64 } from "./folders";
 import { makeSmaller, suggestions, WORKSHOP_SCREENS, type Suggestion } from "./pictures";
+import { installedText, readerLabel, stepText } from "./sending";
 
 interface Props {
   desk: Desk;
@@ -23,6 +26,10 @@ export function Send({ desk, backend, onClose }: Props) {
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
   const [said, setSaid] = useState("");
+  // How sending goes, from the app, while it goes.
+  const [step, setStep] = useState("");
+  // The readers on the cable, once looked for.
+  const [readers, setReaders] = useState<CableReader[] | null>(null);
   const [smaller, setSmaller] = useState<Suggestion[]>([]);
   const checks = desk.checker.checks;
   const errors = checks.state === "done" ? shown(checks.found, project?.ignoredChecks).filter((f) => f.level === "error") : [];
@@ -32,17 +39,31 @@ export function Send({ desk, backend, onClose }: Props) {
     if (project) void suggestions(project, WORKSHOP_SCREENS, backend).then(setSmaller, () => setSmaller([]));
   }, [project, backend]);
 
+  useEffect(() => {
+    let stop: (() => void) | undefined;
+    void backend.onSendProgress(setStep).then((s) => { stop = s; });
+    return () => stop?.();
+  }, [backend]);
+
   const doing = async (what: () => Promise<string>) => {
     setBusy(true);
     setSaid("");
+    setStep("");
     try {
       setSaid(await what());
     } catch (e) {
       setSaid(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
+      setStep("");
     }
   };
+
+  const lookForReaders = () => void doing(async () => {
+    const found = await backend.usbReaders();
+    setReaders(found);
+    return found.length ? "" : "No reader on the cable. Plug it in and switch it on.";
+  });
 
   const shrink = async (s: Suggestion) => {
     if (!project) return;
@@ -88,10 +109,31 @@ export function Send({ desk, backend, onClose }: Props) {
           <section class="way">
             <h3>Over Wi-Fi</h3>
             <p>On the reader, open Transfer. Type the address it shows.</p>
-            <form class="line" onSubmit={(e) => { e.preventDefault(); void doing(async () => `Sent ${await backend.sendWifi(project!.key, address)}. Restart the reader to load it.`); }}>
+            <form class="line" onSubmit={(e) => { e.preventDefault(); void doing(async () => installedText(await backend.sendWifi(project!.key, address))); }}>
               <input aria-label="The reader's address" placeholder="http://192.168.…/?k=…" spellcheck={false} value={address} onInput={(e) => setAddress(e.currentTarget.value)} />
               <button type="submit" class="go" disabled={busy || !address.trim()}>Send</button>
             </form>
+          </section>
+          <section class="way">
+            <h3>Over the cable</h3>
+            <p>Plug the reader into this computer. It asks on its screen before it takes the plugin.</p>
+            {readers && readers.length > 0 && (
+              <ul class="files">
+                {readers.map((r) => (
+                  <li key={r.port}>
+                    <span class="file-name">{readerLabel(r)}</span>
+                    {!r.problem && (
+                      <button type="button" class="go" disabled={busy} onClick={() => void doing(async () => installedText(await backend.sendUsb(project!.key, r.port)))}>
+                        Send
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <button type="button" class="link" disabled={busy} onClick={lookForReaders}>
+              {readers ? "Look again" : "Look for readers"}
+            </button>
           </section>
           <section class="way">
             <h3>Onto its card</h3>
@@ -109,6 +151,7 @@ export function Send({ desk, backend, onClose }: Props) {
               Choose the card
             </button>
           </section>
+          {busy && step && <p class={step === "asking" ? "said asking" : "said"} role="status">{stepText(step)}</p>}
           {said && <p class="said" role="status">{said}</p>}
         </>
       )}

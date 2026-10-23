@@ -1,7 +1,15 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "The workshop's one window: its own commands, the core events, and choosing where a plugin goes.",
-  "windows": ["main"],
-  "permissions": ["core:default", "dialog:allow-save", "dialog:allow-open"]
+  "description": "The workshop's one window: its own commands, the core events, choosing where a plugin goes, and the app's own updates.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "dialog:allow-save",
+    "dialog:allow-open",
+    "updater:default",
+    "process:allow-restart"
+  ]
 }

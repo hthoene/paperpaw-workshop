@@ -255,6 +255,9 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .send-sheet .way p { margin: 0 0 .7rem; color: var(--ink-2); }
 .send-sheet .way .go { min-height: 2.6rem; }
 .send-sheet .said { margin: .4rem 0 0; font-weight: 600; }
+/* The reader asks on its screen: said plainly, in the mark's colour. */
+.send-sheet .said.asking { color: var(--mark); font-size: 1.05rem; }
+.send-sheet .way .files li { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
 .notice {
   position: absolute; left: 50%; bottom: 6rem; z-index: 4; transform: translateX(-50%);
   display: flex; align-items: center; gap: .6rem; margin: 0; padding: .45rem .5rem .45rem 1rem;
@@ -278,8 +281,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .publish-sheet .file-name { font-weight: 600; overflow-wrap: anywhere; }
 
 /* The author key in Settings, and the backup before the first package. */
-.author-key { margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
-.author-key h3 { margin: 0 0 .4rem; font: 600 1.02rem/1.3 var(--display); }
+.author-key, .app-update { margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
+.author-key h3, .app-update h3 { margin: 0 0 .4rem; font: 600 1.02rem/1.3 var(--display); }
 .author-key .fingerprint { font-variant-numeric: tabular-nums; letter-spacing: .04em; }
 .key-gate .go { min-height: 2.4rem; }
 

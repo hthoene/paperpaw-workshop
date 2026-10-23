@@ -20,3 +20,4 @@ src-tauri/resources/emulator/*
 !src-tauri/resources/emulator/README.md
 src-tauri/resources/sdk/*
 !src-tauri/resources/sdk/README.md
+dist-installer/
