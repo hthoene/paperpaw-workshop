@@ -35,9 +35,17 @@ pub const CARGO_CONFIG: &str = r#"# How a native plugin is built (PaperPaw's doc
 # `paperpaw-plugin.x` (the copy beside this folder, as the PaperPaw
 # release has it), its relocations kept for the packer. Keep both as they
 # are: paperpaw.org rebuilds the plugin with them.
+#
+# - The X4 (ESP32-C3, RISC-V): `cargo x4`, with the toolchain the
+#   PaperPaw release names.
+# - The X4 Pro (ESP32-S3, Xtensa): `cargo +esp x4pro`, with espup's `esp`
+#   toolchain and the core libraries of the PaperPaw release
+#   (`paperpaw-xtensa-std-<version>.tar.gz`, installed with PaperPaw's
+#   tools/xtensa-std/install.sh), so that the plugin's code is the same
+#   on every computer.
 [alias]
 x4 = "build --release --target riscv32imc-unknown-none-elf"
-x4pro = "build --release --target xtensa-esp32s3-none-elf -Zbuild-std=core,alloc"
+x4pro = "build --release --target xtensa-esp32s3-none-elf"
 
 [target.riscv32imc-unknown-none-elf]
 rustflags = [
@@ -437,6 +445,8 @@ mod tests {
         assert_eq!(linker_script(released, None, &home).as_deref(), Some(&b"release"[..]));
         assert_eq!(linker_script("{ version = \"=0.6.0\" }", None, &home), None);
         assert!(CARGO_CONFIG.contains("-Tpaperpaw-plugin.x"));
+        // The X4 Pro links with the release's core libraries, as PaperPaw's sample.
+        assert!(!CARGO_CONFIG.contains("build-std"));
     }
 
     #[test]
