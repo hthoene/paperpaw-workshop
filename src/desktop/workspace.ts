@@ -11,6 +11,7 @@ export class Workspace {
   project: Project | null = null;
   listed: Listed[] = [];
   private listeners = new Set<() => void>();
+  private savedListeners = new Set<(project: Project) => void>();
   private saving: Promise<void> = Promise.resolve();
 
   constructor(api: FolderApi) {
@@ -20,6 +21,12 @@ export class Workspace {
   subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
+  }
+
+  /** Calls `saved` after each save (the checks run then). */
+  afterSave(saved: (project: Project) => void): () => void {
+    this.savedListeners.add(saved);
+    return () => this.savedListeners.delete(saved);
   }
 
   private changed(): void {
@@ -62,7 +69,12 @@ export class Workspace {
   save(): Promise<void> {
     const project = this.project;
     if (!project) return this.saving;
-    this.saving = this.saving.then(() => this.folders.save(project)).then(() => this.changed());
+    this.saving = this.saving
+      .then(() => this.folders.save(project))
+      .then(() => {
+        this.changed();
+        this.savedListeners.forEach((s) => s(project));
+      });
     return this.saving;
   }
 

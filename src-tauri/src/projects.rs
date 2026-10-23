@@ -39,7 +39,7 @@ fn b64() -> base64::engine::GeneralPurpose {
 }
 
 /// `name` as a folder name of the root: one part, nothing hidden.
-fn folder(root: &Path, name: &str) -> Result<PathBuf, String> {
+pub fn folder(root: &Path, name: &str) -> Result<PathBuf, String> {
     if name.is_empty()
         || name.starts_with('.')
         || name.contains(['/', '\\', ':'])
@@ -138,6 +138,19 @@ fn walk(base: &Path, dir: &Path, out: &mut Vec<FileEntry>) -> std::io::Result<()
         }
     }
     Ok(())
+}
+
+/// The plugin's files of the project with their bytes, as a reader would
+/// find them: for the checks.
+pub fn plugin_files(root: &Path, project: &str) -> Result<Vec<(String, Vec<u8>)>, String> {
+    let dir = folder(root, project)?;
+    files(root, project)?
+        .into_iter()
+        .map(|f| {
+            let bytes = std::fs::read(dir.join(&f.path)).map_err(|e| format!("{}: {e}", f.path))?;
+            Ok((f.path, bytes))
+        })
+        .collect()
 }
 
 /// A file of the project, in base64 (`workshop`: the workshop's own may be

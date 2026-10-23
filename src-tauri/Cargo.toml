@@ -26,10 +26,15 @@ png = "0.17"
 # Pictures for plugins, made smaller on the computer (pictures.rs).
 image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp", "gif"] }
 oxipng = { version = "9", default-features = false, features = ["parallel"] }
-# PaperPaw's own emulator, the device model without its window, and the
-# platform's input types; pinned to a PaperPaw commit (main, 2026-10-23).
-paperpaw-emulator = { git = "https://github.com/hthoene/paperpaw", rev = "c5f539a701b8b206b33a0b8846c2664d4c5b0969", default-features = false }
-paperpaw-platform = { git = "https://github.com/hthoene/paperpaw", rev = "c5f539a701b8b206b33a0b8846c2664d4c5b0969" }
 
 [dev-dependencies]
 tempfile = "3"
+
+# Pictures are made in this process (image, oxipng): optimised even in
+# debug builds, the workshop's own code left quick to build. PaperPaw's
+# emulator and checks are a program of their own (emulator.rs).
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.dev.build-override]
+opt-level = 3

@@ -21,3 +21,22 @@ pub fn app_data() -> Result<PathBuf, String> {
 pub fn emulator_library(profile: &str) -> Result<PathBuf, String> {
     Ok(app_data()?.join("readers").join(profile))
 }
+
+/// PaperPaw's emulator, `paperpaw-emu` (paperpaw-dev beside it for the
+/// checks): `PAPERPAW_EMU` while the workshop is worked on (a build of
+/// PaperPaw's own), else the one of the PaperPaw release chosen, kept in
+/// the app's folder (`emulators/<version>/`, see the version step).
+pub fn emulator_program() -> Result<PathBuf, String> {
+    if let Some(program) = std::env::var_os("PAPERPAW_EMU") {
+        return Ok(PathBuf::from(program));
+    }
+    let program = app_data()?
+        .join("emulators")
+        .join("current")
+        .join(format!("paperpaw-emu{}", std::env::consts::EXE_SUFFIX));
+    if program.exists() {
+        Ok(program)
+    } else {
+        Err(format!("PaperPaw's emulator is not here yet ({}).", program.display()))
+    }
+}

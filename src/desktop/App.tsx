@@ -5,6 +5,8 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
 
 import type { Backend } from "./backend";
+import { Checker, summary } from "./checks";
+import { CHOICES, offered, saveChoice, savedChoice, usable, type ModelChoice } from "./models";
 import { Drawer } from "./Drawer";
 import { Projects } from "./Projects";
 import { Reader } from "./Reader";
@@ -35,7 +37,7 @@ export function App({ backend }: Props) {
   if (key === null) {
     return <FirstStart onKey={async (k) => { await backend.keySet(k); setKey(k); }} />;
   }
-  return <Window backend={backend} onForgetKey={async () => { await backend.keyClear(); setKey(null); }} />;
+  return <Window backend={backend} keyKind={keyKind(key)} onForgetKey={async () => { await backend.keyClear(); setKey(null); }} />;
 }
 
 function FirstStart({ onKey }: { onKey(key: string): Promise<void> }) {
@@ -77,23 +79,41 @@ function FirstStart({ onKey }: { onKey(key: string): Promise<void> }) {
   );
 }
 
-function Window({ backend, onForgetKey }: { backend: Backend; onForgetKey(): void }) {
+function Window({ backend, keyKind, onForgetKey }: { backend: Backend; keyKind: "claude" | "paperpaw" | null; onForgetKey(): void }) {
   const workspace = useMemo(() => new Workspace(backend), [backend]);
+  const checker = useMemo(() => new Checker(backend), [backend]);
   const [, redraw] = useState(0);
   const [menu, setMenu] = useState(false);
   const [files, setFiles] = useState(false);
+  const [settings, setSettings] = useState(false);
   const [draft, setDraft] = useState("");
 
   useEffect(() => {
-    const stop = workspace.subscribe(() => redraw((n) => n + 1));
+    const stops = [
+      workspace.subscribe(() => redraw((n) => n + 1)),
+      checker.subscribe(() => redraw((n) => n + 1)),
+      // After every change: the plugin onto the reader, then PaperPaw's
+      // checks (see checks.ts).
+      workspace.afterSave((project) => {
+        void backend.emulatorSync(project.key).catch(() => {}).then(() => checker.run(project.key));
+      }),
+    ];
     void workspace.refresh();
-    return stop;
-  }, [workspace]);
+    return () => stops.forEach((stop) => stop());
+  }, [workspace, checker]);
+
+  // Another project: its own results, checked once it is open.
+  const open = workspace.project?.key;
+  useEffect(() => {
+    checker.reset();
+    if (open) void checker.run(open);
+  }, [open, checker]);
 
   return (
     <div class="window">
       <header class="bar">
         <Projects workspace={workspace} />
+        <Checks checker={checker} />
         <button type="button" class="link" aria-expanded={files} onClick={() => setFiles(!files)}>Files</button>
         <button type="button" class="send">Send to reader</button>
         <div class="menu">
@@ -103,6 +123,7 @@ function Window({ backend, onForgetKey }: { backend: Backend; onForgetKey(): voi
           {menu && (
             <div class="menu-list" role="menu">
               <button type="button" role="menuitem">Export zip</button>
+              <button type="button" role="menuitem" onClick={() => { setMenu(false); setSettings(true); }}>Settings</button>
               <button type="button" role="menuitem" onClick={() => { setMenu(false); onForgetKey(); }}>Remove key</button>
             </div>
           )}
@@ -124,8 +145,86 @@ function Window({ backend, onForgetKey }: { backend: Backend; onForgetKey(): voi
           </form>
         </section>
         <Reader backend={backend} />
+        {settings && <Settings workspace={workspace} keyKind={keyKind} onClose={() => setSettings(false)} />}
         {files && <Drawer workspace={workspace} pictures={backend} onClose={() => setFiles(false)} />}
       </div>
     </div>
+  );
+}
+
+/** "Checks: ok" or "Checks: 2 to fix", and what they are, quietly. */
+function Checks({ checker }: { checker: Checker }) {
+  const [open, setOpen] = useState(false);
+  const checks = checker.checks;
+  const said = summary(checks);
+  if (!said) return null;
+  const found = checks.state === "done" ? checks.found : [];
+  return (
+    <div class="checks">
+      <button type="button" class={`checks-state${found.length ? " fix" : ""}`} aria-expanded={open} disabled={!found.length && checks.state !== "failed"} onClick={() => setOpen(!open)}>
+        {said}
+      </button>
+      {open && (
+        <div class="checks-list" role="status">
+          {checks.state === "failed" ? <p>{checks.message}</p> : found.map((f) => (
+            <p>
+              <strong>{f.place}</strong> {f.message}
+              {f.seen.length > 0 && <small>{f.seen.join(", ")}</small>}
+            </p>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** The app's settings: which model, for all plugins and for this one. */
+function Settings({ workspace, keyKind, onClose }: { workspace: Workspace; keyKind: "claude" | "paperpaw" | null; onClose(): void }) {
+  // The proxy's list for a PaperPaw key comes with the AI loop; until
+  // then such a key is offered Automatic only.
+  const may = offered(keyKind);
+  const [choice, setChoice] = useState<ModelChoice>(usable(savedChoice(), may));
+  const project = workspace.project;
+  const own = usable(project?.model as ModelChoice | undefined, may);
+  const pick = (c: ModelChoice) => { setChoice(c); saveChoice(c); };
+  const pickOwn = async (c: ModelChoice) => {
+    if (!project) return;
+    if (c === "auto") delete project.model;
+    else project.model = c;
+    await workspace.save();
+  };
+  const shown = CHOICES.filter((c) => may.includes(c.choice));
+  return (
+    <aside class="drawer settings" aria-label="Settings">
+      <div class="drawer-head">
+        <h2>Settings</h2>
+        <button type="button" class="close" aria-label="Close" onClick={onClose}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
+      <fieldset class="choices">
+        <legend>Model</legend>
+        {shown.map((c) => (
+          <label class="choice">
+            <input type="radio" name="model" checked={choice === c.choice} onChange={() => pick(c.choice)} />
+            <span>
+              {c.label}
+              <small>{c.hint}</small>
+            </span>
+          </label>
+        ))}
+        {keyKind === "paperpaw" && <p class="hint">Your PaperPaw key decides which models you can pick.</p>}
+      </fieldset>
+      {project && shown.length > 1 && (
+        <label class="own">
+          <span>For {workspace.name}</span>
+          <select class="mode" value={own} onChange={(e) => void pickOwn(e.currentTarget.value as ModelChoice)}>
+            <option value="auto">Same as above</option>
+            {shown.filter((c) => c.choice !== "auto").map((c) => <option value={c.choice}>{c.label}</option>)}
+          </select>
+        </label>
+      )}
+      <p class="hint">What each turn cost shows in the conversation.</p>
+    </aside>
   );
 }

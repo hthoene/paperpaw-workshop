@@ -2,6 +2,7 @@
 //! in the keychain, projects as folders in Documents, files dropped in,
 //! sending a plugin to a reader, and building plugins with code.
 
+mod checks;
 mod emulator;
 mod key;
 mod paths;
@@ -13,7 +14,8 @@ use tauri::Manager;
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
-            app.manage(emulator::spawn(app.handle().clone()));
+            app.manage(emulator::for_app(app.handle().clone()));
+            app.manage(emulator::Shown(std::sync::Mutex::new(None)));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -23,6 +25,14 @@ pub fn run() {
             emulator::emulator_start,
             emulator::emulator_button,
             emulator::emulator_pointer,
+            emulator::emulator_sync,
+            emulator::emulator_describe,
+            emulator::emulator_shot,
+            emulator::emulator_open,
+            emulator::emulator_run,
+            emulator::emulator_told,
+            emulator::emulator_ready,
+            checks::plugin_check,
             pictures::picture_make,
             pictures::picture_info,
             projects::projects_list,

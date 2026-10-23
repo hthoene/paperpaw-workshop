@@ -5,6 +5,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 
+import type { CheckApi } from "./checks";
 import type { FolderApi } from "./folders";
 import type { PictureApi } from "./pictures";
 
@@ -21,7 +22,7 @@ export interface Frame {
 
 export type Phase = "down" | "move" | "up" | "cancel";
 
-export interface Backend extends FolderApi, PictureApi {
+export interface Backend extends FolderApi, PictureApi, CheckApi {
   keyGet(): Promise<string | null>;
   keySet(key: string): Promise<void>;
   keyClear(): Promise<void>;
@@ -31,6 +32,39 @@ export interface Backend extends FolderApi, PictureApi {
   /** Calls `seen` with each new frame; returns how to stop. */
   onFrame(seen: (frame: Frame) => void): Promise<() => void>;
   onError(said: (message: string) => void): Promise<() => void>;
+  /** The project's plugin put on the reader shown, which starts again. */
+  emulatorSync(project: string): Promise<void>;
+  /** What the screen shows, part by part. */
+  emulatorDescribe(): Promise<{ parts: Part[] }>;
+  /** The panel as a PNG in base64. */
+  emulatorShot(): Promise<string>;
+  emulatorOpen(screen: string, params?: Record<string, string>): Promise<void>;
+  emulatorRun(action: string): Promise<void>;
+  /** The plugins' warnings and requests since asked last. */
+  emulatorTold(): Promise<[string[], string[]]>;
+  /** Which PaperPaw answers, once it said so. */
+  emulatorReady(): Promise<Ready | null>;
+}
+
+/** A part of the screen, as PaperPaw describes it. */
+export interface Part {
+  role: string;
+  label: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  focused?: boolean;
+  on?: boolean;
+}
+
+/** Who answers: PaperPaw's version, and what code plugins are built for. */
+export interface Ready {
+  protocol: number;
+  paperpaw: string;
+  profiles: string[];
+  fingerprint: string;
+  toolchain: string;
 }
 
 /** Whether the page runs in the app (Tauri), not in a plain browser. */
@@ -47,6 +81,13 @@ export const appBackend: Backend = {
   emulatorPointer: (phase, x, y) => invoke("emulator_pointer", { phase, x, y }),
   onFrame: async (seen) => listen<Frame>("emulator-frame", (event) => seen(event.payload)),
   onError: async (said) => listen<string>("emulator-error", (event) => said(event.payload)),
+  emulatorSync: (project) => invoke("emulator_sync", { project }),
+  emulatorDescribe: () => invoke("emulator_describe"),
+  emulatorShot: () => invoke("emulator_shot"),
+  emulatorOpen: (screen, params) => invoke("emulator_open", { screen, params }),
+  emulatorRun: (action) => invoke("emulator_run", { action }),
+  emulatorTold: () => invoke("emulator_told"),
+  emulatorReady: () => invoke("emulator_ready"),
   projectsList: () => invoke("projects_list"),
   projectCreate: (name, meta) => invoke("project_create", { name, meta }),
   projectFiles: (project) => invoke("project_files", { project }),
@@ -61,6 +102,7 @@ export const appBackend: Backend = {
   uploadRemove: (project, name) => invoke("upload_remove", { project, name }),
   pictureMake: (base64, mode, maxWidth, maxHeight) => invoke("picture_make", { base64, mode, maxWidth, maxHeight }),
   pictureInfo: (base64) => invoke("picture_info", { base64 }),
+  pluginCheck: (project) => invoke("plugin_check", { project }),
 };
 
 /** The stand-in for a plain browser: the key in memory, a still picture
@@ -96,6 +138,13 @@ export function standInBackend(): Backend {
       return () => frames.delete(seen);
     },
     onError: async () => () => {},
+    emulatorSync: async () => {},
+    emulatorDescribe: async () => ({ parts: [] }),
+    emulatorShot: async () => "",
+    emulatorOpen: async () => {},
+    emulatorRun: async () => {},
+    emulatorTold: async () => [[], []],
+    emulatorReady: async () => null,
     projectsList: async () => [...folders].map(([folder, f]) => ({ folder, meta: f.meta })),
     projectCreate: async (name, meta) => {
       let folder = name || "New plugin";
@@ -120,5 +169,7 @@ export function standInBackend(): Backend {
     // No pictures made in a plain browser: they stay as they are.
     pictureMake: async (base64) => [base64, 0, 0],
     pictureInfo: async (base64) => ({ width: 0, height: 0, bytes: Math.floor((base64.length * 3) / 4), colour: false }),
+    // No checks in a plain browser: nothing found.
+    pluginCheck: async () => [],
   };
 }
