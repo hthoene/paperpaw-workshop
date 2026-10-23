@@ -95,6 +95,12 @@ export interface Session {
   /** What a turn may cost without changing a file before it pauses
    *  ([`PAUSE_AFTER_DOLLARS`] if not given). */
   pauseAfter?: number;
+  /** The most uses of tools in one turn, over [`PER_TURN`] (the looks the
+   *  person allows). */
+  perTurn?: Record<string, number>;
+  /** A note after a tool's results, by its name (what the person asked
+   *  of it). */
+  notes?: Record<string, string>;
 }
 
 export interface TurnEvents {
@@ -215,13 +221,14 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
       const key = looking ? inputKey(call.name, call.input) : "";
       const earlier = looking ? seen.get(key) : undefined;
       let result: Anthropic.ToolResultBlockParam;
-      const most = PER_TURN[call.name];
+      const most = { ...PER_TURN, ...session.perTurn }[call.name];
       if (!earlier && most !== undefined && (used.get(call.name) ?? 0) >= most) {
         result = { type: "tool_result", tool_use_id: call.id, content: `${call.name} is used at most ${most} times in one turn.`, is_error: true };
         results.push(result);
         continue;
       }
       if (!earlier && most !== undefined) used.set(call.name, (used.get(call.name) ?? 0) + 1);
+      const count = most !== undefined && !earlier ? `(${call.name} ${used.get(call.name)} of at most ${most} in this turn.)` : "";
       if (earlier) {
         // Answered in this turn already, and still so: where, not again.
         result = {
@@ -242,6 +249,9 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
         looks += 1;
         if (looks >= LOOKS_BEFORE_WRITING && (looks - LOOKS_BEFORE_WRITING) % 10 === 0) result = withNote(result, writeNow(looks));
       }
+      // How many are left, and what the person asked of this tool.
+      const note = [count, session.notes?.[call.name] ?? ""].filter(Boolean).join(" ");
+      if (note && !result.is_error) result = withNote(result, note);
       results.push(result);
     }
     project.messages.push({ role: "user", content: results });

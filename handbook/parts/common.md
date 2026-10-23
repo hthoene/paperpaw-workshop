@@ -26,8 +26,14 @@ X4 and a Boox Go 7; the devices table says what each has.
    touch targets, contrast), and you get what they find. Fix every
    error, and warnings unless you have a good reason. `check` runs them
    at once when you need it.
-5. Look with `look` only where the look itself matters and the checks
-   cannot judge it (a picture, a colour, a layout the person described).
+5. Look with `look` sparingly, where the look itself matters and the
+   checks cannot judge it. After a turn that changed what a screen or a
+   widget draws, look once at the end, on the device shown, and fix what
+   is plainly wrong: text cut off, parts overlapping, a large empty area.
+   Where the change is about a layout that depends on size (a widget in
+   several sizes, a screen), look once more on a second device (the X4
+   and the Boox Go 7 differ most). Never look again and again: look again
+   only after a fix. Each look says how many this turn still allows.
    `control` with `describe` says what the screen shows part by part
    (roles, labels, where, which is focused): read it instead of a
    picture. To get where your change shows, go there directly with

@@ -20,6 +20,7 @@ import { thisMonth, turnOf } from "./costs";
 import { fromBase64 } from "./folders";
 import { NO_HISTORY, today, type History } from "./history";
 import { decideKind } from "./kind";
+import { lookRules, savedLooks } from "./looks";
 import { NativeEmulator } from "./native";
 import { pictureOf, WORKSHOP_SCREENS } from "./pictures";
 import type { Workspace } from "./workspace";
@@ -201,6 +202,11 @@ export class Desk {
     // The state before the first change, if the history has none yet.
     await this.keep(() => this.backend.historyBegin(project.key, project.messages.length, conversation));
     const said = project.messages.length;
+    // How much it may look at the screen, as the person chose.
+    const looks = lookRules(savedLooks());
+    workshop.withoutTools = ["set_fixtures", ...looks.without];
+    workshop.perTurn = looks.perTurn;
+    workshop.notes = looks.notes;
     await workshop.send(text);
     this.building = "";
     const heard = project.messages.length > said;

@@ -14,6 +14,7 @@ import { Findings } from "./Findings";
 import { Conversation } from "./Conversation";
 import { Desk } from "./desk";
 import { CHOICES, saveChoice, savedChoice, usable, type ModelChoice } from "./models";
+import { LOOK_CHOICES, saveLooks, savedLooks, type LookChoice } from "./looks";
 import { Drawer } from "./Drawer";
 import { Projects } from "./Projects";
 import { Reader } from "./Reader";
@@ -236,6 +237,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
 /** The app's settings: which model, for all plugins and for this one. */
 function Settings({ workspace, backend, keyKind, may, onClose }: { workspace: Workspace; backend: Backend; keyKind: "claude" | "paperpaw" | null; may: ModelChoice[]; onClose(): void }) {
   const [choice, setChoice] = useState<ModelChoice>(usable(savedChoice(), may));
+  const [looks, setLooks] = useState<LookChoice>(savedLooks());
   const project = workspace.project;
   const own = usable(project?.model as ModelChoice | undefined, may);
   const pick = (c: ModelChoice) => { setChoice(c); saveChoice(c); };
@@ -276,6 +278,18 @@ function Settings({ workspace, backend, keyKind, may, onClose }: { workspace: Wo
           </select>
         </label>
       )}
+      <fieldset class="choices">
+        <legend>Check the look myself</legend>
+        {LOOK_CHOICES.map((c) => (
+          <label class="choice">
+            <input type="radio" name="looks" checked={looks === c.choice} onChange={() => { setLooks(c.choice); saveLooks(c.choice); }} />
+            <span>
+              {c.label}
+              <small>{c.hint}</small>
+            </span>
+          </label>
+        ))}
+      </fieldset>
       <p class="hint">What each turn cost shows in the conversation.</p>
       <KeySettings backend={backend} />
     </aside>

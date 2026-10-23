@@ -51,6 +51,10 @@ export class Workshop {
   /** Tools this workshop does without (the app's reader fetches from the
    *  internet itself: no recorded answers). */
   withoutTools: string[] = [];
+  /** The most uses of tools in a turn, and notes after their results
+   *  (the looks the person allows). */
+  perTurn: Record<string, number> = {};
+  notes: Record<string, string> = {};
   /** Asking the person and fetching an example, where the app can
    *  (`fetch_sample`); which addresses are the person's is said here. */
   samples?: Pick<Samples, "consent" | "fetch">;
@@ -435,6 +439,8 @@ export class Workshop {
           model: this.model,
           kind: this.code ? "code" : "data",
           escalated: this.escalated,
+          perTurn: this.perTurn,
+          notes: this.notes,
         },
         said,
         {
