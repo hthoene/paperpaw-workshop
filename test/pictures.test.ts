@@ -206,6 +206,30 @@ describe("the AI's tools for uploads", () => {
     expect((await convertPicture.run({ upload: "owl-sans.ttf", to: "x.png", fit: "fill" }, context)).isError).toBe(true);
   });
 
+  it("leave making the picture to the app where it can: shaped as the AI says, as the person chose", async () => {
+    const { context, files } = await owl();
+    const asked: unknown[] = [];
+    const made = testPicture(1264, 1680);
+    context.optimise = async (upload, to, shape) => {
+      asked.push({ upload, to, shape });
+      return { png: made, width: 1264, height: 1680, mode: "smaller-grays" };
+    };
+    const crop = { x: 100, y: 0, width: 600, height: 900 };
+    const result = await convertPicture.run({ upload: "owl.jpg", to: "sleep/1.png", fit: "fill", crop, gamma: 1.4 }, context);
+    expect(result.isError).toBeFalsy();
+    // For all the readers shown: the largest screen's size.
+    expect(asked).toEqual([{ upload: "owl.jpg", to: "sleep/1.png", shape: { width: 1264, height: 1680, fit: "fill", crop, tone: { gamma: 1.4 } } }]);
+    expect(files.bytes()["sleep/1.png"]).toEqual(made);
+    const content = result.content as Anthropic.ToolResultBlockParam["content"] & unknown[];
+    expect((content[0] as { text: string }).text).toContain("1264 x 1680, in 16 grays");
+    expect((content[1] as { type: string }).type).toBe("image");
+
+    // A box in X4 pixels, scaled for the largest screen.
+    asked.length = 0;
+    await convertPicture.run({ upload: "owl.jpg", to: "logo.png", fit: "whole", box: { width: 160, height: 160 } }, context);
+    expect(asked).toEqual([{ upload: "owl.jpg", to: "logo.png", shape: { width: 421, height: 421, fit: "whole" } }]);
+  });
+
   it("copy fonts and texts as they are", async () => {
     const { context, files } = await owl();
     expect((await placeFile.run({ upload: "owl-sans.ttf", to: "fonts/OwlSans.ttf" }, context)).isError).toBeFalsy();

@@ -111,6 +111,15 @@ export function makePicture(raster: Raster, path: string, targets: Target[], opt
   return { files, preview, drawn };
 }
 
+/** How the X4 shows a picture made elsewhere (the app's optimiser):
+ *  fitted into `width` x `height` X4 pixels, at its four grays, dithered as
+ *  `dither` says. A PNG. */
+export function preview(raster: Raster, width: number, height: number, how: "fill" | "whole", dither?: Dither | "auto"): Uint8Array {
+  const gray = fit(toGray(raster), width, height, how);
+  const chosen: Dither = !dither || dither === "auto" ? (looksDrawn(gray) ? "lineart" : "diffusion") : dither;
+  return grayPng(width, height, quantize(gray, 4, chosen), 2);
+}
+
 /** `sleep/1.png` for a 480 x 800 screen: `sleep/1@480x800.png`. */
 export function variantPath(path: string, target: Target): string {
   const dot = path.lastIndexOf(".");

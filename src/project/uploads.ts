@@ -11,6 +11,17 @@ export type UploadKind = "picture" | "font" | "text";
 /** What becomes of an uploaded picture in the plugin (desktop/pictures.ts). */
 export type PictureMode = "keep" | "smaller-colour" | "smaller-grays";
 
+/** What the AI made of an uploaded picture (convert_picture): the part
+ *  used, in the upload's own pixels, the box it fills exactly, how, and its
+ *  tone; made so on the computer (src-tauri's pictures.rs). */
+export interface PictureShape {
+  width: number;
+  height: number;
+  fit: "fill" | "whole";
+  crop?: { x: number; y: number; width: number; height: number };
+  tone?: { brightness?: number; contrast?: number; gamma?: number; invert?: boolean };
+}
+
 export interface UploadInfo {
   /** A name of its own in the project: lower case, `my-photo.jpg`. */
   name: string;
@@ -25,8 +36,8 @@ export interface UploadInfo {
    *  files drawer; the project's setting if not chosen. */
   mode?: PictureMode;
   /** Where the plugin has pictures made of it (made again when the mode
-   *  changes), and the slot's size where one was given. */
-  placed?: { path: string; slot?: { width: number; height: number } }[];
+   *  changes), and the slot's size or the AI's shape where one was given. */
+  placed?: { path: string; slot?: { width: number; height: number }; shape?: PictureShape }[];
   added: string;
 }
 

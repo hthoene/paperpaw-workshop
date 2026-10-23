@@ -16,6 +16,7 @@ import { modelFor, offered, savedChoice, type ModelChoice } from "./models";
 import { LocalBuilder } from "./builder";
 import { thisMonth, turnOf } from "./costs";
 import { NativeEmulator } from "./native";
+import { pictureOf, WORKSHOP_SCREENS } from "./pictures";
 import type { Workspace } from "./workspace";
 
 /** How often one message of the person gives the AI the checks'
@@ -139,6 +140,7 @@ export class Desk {
     });
     const workshop = new Workshop(project, this.handbook, this.provider, browserKit, this.workspace.folders.uploads(), builder, () => this.workspace.save());
     workshop.chooseModel = (p) => modelFor(savedChoice(), p, p.kind, this.may);
+    workshop.optimise = (upload, to, shape) => pictureOf(project, workshop.uploads, upload, to, WORKSHOP_SCREENS, this.backend, { shape });
     const shown = this.handbook.profile(this.profile);
     if (shown) workshop.profile = shown;
     this.workshop = workshop;

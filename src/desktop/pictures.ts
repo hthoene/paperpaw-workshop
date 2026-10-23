@@ -2,14 +2,16 @@
 // pictures.rs), as the person chooses: per picture in the files drawer
 // (keep it, smaller in colour, smaller in grays), by default as the
 // project's "Optimise images for e-ink" says. The upload stays as it was;
-// the plugin gets the picture made from it. The AI never chooses a mode.
+// the plugin gets the picture made from it. The AI never chooses a mode:
+// what it makes of an upload (convert_picture: the part, the fit, the
+// tone) is made so here too, in the mode the person chose.
 
 import type { Profile } from "../handbook/handbook";
 import type { Project } from "../project/project";
-import type { PictureMode, UploadInfo, Uploads } from "../project/uploads";
+import type { PictureMode, PictureShape, UploadInfo, Uploads } from "../project/uploads";
 import { fromBase64, toBase64 } from "./folders";
 
-export type { PictureMode };
+export type { PictureMode, PictureShape };
 
 export const MODES: { mode: PictureMode; label: string }[] = [
   { mode: "keep", label: "Keep as it is" },
@@ -19,7 +21,7 @@ export const MODES: { mode: PictureMode; label: string }[] = [
 
 /** The Rust side's picture calls (or a stand-in's). */
 export interface PictureApi {
-  pictureMake(base64: string, mode: PictureMode, maxWidth: number, maxHeight: number): Promise<[string, number, number]>;
+  pictureMake(base64: string, mode: PictureMode, maxWidth: number, maxHeight: number, shape?: PictureShape): Promise<[string, number, number]>;
   pictureInfo(base64: string): Promise<{ width: number; height: number; bytes: number; colour: boolean }>;
 }
 
@@ -62,9 +64,36 @@ export function needed(screens: Screen[], slot?: { width: number; height: number
   return largest ? [largest.width, largest.height] : [480, 800];
 }
 
-/** Writes the picture made of upload `name` at `to` in the plugin, as its
- *  mode says, and remembers it came from there (a changed mode makes it
- *  again). */
+/** The picture made of upload `name` for `to` in the plugin, as its mode
+ *  says (and the AI's shape, if it made one), remembered as made from there
+ *  (a changed mode makes it again); not written. */
+export async function pictureOf(
+  project: Project,
+  uploads: Uploads,
+  name: string,
+  to: string,
+  screens: Screen[],
+  api: PictureApi,
+  how: { slot?: { width: number; height: number }; shape?: PictureShape } = {},
+): Promise<{ png: Uint8Array; width: number; height: number; mode: PictureMode }> {
+  const upload = uploads.info(name);
+  const original = upload && (await uploads.read(name));
+  if (!upload || !original) throw new Error(`There is no upload ${name}.`);
+  if (upload.kind !== "picture") throw new Error(`${name} is a ${upload.kind}, not a picture.`);
+  const { slot, shape } = how;
+  const [width, height] = shape ? [shape.width, shape.height] : needed(screens, slot);
+  const mode = modeFor(project, upload, screens);
+  const [made, w, h] = await api.pictureMake(toBase64(original), mode, width, height, shape);
+  const placed = (upload.placed ??= []);
+  const entry = { path: to, ...(slot && { slot }), ...(shape && { shape }) };
+  const at = placed.findIndex((p) => p.path === to);
+  if (at >= 0) placed[at] = entry;
+  else placed.push(entry);
+  return { png: fromBase64(made), width: w, height: h, mode };
+}
+
+/** Writes the picture made of upload `name` at `to` in the plugin
+ *  (pictureOf). */
 export async function placePicture(
   project: Project,
   uploads: Uploads,
@@ -73,27 +102,18 @@ export async function placePicture(
   screens: Screen[],
   api: PictureApi,
   slot?: { width: number; height: number },
+  shape?: PictureShape,
 ): Promise<{ bytes: number; width: number; height: number }> {
-  const upload = uploads.info(name);
-  const original = upload && (await uploads.read(name));
-  if (!upload || !original) throw new Error(`There is no upload ${name}.`);
-  if (upload.kind !== "picture") throw new Error(`${name} is a ${upload.kind}, not a picture.`);
-  const [width, height] = needed(screens, slot);
-  const [made, w, h] = await api.pictureMake(toBase64(original), modeFor(project, upload, screens), width, height);
-  const bytes = fromBase64(made);
-  project.files[to] = bytes;
-  const placed = (upload.placed ??= []);
-  const at = placed.find((p) => p.path === to);
-  if (at) at.slot = slot;
-  else placed.push(slot ? { path: to, slot } : { path: to });
-  return { bytes: bytes.length, width: w, height: h };
+  const made = await pictureOf(project, uploads, name, to, screens, api, { slot, shape });
+  project.files[to] = made.png;
+  return { bytes: made.png.length, width: made.width, height: made.height };
 }
 
 /** Makes again every plugin picture made of `upload` that is still there,
  *  after its mode or the project's setting changed. */
 export async function remake(project: Project, uploads: Uploads, upload: UploadInfo, screens: Screen[], api: PictureApi): Promise<void> {
   upload.placed = (upload.placed ?? []).filter((p) => project.files[p.path] !== undefined);
-  for (const p of [...upload.placed]) await placePicture(project, uploads, upload.name, p.path, screens, api, p.slot);
+  for (const p of [...upload.placed]) await placePicture(project, uploads, upload.name, p.path, screens, api, p.slot, p.shape);
 }
 
 /** A picture the check before sending would make smaller. */

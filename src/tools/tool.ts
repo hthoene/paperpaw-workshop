@@ -11,7 +11,7 @@ import type { Handbook, Profile } from "../handbook/handbook";
 import type { BuildResult, Builder } from "../build/client";
 import type { PictureKit } from "../pictures/kit";
 import type { Files } from "../project/project";
-import type { Uploads } from "../project/uploads";
+import type { PictureMode, PictureShape, Uploads } from "../project/uploads";
 
 export interface ToolContext {
   files: Files;
@@ -45,6 +45,10 @@ export interface ToolContext {
     real(): boolean;
   };
   lastBuild?(result: BuildResult): void;
+  /** Makes a picture of an upload as `shape` says and as the person chose
+   *  for it (smaller, in grays or colours, or kept), where the app can: the
+   *  file to write at `to`. Without it, convert_picture dithers itself. */
+  optimise?(upload: string, to: string, shape: PictureShape): Promise<{ png: Uint8Array; width: number; height: number; mode: PictureMode }>;
 }
 
 /** One line the conversation shows for a step: a catalog key and its values. */

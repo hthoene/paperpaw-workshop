@@ -135,7 +135,7 @@ export const appBackend: Backend = {
   projectRestore: (name) => invoke("project_restore", { name }),
   projectsArchived: () => invoke("projects_archived"),
   projectTrash: (project, archived) => invoke("project_trash", { project, archived }),
-  pictureMake: (base64, mode, maxWidth, maxHeight) => invoke("picture_make", { base64, mode, maxWidth, maxHeight }),
+  pictureMake: (base64, mode, maxWidth, maxHeight, shape) => invoke("picture_make", { base64, mode, maxWidth, maxHeight, shape: shape ?? null }),
   pictureInfo: (base64) => invoke("picture_info", { base64 }),
   pluginCheck: (project) => invoke("plugin_check", { project }),
 };

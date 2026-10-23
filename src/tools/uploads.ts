@@ -5,7 +5,8 @@
 
 import { z } from "zod";
 
-import { MAX_PICTURE_FILE, makePicture, targetsFor } from "../pictures/convert";
+import { MAX_PICTURE_FILE, makePicture, preview, targetsFor } from "../pictures/convert";
+import type { PictureMode } from "../project/uploads";
 import { isText } from "../project/rules";
 import type { WorkshopTool } from "./tool";
 import { deviceNamed, type ToolContext } from "./tool";
@@ -69,7 +70,7 @@ export interface ConvertInput {
 export const convertPicture: WorkshopTool<ConvertInput> = {
   name: "convert_picture",
   description:
-    "Make an uploaded picture into a picture of the plugin, made for e-ink: gray, fitted to the screen (or to a box, e.g. for a logo), toned, and dithered to the panel's grays (four on the X4). Writes a PNG at `to` (e.g. sleep/1.png, logo.png) and shows you how the X4 shows it: judge it, and convert again with other tone or crop if it is too dark, too flat or cut badly. The devices default to all the workshop shows.",
+    "Make an uploaded picture into a picture of the plugin, made for e-ink: fitted to the screen (or to a box, e.g. for a logo), toned, gray and small (or as the person chose for that picture). Writes a PNG at `to` (e.g. sleep/1.png, logo.png) and shows you how the X4 shows it: judge it, and convert again with other tone or crop if it is too dark, too flat or cut badly. The devices default to all the workshop shows.",
   schema: z
     .object({
       upload: z.string().describe("The upload's name, from list_uploads"),
@@ -97,6 +98,7 @@ export const convertPicture: WorkshopTool<ConvertInput> = {
     if (!info || !bytes) return { content: `There is no upload ${input.upload}. list_uploads lists them.`, isError: true, step };
     if (info.kind !== "picture") return { content: `${input.upload} is a ${info.kind}, not a picture.`, isError: true, step };
     const profiles = devicesOf(context, input.devices);
+    if (context.optimise) return optimised(input, context, profiles, step);
     const raster = await pictures.decode(bytes, info.type);
     const made = makePicture(raster, input.to, targetsFor(profiles), {
       fit: input.fit,
@@ -133,6 +135,59 @@ export const convertPicture: WorkshopTool<ConvertInput> = {
     };
   },
 };
+
+/** What the person chose for the upload, in the AI's words. */
+const MODE_SAID: Record<PictureMode, string> = {
+  "smaller-grays": "in 16 grays (the reader dithers it to its panel)",
+  "smaller-colour": "in colour, as the person chose for this picture",
+  keep: "in colour and not made smaller, as the person chose for this picture",
+};
+
+/** convert_picture where the app makes the picture (context.optimise):
+ *  shaped as the AI says, made smaller as the person chose. */
+async function optimised(input: ConvertInput, context: ToolContext, profiles: ReturnType<typeof devicesOf>, step: { key: string; vars: { path: string } }) {
+  const largest = targetsFor(profiles)[0]!;
+  const scale = largest.width / 480;
+  const width = input.box ? Math.max(1, Math.round(input.box.width * scale)) : largest.width;
+  const height = input.box ? Math.max(1, Math.round(input.box.height * scale)) : largest.height;
+  const tone = { brightness: input.brightness, contrast: input.contrast, gamma: input.gamma, invert: input.invert };
+  const shape = {
+    width,
+    height,
+    fit: input.fit,
+    ...(input.crop && { crop: input.crop }),
+    ...(Object.values(tone).some((v) => v !== undefined) && { tone: Object.fromEntries(Object.entries(tone).filter(([, v]) => v !== undefined)) }),
+  };
+  let made;
+  try {
+    made = await context.optimise!(input.upload, input.to, shape);
+  } catch (e) {
+    return { content: `Not made: ${e instanceof Error ? e.message : String(e)}.`, isError: true, step };
+  }
+  if (made.png.length > MAX_PICTURE_FILE) {
+    return {
+      content: `${input.to} would be ${Math.round(made.png.length / 1024)} KB, more than ${MAX_PICTURE_FILE / 1000} KB. Use a box, or fewer devices.`,
+      isError: true,
+      step,
+    };
+  }
+  const problem = context.files.writeBytes(input.to, made.png);
+  if (problem) return { content: `Not written: ${problem}.`, isError: true, step };
+  await context.sync();
+  const x4 = input.box ? input.box : { width: 480, height: 800 };
+  const shown = preview(await context.pictures.decode(made.png, "image/png"), x4.width, x4.height, input.fit, input.dither);
+  const devices = profiles.map((p) => p.name).join(", ");
+  return {
+    content: [
+      {
+        type: "text" as const,
+        text: `Wrote ${input.to}: ${made.width} x ${made.height}, ${MODE_SAID[made.mode]}, ${Math.round(made.png.length / 1024)} KB, for ${devices}.\nHow the X4 shows it:`,
+      },
+      { type: "image" as const, source: { type: "base64" as const, media_type: "image/png" as const, data: base64(shown) } },
+    ],
+    step,
+  };
+}
 
 export const placeFile: WorkshopTool<{ upload: string; to: string }> = {
   name: "place_file",

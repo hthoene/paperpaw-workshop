@@ -88,6 +88,9 @@ export class Workshop {
   /** Whether the next turn thinks more: PaperPaw's checks kept failing. */
   escalated = false;
 
+  /** Pictures made on the computer, as the person chose (the app). */
+  optimise: ToolContext["optimise"];
+
   /** The app's choice of model (Settings), where there is one. */
   chooseModel: ((project: Project) => string) | undefined;
 
@@ -197,6 +200,7 @@ export class Workshop {
         this.build = result;
         this.changed();
       },
+      optimise: this.optimise,
     };
   }
 
