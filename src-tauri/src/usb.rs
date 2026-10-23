@@ -341,6 +341,56 @@ mod tests {
         assert_eq!(asked, ["POST /api/offer", "GET /api/offer", "PUT /api/plugin/calm/plugin.ini", "POST /api/plugin/calm"]);
     }
 
+    /// PaperPaw's emulator, which speaks the cable transfer on its standard
+    /// input and output as a reader does on its cable.
+    struct Emulator {
+        child: std::process::Child,
+    }
+
+    impl Write for Emulator {
+        fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+            self.child.stdin.as_mut().unwrap().write(bytes)
+        }
+        fn flush(&mut self) -> std::io::Result<()> {
+            self.child.stdin.as_mut().unwrap().flush()
+        }
+    }
+
+    impl Read for Emulator {
+        fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+            self.child.stdout.as_mut().unwrap().read(buf)
+        }
+    }
+
+    impl Drop for Emulator {
+        fn drop(&mut self) {
+            let _ = self.child.kill();
+        }
+    }
+
+    /// Against a PaperPaw with the cable transfer: `PAPERPAW_EMU` names its
+    /// `paperpaw-emu` (headless, it answers what needs no permission).
+    #[test]
+    #[ignore = "needs PAPERPAW_EMU, a PaperPaw with the cable transfer"]
+    fn a_paperpaw_answers_over_its_cable_transfer() {
+        let program = std::env::var("PAPERPAW_EMU").expect("PAPERPAW_EMU");
+        let child = std::process::Command::new(program)
+            .args(["--stdio", "--headless"])
+            .stdin(std::process::Stdio::piped())
+            .stdout(std::process::Stdio::piped())
+            .spawn()
+            .unwrap();
+        let mut cable = Cable::new(Emulator { child }, Duration::from_secs(30));
+        let (status, text) = cable.call("GET", "/api/hello", None).unwrap();
+        assert_eq!(status, 200, "{text}");
+        let hello: serde_json::Value = serde_json::from_str(&text).unwrap();
+        assert_eq!(hello["protocol"], 1, "{text}");
+        assert!(hello["device"].is_string(), "{text}");
+        let (status, text) = cable.call("GET", "/api/plugins", None).unwrap();
+        assert_eq!(status, 200, "{text}");
+        assert!(text.contains("\"plugins\""), "{text}");
+    }
+
     #[test]
     fn hex_goes_both_ways() {
         assert_eq!(hex(&[0, 255, 16]), "00ff10");
