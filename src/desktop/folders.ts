@@ -112,8 +112,8 @@ export class Folders {
     }
     this.saved.set(folder, new Map(Object.entries(files)));
     return {
-      usage: { ...NO_USAGE },
       ...record,
+      usage: record.usage ?? { ...NO_USAGE },
       key: folder,
       files,
       messages: talk.messages ?? [],
