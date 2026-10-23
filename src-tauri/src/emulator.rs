@@ -32,6 +32,15 @@ pub const PROFILES: [&str; 3] = ["xteink-x4", "xteink-x4-pro", "boox-go-7"];
 /// over the screens a plugin is tried on.
 const SETTINGS: &str = "[help]\nshow = false\n";
 
+/// The readers' settings: the workshop's own, and `widget` alone on the
+/// first page of the home screen where one is shown.
+fn settings(widget: Option<&str>) -> String {
+    match widget {
+        Some(widget) => format!("{SETTINGS}[home]\npage-1 = {widget}\n"),
+        None => SETTINGS.to_string(),
+    }
+}
+
 /// How long an answer (`described`, `shot`, `started`) may take.
 const ANSWER: Duration = Duration::from_secs(60);
 
@@ -106,6 +115,9 @@ pub struct Emulator {
     shared: Arc<Mutex<Shared>>,
     /// The last `start`, sent again when the program had to start again.
     last_start: Mutex<Option<Value>>,
+    /// The widget shown alone on the first page of the home screen, if
+    /// one is (`show_widget`).
+    home: Mutex<Option<String>>,
 }
 
 impl Emulator {
@@ -121,6 +133,7 @@ impl Emulator {
             running: Mutex::new(None),
             shared: Arc::new(Mutex::new(Shared::default())),
             last_start: Mutex::new(None),
+            home: Mutex::new(None),
         }
     }
 
@@ -171,15 +184,32 @@ impl Emulator {
 
     /// Starts (or switches to) a reader of `profile` on its folder.
     pub fn start(&self, profile: &str, library: &Path) -> Result<(), String> {
+        let home = self.home.lock().map_err(|e| e.to_string())?.clone();
         let request = json!({
             "op": "start",
             "profile": profile,
             "library": library.to_string_lossy(),
-            "settings": SETTINGS,
+            "settings": settings(home.as_deref()),
             // Plugins with code built here run: the reader's folder is the
             // workshop's own, nothing else puts code into it.
             "trust_code": true,
         });
+        *self.last_start.lock().map_err(|e| e.to_string())? = Some(request.clone());
+        self.ask(request, "started", "start").map(|_| ())
+    }
+
+    /// Shows `widget` alone on the first page of the home screen, as a
+    /// person who placed it there would see it: the reader starts again
+    /// so, on every device shown from now on.
+    pub fn show_widget(&self, widget: &str) -> Result<(), String> {
+        *self.home.lock().map_err(|e| e.to_string())? = Some(widget.to_string());
+        let mut request = self
+            .last_start
+            .lock()
+            .map_err(|e| e.to_string())?
+            .clone()
+            .ok_or("the reader has not started yet")?;
+        request["settings"] = json!(settings(Some(widget)));
         *self.last_start.lock().map_err(|e| e.to_string())? = Some(request.clone());
         self.ask(request, "started", "start").map(|_| ())
     }
@@ -460,6 +490,17 @@ pub fn same_plugin(folder: &Path, files: &[(String, Vec<u8>)]) -> bool {
     let mut there = Vec::new();
     collect_files(folder, &mut there);
     there.len() == files.len() && files.iter().all(|(path, bytes)| std::fs::read(folder.join(path)).is_ok_and(|b| &b == bytes))
+}
+
+/// Shows widget `widget` (`<plugin>.<name>`) alone on the first page of
+/// the home screen of the reader beside the conversation.
+#[tauri::command]
+pub async fn emulator_widget(emulator: State<'_, Emulator>, widget: String) -> Result<(), String> {
+    let plain = !widget.is_empty() && widget.len() <= 120 && widget.chars().all(|c| c.is_ascii_alphanumeric() || "._@-".contains(c));
+    if !plain {
+        return Err(format!("not a widget's id: {widget}"));
+    }
+    emulator.show_widget(&widget)
 }
 
 /// What the screen shows, part by part, for the AI.

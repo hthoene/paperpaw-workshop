@@ -56,10 +56,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .window { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); }
 .bar { position: relative; z-index: 5; display: flex; align-items: center; gap: 1.4rem; padding: .65rem 1.2rem; border-bottom: 1px solid var(--rule); }
 .projects { position: relative; margin-right: auto; }
-.bar .project { display: flex; align-items: center; gap: .3rem; padding: .3rem .4rem .3rem 0; font: 600 1.15rem/1 var(--display); }
+.bar .project { display: flex; align-items: baseline; gap: .3rem; padding: .3rem .4rem .3rem 0; font: 600 1.15rem/1 var(--display); }
 /* The kind beside the name: with code, without, or as the first words ask. */
 .bar .project .kind { margin-left: .2rem; font: 400 .78rem/1 var(--text); color: var(--ink-2); white-space: nowrap; }
-.bar .project svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: var(--ink-2); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.bar .project svg { align-self: center; width: 1.1rem; height: 1.1rem; fill: none; stroke: var(--ink-2); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .project-list {
   position: absolute; left: 0; top: calc(100% + .4rem); z-index: 3; width: 21rem;
   /* Never off the screen: the recent ones scroll inside, the new ones and "All" stay. */
@@ -155,7 +155,17 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .log { overflow: auto; padding: 1.6rem 2rem; display: grid; align-content: start; gap: 1.1rem; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
 .empty { margin: 18vh auto 0; max-width: 26rem; text-align: center; color: var(--ink-2); font: 400 1.15rem/1.55 var(--display); }
 .ask { padding: .9rem 1.2rem 1.1rem; min-height: 4.7rem; align-items: flex-end; }
-.ask textarea { resize: none; min-height: 2.75rem; max-height: 12rem; padding-top: .7rem; padding-bottom: .7rem; line-height: 1.4; border-radius: 1.4rem; field-sizing: content; }
+/* The room above and below the words is a clear border, not padding: it
+   does not scroll away, so lines never run into the field's edge, which
+   is drawn outside. */
+.ask textarea { resize: none; min-height: 2.75rem; max-height: 12rem; padding-top: 0; padding-bottom: 0; border-block: .7rem solid transparent; box-shadow: 0 0 0 1px var(--field-edge); line-height: 1.4; border-radius: 1.4rem; field-sizing: content; overflow-y: auto; }
+.ask textarea:focus-visible { box-shadow: 0 0 0 2px var(--ink); }
+/* Long words: a quiet thin bar inside the rounded field, only when it
+   scrolls, kept clear of its round ends, without arrows. */
+.ask textarea::-webkit-scrollbar { width: 10px; }
+.ask textarea::-webkit-scrollbar-track { margin: 1.1rem 0; background: transparent; }
+.ask textarea::-webkit-scrollbar-thumb { border: 3px solid transparent; border-radius: 5px; background: var(--rule) padding-box; }
+.ask textarea::-webkit-scrollbar-button { display: none; }
 .ask .go { height: 2.75rem; }
 
 /* The conversation */

@@ -33,8 +33,15 @@ X4 and a Boox Go 7; the devices table says what each has.
    picture. To get where your change shows, go there directly with
    `control` rather than pressing through menus: `show` a screen by its
    id, `run` an action.
-6. Tell the person in two or three short sentences what you made and
-   what they will see, then ask what they would like changed.
+6. Leave the reader showing what you made, so the person sees it at once
+   without looking for it: a widget on the home screen (`control`
+   `widget` with its id), your screen open (`control` `show`), a look or
+   a home screen on the screen it changes (the home screen, a book open,
+   the settings of your group). Do this as the last thing of every turn
+   that changed the plugin.
+7. Tell the person in two or three short sentences what you made and
+   what they see on the reader now, then ask what they would like
+   changed.
 
 ## How you talk
 

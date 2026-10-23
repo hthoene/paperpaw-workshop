@@ -50,6 +50,9 @@ impl Rust {
         if let Some((rustup, cargo)) = &self.homes {
             command.env("RUSTUP_HOME", rustup).env("CARGO_HOME", cargo);
         }
+        // The builds go where the workshop looks for them, whatever the
+        // person's own Cargo is set to.
+        command.env_remove("CARGO_TARGET_DIR").env_remove("CARGO_BUILD_TARGET_DIR");
         quiet(&mut command);
         command
     }

@@ -49,7 +49,7 @@ export async function requestsSince(context: ToolContext): Promise<string> {
   return `\nThe plugin's requests since${more}:\n${said.join("\n")}`;
 }
 
-type Do = "describe" | "screens" | "show" | "slot" | "run" | "emit" | "set" | "setting" | "actions" | "wait";
+type Do = "describe" | "screens" | "show" | "slot" | "run" | "emit" | "set" | "setting" | "actions" | "wait" | "widget";
 
 export const control: WorkshopTool<{
   do: Do;
@@ -65,6 +65,7 @@ export const control: WorkshopTool<{
     "describe (what the screen shows, part by part: role, label, place, state: read this instead of guessing from a picture),",
     "screens (the screens open, the one shown last),",
     "show (open the screen `id`, e.g. your plugin's own, with `params`),",
+    "widget (show the widget `id`, e.g. your plugin's own, alone on the first page of the home screen, as a person who placed it there sees it: the reader starts again so),",
     "slot (open a slot: `id` core.settings, core.home, core.library ..., `params` e.g. {id: reader}),",
     "run (run the action `id`, as a button bound to it would),",
     "emit (send the event `id` with `params`, as a plugin would),",
@@ -72,11 +73,11 @@ export const control: WorkshopTool<{
     "setting (read the setting `id`),",
     "actions (the action ids there are, starting with `id` if given),",
     "wait (until the screen is `id` or shows it in a label, at most `timeout_ms`, 10000 unless said).",
-    "After show, slot, run, emit and set it answers what the screen shows then.",
+    "After show, widget, slot, run, emit and set it answers what the screen shows then, and the requests the plugin made since and how each was answered.",
   ].join(" "),
   schema: z
     .object({
-      do: z.enum(["describe", "screens", "show", "slot", "run", "emit", "set", "setting", "actions", "wait"]),
+      do: z.enum(["describe", "screens", "show", "slot", "run", "emit", "set", "setting", "actions", "wait", "widget"]),
       id: z.string().max(200).optional().describe("The screen, slot, action, event or setting; for wait the screen id or a text it shows"),
       params: z.record(z.string(), z.string().max(2000)).optional(),
       value: z.string().max(2000).optional(),
@@ -110,11 +111,12 @@ export const control: WorkshopTool<{
         set: ["set", input.id!, hex(input.value ?? "")],
         setting: ["setting", input.id!],
         actions: input.id ? ["actions", input.id] : ["actions"],
+        widget: ["widget", input.id!],
       }[input.do].join(" ");
       const answer = await context.emulator.command(line);
       let content: string;
       if (input.do === "describe") content = described(answer);
-      else if (["show", "slot", "run", "emit", "set"].includes(input.do)) {
+      else if (["show", "slot", "run", "emit", "set", "widget"].includes(input.do)) {
         content = `Done on the ${profile.name}. Now:\n${described(await context.emulator.command("describe"))}`;
       } else content = JSON.stringify(answer);
       return { content: content + (await requestsSince(context)), step };

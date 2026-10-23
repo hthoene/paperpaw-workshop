@@ -107,7 +107,8 @@ export class NativeEmulator implements Emulator {
   }
 
   /** The remote control's lines the tools send (tools/control.ts), as far
-   *  as PaperPaw's protocol has them: describe, show, run. */
+   *  as PaperPaw's protocol has them: describe, show, run, and a widget
+   *  shown on the home screen (the workshop's own). */
   async command(line: string): Promise<Record<string, unknown>> {
     const [what, id, ...rest] = line.split(" ");
     switch (what) {
@@ -121,6 +122,10 @@ export class NativeEmulator implements Emulator {
         return { ok: true };
       case "run":
         await this.backend.emulatorRun(id!);
+        await settle();
+        return { ok: true };
+      case "widget":
+        await this.backend.emulatorWidget(id!);
         await settle();
         return { ok: true };
       default:

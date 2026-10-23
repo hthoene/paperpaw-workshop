@@ -248,7 +248,7 @@ const recipes = [
       .join("\n") +
     "\n- A screen, an action in a menu, a text setting, an event and translations: the sample plugin the project starts with (below).",
   `## ${RECIPES["widget-fetch"]}\n\n` +
-    "The address answers in the workshop only as `set_fixtures` records it (for this one, `https://quotes.example.org/api/today` with `{\"quote\": \"…\", \"author\": \"…\"}`): record the answers of the person's address before you `look`.\n\n" +
+    "To see it: `build`, then `control` `widget` with its id (here `quote.today`), `wait` for a text of the reply, and `look`. The reader beside the conversation fetches from the internet as a reader does.\n\n" +
     recipeText("widget-fetch"),
 ].join("\n\n");
 

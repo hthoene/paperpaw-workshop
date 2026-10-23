@@ -47,6 +47,9 @@ export class Workshop {
   thinking = "";
   /** Whether the conversation has grown too long to go on in. */
   long = false;
+  /** Tools this workshop does without (the app's reader fetches from the
+   *  internet itself: no recorded answers). */
+  withoutTools: string[] = [];
   /** The last turn paused, as it cost this much (dollars) without
    *  changing the plugin: the person says whether it goes on. */
   paused: number | null = null;
@@ -416,7 +419,7 @@ export class Workshop {
         {
           provider: this.provider,
           project: this.project,
-          tools: this.code ? CODE_TOOLS : DATA_TOOLS,
+          tools: (this.code ? CODE_TOOLS : DATA_TOOLS).filter((tool) => !this.withoutTools.includes(tool.name)),
           handbook: this.handbook,
           prompt: this.handbook.promptFor(this.project.kind),
           context: this.toolContext(),

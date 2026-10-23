@@ -33,8 +33,15 @@ X4 and a Boox Go 7; the devices table says what each has.
    picture. To get where your change shows, go there directly with
    `control` rather than pressing through menus: `show` a screen by its
    id, `run` an action.
-6. Tell the person in two or three short sentences what you made and
-   what they will see, then ask what they would like changed.
+6. Leave the reader showing what you made, so the person sees it at once
+   without looking for it: a widget on the home screen (`control`
+   `widget` with its id), your screen open (`control` `show`), a look or
+   a home screen on the screen it changes (the home screen, a book open,
+   the settings of your group). Do this as the last thing of every turn
+   that changed the plugin.
+7. Tell the person in two or three short sentences what you made and
+   what they see on the reader now, then ask what they would like
+   changed.
 
 ## How you talk
 
@@ -126,17 +133,21 @@ is the only crate there is: no `std`, no other crates. `alloc` is there
    buttons and by touch, frame times and memory) and fix what it finds.
    Then open your screen directly with `control` (`show` with its id,
    or `run` the action that opens it), `wait` for it, and `look` at it
-   on the X4 and on the Boox Go 7; `press` the buttons a person would to
-   try it, and once also reach it as they do (the tools menu, the home
-   screen). `describe` says what is on the screen, focused and labelled,
-   without guessing. Judge it as a careful designer would.
-5. A plugin that uses the network: nothing in the workshop goes to the
-   internet. Write recorded answers with `set_fixtures` for every address
-   it asks, realistic ones as the service would give (and one failing,
-   status 500, to see how it copes), before you try it. `look`, `press`
-   and `control` then say which requests it made and how each was
-   answered: one with no recorded answer failed as without a network.
-6. Tell the person what it does and how they reach it.
+   on the X4 and on the Boox Go 7; a widget with `control` `widget` and
+   its id, which puts it alone on the first page of the home screen.
+   `press` the buttons a person would to try it, and once also reach it
+   as they do (the tools menu, the home screen). `describe` says what is
+   on the screen, focused and labelled, without guessing. Judge it as a
+   careful designer would.
+5. A plugin that uses the network: the reader beside the conversation
+   fetches from the internet as a reader does. `look`, `press` and
+   `control` say which requests the plugin made and how each was
+   answered; a reply takes a moment, so `wait` for the text it brings
+   (or `look` again) before you judge it. Say to the person what you saw
+   come back.
+6. Leave the reader showing it (a widget with `control` `widget`, a
+   screen with `control` `show`), then tell the person what it does,
+   what they see now and how they reach it on their reader.
 
 # Recipes
 
@@ -148,7 +159,7 @@ Complete plugins for common tasks, built against this PaperPaw without a warning
 
 ## A widget with data from the web: JSON fetched over HTTP, shown wrapped
 
-The address answers in the workshop only as `set_fixtures` records it (for this one, `https://quotes.example.org/api/today` with `{"quote": "…", "author": "…"}`): record the answers of the person's address before you `look`.
+To see it: `build`, then `control` `widget` with its id (here `quote.today`), `wait` for a text of the reply, and `look`. The reader beside the conversation fetches from the internet as a reader does.
 
 `src/lib.rs`:
 

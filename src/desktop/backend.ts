@@ -70,6 +70,9 @@ export interface Backend extends FolderApi, PictureApi, CheckApi, HistoryApi {
   /** The panel as a PNG in base64. */
   emulatorShot(): Promise<string>;
   emulatorOpen(screen: string, params?: Record<string, string>): Promise<void>;
+  /** Widget `widget` alone on the first page of the home screen; the
+   *  reader starts again so. */
+  emulatorWidget(widget: string): Promise<void>;
   emulatorRun(action: string): Promise<void>;
   /** The plugins' warnings and requests since asked last. */
   emulatorTold(): Promise<[string[], string[]]>;
@@ -169,6 +172,7 @@ export const appBackend: Backend = {
   emulatorDescribe: () => invoke("emulator_describe"),
   emulatorShot: () => invoke("emulator_shot"),
   emulatorOpen: (screen, params) => invoke("emulator_open", { screen, params }),
+  emulatorWidget: (widget) => invoke("emulator_widget", { widget }),
   emulatorRun: (action) => invoke("emulator_run", { action }),
   emulatorTold: () => invoke("emulator_told"),
   emulatorReady: () => invoke("emulator_ready"),
@@ -271,6 +275,7 @@ export function standInBackend(): Backend {
     emulatorDescribe: async () => ({ parts: [] }),
     emulatorShot: async () => "",
     emulatorOpen: async () => {},
+    emulatorWidget: async () => {},
     emulatorRun: async () => {},
     emulatorTold: async () => [[], []],
     emulatorReady: async () => null,

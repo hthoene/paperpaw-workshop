@@ -104,5 +104,6 @@ export function stepText(tool: string, input: Record<string, unknown>): string {
   if (typeof input?.to === "string") vars.path = input.to;
   if (typeof input?.upload === "string") vars.name = input.upload;
   if ((tool === "look" || tool === "press") && !vars.device) vars.device = "X4";
+  if (Array.isArray(input?.fixtures)) vars.n = String(input.fixtures.length);
   return t(`step.${tool}`, vars);
 }

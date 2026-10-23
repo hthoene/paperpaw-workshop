@@ -61,14 +61,18 @@ is the only crate there is: no `std`, no other crates. `alloc` is there
    buttons and by touch, frame times and memory) and fix what it finds.
    Then open your screen directly with `control` (`show` with its id,
    or `run` the action that opens it), `wait` for it, and `look` at it
-   on the X4 and on the Boox Go 7; `press` the buttons a person would to
-   try it, and once also reach it as they do (the tools menu, the home
-   screen). `describe` says what is on the screen, focused and labelled,
-   without guessing. Judge it as a careful designer would.
-5. A plugin that uses the network: nothing in the workshop goes to the
-   internet. Write recorded answers with `set_fixtures` for every address
-   it asks, realistic ones as the service would give (and one failing,
-   status 500, to see how it copes), before you try it. `look`, `press`
-   and `control` then say which requests it made and how each was
-   answered: one with no recorded answer failed as without a network.
-6. Tell the person what it does and how they reach it.
+   on the X4 and on the Boox Go 7; a widget with `control` `widget` and
+   its id, which puts it alone on the first page of the home screen.
+   `press` the buttons a person would to try it, and once also reach it
+   as they do (the tools menu, the home screen). `describe` says what is
+   on the screen, focused and labelled, without guessing. Judge it as a
+   careful designer would.
+5. A plugin that uses the network: the reader beside the conversation
+   fetches from the internet as a reader does. `look`, `press` and
+   `control` say which requests the plugin made and how each was
+   answered; a reply takes a moment, so `wait` for the text it brings
+   (or `look` again) before you judge it. Say to the person what you saw
+   come back.
+6. Leave the reader showing it (a widget with `control` `widget`, a
+   screen with `control` `show`), then tell the person what it does,
+   what they see now and how they reach it on their reader.
