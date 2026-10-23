@@ -1,4 +1,16 @@
 ```rust
+pub struct paperpaw_sdk::wifi::Wifi
+pub paperpaw_sdk::wifi::Wifi::busy: bool
+pub paperpaw_sdk::wifi::Wifi::networks: alloc::vec::Vec<paperpaw_sdk::wifi::WifiNetwork>
+pub paperpaw_sdk::wifi::Wifi::scanning: bool
+pub paperpaw_sdk::wifi::Wifi::state: paperpaw_sdk::wifi::WifiState
+pub paperpaw_sdk::wifi::Wifi::wanted: bool
+pub struct paperpaw_sdk::wifi::WifiNetwork
+pub paperpaw_sdk::wifi::WifiNetwork::secured: bool
+pub paperpaw_sdk::wifi::WifiNetwork::signal: i8
+pub paperpaw_sdk::wifi::WifiNetwork::ssid: alloc::string::String
+pub fn paperpaw_sdk::wifi::WifiNetwork::bars(&self) -> u8
+pub enum paperpaw_sdk::wifi::JoinFailure
 pub fn paperpaw_sdk::wifi::JoinFailure::from_param(&str) -> core::option::Option<Self>
 pub fn paperpaw_sdk::wifi::JoinFailure::missing() -> core::option::Option<Self>
 pub fn paperpaw_sdk::wifi::JoinFailure::to_param(&self) -> alloc::string::String
@@ -23,6 +35,7 @@ pub paperpaw_sdk::wifi::WifiCommand::Off
 pub paperpaw_sdk::wifi::WifiCommand::On
 pub paperpaw_sdk::wifi::WifiCommand::Scan
 pub fn paperpaw_sdk::wifi::WifiCommand::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+pub enum paperpaw_sdk::wifi::WifiState
 pub paperpaw_sdk::wifi::WifiState::Hosting
 pub paperpaw_sdk::wifi::WifiState::Hosting::address: alloc::string::String
 pub paperpaw_sdk::wifi::WifiState::Hosting::guests: u8
@@ -38,17 +51,6 @@ pub fn paperpaw_sdk::wifi::WifiState::is_hosting(&self) -> bool
 pub fn paperpaw_sdk::wifi::WifiState::is_on(&self) -> bool
 pub fn paperpaw_sdk::wifi::WifiState::is_online(&self) -> bool
 pub fn paperpaw_sdk::wifi::WifiState::ssid(&self) -> core::option::Option<&str>
-pub struct paperpaw_sdk::wifi::Wifi
-pub paperpaw_sdk::wifi::Wifi::busy: bool
-pub paperpaw_sdk::wifi::Wifi::networks: alloc::vec::Vec<paperpaw_sdk::wifi::WifiNetwork>
-pub paperpaw_sdk::wifi::Wifi::scanning: bool
-pub paperpaw_sdk::wifi::Wifi::state: paperpaw_sdk::wifi::WifiState
-pub paperpaw_sdk::wifi::Wifi::wanted: bool
-pub struct paperpaw_sdk::wifi::WifiNetwork
-pub paperpaw_sdk::wifi::WifiNetwork::secured: bool
-pub paperpaw_sdk::wifi::WifiNetwork::signal: i8
-pub paperpaw_sdk::wifi::WifiNetwork::ssid: alloc::string::String
-pub fn paperpaw_sdk::wifi::WifiNetwork::bars(&self) -> u8
 pub const paperpaw_sdk::wifi::NETWORK_WAIT_MS: u64
 pub const paperpaw_sdk::wifi::SECRET_PREFIX: &str
 pub fn paperpaw_sdk::wifi::forget(&str) -> paperpaw_sdk::secrets::SecretChange

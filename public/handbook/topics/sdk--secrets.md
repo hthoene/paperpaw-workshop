@@ -1,5 +1,8 @@
 ```rust
+pub trait paperpaw_sdk::secrets::Running
+pub fn paperpaw_sdk::secrets::Running::runs(&self, &str) -> bool
 pub struct paperpaw_sdk::secrets::Anyone
+pub fn paperpaw_sdk::secrets::Anyone::runs(&self, &str) -> bool
 pub fn paperpaw_sdk::secrets::Anyone::runs(&self, &str) -> bool
 pub struct paperpaw_sdk::secrets::Listed<'a>
 pub paperpaw_sdk::secrets::Listed::changeable: bool
@@ -34,7 +37,4 @@ pub fn paperpaw_sdk::secrets::Visible<'a>::listed(&self) -> impl core::iter::tra
 pub fn paperpaw_sdk::secrets::Visible<'a>::new(&'a paperpaw_sdk::secrets::Secrets, &'a dyn paperpaw_sdk::secrets::Running) -> Self
 pub fn paperpaw_sdk::secrets::Visible<'_>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub const paperpaw_sdk::secrets::FILE: &str
-pub trait paperpaw_sdk::secrets::Running
-pub fn paperpaw_sdk::secrets::Running::runs(&self, &str) -> bool
-pub fn paperpaw_sdk::secrets::Anyone::runs(&self, &str) -> bool
 ```

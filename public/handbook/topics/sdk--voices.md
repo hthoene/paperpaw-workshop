@@ -1,4 +1,5 @@
 ```rust
+pub struct paperpaw_sdk::voices::VoiceSpec
 pub paperpaw_sdk::voices::VoiceSpec::id: paperpaw_sdk::Id
 pub paperpaw_sdk::voices::VoiceSpec::languages: alloc::vec::Vec<alloc::borrow::Cow<'static, str>>
 pub paperpaw_sdk::voices::VoiceSpec::speak: paperpaw_sdk::voices::SpeakFn

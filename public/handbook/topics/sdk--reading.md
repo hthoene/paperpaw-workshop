@@ -1,14 +1,37 @@
 ```rust
-pub fn paperpaw_sdk::reading::PageWords::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
-pub fn paperpaw_sdk::reading::PageWords::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::reading::DroppedRuns
 pub fn paperpaw_sdk::reading::DroppedRuns::clear(&self)
 pub fn paperpaw_sdk::reading::DroppedRuns::new() -> Self
-pub paperpaw_sdk::reading::FilteredDocument::document: &'d dyn paperpaw_document::Document
-pub paperpaw_sdk::reading::FilteredDocument::dropped: core::option::Option<&'d paperpaw_sdk::reading::DroppedRuns>
-pub paperpaw_sdk::reading::FilteredDocument::env: &'d paperpaw_sdk::Env<'e>
-pub paperpaw_sdk::reading::FilteredDocument::language: &'d str
-pub paperpaw_sdk::reading::FilteredDocument::path: &'d str
+pub struct paperpaw_sdk::reading::PageIndex
+pub fn paperpaw_sdk::reading::PageIndex::append(&mut self, &dyn paperpaw_platform::storage::Storage, &[paperpaw_document::Locator]) -> bool
+pub fn paperpaw_sdk::reading::PageIndex::entry(&self, &dyn paperpaw_platform::storage::Storage, u32) -> core::option::Option<paperpaw_document::Locator>
+pub fn paperpaw_sdk::reading::PageIndex::finish(&mut self, &dyn paperpaw_platform::storage::Storage)
+pub fn paperpaw_sdk::reading::PageIndex::is_complete(&self) -> bool
+pub fn paperpaw_sdk::reading::PageIndex::last(&self, &dyn paperpaw_platform::storage::Storage) -> core::option::Option<paperpaw_document::Locator>
+pub fn paperpaw_sdk::reading::PageIndex::locate(&self, &dyn paperpaw_platform::storage::Storage, paperpaw_document::Locator) -> core::option::Option<(u32, bool)>
+pub fn paperpaw_sdk::reading::PageIndex::open(&dyn paperpaw_platform::storage::Storage, alloc::string::String) -> Self
+pub fn paperpaw_sdk::reading::PageIndex::pages(&self) -> u32
+pub struct paperpaw_sdk::reading::PageWords
+pub fn paperpaw_sdk::reading::PageWords::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::reading::PageWords::to_params(&self) -> paperpaw_sdk::Params
+pub paperpaw_sdk::reading::PageWords::end: paperpaw_document::Locator
+pub paperpaw_sdk::reading::PageWords::language: alloc::string::String
+pub paperpaw_sdk::reading::PageWords::path: alloc::string::String
+pub paperpaw_sdk::reading::PageWords::start: paperpaw_document::Locator
+pub paperpaw_sdk::reading::PageWords::words: alloc::vec::Vec<paperpaw_sdk::reading::Word>
+pub fn paperpaw_sdk::reading::PageWords::new(impl core::convert::Into<alloc::string::String>, impl core::convert::Into<alloc::string::String>, paperpaw_document::Locator, paperpaw_document::Locator) -> Self
+pub fn paperpaw_sdk::reading::PageWords::text(&self) -> alloc::string::String
+pub fn paperpaw_sdk::reading::PageWords::words(self, alloc::vec::Vec<paperpaw_sdk::reading::Word>) -> Self
+pub fn paperpaw_sdk::reading::PageWords::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::reading::PageWords::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::reading::PageWords::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::reading::PageWords::to_params(&self) -> paperpaw_sdk::Params
+pub struct paperpaw_sdk::reading::Word
+pub paperpaw_sdk::reading::Word::end: paperpaw_document::Locator
+pub paperpaw_sdk::reading::Word::start: paperpaw_document::Locator
+pub paperpaw_sdk::reading::Word::text: alloc::string::String
+pub fn paperpaw_sdk::reading::Word::new(impl core::convert::Into<alloc::string::String>, paperpaw_document::Locator, paperpaw_document::Locator) -> Self
+pub struct paperpaw_sdk::reading::FilteredDocument<'d, 'e>
 pub fn paperpaw_sdk::reading::FilteredDocument<'d, 'e>::in_book(self, &'d str, &'d str) -> Self
 pub fn paperpaw_sdk::reading::FilteredDocument<'d, 'e>::kept_block_at(&self, &dyn paperpaw_platform::storage::Storage, paperpaw_document::Locator) -> core::result::Result<core::option::Option<paperpaw_document::Block>, paperpaw_document::DocumentError>
 pub fn paperpaw_sdk::reading::FilteredDocument<'d, 'e>::new(&'d dyn paperpaw_document::Document, &'d paperpaw_sdk::Env<'e>) -> Self
@@ -32,33 +55,13 @@ pub fn paperpaw_sdk::reading::FilteredDocument<'_, '_>::toc_len(&self, &dyn pape
 pub fn paperpaw_sdk::reading::FilteredDocument<'_, '_>::toc_target(&self, &dyn paperpaw_platform::storage::Storage, u32) -> core::option::Option<paperpaw_document::Locator>
 pub fn paperpaw_sdk::reading::FilteredDocument<'_, '_>::whole_pages(&self) -> bool
 pub fn paperpaw_sdk::reading::FilteredDocument<'_, '_>::xpointer(&self, &dyn paperpaw_platform::storage::Storage, paperpaw_document::Locator) -> core::option::Option<alloc::string::String>
-pub struct paperpaw_sdk::reading::PageIndex
-pub fn paperpaw_sdk::reading::PageIndex::append(&mut self, &dyn paperpaw_platform::storage::Storage, &[paperpaw_document::Locator]) -> bool
-pub fn paperpaw_sdk::reading::PageIndex::entry(&self, &dyn paperpaw_platform::storage::Storage, u32) -> core::option::Option<paperpaw_document::Locator>
-pub fn paperpaw_sdk::reading::PageIndex::finish(&mut self, &dyn paperpaw_platform::storage::Storage)
-pub fn paperpaw_sdk::reading::PageIndex::is_complete(&self) -> bool
-pub fn paperpaw_sdk::reading::PageIndex::last(&self, &dyn paperpaw_platform::storage::Storage) -> core::option::Option<paperpaw_document::Locator>
-pub fn paperpaw_sdk::reading::PageIndex::locate(&self, &dyn paperpaw_platform::storage::Storage, paperpaw_document::Locator) -> core::option::Option<(u32, bool)>
-pub fn paperpaw_sdk::reading::PageIndex::open(&dyn paperpaw_platform::storage::Storage, alloc::string::String) -> Self
-pub fn paperpaw_sdk::reading::PageIndex::pages(&self) -> u32
-pub paperpaw_sdk::reading::PageWords::end: paperpaw_document::Locator
-pub paperpaw_sdk::reading::PageWords::language: alloc::string::String
-pub paperpaw_sdk::reading::PageWords::path: alloc::string::String
-pub paperpaw_sdk::reading::PageWords::start: paperpaw_document::Locator
-pub paperpaw_sdk::reading::PageWords::words: alloc::vec::Vec<paperpaw_sdk::reading::Word>
-pub fn paperpaw_sdk::reading::PageWords::new(impl core::convert::Into<alloc::string::String>, impl core::convert::Into<alloc::string::String>, paperpaw_document::Locator, paperpaw_document::Locator) -> Self
-pub fn paperpaw_sdk::reading::PageWords::text(&self) -> alloc::string::String
-pub fn paperpaw_sdk::reading::PageWords::words(self, alloc::vec::Vec<paperpaw_sdk::reading::Word>) -> Self
-pub fn paperpaw_sdk::reading::PageWords::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
-pub fn paperpaw_sdk::reading::PageWords::to_params(&self) -> paperpaw_sdk::Params
-pub paperpaw_sdk::reading::Word::end: paperpaw_document::Locator
-pub paperpaw_sdk::reading::Word::start: paperpaw_document::Locator
-pub paperpaw_sdk::reading::Word::text: alloc::string::String
-pub fn paperpaw_sdk::reading::Word::new(impl core::convert::Into<alloc::string::String>, paperpaw_document::Locator, paperpaw_document::Locator) -> Self
+pub paperpaw_sdk::reading::FilteredDocument::document: &'d dyn paperpaw_document::Document
+pub paperpaw_sdk::reading::FilteredDocument::dropped: core::option::Option<&'d paperpaw_sdk::reading::DroppedRuns>
+pub paperpaw_sdk::reading::FilteredDocument::env: &'d paperpaw_sdk::Env<'e>
+pub paperpaw_sdk::reading::FilteredDocument::language: &'d str
+pub paperpaw_sdk::reading::FilteredDocument::path: &'d str
 pub fn paperpaw_sdk::reading::ask_page_words(&paperpaw_sdk::event::Event<paperpaw_sdk::reading::PageWords>) -> paperpaw_sdk::Command
 pub fn paperpaw_sdk::reading::conversion(&paperpaw_sdk::Env<'_>) -> u64
 pub fn paperpaw_sdk::reading::note_text(&paperpaw_sdk::reading::FilteredDocument<'_, '_>, &dyn paperpaw_platform::storage::Storage, &str) -> core::option::Option<alloc::string::String>
 pub fn paperpaw_sdk::reading::open_options(&paperpaw_sdk::Env<'_>) -> paperpaw_sdk::OpenOptions
-pub fn paperpaw_sdk::reading::PageWords::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
-pub fn paperpaw_sdk::reading::PageWords::to_params(&self) -> paperpaw_sdk::Params
 ```

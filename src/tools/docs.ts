@@ -16,15 +16,10 @@ export const lookupDocs: WorkshopTool<{ topic: string }> = {
     if (found) {
       return { content: await handbook.read(found), step: { key: "step.lookup_docs", vars: { topic: found.title } } };
     }
-    const items = await handbook.items(topic);
+    const items = await handbook.lookup(topic);
     const list = candidates.map((t) => `- ${t.id}: ${t.title} (${t.tokens} tokens)`).join("\n");
     const parts = [];
-    if (items.length) {
-      parts.push(
-        `The SDK's items for "${topic}" (paths in paperpaw_sdk):\n\n` +
-          items.map((i) => `${i.signature}${i.doc ? `\n${i.doc.replace(/^/gm, "    ")}` : ""}`).join("\n\n"),
-      );
-    }
+    if (items) parts.push(`The SDK's items for "${topic}" (paths in paperpaw_sdk):\n\n${items}`);
     if (candidates.length) parts.push(`${items.length ? "Topics" : `No topic is called "${topic}". The closest`}:\n${list}`);
     return {
       content: parts.length

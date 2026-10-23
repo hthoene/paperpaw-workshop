@@ -1,9 +1,12 @@
 ```rust
+pub trait paperpaw_sdk::services::ServiceType: core::any::Any
+pub struct paperpaw_sdk::services::EventSpec
 pub paperpaw_sdk::services::EventSpec::id: paperpaw_sdk::Id
 pub paperpaw_sdk::services::EventSpec::params: &'static [&'static str]
 pub paperpaw_sdk::services::EventSpec::title: alloc::borrow::Cow<'static, str>
 pub fn paperpaw_sdk::services::EventSpec::new(paperpaw_sdk::Id, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> Self
 pub fn paperpaw_sdk::services::EventSpec::params(self, &'static [&'static str]) -> Self
+pub struct paperpaw_sdk::services::PointSpec
 pub paperpaw_sdk::services::PointSpec::doc: alloc::borrow::Cow<'static, str>
 pub paperpaw_sdk::services::PointSpec::id: paperpaw_sdk::Id
 pub paperpaw_sdk::services::PointSpec::title: alloc::borrow::Cow<'static, str>
@@ -28,6 +31,5 @@ pub fn paperpaw_sdk::services::Services::new() -> Self
 pub fn paperpaw_sdk::services::Services::points(&self) -> &[paperpaw_sdk::services::PointSpec]
 pub fn paperpaw_sdk::services::Services::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub const paperpaw_sdk::services::REPLACEABLE: &[&str]
-pub trait paperpaw_sdk::services::ServiceType: core::any::Any
 pub const paperpaw_sdk::services::ServiceType::KEY: &'static str
 ```

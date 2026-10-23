@@ -1,0 +1,9 @@
+[package]
+name = "quote"
+version = "0.1.0"
+
+[package.metadata.paperpaw]
+plugin = "Quote"
+
+[dependencies]
+paperpaw-sdk = "0.4"

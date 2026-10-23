@@ -370,7 +370,7 @@ pub fn place_plugin(library: &Path, id: &str, files: &[(String, Vec<u8>)]) -> Re
 }
 
 /// Every file under `dir`, into `out`.
-fn collect_files(dir: &Path, out: &mut Vec<PathBuf>) {
+pub(crate) fn collect_files(dir: &Path, out: &mut Vec<PathBuf>) {
     for entry in std::fs::read_dir(dir).into_iter().flatten().flatten() {
         let path = entry.path();
         if path.is_dir() {

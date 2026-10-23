@@ -6,7 +6,7 @@
 // plugin, its state is kept in the project's history (history.ts).
 
 import type { Provider } from "../ai/provider";
-import { modelName } from "../ai/pricing";
+import { MODELS, modelName } from "../ai/pricing";
 import { Workshop } from "../app/controller";
 import type { Handbook } from "../handbook/handbook";
 import { browserKit } from "../pictures/kit";
@@ -19,6 +19,7 @@ import { LocalBuilder } from "./builder";
 import { thisMonth, turnOf } from "./costs";
 import { fromBase64 } from "./folders";
 import { NO_HISTORY, today, type History } from "./history";
+import { decideKind } from "./kind";
 import { NativeEmulator } from "./native";
 import { pictureOf, WORKSHOP_SCREENS } from "./pictures";
 import type { Workspace } from "./workspace";
@@ -182,7 +183,9 @@ export class Desk {
    *  turn. Whether they reached the model (if not, they are not kept). */
   async send(text: string): Promise<boolean> {
     if (!text.trim() || this.workshop?.busy || this.previewing) return false;
-    const project = await this.workspace.ensure();
+    // A new plugin of no kind yet: its first words say which.
+    const kind = !this.workspace.project && this.workspace.freshKind === "auto" ? await decideKind(this.provider, text, MODELS.data) : undefined;
+    const project = await this.workspace.ensure(undefined, kind);
     const workshop = this.workshop?.project === project ? this.workshop : await this.attach(project);
     const before = project.usage.dollars;
     const usage = { ...project.usage };

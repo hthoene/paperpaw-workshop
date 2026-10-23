@@ -8,10 +8,12 @@
 //! the AI reads them. Builds live in the app's folder (`builds/<project>/`),
 //! so that the next one is quick.
 //!
-//! The SDK: the release's on crates.io (`paperpaw-sdk = "=<version>"`);
-//! `PAPERPAW_SDK` names a local checkout's `crates/paperpaw-sdk` while the
-//! workshop is worked on, as long as a PaperPaw in work (`0.4.0-dev`) is
-//! fingerprinted by its very source.
+//! The SDK: the release's on crates.io (`paperpaw-sdk = "=<version>"`).
+//! A PaperPaw in work (`0.4.0-dev`) is fingerprinted by its very source,
+//! which crates.io does not have: then the SDK the installer brought with
+//! the emulator (`sdk/` beside the app, of the same PaperPaw), or
+//! `PAPERPAW_SDK`, a local checkout's `crates/paperpaw-sdk`, while the
+//! workshop is worked on (see `local_sdk`).
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
@@ -172,12 +174,39 @@ pub fn problems(files: &[(String, Vec<u8>)]) -> Vec<String> {
     out
 }
 
-/// How Cargo.toml names the SDK: a local checkout's, or the release's.
-pub fn sdk(paperpaw: &str) -> String {
-    match std::env::var("PAPERPAW_SDK") {
-        Ok(path) if !path.is_empty() => format!("{{ path = {:?}, features = [\"outline\"] }}", path.replace('\\', "/")),
-        _ => format!("{{ version = \"={paperpaw}\", features = [\"outline\"] }}"),
+/// The SDK's crate on this computer for PaperPaw `paperpaw`, if there is
+/// one: `PAPERPAW_SDK` (a checkout's `crates/paperpaw-sdk`), else the
+/// one the installer brought beside the app (`sdk/`), where it is of
+/// that very PaperPaw (`sdk/version.txt`).
+pub fn local_sdk(paperpaw: &str) -> Option<PathBuf> {
+    if let Some(path) = std::env::var_os("PAPERPAW_SDK").filter(|p| !p.is_empty()) {
+        return Some(PathBuf::from(path));
     }
+    bundled_sdk(&std::env::current_exe().ok()?.parent()?.join("sdk"), paperpaw)
+}
+
+/// The SDK's crate in `dir` (as scripts/installer.mjs lays it out), if it
+/// is of PaperPaw `paperpaw`.
+pub fn bundled_sdk(dir: &Path, paperpaw: &str) -> Option<PathBuf> {
+    let version = std::fs::read_to_string(dir.join("version.txt")).ok()?;
+    let krate = dir.join("crates").join("paperpaw-sdk");
+    (version.trim() == paperpaw && krate.join("Cargo.toml").is_file()).then_some(krate)
+}
+
+/// How Cargo.toml names the SDK: the one on this computer (see
+/// `local_sdk`), or the release's.
+pub fn sdk(paperpaw: &str) -> String {
+    match local_sdk(paperpaw) {
+        Some(path) => format!("{{ path = {:?}, features = [\"outline\"] }}", path.to_string_lossy().replace('\\', "/")),
+        None => format!("{{ version = \"={paperpaw}\", features = [\"outline\"] }}"),
+    }
+}
+
+/// The folder of the SDK a Cargo.toml line of `sdk` names, if it is one
+/// on this computer (`{ path = "…", … }`).
+pub fn sdk_path(sdk: &str) -> Option<PathBuf> {
+    let rest = sdk.split_once("path = \"")?.1;
+    Some(PathBuf::from(&rest[..rest.find('"')?]))
 }
 
 /// The plugin's crate as the workshop builds it: its name and version,
@@ -293,7 +322,7 @@ pub fn build(dir: &Path, files: &[(String, Vec<u8>)], rust: &crate::toolchain::R
         files: Vec::new(),
         log_tail: String::new(),
     };
-    if paperpaw.contains('-') && std::env::var_os("PAPERPAW_SDK").is_none() {
+    if paperpaw.contains('-') && local_sdk(paperpaw).is_none() {
         built.problems.push(format!(
             "PaperPaw {paperpaw} is a version in work: its SDK is not published, so plugins with code cannot be built for it. Say so to the person: plugins with code are built for released PaperPaw versions."
         ));
@@ -462,6 +491,50 @@ mod tests {
     /// with `PAPERPAW_EMU` and `PAPERPAW_SDK` (the checkout it was built
     /// from), else skipped. Sets up Rust in the app's folder the first
     /// time (some minutes).
+    /// The files of the handbook's recipe `name` (handbook/recipes/), as
+    /// a project holds them.
+    fn recipe(name: &str) -> Vec<(String, Vec<u8>)> {
+        let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../handbook/recipes").join(name);
+        let mut files = Vec::new();
+        crate::emulator::collect_files(&dir, &mut files);
+        files
+            .into_iter()
+            .map(|path| {
+                let relative = path.strip_prefix(&dir).unwrap().to_string_lossy().replace('\\', "/");
+                (relative, std::fs::read(&path).unwrap())
+            })
+            .collect()
+    }
+
+    /// The recipes the AI's handbook gives in full build as the workshop
+    /// builds a project, without a warning: with `PAPERPAW_EMU` and
+    /// `PAPERPAW_SDK`, as the test below.
+    #[test]
+    fn the_handbook_s_recipes_build_without_a_warning() {
+        let (Some(program), true) = (std::env::var_os("PAPERPAW_EMU").map(PathBuf::from), std::env::var_os("PAPERPAW_SDK").is_some()) else {
+            eprintln!("skipped: PAPERPAW_EMU and PAPERPAW_SDK name no PaperPaw");
+            return;
+        };
+        let emulator = crate::emulator::Emulator::new(move || Ok(program.clone()), |_| {});
+        let library = tempfile::tempdir().unwrap();
+        emulator.start("xteink-x4", library.path()).unwrap();
+        let ready = emulator.ready().unwrap();
+        let (version, _) = crate::toolchain::wanted(&ready.toolchain).unwrap();
+        let rust = crate::toolchain::ready(&crate::paths::app_data().unwrap().join("rust"), &version, &|t| eprintln!("{t}")).unwrap();
+        let recipes = Path::new(env!("CARGO_MANIFEST_DIR")).join("../handbook/recipes");
+        for entry in std::fs::read_dir(recipes).unwrap().flatten() {
+            let name = entry.file_name().to_string_lossy().into_owned();
+            let files = recipe(&name);
+            assert!(problems(&files).is_empty(), "{name}: {:?}", problems(&files));
+            let dir = tempfile::tempdir().unwrap();
+            let (built, made) = build(dir.path(), &files, &rust, &ready.paperpaw);
+            assert_eq!(built.state, "done", "{name}: {:#?}
+{}", built.diagnostics, built.log_tail);
+            assert!(built.diagnostics.is_empty(), "{name}: {:#?}", built.diagnostics);
+            assert!(made.is_some(), "{name}");
+        }
+    }
+
     #[test]
     fn a_plugin_with_code_is_built_and_runs_in_paperpaw_s_emulator() {
         let (Some(program), true) = (std::env::var_os("PAPERPAW_EMU").map(PathBuf::from), std::env::var_os("PAPERPAW_SDK").is_some()) else {

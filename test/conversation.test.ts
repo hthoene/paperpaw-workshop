@@ -65,3 +65,26 @@ describe("a conversation grown too long", () => {
     expect(project.carried!.startsWith(CARRIED)).toBe(true);
   });
 });
+
+describe("steps in a row", () => {
+  it("are one line for the same tool: how many, and what about, each once", () => {
+    const use = (id: string, name: string, input: Record<string, unknown>) => ({ type: "tool_use" as const, id, name, input });
+    const topics = ["Widget", "WidgetSpec", "HttpReply", "Widget", "json", "draw_wrapped", "Work"];
+    const messages: Anthropic.MessageParam[] = [
+      { role: "user", content: "A widget" },
+      { role: "assistant", content: topics.map((topic, i) => use(`d${i}`, "lookup_docs", { topic })) },
+      {
+        role: "user",
+        content: [...topics.map((_, i) => ({ type: "tool_result" as const, tool_use_id: `d${i}`, content: "…" })), { type: "tool_result" as const, tool_use_id: "r2", content: "no", is_error: true }],
+      },
+      { role: "assistant", content: [use("r1", "read_file", { path: "Cargo.toml" }), use("r2", "read_file", { path: "how/en.txt" }), use("w1", "write_file", { path: "src/lib.rs" })] },
+    ];
+    expect(lines(messages).map((l) => l.text)).toEqual([
+      "A widget",
+      "Read in PaperPaw's documentation (7): Widget, WidgetSpec, HttpReply, json, draw_wrapped and 1 more",
+      "Read Cargo.toml",
+      "Read how/en.txt: it did not work",
+      "Wrote src/lib.rs",
+    ]);
+  });
+});

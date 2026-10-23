@@ -127,7 +127,13 @@ function Window(props: WindowProps) {
 }
 
 function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps & { handbook: Handbook }) {
-  const workspace = useMemo(() => new Workspace(backend), [backend]);
+  const workspace = useMemo(() => {
+    const made = new Workspace(backend);
+    // A new plugin's kind as its first words ask; a recorded example's is
+    // data (its answers would be taken by the question).
+    made.freshKind = example() ? "data" : "auto";
+    return made;
+  }, [backend]);
   const checker = useMemo(() => new Checker(backend), [backend]);
   const desk = useMemo(() => {
     const provider = example() ?? (keyKind === "paperpaw" ? new AnthropicDirect(apiKey, PROXY, "provider.paperpaw") : new AnthropicDirect(apiKey));

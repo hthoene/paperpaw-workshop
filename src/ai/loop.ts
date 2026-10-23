@@ -20,9 +20,49 @@ export const MAX_PROMPT = 90_000;
 /** The most one answer may hold, thinking included. */
 export const MAX_TOKENS = 32_000;
 
-/** Old tool results (screenshots, files read) cleared on Anthropic's side
- *  once the prompt grows: the conversation here stays whole (append-only,
- *  so thinking and the cache hold), the model sees the recent ones. */
+/** The tools whose results stay for the whole conversation: what the
+ *  docs say and what the project holds are small, and cleared the model
+ *  would look them up again and again. */
+export const KEPT_TOOLS = ["lookup_docs", "read_file", "list_files", "list_uploads"];
+
+/** Tools that only look. Asked again in one turn with the same input,
+ *  they answer with where the first answer is, not with it again. */
+export const LOOKING_TOOLS = KEPT_TOOLS;
+/** Tools that change the plugin's files (and so what reading them gives). */
+export const CHANGING_TOOLS = ["write_file", "edit_file", "delete_file", "place_file", "convert_picture", "set_entry"];
+/** After this many looks in a turn without a change, the model is told
+ *  to write with what it has, or to ask; again every ten after. */
+export const LOOKS_BEFORE_WRITING = 15;
+/** What a turn may cost without changing a file before it pauses and
+ *  the person is asked whether to go on, in dollars. */
+export const PAUSE_AFTER_DOLLARS = 0.25;
+
+/** A tool's input as a key: the same input, the same key. */
+function inputKey(name: string, input: unknown): string {
+  const sorted = (value: unknown): unknown =>
+    value && typeof value === "object" && !Array.isArray(value)
+      ? Object.fromEntries(Object.entries(value as Record<string, unknown>).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => [k, sorted(v)]))
+      : typeof value === "string"
+        ? value.trim().toLowerCase()
+        : value;
+  return `${name} ${JSON.stringify(sorted(input))}`;
+}
+
+/** What the model is told after `looks` looks without a change. */
+export function writeNow(looks: number): string {
+  return `(You have looked things up ${looks} times in this turn without changing a file. That is enough to start: write the code now with what the answers above say, then build, and the compiler tells you what is still wrong. Or ask the person what is unclear.)`;
+}
+
+/** `result` with `note` after what it says. */
+function withNote(result: Anthropic.ToolResultBlockParam, note: string): Anthropic.ToolResultBlockParam {
+  if (typeof result.content === "string" || result.content === undefined) return { ...result, content: `${result.content ?? ""}\n\n${note}` };
+  return { ...result, content: [...result.content, { type: "text", text: note }] };
+}
+
+/** Old tool results (screenshots, builds, checks) cleared on Anthropic's
+ *  side once the prompt grows, never those of [`KEPT_TOOLS`]: the
+ *  conversation here stays whole (append-only, so thinking and the cache
+ *  hold), the model sees the recent ones. */
 export const CLEARING: ContextManagement = {
   edits: [
     {
@@ -30,6 +70,7 @@ export const CLEARING: ContextManagement = {
       trigger: { type: "input_tokens", value: 40_000 },
       keep: { type: "tool_uses", value: 6 },
       clear_at_least: { type: "input_tokens", value: 10_000 },
+      exclude_tools: KEPT_TOOLS,
     },
   ],
 };
@@ -48,6 +89,9 @@ export interface Session {
   /** The system prompt: the handbook for the plugin's kind (data's if not
    *  given). */
   prompt?: string;
+  /** What a turn may cost without changing a file before it pauses
+   *  ([`PAUSE_AFTER_DOLLARS`] if not given). */
+  pauseAfter?: number;
 }
 
 export interface TurnEvents {
@@ -62,8 +106,10 @@ export interface TurnEvents {
 }
 
 /** How a turn ended: `cut` when an answer reached its length limit with
- *  nothing more to do, so the person should know it is not finished. */
-export type TurnEnd = "done" | "stopped" | "limit" | "refusal" | "too_long" | "cut";
+ *  nothing more to do, so the person should know it is not finished;
+ *  `paused` when it cost more than it may without changing a file, so
+ *  the person says whether it goes on. */
+export type TurnEnd = "done" | "stopped" | "limit" | "refusal" | "too_long" | "cut" | "paused";
 
 type Effort = "low" | "medium" | "high";
 
@@ -118,6 +164,13 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
     { type: "text", text: session.prompt ?? session.handbook.prompt, cache_control: { type: "ephemeral" } },
   ];
 
+  // What this turn looked at (by input, the call that answered), how
+  // often since the last change, and whether it changed a file.
+  const seen = new Map<string, string>();
+  let looks = 0;
+  let changed = false;
+  const before = project.usage.dollars;
+
   for (let round = 0; round < MAX_ROUNDS; round++) {
     // Every round, not only the first: a long turn grows the prompt too.
     if (round > 0 && lastPrompt(project) > MAX_PROMPT) return "too_long";
@@ -154,11 +207,37 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
 
     const results: Anthropic.ToolResultBlockParam[] = [];
     for (const call of calls) {
-      results.push(await runTool(session, call, message.stop_reason === "max_tokens", events));
+      const looking = LOOKING_TOOLS.includes(call.name);
+      const key = looking ? inputKey(call.name, call.input) : "";
+      const earlier = looking ? seen.get(key) : undefined;
+      let result: Anthropic.ToolResultBlockParam;
+      if (earlier) {
+        // Answered in this turn already, and still so: where, not again.
+        result = {
+          type: "tool_result",
+          tool_use_id: call.id,
+          content: `Already answered above in this turn: ${call.name} with the same input (call ${earlier}). Read that answer; it has not changed since.`,
+        };
+      } else {
+        result = await runTool(session, call, message.stop_reason === "max_tokens", events);
+        if (looking && !result.is_error) seen.set(key, call.id);
+      }
+      if (CHANGING_TOOLS.includes(call.name) && !result.is_error) {
+        changed = true;
+        looks = 0;
+        // What the files say may differ now; the docs say the same.
+        for (const k of [...seen.keys()]) if (!k.startsWith("lookup_docs ")) seen.delete(k);
+      } else if (looking) {
+        looks += 1;
+        if (looks >= LOOKS_BEFORE_WRITING && (looks - LOOKS_BEFORE_WRITING) % 10 === 0) result = withNote(result, writeNow(looks));
+      }
+      results.push(result);
     }
     project.messages.push({ role: "user", content: results });
     events.onRound?.();
     if (signal?.aborted) return "stopped";
+    // Costly, and nothing changed yet: the person says whether it goes on.
+    if (!changed && project.usage.dollars - before > (session.pauseAfter ?? PAUSE_AFTER_DOLLARS)) return "paused";
   }
   return "limit";
 }

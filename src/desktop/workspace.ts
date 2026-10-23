@@ -44,13 +44,14 @@ export class Workspace {
     return shownName(this.project) ?? this.project.key;
   }
 
-  /** What a new plugin will be: with code or without. */
-  freshKind: Kind = "data";
+  /** What a new plugin will be: with code, without, or (`auto`) as its
+   *  first words ask (see kind.ts). */
+  freshKind: Kind | "auto" = "data";
   /** The files a plugin with code starts from (PaperPaw's sample). */
   codeSample: Record<string, string> = {};
 
   /** The project, made now if there is none yet. */
-  async ensure(name = "New plugin", kind: Kind = this.freshKind): Promise<Project> {
+  async ensure(name = "New plugin", kind: Kind = this.freshKind === "auto" ? "data" : this.freshKind): Promise<Project> {
     if (!this.project) {
       this.project = await this.folders.create(name, kind, kind === "code" ? this.codeSample : {});
       await this.refresh();
@@ -78,7 +79,7 @@ export class Workspace {
 
   /** A new plugin (with code or without): no folder until something is
    *  said or added. */
-  fresh(kind: Kind = "data"): void {
+  fresh(kind: Kind | "auto" = "data"): void {
     this.freshKind = kind;
     this.project = null;
     this.changed();

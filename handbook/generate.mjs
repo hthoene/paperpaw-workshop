@@ -30,7 +30,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { sdkItems } from "./sdk-items.mjs";
+import { apiLines, sdkItems } from "./sdk-items.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
@@ -220,9 +220,42 @@ const sampleCode = exists("samples/hello-plugin/src/lib.rs")
       "`i18n/en.ini`:\n\n```ini\n" + read("samples/hello-plugin/i18n/en.ini").trim() + "\n```",
     ]
   : [];
+// The recipes (handbook/recipes/): complete plugins for common tasks,
+// which the workshop's tests build against this PaperPaw (code.rs,
+// `the_handbook_s_recipes_build_without_a_warning`), so that they never
+// go stale. The widget from the web is in the handbook whole, the others
+// are topics.
+const RECIPES = {
+  "widget-fetch": "A widget with data from the web: JSON fetched over HTTP, shown wrapped",
+  settings: "Settings of a plugin's own (text, choice, switch, number), read by a widget",
+};
+const recipeFiles = (name) => {
+  const dir = path.join(here, "recipes", name);
+  const walk = (rel) =>
+    fs.readdirSync(path.join(dir, rel), { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.posix.join(rel, e.name)) : [path.posix.join(rel, e.name)]));
+  const first = ["src/lib.rs", "Cargo.toml", "plugin/plugin.ini", "i18n/en.ini"];
+  return walk("")
+    .sort((a, b) => (first.indexOf(a) + 1 || 99) - (first.indexOf(b) + 1 || 99) || a.localeCompare(b))
+    .map((p) => ({ path: p, text: fs.readFileSync(path.join(dir, p), "utf8").replace(/\r\n/g, "\n").trim() }));
+};
+const fenceOf = (p) => (p.endsWith(".rs") ? "rust" : p.endsWith(".toml") ? "toml" : p.endsWith(".ini") ? "ini" : "text");
+const recipeText = (name) => recipeFiles(name).map((f) => `\`${f.path}\`:\n\n\`\`\`${fenceOf(f.path)}\n${f.text}\n\`\`\``).join("\n\n");
+const recipes = [
+  "# Recipes",
+  "Complete plugins for common tasks, built against this PaperPaw without a warning. Start from the one closest to what the person wants: write its files whole into the project (in place of the sample's), build, and only then change it. Look up only what a recipe does not show.\n\n" +
+    Object.entries(RECIPES)
+      .map(([name, title]) => `- \`recipes/${name}\`: ${title}.`)
+      .join("\n") +
+    "\n- A screen, an action in a menu, a text setting, an event and translations: the sample plugin the project starts with (below).",
+  `## ${RECIPES["widget-fetch"]}\n\n` +
+    "The address answers in the workshop only as `set_fixtures` records it (for this one, `https://quotes.example.org/api/today` with `{\"quote\": \"…\", \"author\": \"…\"}`): record the answers of the person's address before you `look`.\n\n" +
+    recipeText("widget-fetch"),
+].join("\n\n");
+
 const code = [
   part("common.md"),
   part("code.md"),
+  recipes,
   "# From PaperPaw's documentation",
   ...["The sample plugin", "Reading and changing: `Env` and commands", "Screens", "Settings", "Events", "Translations", "What plugins contribute", "Memory"]
     .filter((t) => plugins.some((s) => s.title === t))
@@ -242,10 +275,39 @@ const slug = (t) =>
     .replace(/^-|-$/g, "");
 const topics = [];
 const add = (id, title, body) => topics.push({ id, title, body: body.trim() });
+
+/** A module's api.txt `lines` in the order a plugin needs them, so that a
+ *  topic cut short keeps what matters: its traits, then its structs and
+ *  enums, each followed by its members, then its functions, then the
+ *  rest (constants, re-exports). */
+function byImportance(lines) {
+  const rank = { trait: 0, struct: 1, enum: 2, type: 3, fn: 4, const: 5, static: 5 };
+  const parse = (line) => {
+    const m = /^pub (?:([a-z]+(?: [a-z]+)*) )?paperpaw_sdk::([\w:]+)/.exec(line);
+    const kind = m?.[1]?.split(" ").at(-1) ?? "field";
+    const segs = (m?.[2] ?? "").split("::");
+    const at = segs.findIndex((s) => /^[A-Z]/.test(s));
+    return { kind, owner: at >= 0 ? segs.slice(0, at + 1).join("::") : null, self: at === segs.length - 1 };
+  };
+  const parsed = lines.map((line, i) => ({ line, i, ...parse(line) }));
+  const typeKind = new Map(parsed.filter((p) => p.owner && p.self).map((p) => [p.owner, p.kind]));
+  const key = (p) => {
+    if (p.owner && typeKind.has(p.owner)) return [rank[typeKind.get(p.owner)] ?? 3, p.owner, p.self ? 0 : 1, p.i];
+    return [p.kind === "fn" ? 6 : 7, "", 0, p.i];
+  };
+  return parsed
+    .sort((a, b) => {
+      const [x, y] = [key(a), key(b)];
+      for (let n = 0; n < x.length; n++) if (x[n] !== y[n]) return x[n] < y[n] ? -1 : 1;
+      return 0;
+    })
+    .map((p) => p.line);
+}
 for (const s of plugins.filter((s) => s.level >= 2)) add(`docs/${slug(s.title)}`, s.title, s.body);
 if (customisation) add("docs/customisation", "Customisation at a glance (paperpaw.ini)", customisation.body);
 add("keymap/default", "The default key map", "```ini\n" + keymap + "\n```");
 for (const s of sampleList) add(`samples/${s.id}`, `Sample data plugin: ${s.id}`, s.body);
+for (const [name, title] of Object.entries(RECIPES)) add(`recipes/${name}`, `Recipe: ${title}`, recipeText(name));
 add("widgets", "Widgets for home screen layouts", widgetsTable);
 add("actions", "Actions for key maps", actionsTable);
 add("devices", "The devices (emulator profiles)", profilesTable);
@@ -253,14 +315,14 @@ add("devices", "The devices (emulator profiles)", profilesTable);
 // by module: what a plugin with code may call, exactly.
 if (exists("crates/paperpaw-sdk/api.txt")) {
   const byModule = new Map();
-  for (const line of read("crates/paperpaw-sdk/api.txt").split("\n")) {
+  for (const line of apiLines(read("crates/paperpaw-sdk/api.txt"))) {
     const m = /^pub (?:[a-z ]+ )?paperpaw_sdk::([a-z_]+)::/.exec(line);
     if (!line.startsWith("pub ")) continue;
     const module = m ? m[1] : "root";
     byModule.set(module, [...(byModule.get(module) || []), line]);
   }
   for (const [module, lines] of byModule) {
-    add(`sdk/${module}`, module === "root" ? "The SDK's top level (paperpaw_sdk::...)" : `The SDK's module ${module}`, "```rust\n" + lines.join("\n") + "\n```");
+    add(`sdk/${module}`, module === "root" ? "The SDK's top level (paperpaw_sdk::...)" : `The SDK's module ${module}`, "```rust\n" + byImportance(lines).join("\n") + "\n```");
   }
 }
 
@@ -299,6 +361,10 @@ if (exists("samples/hello-plugin/src/lib.rs")) {
       : "[plugin]\nid = hello\nname = Hello\ndescription = A sample plugin to start from.\nversion = 0.1.0\n",
   };
   if (exists("samples/hello-plugin/i18n/de.ini")) sample["i18n/de.ini"] = read("samples/hello-plugin/i18n/de.ini");
+  // How it works, which src/lib.rs includes (`include_str!("../how/en.txt")`).
+  for (const lang of ["en", "de"]) {
+    if (exists(`samples/hello-plugin/how/${lang}.txt`)) sample[`how/${lang}.txt`] = read(`samples/hello-plugin/how/${lang}.txt`);
+  }
   fs.writeFileSync(path.join(out, "code-sample.json"), JSON.stringify(sample, null, 1) + "\n");
 }
 const index = topics.map((t) => {

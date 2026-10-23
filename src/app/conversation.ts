@@ -1,6 +1,8 @@
 // What the conversation shows, made from the messages alone (one source
 // of truth): the person's words, the AI's words, and a quiet line for
-// each tool it used, marked when the tool failed.
+// what it did, marked when a tool failed. The same tool used several
+// times in a row is one line ("Read in PaperPaw's documentation (12):
+// Widget, WidgetSpec, …"), a failed use a line of its own.
 
 import type Anthropic from "@anthropic-ai/sdk";
 
@@ -15,8 +17,11 @@ export type Line =
   /** An upload the person added to their message, by name. */
   | { kind: "added"; text: string };
 
+/** A line as it is made: a step with its tool and what it was about. */
+type Made = Line & { tool?: string; subject?: string };
+
 export function lines(messages: Anthropic.MessageParam[]): Line[] {
-  const out: Line[] = [];
+  const out: Made[] = [];
   const failed = new Set<string>();
   for (const m of messages) {
     if (m.role !== "user" || !Array.isArray(m.content)) continue;
@@ -36,11 +41,56 @@ export function lines(messages: Anthropic.MessageParam[]): Line[] {
       } else if (block.type === "text" && block.text.trim()) {
         out.push({ kind: m.role === "user" ? "me" : "ai", text: block.text.trim() });
       } else if (block.type === "tool_use") {
-        const step = stepText(block.name, block.input as Record<string, unknown>);
+        const input = block.input as Record<string, unknown>;
+        const step = stepText(block.name, input);
         const bad = failed.has(block.id);
-        out.push({ kind: "step", text: bad ? t("step.failed", { step }) : step, failed: bad });
+        out.push({ kind: "step", text: bad ? t("step.failed", { step }) : step, failed: bad, tool: block.name, subject: subjectOf(input) });
       }
     }
+  }
+  return grouped(out);
+}
+
+/** What a use of a tool is about: the topic, file or upload it names. */
+function subjectOf(input: Record<string, unknown>): string | undefined {
+  for (const name of ["topic", "path", "to", "name", "upload"]) {
+    if (typeof input?.[name] === "string" && (input[name] as string).trim()) return (input[name] as string).trim();
+  }
+  return undefined;
+}
+
+/** How many subjects a grouped line names before "and N more". */
+const NAMED = 5;
+
+/** `lines` with each run of the same tool's uses that worked as one line:
+ *  how many, and what about (each subject once). */
+function grouped(lines: Made[]): Line[] {
+  const out: Line[] = [];
+  const plain = ({ tool: _tool, subject: _subject, ...line }: Made): Line => line as Line;
+  for (let i = 0; i < lines.length; ) {
+    const line = lines[i]!;
+    if (line.kind !== "step" || !line.tool || line.failed) {
+      out.push(plain(line));
+      i += 1;
+      continue;
+    }
+    let end = i + 1;
+    while (end < lines.length) {
+      const next = lines[end]!;
+      if (next.kind !== "step" || next.tool !== line.tool || next.failed) break;
+      end += 1;
+    }
+    const run = lines.slice(i, end);
+    i = end;
+    if (run.length === 1) {
+      out.push(plain(line));
+      continue;
+    }
+    const subjects = [...new Set(run.map((l) => l.subject).filter((s): s is string => !!s))];
+    const named = subjects.slice(0, NAMED).join(", ");
+    const more = subjects.length - NAMED;
+    const about = subjects.length ? (more > 0 ? t("steps.more", { list: named, more }) : named) : "";
+    out.push({ kind: "step", text: t(`steps.${line.tool}`, { n: run.length, about }), failed: false });
   }
   return out;
 }

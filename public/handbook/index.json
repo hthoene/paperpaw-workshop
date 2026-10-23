@@ -378,6 +378,20 @@
   "tokens": 254
  },
  {
+  "id": "recipes/widget-fetch",
+  "title": "Recipe: A widget with data from the web: JSON fetched over HTTP, shown wrapped",
+  "file": "recipes--widget-fetch.md",
+  "summary": "`src/lib.rs`:\n\n```rust\n//! A widget that shows a text fetched from the web as JSON: here a quote\n//! of the day from `https://quotes.example.org/api/today`, whi",
+  "tokens": 2076
+ },
+ {
+  "id": "recipes/settings",
+  "title": "Recipe: Settings of a plugin's own (text, choice, switch, number), read by a widget",
+  "file": "recipes--settings.md",
+  "summary": "`src/lib.rs`:\n\n```rust\n//! Settings of a plugin's own, in a group of its own, and a widget that\n//! shows what they say: a motto, typed in (`text`), shown plain",
+  "tokens": 1717
+ },
+ {
   "id": "widgets",
   "title": "Widgets for home screen layouts",
   "file": "widgets.md",
@@ -402,15 +416,15 @@
   "id": "sdk/root",
   "title": "The SDK's top level (paperpaw_sdk::...)",
   "file": "sdk--root.md",
-  "summary": "```rust\npub mod paperpaw_sdk\npub use paperpaw_sdk::Arg\npub use paperpaw_sdk::Battery\npub use paperpaw_sdk::ButtonState\npub use paperpaw_sdk::Canvas\npub use pape",
-  "tokens": 22168
+  "summary": "```rust\npub trait paperpaw_sdk::EventData: core::marker::Sized + 'static\npub trait paperpaw_sdk::Plugin\npub fn paperpaw_sdk::Plugin::manifest(&self) -> paperpaw",
+  "tokens": 22978
  },
  {
   "id": "sdk/annotations",
   "title": "The SDK's module annotations",
   "file": "sdk--annotations.md",
-  "summary": "```rust\npub paperpaw_sdk::annotations::Kind::Bookmark\npub paperpaw_sdk::annotations::Kind::Highlight\npub struct paperpaw_sdk::annotations::Annotation\npub paperp",
-  "tokens": 690
+  "summary": "```rust\npub struct paperpaw_sdk::annotations::Annotation\npub paperpaw_sdk::annotations::Annotation::created: i64\npub paperpaw_sdk::annotations::Annotation::mark",
+  "tokens": 702
  },
  {
   "id": "sdk/ask",
@@ -423,15 +437,15 @@
   "id": "sdk/builtin",
   "title": "The SDK's module builtin",
   "file": "sdk--builtin.md",
-  "summary": "```rust\npub mod paperpaw_sdk::builtin::actions\npub const paperpaw_sdk::builtin::actions::BACK: paperpaw_sdk::Id\npub const paperpaw_sdk::builtin::actions::CLEAN_",
-  "tokens": 15055
+  "summary": "```rust\npub struct paperpaw_sdk::builtin::events::AnnotationsChanged\npub paperpaw_sdk::builtin::events::AnnotationsChanged::path: alloc::string::String\npub fn p",
+  "tokens": 15478
  },
  {
   "id": "sdk/chrome",
   "title": "The SDK's module chrome",
   "file": "sdk--chrome.md",
-  "summary": "```rust\npub paperpaw_sdk::chrome::Edge::Bottom\npub paperpaw_sdk::chrome::Edge::Left\npub paperpaw_sdk::chrome::Edge::Right\npub paperpaw_sdk::chrome::Edge::Top\npu",
-  "tokens": 371
+  "summary": "```rust\npub struct paperpaw_sdk::chrome::ChromeSpec\npub paperpaw_sdk::chrome::ChromeSpec::edge: paperpaw_sdk::chrome::Edge\npub paperpaw_sdk::chrome::ChromeSpec:",
+  "tokens": 393
  },
  {
   "id": "sdk/collections",
@@ -451,22 +465,22 @@
   "id": "sdk/contribution",
   "title": "The SDK's module contribution",
   "file": "sdk--contribution.md",
-  "summary": "```rust\npub paperpaw_sdk::contribution::Contribution::Action(alloc::boxed::Box<paperpaw_sdk::ActionSpec>)\npub paperpaw_sdk::contribution::Contribution::ActionOb",
-  "tokens": 9407
+  "summary": "```rust\npub struct paperpaw_sdk::contribution::Registrar\npub fn paperpaw_sdk::contribution::Registrar::add(&mut self, paperpaw_sdk::contribution::Contribution) ",
+  "tokens": 9720
  },
  {
   "id": "sdk/data",
   "title": "The SDK's module data",
   "file": "sdk--data.md",
-  "summary": "```rust\npub paperpaw_sdk::data::Error::Newer(u32)\npub paperpaw_sdk::data::Error::Storage(paperpaw_platform::storage::StorageError)\npub paperpaw_sdk::data::Error",
-  "tokens": 384
+  "summary": "```rust\npub struct paperpaw_sdk::data::Format\npub paperpaw_sdk::data::Format::upgrades: &'static [paperpaw_sdk::data::Upgrade]\npub paperpaw_sdk::data::Format::v",
+  "tokens": 394
  },
  {
   "id": "sdk/decorations",
   "title": "The SDK's module decorations",
   "file": "sdk--decorations.md",
-  "summary": "```rust\npub paperpaw_sdk::decorations::LineKind::Dashed\npub paperpaw_sdk::decorations::LineKind::Dotted\npub paperpaw_sdk::decorations::LineKind::Double\npub pape",
-  "tokens": 2548
+  "summary": "```rust\npub struct paperpaw_sdk::decorations::Decorated\npub paperpaw_sdk::decorations::Decorated::end: paperpaw_document::Locator\npub paperpaw_sdk::decorations:",
+  "tokens": 2613
  },
  {
   "id": "sdk/device_name",
@@ -493,43 +507,43 @@
   "id": "sdk/event",
   "title": "The SDK's module event",
   "file": "sdk--event.md",
-  "summary": "```rust\npub struct paperpaw_sdk::event::Event<P: paperpaw_sdk::event::EventData>\npub fn paperpaw_sdk::event::Event<P>::as_str(&self) -> &str\npub fn paperpaw_sdk",
+  "summary": "```rust\npub trait paperpaw_sdk::event::EventData: core::marker::Sized + 'static\npub trait paperpaw_sdk::event::ParamValue: core::marker::Sized\npub type paperpaw",
   "tokens": 707
  },
  {
   "id": "sdk/reading",
   "title": "The SDK's module reading",
   "file": "sdk--reading.md",
-  "summary": "```rust\npub fn paperpaw_sdk::reading::PageWords::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>\npub fn paperpaw_sdk::reading::PageWords::to_pa",
-  "tokens": 2031
+  "summary": "```rust\npub struct paperpaw_sdk::reading::DroppedRuns\npub fn paperpaw_sdk::reading::DroppedRuns::clear(&self)\npub fn paperpaw_sdk::reading::DroppedRuns::new() -",
+  "tokens": 2070
  },
  {
   "id": "sdk/replies",
   "title": "The SDK's module replies",
   "file": "sdk--replies.md",
-  "summary": "```rust\npub fn paperpaw_sdk::replies::Chosen::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>\npub fn paperpaw_sdk::replies::Chosen::to_params(&",
-  "tokens": 2616
+  "summary": "```rust\npub struct paperpaw_sdk::replies::Chosen\npub fn paperpaw_sdk::replies::Chosen::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>\npub fn p",
+  "tokens": 2664
  },
  {
   "id": "sdk/ui",
   "title": "The SDK's module ui",
   "file": "sdk--ui.md",
-  "summary": "```rust\npub fn paperpaw_sdk::ui::choice::Picked::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>\npub fn paperpaw_sdk::ui::choice::Picked::to_pa",
-  "tokens": 22319
+  "summary": "```rust\npub struct paperpaw_sdk::ui::Chips\npub fn paperpaw_sdk::ui::Chips::cell(&self, usize) -> core::option::Option<paperpaw_platform::geometry::Rect>\npub fn ",
+  "tokens": 22627
  },
  {
   "id": "sdk/work",
   "title": "The SDK's module work",
   "file": "sdk--work.md",
-  "summary": "```rust\npub fn paperpaw_sdk::work::WorkRefused::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>\npub fn paperpaw_sdk::work::WorkRefused::to_para",
-  "tokens": 2444
+  "summary": "```rust\npub struct paperpaw_sdk::work::Moments(_)\npub const paperpaw_sdk::work::Moments::ALL: paperpaw_sdk::work::Moments\npub const paperpaw_sdk::work::Moments:",
+  "tokens": 2475
  },
  {
   "id": "sdk/wifi",
   "title": "The SDK's module wifi",
   "file": "sdk--wifi.md",
-  "summary": "```rust\npub fn paperpaw_sdk::wifi::JoinFailure::from_param(&str) -> core::option::Option<Self>\npub fn paperpaw_sdk::wifi::JoinFailure::missing() -> core::option",
-  "tokens": 994
+  "summary": "```rust\npub struct paperpaw_sdk::wifi::Wifi\npub paperpaw_sdk::wifi::Wifi::busy: bool\npub paperpaw_sdk::wifi::Wifi::networks: alloc::vec::Vec<paperpaw_sdk::wifi:",
+  "tokens": 1016
  },
  {
   "id": "sdk/files",
@@ -542,21 +556,21 @@
   "id": "sdk/filters",
   "title": "The SDK's module filters",
   "file": "sdk--filters.md",
-  "summary": "```rust\npub paperpaw_sdk::filters::InputVerdict::Cancel\npub paperpaw_sdk::filters::InputVerdict::Pass\npub paperpaw_sdk::filters::InputVerdict::Replace(paperpaw_",
-  "tokens": 1722
+  "summary": "```rust\npub struct paperpaw_sdk::filters::InputFilterSpec\npub paperpaw_sdk::filters::InputFilterSpec::filter: paperpaw_sdk::filters::InputFilterFn\npub paperpaw_",
+  "tokens": 1839
  },
  {
   "id": "sdk/firmware",
   "title": "The SDK's module firmware",
   "file": "sdk--firmware.md",
-  "summary": "```rust\npub use paperpaw_sdk::firmware::APP_HEAD_LEN\npub use paperpaw_sdk::firmware::AppInfo\npub use paperpaw_sdk::firmware::CHIP_ESP32_C3\npub use paperpaw_sdk:",
-  "tokens": 1108
+  "summary": "```rust\npub struct paperpaw_sdk::firmware::Firmware\npub paperpaw_sdk::firmware::Firmware::chip: u16\npub paperpaw_sdk::firmware::Firmware::keys: alloc::vec::Vec<",
+  "tokens": 1145
  },
  {
   "id": "sdk/help",
   "title": "The SDK's module help",
   "file": "sdk--help.md",
-  "summary": "```rust\npub enum paperpaw_sdk::help::Input\npub paperpaw_sdk::help::Input::Any\npub paperpaw_sdk::help::Input::Buttons\npub paperpaw_sdk::help::Input::Touch\npub fn",
+  "summary": "```rust\npub struct paperpaw_sdk::help::Hint\npub paperpaw_sdk::help::Hint::input: paperpaw_sdk::help::Input\npub paperpaw_sdk::help::Hint::text: alloc::string::St",
   "tokens": 548
  },
  {
@@ -598,8 +612,8 @@
   "id": "sdk/install",
   "title": "The SDK's module install",
   "file": "sdk--install.md",
-  "summary": "```rust\npub enum paperpaw_sdk::install::Digest\npub paperpaw_sdk::install::Digest::Sha1(alloc::string::String)\npub paperpaw_sdk::install::Digest::Sha256(alloc::s",
-  "tokens": 964
+  "summary": "```rust\npub struct paperpaw_sdk::install::Installer\npub fn paperpaw_sdk::install::Installer::cancel(&self, &dyn paperpaw_platform::storage::Storage)\npub fn pape",
+  "tokens": 999
  },
  {
   "id": "sdk/json",
@@ -612,43 +626,43 @@
   "id": "sdk/keys",
   "title": "The SDK's module keys",
   "file": "sdk--keys.md",
-  "summary": "```rust\npub paperpaw_sdk::keys::BindingOrigin::Device\npub paperpaw_sdk::keys::BindingOrigin::Plugin\npub paperpaw_sdk::keys::BindingOrigin::Preset\npub paperpaw_s",
-  "tokens": 855
+  "summary": "```rust\npub trait paperpaw_sdk::keys::GestureRecognizer\npub fn paperpaw_sdk::keys::GestureRecognizer::next_tick(&self) -> core::option::Option<paperpaw_platform",
+  "tokens": 936
  },
  {
   "id": "sdk/layers",
   "title": "The SDK's module layers",
   "file": "sdk--layers.md",
-  "summary": "```rust\npub paperpaw_sdk::layers::Side::Bottom\npub paperpaw_sdk::layers::Side::Left\npub paperpaw_sdk::layers::Side::Right\npub paperpaw_sdk::layers::Side::Top\npu",
-  "tokens": 1843
+  "summary": "```rust\npub struct paperpaw_sdk::layers::LineBox\npub paperpaw_sdk::layers::LineBox::area: paperpaw_platform::geometry::Rect\npub paperpaw_sdk::layers::LineBox::e",
+  "tokens": 1904
  },
  {
   "id": "sdk/library",
   "title": "The SDK's module library",
   "file": "sdk--library.md",
-  "summary": "```rust\npub mod paperpaw_sdk::library::catalog\npub paperpaw_sdk::library::catalog::Reading::Begun\npub paperpaw_sdk::library::catalog::Reading::Finished\npub pape",
-  "tokens": 10621
+  "summary": "```rust\npub trait paperpaw_sdk::library::Library\npub fn paperpaw_sdk::library::Library::book(&self, &paperpaw_sdk::Env<'_>, &str) -> core::option::Option<paperp",
+  "tokens": 10880
  },
  {
   "id": "sdk/logo",
   "title": "The SDK's module logo",
   "file": "sdk--logo.md",
-  "summary": "```rust\npub paperpaw_sdk::logo::Logo::Drawn\npub paperpaw_sdk::logo::Logo::Picture(paperpaw_document::ImageRef)\npub fn paperpaw_sdk::logo::Logo::draw(&self, &mut",
-  "tokens": 200
+  "summary": "```rust\npub enum paperpaw_sdk::logo::Logo\npub paperpaw_sdk::logo::Logo::Drawn\npub paperpaw_sdk::logo::Logo::Picture(paperpaw_document::ImageRef)\npub fn paperpaw",
+  "tokens": 210
  },
  {
   "id": "sdk/lookup",
   "title": "The SDK's module lookup",
   "file": "sdk--lookup.md",
-  "summary": "```rust\npub paperpaw_sdk::lookup::LookupAnswer::Pending(alloc::vec::Vec<paperpaw_sdk::Command>)\npub paperpaw_sdk::lookup::LookupAnswer::Ready(alloc::vec::Vec<pa",
-  "tokens": 990
+  "summary": "```rust\npub struct paperpaw_sdk::lookup::Asked\npub paperpaw_sdk::lookup::Asked::commands: alloc::vec::Vec<paperpaw_sdk::Command>\npub paperpaw_sdk::lookup::Asked",
+  "tokens": 1052
  },
  {
   "id": "sdk/native",
   "title": "The SDK's module native",
   "file": "sdk--native.md",
-  "summary": "```rust\npub use paperpaw_sdk::native::BadSignature\npub use paperpaw_sdk::native::Chip\npub use paperpaw_sdk::native::HEADER_LEN\npub use paperpaw_sdk::native::Hea",
-  "tokens": 1499
+  "summary": "```rust\npub struct paperpaw_sdk::native::CodeRoom\npub paperpaw_sdk::native::CodeRoom::granule: u32\npub paperpaw_sdk::native::CodeRoom::max_plugins: core::option",
+  "tokens": 1584
  },
  {
   "id": "sdk/numbers",
@@ -661,29 +675,29 @@
   "id": "sdk/pattern",
   "title": "The SDK's module pattern",
   "file": "sdk--pattern.md",
-  "summary": "```rust\npub paperpaw_sdk::pattern::PatternError::Syntax(usize)\npub paperpaw_sdk::pattern::PatternError::TooLong\npub paperpaw_sdk::pattern::PatternError::TooMany",
-  "tokens": 288
+  "summary": "```rust\npub struct paperpaw_sdk::pattern::Pattern\npub fn paperpaw_sdk::pattern::Pattern::as_str(&self) -> &str\npub fn paperpaw_sdk::pattern::Pattern::find_iter<",
+  "tokens": 300
  },
  {
   "id": "sdk/positions",
   "title": "The SDK's module positions",
   "file": "sdk--positions.md",
-  "summary": "```rust\npub paperpaw_sdk::positions::Position::at: paperpaw_document::Locator\npub paperpaw_sdk::positions::Position::conversion: core::option::Option<u64>\npub p",
-  "tokens": 378
+  "summary": "```rust\npub struct paperpaw_sdk::positions::Position\npub paperpaw_sdk::positions::Position::at: paperpaw_document::Locator\npub paperpaw_sdk::positions::Position",
+  "tokens": 390
  },
  {
   "id": "sdk/power",
   "title": "The SDK's module power",
   "file": "sdk--power.md",
-  "summary": "```rust\npub enum paperpaw_sdk::power::PowerLevel\npub paperpaw_sdk::power::PowerLevel::Normal\npub paperpaw_sdk::power::PowerLevel::Offline\npub paperpaw_sdk::powe",
-  "tokens": 432
+  "summary": "```rust\npub struct paperpaw_sdk::power::Power\npub paperpaw_sdk::power::Power::automatic: bool\npub paperpaw_sdk::power::Power::level: paperpaw_sdk::power::PowerL",
+  "tokens": 453
  },
  {
   "id": "sdk/presets",
   "title": "The SDK's module presets",
   "file": "sdk--presets.md",
-  "summary": "```rust\npub paperpaw_sdk::presets::Preset::description: alloc::borrow::Cow<'static, str>\npub paperpaw_sdk::presets::Preset::id: paperpaw_sdk::Id\npub paperpaw_sd",
-  "tokens": 852
+  "summary": "```rust\npub struct paperpaw_sdk::presets::Preset\npub paperpaw_sdk::presets::Preset::description: alloc::borrow::Cow<'static, str>\npub paperpaw_sdk::presets::Pre",
+  "tokens": 863
  },
  {
   "id": "sdk/qr",
@@ -703,28 +717,28 @@
   "id": "sdk/readers",
   "title": "The SDK's module readers",
   "file": "sdk--readers.md",
-  "summary": "```rust\npub paperpaw_sdk::readers::Choice::Book(&'a str)\npub paperpaw_sdk::readers::Choice::Folder(&'a str)\npub paperpaw_sdk::readers::ReaderSpec::formats: allo",
-  "tokens": 983
+  "summary": "```rust\npub struct paperpaw_sdk::readers::ReaderSpec\npub paperpaw_sdk::readers::ReaderSpec::formats: alloc::vec::Vec<paperpaw_sdk::Id>\npub paperpaw_sdk::readers",
+  "tokens": 1007
  },
  {
   "id": "sdk/secrets",
   "title": "The SDK's module secrets",
   "file": "sdk--secrets.md",
-  "summary": "```rust\npub struct paperpaw_sdk::secrets::Anyone\npub fn paperpaw_sdk::secrets::Anyone::runs(&self, &str) -> bool\npub struct paperpaw_sdk::secrets::Listed<'a>\npu",
+  "summary": "```rust\npub trait paperpaw_sdk::secrets::Running\npub fn paperpaw_sdk::secrets::Running::runs(&self, &str) -> bool\npub struct paperpaw_sdk::secrets::Anyone\npub f",
   "tokens": 768
  },
  {
   "id": "sdk/semantics",
   "title": "The SDK's module semantics",
   "file": "sdk--semantics.md",
-  "summary": "```rust\npub use paperpaw_sdk::semantics::Described\npub use paperpaw_sdk::semantics::Role\npub struct paperpaw_sdk::semantics::Part\npub paperpaw_sdk::semantics::P",
+  "summary": "```rust\npub struct paperpaw_sdk::semantics::Part\npub paperpaw_sdk::semantics::Part::area: paperpaw_platform::geometry::Rect\npub paperpaw_sdk::semantics::Part::f",
   "tokens": 269
  },
  {
   "id": "sdk/served",
   "title": "The SDK's module served",
   "file": "sdk--served.md",
-  "summary": "```rust\npub enum paperpaw_sdk::served::Access\npub paperpaw_sdk::served::Access::Denied\npub paperpaw_sdk::served::Access::Granted\npub paperpaw_sdk::served::Acces",
+  "summary": "```rust\npub struct paperpaw_sdk::served::Guard\npub fn paperpaw_sdk::served::Guard::check(&mut self, core::option::Option<&str>, paperpaw_platform::input::Instan",
   "tokens": 274
  },
  {
@@ -738,22 +752,22 @@
   "id": "sdk/services",
   "title": "The SDK's module services",
   "file": "sdk--services.md",
-  "summary": "```rust\npub paperpaw_sdk::services::EventSpec::id: paperpaw_sdk::Id\npub paperpaw_sdk::services::EventSpec::params: &'static [&'static str]\npub paperpaw_sdk::ser",
-  "tokens": 808
+  "summary": "```rust\npub trait paperpaw_sdk::services::ServiceType: core::any::Any\npub struct paperpaw_sdk::services::EventSpec\npub paperpaw_sdk::services::EventSpec::id: pa",
+  "tokens": 833
  },
  {
   "id": "sdk/setting",
   "title": "The SDK's module setting",
   "file": "sdk--setting.md",
-  "summary": "```rust\npub enum paperpaw_sdk::setting::Text\npub type paperpaw_sdk::setting::Text::Input = alloc::borrow::Cow<'static, str>\npub type paperpaw_sdk::setting::Text",
+  "summary": "```rust\npub trait paperpaw_sdk::setting::SettingType: 'static\npub enum paperpaw_sdk::setting::Text\npub type paperpaw_sdk::setting::Text::Input = alloc::borrow::",
   "tokens": 919
  },
  {
   "id": "sdk/setup",
   "title": "The SDK's module setup",
   "file": "sdk--setup.md",
-  "summary": "```rust\npub paperpaw_sdk::setup::SetupPage::Screen(paperpaw_sdk::Id)\npub paperpaw_sdk::setup::SetupPage::Setting(paperpaw_sdk::Id)\npub paperpaw_sdk::setup::Setu",
-  "tokens": 418
+  "summary": "```rust\npub struct paperpaw_sdk::setup::SetupStepSpec\npub paperpaw_sdk::setup::SetupStepSpec::applies: core::option::Option<paperpaw_sdk::setup::AppliesFn>\npub ",
+  "tokens": 442
  },
  {
   "id": "sdk/socket_params",
@@ -773,8 +787,8 @@
   "id": "sdk/status",
   "title": "The SDK's module status",
   "file": "sdk--status.md",
-  "summary": "```rust\npub mod paperpaw_sdk::status::context\npub const paperpaw_sdk::status::context::CHAPTER: &str\npub const paperpaw_sdk::status::context::CHAPTERS: &str\npub",
-  "tokens": 3369
+  "summary": "```rust\npub struct paperpaw_sdk::status::Place\npub paperpaw_sdk::status::Place::id: paperpaw_sdk::Id\npub paperpaw_sdk::status::Place::line: core::option::Option",
+  "tokens": 3458
  },
  {
   "id": "sdk/text",
@@ -801,8 +815,8 @@
   "id": "sdk/voices",
   "title": "The SDK's module voices",
   "file": "sdk--voices.md",
-  "summary": "```rust\npub paperpaw_sdk::voices::VoiceSpec::id: paperpaw_sdk::Id\npub paperpaw_sdk::voices::VoiceSpec::languages: alloc::vec::Vec<alloc::borrow::Cow<'static, st",
-  "tokens": 484
+  "summary": "```rust\npub struct paperpaw_sdk::voices::VoiceSpec\npub paperpaw_sdk::voices::VoiceSpec::id: paperpaw_sdk::Id\npub paperpaw_sdk::voices::VoiceSpec::languages: all",
+  "tokens": 496
  },
  {
   "id": "sdk/web",
@@ -815,8 +829,8 @@
   "id": "sdk/widgets",
   "title": "The SDK's module widgets",
   "file": "sdk--widgets.md",
-  "summary": "```rust\npub mod paperpaw_sdk::widgets::categories\npub const paperpaw_sdk::widgets::categories::ALL: &[&str]\npub const paperpaw_sdk::widgets::categories::BOOKS: ",
-  "tokens": 9432
+  "summary": "```rust\npub trait paperpaw_sdk::widgets::Widget\npub fn paperpaw_sdk::widgets::Widget::context(&mut self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::widgets::WidgetC",
+  "tokens": 9713
  },
  {
   "id": "sdk/words",

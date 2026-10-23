@@ -152,8 +152,8 @@ pub fn remaps(top: &Path, cargo_home: &Path, local_sdk: Option<&Path>) -> Vec<St
         format!("--remap-path-prefix={}=/plugin", forward(top)),
         format!("--remap-path-prefix={}=/cargo", forward(cargo_home)),
     ];
-    // A checkout's SDK while the workshop is worked on (`PAPERPAW_SDK`):
-    // its repository as `/paperpaw`, so no path of this computer's is in
+    // An SDK on this computer (the installer's, or a checkout's while the
+    // workshop is worked on): its repository as `/paperpaw`, so no path of this computer's is in
     // the file. A published SDK lies under Cargo's home.
     if let Some(repo) = local_sdk {
         out.push(format!("--remap-path-prefix={}=/paperpaw", forward(repo)));
@@ -301,10 +301,9 @@ pub fn build_x4(
     let _ = fetch.output();
     let args = dir.join("target").join("remap.args");
     let _ = std::fs::create_dir_all(args.parent().unwrap_or(dir));
-    // The checkout around a local SDK (`<repository>/crates/paperpaw-sdk`).
-    let local_sdk = std::env::var_os("PAPERPAW_SDK")
-        .map(PathBuf::from)
-        .and_then(|sdk| Some(sdk.parent()?.parent()?.to_path_buf()));
+    // The checkout around an SDK on this computer
+    // (`<repository>/crates/paperpaw-sdk`, see `code::local_sdk`).
+    let local_sdk = crate::code::sdk_path(sdk).and_then(|sdk| Some(sdk.parent()?.parent()?.to_path_buf()));
     let lines = remaps(dir, &cargo_home, local_sdk.as_deref());
     if let Err(e) = std::fs::write(&args, lines.join("\n") + "\n") {
         built.problems.push(e.to_string());

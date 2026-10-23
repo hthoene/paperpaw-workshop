@@ -1,4 +1,5 @@
 ```rust
+pub struct paperpaw_sdk::presets::Preset
 pub paperpaw_sdk::presets::Preset::description: alloc::borrow::Cow<'static, str>
 pub paperpaw_sdk::presets::Preset::id: paperpaw_sdk::Id
 pub paperpaw_sdk::presets::Preset::kind: paperpaw_sdk::Id

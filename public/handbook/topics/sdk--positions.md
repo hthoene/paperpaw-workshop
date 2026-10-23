@@ -1,4 +1,5 @@
 ```rust
+pub struct paperpaw_sdk::positions::Position
 pub paperpaw_sdk::positions::Position::at: paperpaw_document::Locator
 pub paperpaw_sdk::positions::Position::conversion: core::option::Option<u64>
 pub paperpaw_sdk::positions::Position::percent: f32

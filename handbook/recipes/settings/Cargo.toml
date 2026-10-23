@@ -1,0 +1,9 @@
+[package]
+name = "motto"
+version = "0.1.0"
+
+[package.metadata.paperpaw]
+plugin = "Motto"
+
+[dependencies]
+paperpaw-sdk = "0.4"

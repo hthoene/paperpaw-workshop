@@ -1,6 +1,5 @@
 ```rust
-pub paperpaw_sdk::setup::SetupPage::Screen(paperpaw_sdk::Id)
-pub paperpaw_sdk::setup::SetupPage::Setting(paperpaw_sdk::Id)
+pub struct paperpaw_sdk::setup::SetupStepSpec
 pub paperpaw_sdk::setup::SetupStepSpec::applies: core::option::Option<paperpaw_sdk::setup::AppliesFn>
 pub paperpaw_sdk::setup::SetupStepSpec::help: alloc::borrow::Cow<'static, str>
 pub paperpaw_sdk::setup::SetupStepSpec::id: paperpaw_sdk::Id
@@ -15,5 +14,8 @@ pub fn paperpaw_sdk::setup::SetupStepSpec::fmt(&self, &mut core::fmt::Formatter<
 pub struct paperpaw_sdk::setup::SetupSteps
 pub fn paperpaw_sdk::setup::SetupSteps::applying<'a>(&'a self, &paperpaw_sdk::Env<'_>) -> alloc::vec::Vec<&'a paperpaw_sdk::setup::SetupStepSpec>
 pub fn paperpaw_sdk::setup::SetupSteps::new() -> Self
+pub enum paperpaw_sdk::setup::SetupPage
+pub paperpaw_sdk::setup::SetupPage::Screen(paperpaw_sdk::Id)
+pub paperpaw_sdk::setup::SetupPage::Setting(paperpaw_sdk::Id)
 pub type paperpaw_sdk::setup::AppliesFn = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>) -> bool>
 ```

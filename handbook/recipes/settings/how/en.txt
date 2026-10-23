@@ -1,0 +1,1 @@
+A widget with a motto of your own. Set its words and how it looks in the settings, under Motto.

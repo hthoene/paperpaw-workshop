@@ -7,6 +7,7 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 
 import type { Listed } from "./folders";
+import { kindLabel } from "./kind";
 import type { Workspace } from "./workspace";
 
 /** How many plugins the menu shows before "All projects…". */
@@ -49,12 +50,13 @@ export function Projects({ workspace }: { workspace: Workspace }) {
     <div class="projects" ref={box}>
       <button type="button" class="project" aria-expanded={open} onClick={() => setOpen(!open)}>
         {workspace.name}
+        <small class="kind">{kindLabel(workspace.project?.kind ?? workspace.freshKind)}</small>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" /></svg>
       </button>
       {open && (
         <div class="project-list" role="menu">
           <div class="news">
-            <button type="button" role="menuitem" class="new" onClick={() => { workspace.fresh(); setOpen(false); }}>New plugin</button>
+            <button type="button" role="menuitem" class="new" onClick={() => { workspace.fresh("auto"); setOpen(false); }}>New plugin</button>
             <button type="button" role="menuitem" class="new" onClick={() => { workspace.fresh("code"); setOpen(false); }}>New plugin with code</button>
           </div>
           <div class="recent">

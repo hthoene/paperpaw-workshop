@@ -57,6 +57,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bar { position: relative; z-index: 5; display: flex; align-items: center; gap: 1.4rem; padding: .65rem 1.2rem; border-bottom: 1px solid var(--rule); }
 .projects { position: relative; margin-right: auto; }
 .bar .project { display: flex; align-items: center; gap: .3rem; padding: .3rem .4rem .3rem 0; font: 600 1.15rem/1 var(--display); }
+/* The kind beside the name: with code, without, or as the first words ask. */
+.bar .project .kind { margin-left: .2rem; font: 400 .78rem/1 var(--text); color: var(--ink-2); white-space: nowrap; }
 .bar .project svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: var(--ink-2); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .project-list {
   position: absolute; left: 0; top: calc(100% + .4rem); z-index: 3; width: 21rem;

@@ -325,3 +325,68 @@ describe("how much the model thinks", () => {
     expect(thinkingFor("claude-haiku-5-5", "data", true).output_config).toEqual({ effort: "medium" });
   });
 });
+
+describe("the loop's guards", () => {
+  const use = (id: string, name: string, input: Record<string, unknown>) => ({ type: "tool_use", id, name, input }) as Anthropic.ContentBlock;
+  const answer = (...content: Anthropic.ContentBlock[]) => ({ content, stop_reason: "tool_use" as const });
+  const done = { content: [{ type: "text", text: "Done.", citations: null } as Anthropic.ContentBlock], stop_reason: "end_turn" as const };
+
+  it("keeps what the docs and the files said for the whole conversation", () => {
+    expect(CLEARING.edits[0]!.exclude_tools).toEqual(expect.arrayContaining(["lookup_docs", "read_file", "list_files"]));
+  });
+
+  it("points to the answer of a lookup or read asked again in the same turn, until a file changes", async () => {
+    const provider = new ReplayProvider({
+      title: "again",
+      user: ["A widget"],
+      answers: [
+        answer(use("t1", "lookup_docs", { topic: "Widget" }), use("t2", "read_file", { path: "plugin.ini" })),
+        answer(use("t3", "lookup_docs", { topic: " widget" }), use("t4", "read_file", { path: "plugin.ini" })),
+        answer(use("t5", "write_file", { path: "plugin.ini", content: "[plugin]\nid = calm\nname = Calm\nversion = 1.0.0\n" })),
+        answer(use("t6", "read_file", { path: "plugin.ini" }), use("t7", "lookup_docs", { topic: "Widget" })),
+        done,
+      ],
+    });
+    const { session: s, files, project } = session(provider);
+    files.write("plugin.ini", "[plugin]\nid = calm\n");
+    expect(await runTurn(s, "A widget")).toBe("done");
+    const said = Object.fromEntries(results(project.messages).map((r) => [r.tool_use_id, String(r.content)]));
+    expect(said.t3).toContain("Already answered above in this turn: lookup_docs with the same input (call t1)");
+    expect(said.t4).toContain("(call t2)");
+    // After a change the file is read again; the docs say the same.
+    expect(said.t6).toContain("version = 1.0.0");
+    expect(said.t7).toContain("(call t1)");
+  });
+
+  it("tells the model to write once it has looked fifteen times without a change", async () => {
+    const looks = Array.from({ length: 16 }, (_, i) => use(`l${i}`, "lookup_docs", { topic: `topic ${i}` }));
+    const provider = new ReplayProvider({ title: "looks", user: ["A widget"], answers: [answer(...looks), done] });
+    const { session: s, project } = session(provider);
+    await runTurn(s, "A widget");
+    const said = results(project.messages).map((r) => String(r.content));
+    expect(said[13]).not.toContain("That is enough to start");
+    expect(said[14]).toContain("You have looked things up 15 times in this turn without changing a file");
+    expect(said[15]).not.toContain("That is enough to start");
+  });
+
+  it("pauses a turn that costs more than it may without changing a file, and goes on with a change", async () => {
+    const reading = new ReplayProvider({
+      title: "dear",
+      user: ["A widget"],
+      answers: [answer(use("t1", "lookup_docs", { topic: "Widget" })), answer(use("t2", "lookup_docs", { topic: "WidgetSpec" })), done],
+    });
+    const first = session(reading);
+    expect(await runTurn({ ...first.session, pauseAfter: 0 }, "A widget")).toBe("paused");
+    expect(reading.requests).toHaveLength(1);
+    // The person's words join its tool results when it goes on.
+    expect(first.project.messages.at(-1)!.role).toBe("user");
+
+    const writing = new ReplayProvider({
+      title: "cheap",
+      user: ["A widget"],
+      answers: [answer(use("t1", "write_file", { path: "plugin.ini", content: "[plugin]\nid = calm\n" })), done],
+    });
+    const second = session(writing);
+    expect(await runTurn({ ...second.session, pauseAfter: 0 }, "A widget")).toBe("done");
+  });
+});

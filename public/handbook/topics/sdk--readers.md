@@ -1,6 +1,5 @@
 ```rust
-pub paperpaw_sdk::readers::Choice::Book(&'a str)
-pub paperpaw_sdk::readers::Choice::Folder(&'a str)
+pub struct paperpaw_sdk::readers::ReaderSpec
 pub paperpaw_sdk::readers::ReaderSpec::formats: alloc::vec::Vec<paperpaw_sdk::Id>
 pub paperpaw_sdk::readers::ReaderSpec::id: paperpaw_sdk::Id
 pub paperpaw_sdk::readers::ReaderSpec::screen: paperpaw_sdk::Id
@@ -15,6 +14,9 @@ pub fn paperpaw_sdk::readers::Readers::iter(&self) -> impl core::iter::traits::i
 pub fn paperpaw_sdk::readers::Readers::len(&self) -> usize
 pub fn paperpaw_sdk::readers::Readers::new() -> Self
 pub fn paperpaw_sdk::readers::Readers::reading<'s>(&'s self, core::option::Option<&'s paperpaw_sdk::Id>) -> impl core::iter::traits::iterator::Iterator<Item = &'s paperpaw_sdk::readers::ReaderSpec>
+pub enum paperpaw_sdk::readers::Choice<'a>
+pub paperpaw_sdk::readers::Choice::Book(&'a str)
+pub paperpaw_sdk::readers::Choice::Folder(&'a str)
 pub const paperpaw_sdk::readers::DEFAULT: &str
 pub const paperpaw_sdk::readers::DIR: &str
 pub const paperpaw_sdk::readers::FOLDERS: &str

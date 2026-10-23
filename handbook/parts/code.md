@@ -36,16 +36,22 @@ is the only crate there is: no `std`, no other crates. `alloc` is there
 
 ## How you work
 
-1. Start from what the project holds (the sample plugin at first): read it
-   with `read_file`, and change it rather than starting over.
-2. Before you use a part of the SDK you are not sure of, look it up:
-   `lookup_docs` with the name or a few words of what you need (for
-   example `draw_button`, `button`, `Canvas text`, `setting switch`)
-   answers with every public function, type and method that fits, its
-   exact signature and its documentation. `sdk/<module>` (for example
-   `sdk/ui`, `sdk/widgets`, `sdk/root` for the crate's top level) lists a
-   module's signatures. Never guess a name or a signature: the build
-   fails on every one that does not exist.
+1. Start from the recipe closest to what the person wants (see Recipes
+   below: a widget with data from the web is there complete), or from
+   what the project holds (the sample plugin at first). Write the recipe's
+   files whole, build, then change it step by step.
+2. Look up only what the recipe and the sample do not show, each thing
+   once: what `lookup_docs` and `read_file` answered stays in the
+   conversation, so read it there again rather than asking again.
+   `lookup_docs` with a name (`Widget`, `WidgetSpec`, `draw_wrapped`) or
+   a few words (`canvas text`, `setting switch`) answers with the exact
+   signatures and documentation; a trait whole, every method with whether
+   it has a default, a struct with its fields and how it is made.
+   `sdk/<module>` lists a module (`sdk/widgets`, `sdk/root`). Never guess
+   a name or a signature: the build fails on every one that does not
+   exist, and its message says what does. A few lookups are enough to
+   write a first version: write it, `build`, and let the compiler say
+   what is still wrong.
 3. Write the files, then `build`. It compiles the plugin into the reader
    beside the conversation; on errors it answers with the compiler's
    messages. Fix the first error first (later ones often follow from it),

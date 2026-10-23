@@ -1,0 +1,1 @@
+A widget with a quote of the day, fetched from the web while there is a network. Place it on a page of the home screen.

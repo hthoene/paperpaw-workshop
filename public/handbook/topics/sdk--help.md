@@ -1,9 +1,4 @@
 ```rust
-pub enum paperpaw_sdk::help::Input
-pub paperpaw_sdk::help::Input::Any
-pub paperpaw_sdk::help::Input::Buttons
-pub paperpaw_sdk::help::Input::Touch
-pub fn paperpaw_sdk::help::Input::fits(self, &paperpaw_sdk::Env<'_>) -> bool
 pub struct paperpaw_sdk::help::Hint
 pub paperpaw_sdk::help::Hint::input: paperpaw_sdk::help::Input
 pub paperpaw_sdk::help::Hint::text: alloc::string::String
@@ -21,6 +16,11 @@ pub paperpaw_sdk::help::Zone::x: u16
 pub paperpaw_sdk::help::Zone::y: u16
 pub const fn paperpaw_sdk::help::Zone::new(u16, u16, u16, u16) -> Self
 pub fn paperpaw_sdk::help::Zone::on(self, paperpaw_platform::geometry::Rect) -> paperpaw_platform::geometry::Rect
+pub enum paperpaw_sdk::help::Input
+pub paperpaw_sdk::help::Input::Any
+pub paperpaw_sdk::help::Input::Buttons
+pub paperpaw_sdk::help::Input::Touch
+pub fn paperpaw_sdk::help::Input::fits(self, &paperpaw_sdk::Env<'_>) -> bool
 pub const paperpaw_sdk::help::POINT: &str
 pub const paperpaw_sdk::help::READY: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::ScreenShown>
 pub fn paperpaw_sdk::help::add(&mut paperpaw_sdk::contribution::Registrar, &str, &[paperpaw_sdk::help::Hint]) -> core::result::Result<(), paperpaw_sdk::RegisterError>

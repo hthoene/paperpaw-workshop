@@ -1,6 +1,4 @@
 ```rust
-pub paperpaw_sdk::annotations::Kind::Bookmark
-pub paperpaw_sdk::annotations::Kind::Highlight
 pub struct paperpaw_sdk::annotations::Annotation
 pub paperpaw_sdk::annotations::Annotation::created: i64
 pub paperpaw_sdk::annotations::Annotation::mark: paperpaw_sdk::annotations::Mark
@@ -14,6 +12,9 @@ pub paperpaw_sdk::annotations::Mark::kind: paperpaw_sdk::annotations::Kind
 pub paperpaw_sdk::annotations::Mark::noted: bool
 pub paperpaw_sdk::annotations::Mark::start: paperpaw_document::Locator
 pub fn paperpaw_sdk::annotations::Mark::overlaps(&self, paperpaw_document::Locator, paperpaw_document::Locator) -> bool
+pub enum paperpaw_sdk::annotations::Kind
+pub paperpaw_sdk::annotations::Kind::Bookmark
+pub paperpaw_sdk::annotations::Kind::Highlight
 pub fn paperpaw_sdk::annotations::add(&dyn paperpaw_platform::storage::Storage, &str, paperpaw_sdk::annotations::Annotation) -> bool
 pub fn paperpaw_sdk::annotations::changed(&str) -> paperpaw_sdk::Command
 pub fn paperpaw_sdk::annotations::file(&str) -> alloc::string::String

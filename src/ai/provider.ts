@@ -15,6 +15,8 @@ export interface ContextManagement {
     trigger: { type: "input_tokens"; value: number };
     keep: { type: "tool_uses"; value: number };
     clear_at_least: { type: "input_tokens"; value: number };
+    /** Tools whose results are never cleared. */
+    exclude_tools?: string[];
   }[];
 }
 
