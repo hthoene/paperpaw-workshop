@@ -153,6 +153,26 @@ mod tests {
         ]
     }
 
+    /// On a real reader's transfer page, `PAPERPAW_READER` (its address as
+    /// it shows it): a small plugin without code installs in one step,
+    /// over the version there before.
+    #[test]
+    #[ignore = "needs a reader's transfer page (PAPERPAW_READER)"]
+    fn a_reader_over_wifi_takes_a_plugin() {
+        let (host, key) = address(&std::env::var("PAPERPAW_READER").expect("PAPERPAW_READER")).unwrap();
+        let plugin = crate::install::ReaderPlugin {
+            id: "workshop-trial".into(),
+            files: vec![(
+                "plugin.ini".into(),
+                b"[plugin]\nid = workshop-trial\nname = Workshop trial\nversion = 0.1.1\nauthor = PaperPaw Workshop\ndescription = Sent by the workshop's tests.\n".to_vec(),
+            )],
+            code: false,
+        };
+        let done = crate::install::over_wifi(&mut Reader::new(host, key), &plugin, &|step| println!("{step:?}"), &std::thread::sleep).unwrap();
+        println!("{done:?}");
+        assert_eq!(done.id, "workshop-trial");
+    }
+
     #[test]
     fn the_address_is_read_as_the_reader_shows_it() {
         assert_eq!(address(" http://192.168.4.1/?k=ab12 ").unwrap(), ("192.168.4.1".into(), "ab12".into()));

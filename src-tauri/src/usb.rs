@@ -391,6 +391,33 @@ mod tests {
         assert!(text.contains("\"plugins\""), "{text}");
     }
 
+    /// A small plugin without code, to install on a real reader.
+    pub(crate) fn trial_plugin() -> crate::install::ReaderPlugin {
+        crate::install::ReaderPlugin {
+            id: "workshop-trial".into(),
+            files: vec![(
+                "plugin.ini".into(),
+                b"[plugin]\nid = workshop-trial\nname = Workshop trial\nversion = 0.1.0\nauthor = PaperPaw Workshop\ndescription = Sent by the workshop's tests.\n".to_vec(),
+            )],
+            code: false,
+        }
+    }
+
+    /// On a real reader on the cable, `PAPERPAW_PORT` (e.g. COM11): it says
+    /// what it is, then takes a small plugin once the person allows it on
+    /// its screen (two minutes).
+    #[test]
+    #[ignore = "needs a reader on the cable (PAPERPAW_PORT) and a person to allow it"]
+    fn a_reader_on_the_cable_takes_a_plugin() {
+        let port = std::env::var("PAPERPAW_PORT").expect("PAPERPAW_PORT");
+        let found = hello(&port);
+        println!("{found:?}");
+        assert!(found.problem.is_none(), "{found:?}");
+        let done = send(&port, &trial_plugin(), &|step| println!("{step:?}")).unwrap();
+        println!("{done:?}");
+        assert_eq!(done.id, "workshop-trial");
+    }
+
     #[test]
     fn hex_goes_both_ways() {
         assert_eq!(hex(&[0, 255, 16]), "00ff10");
