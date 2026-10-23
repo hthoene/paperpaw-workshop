@@ -5,6 +5,8 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 
+import type { FolderApi } from "./folders";
+
 /** A frame of the reader's panel, as the Rust side sends it. */
 export interface Frame {
   profile: string;
@@ -18,7 +20,7 @@ export interface Frame {
 
 export type Phase = "down" | "move" | "up" | "cancel";
 
-export interface Backend {
+export interface Backend extends FolderApi {
   keyGet(): Promise<string | null>;
   keySet(key: string): Promise<void>;
   keyClear(): Promise<void>;
@@ -44,12 +46,31 @@ export const appBackend: Backend = {
   emulatorPointer: (phase, x, y) => invoke("emulator_pointer", { phase, x, y }),
   onFrame: async (seen) => listen<Frame>("emulator-frame", (event) => seen(event.payload)),
   onError: async (said) => listen<string>("emulator-error", (event) => said(event.payload)),
+  projectsList: () => invoke("projects_list"),
+  projectCreate: (name, meta) => invoke("project_create", { name, meta }),
+  projectFiles: (project) => invoke("project_files", { project }),
+  projectRead: (project, path) => invoke("project_read", { project, path }),
+  projectWrite: (project, path, base64) => invoke("project_write", { project, path, base64 }),
+  projectRemove: (project, path) => invoke("project_remove", { project, path }),
+  projectLoad: (project) => invoke("project_load", { project }),
+  projectSave: (project, meta, conversation) => invoke("project_save", { project, meta, conversation }),
+  uploadsList: (project) => invoke("uploads_list", { project }),
+  uploadRead: (project, name) => invoke("upload_read", { project, name }),
+  uploadWrite: (project, name, base64) => invoke("upload_write", { project, name, base64 }),
+  uploadRemove: (project, name) => invoke("upload_remove", { project, name }),
 };
 
 /** The stand-in for a plain browser: the key in memory, a still picture
  *  of a reader. Nothing leaves the page. */
 export function standInBackend(): Backend {
   let key: string | null = null;
+  const folders = new Map<string, { meta: string; conversation: string; files: Map<string, string>; uploads: Map<string, string> }>();
+  const at = (project: string) => {
+    const found = folders.get(project);
+    if (!found) throw new Error(`no project ${project}`);
+    return found;
+  };
+  const sizes = (files: Map<string, string>) => [...files].map(([path, b]) => ({ path, size: Math.floor((b.length * 3) / 4) }));
   const frames = new Set<(frame: Frame) => void>();
   return {
     keyGet: async () => key,
@@ -72,5 +93,26 @@ export function standInBackend(): Backend {
       return () => frames.delete(seen);
     },
     onError: async () => () => {},
+    projectsList: async () => [...folders].map(([folder, f]) => ({ folder, meta: f.meta })),
+    projectCreate: async (name, meta) => {
+      let folder = name || "New plugin";
+      for (let n = 2; folders.has(folder); n++) folder = `${name} ${n}`;
+      folders.set(folder, { meta, conversation: "", files: new Map(), uploads: new Map() });
+      return folder;
+    },
+    projectFiles: async (project) => sizes(at(project).files),
+    projectRead: async (project, path) => at(project).files.get(path) ?? "",
+    projectWrite: async (project, path, base64) => { at(project).files.set(path, base64); },
+    projectRemove: async (project, path) => { at(project).files.delete(path); },
+    projectLoad: async (project) => [at(project).meta, at(project).conversation],
+    projectSave: async (project, meta, conversation) => { Object.assign(at(project), { meta, conversation }); },
+    uploadsList: async (project) => sizes(at(project).uploads),
+    uploadRead: async (project, name) => {
+      const found = at(project).uploads.get(name);
+      if (found === undefined) throw new Error(`no file ${name}`);
+      return found;
+    },
+    uploadWrite: async (project, name, base64) => { at(project).uploads.set(name, base64); },
+    uploadRemove: async (project, name) => { at(project).uploads.delete(name); },
   };
 }

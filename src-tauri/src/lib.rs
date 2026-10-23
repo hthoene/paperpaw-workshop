@@ -5,6 +5,7 @@
 mod emulator;
 mod key;
 mod paths;
+mod projects;
 
 use tauri::Manager;
 
@@ -21,6 +22,18 @@ pub fn run() {
             emulator::emulator_start,
             emulator::emulator_button,
             emulator::emulator_pointer,
+            projects::projects_list,
+            projects::project_create,
+            projects::project_files,
+            projects::project_read,
+            projects::project_write,
+            projects::project_remove,
+            projects::project_load,
+            projects::project_save,
+            projects::uploads_list,
+            projects::upload_read,
+            projects::upload_write,
+            projects::upload_remove,
         ])
         .run(tauri::generate_context!())
         .expect("the workshop could not start");
