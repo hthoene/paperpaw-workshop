@@ -42,18 +42,22 @@ pub trait Secrets {
     fn set(&self, secret: &str) -> Result<(), String>;
 }
 
-/// The system's keychain.
-pub struct Keychain;
+/// The system's keychain, its entry for the author key (another in tests).
+pub struct Keychain {
+    account: &'static str,
+}
 
 impl Keychain {
-    fn entry() -> Result<Entry, String> {
-        Entry::new(SERVICE, ACCOUNT).map_err(|e| e.to_string())
+    pub const AUTHOR: Keychain = Keychain { account: ACCOUNT };
+
+    fn entry(&self) -> Result<Entry, String> {
+        Entry::new(SERVICE, self.account).map_err(|e| e.to_string())
     }
 }
 
 impl Secrets for Keychain {
     fn get(&self) -> Result<Option<String>, String> {
-        match Self::entry()?.get_password() {
+        match self.entry()?.get_password() {
             Ok(secret) => Ok(Some(secret)),
             Err(keyring::Error::NoEntry) => Ok(None),
             Err(e) => Err(e.to_string()),
@@ -61,7 +65,7 @@ impl Secrets for Keychain {
     }
 
     fn set(&self, secret: &str) -> Result<(), String> {
-        Self::entry()?.set_password(secret).map_err(|e| e.to_string())
+        self.entry()?.set_password(secret).map_err(|e| e.to_string())
     }
 }
 
@@ -214,7 +218,7 @@ impl Author<'_> {
 }
 
 fn author() -> Result<Author<'static>, String> {
-    Ok(Author { secrets: &Keychain, dir: paths::app_data()? })
+    Ok(Author { secrets: &Keychain::AUTHOR, dir: paths::app_data()? })
 }
 
 #[tauri::command]
@@ -267,6 +271,36 @@ mod tests {
              a20446e926b7e9ed4c3d91d77ec2b4eb2440843599ef2cdb59962af1376c1b0a7488a48b68dc366d62a98bc7a1268e80cd77618e591bf09940f2cfaaff23760f00000000"
         );
         assert_eq!(fingerprint(&public_key(&[7; 32])), "EA4A 6C63 E29C 520A");
+    }
+
+    /// The system's own keychain, under entries of the test's own (the
+    /// person's author key is never touched): made, read back, backed up,
+    /// carried to a second entry, then removed.
+    #[test]
+    #[ignore = "uses the system's keychain: cargo test -- --ignored"]
+    fn the_keychain_keeps_the_key() {
+        let dir = tempfile::tempdir().unwrap();
+        let first = Keychain { account: "author-key-test-1" };
+        let second = Keychain { account: "author-key-test-2" };
+        let clear = |k: &Keychain| match k.entry().unwrap().delete_credential() {
+            Ok(()) | Err(keyring::Error::NoEntry) => {}
+            Err(e) => panic!("{e}"),
+        };
+        clear(&first);
+        clear(&second);
+        let here = Author { secrets: &first, dir: dir.path().join("one") };
+        let made = here.create().unwrap();
+        // Read back from the keychain, not from memory.
+        let again = Author { secrets: &Keychain { account: "author-key-test-1" }, dir: dir.path().join("one") };
+        assert_eq!(again.status().unwrap().public, made.public);
+        let file = dir.path().join("backup.key");
+        here.back_up(&file).unwrap();
+        let there = Author { secrets: &second, dir: dir.path().join("two") };
+        assert_eq!(there.import(&file).unwrap().public, made.public);
+        assert_eq!(second.get().unwrap(), first.get().unwrap());
+        clear(&first);
+        clear(&second);
+        assert_eq!(first.get().unwrap(), None);
     }
 
     #[test]
