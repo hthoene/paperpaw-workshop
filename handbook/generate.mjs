@@ -188,7 +188,11 @@ const part = (name) => fs.readFileSync(path.join(here, "parts", name), "utf8").t
 const data = [
   part("common.md"),
   part("data.md"),
+  // PaperPaw's facts the guide does not gather yet (the data files and
+  // their formats, home screens): until docs/data-files.md has them.
+  part("data-interim.md"),
   "# From PaperPaw's documentation",
+  section("What is uploaded"),
   section("Plugins without code").replace(/^## /, "## "),
   section("Presets and home screen layouts", "Presets"),
   customisation ? customisation.body : "",

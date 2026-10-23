@@ -3,7 +3,8 @@
 The plugins you make here are Rust crates against PaperPaw's SDK
 (`paperpaw-sdk`): new screens, actions, menu entries, widgets, settings,
 reactions to events. They run inside PaperPaw on the reader, built for it,
-and in the reader beside the conversation, built into PaperPaw's emulator.
+and in PaperPaw's emulator beside the conversation, built for this
+computer.
 
 ## The project
 
@@ -14,7 +15,8 @@ A project holds these files, and nothing else:
 | `Cargo.toml` | The crate: its name, version, the plugin's type, the SDK. Exactly this form; the builder adds the rest. |
 | `src/lib.rs` | The crate's root: `#![no_std]`, the plugin type implementing `Plugin`. More modules in `src/` if it grows. |
 | `i18n/en.ini` | Every text the plugin shows, by key; `i18n/de.ini` and others for other languages. Included with `include_str!` and `r.add_translations`. |
-| `plugin/plugin.ini` | The plugin's folder as readers install it: `[plugin]` with `id`, `name`, `description`, `version`. The build adds `code.ppn` to it. |
+| `how/en.txt` | How it works, in a few lines, by language (`how/de.txt` …), for `Manifest::how`, as the sample has it. |
+| `plugin/plugin.ini` | The plugin's folder as readers install it: `[plugin]` with `id`, `name`, `description`, `version`. The build adds the plugin's code to it. |
 
 ```toml
 [package]
@@ -25,7 +27,7 @@ version = "0.1.0"
 plugin = "MyPlugin"
 
 [dependencies]
-paperpaw-sdk = "0.5"
+paperpaw-sdk = "0.4"
 ```
 
 `plugin` names the type in `src/lib.rs` that implements `Plugin`. The SDK
@@ -64,16 +66,3 @@ is the only crate there is: no `std`, no other crates. `alloc` is there
    and `control` then say which requests it made and how each was
    answered: one with no recorded answer failed as without a network.
 6. Tell the person what it does and how they reach it.
-
-## Rules PaperPaw keeps
-
-- Every id starts with the plugin's id: `my-plugin.open`, `my-plugin.screen`.
-- Every text the person sees is a translation key, its English in
-  `i18n/en.ini` (`[messages]` with `key = text`). No text written into
-  the code.
-- Every screen works with buttons alone (the X4 has no touch screen) and
-  with touch; *Back* closes it.
-- The X4 has some 192 KiB of memory for everything: keep state small,
-  allocate little, and never read files while drawing (read when the
-  screen opens, then draw from memory).
-- E-ink: no animations, few full redraws, black on white with grays.
