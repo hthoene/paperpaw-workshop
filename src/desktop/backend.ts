@@ -6,6 +6,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 
 import type { FolderApi } from "./folders";
+import type { PictureApi } from "./pictures";
 
 /** A frame of the reader's panel, as the Rust side sends it. */
 export interface Frame {
@@ -20,7 +21,7 @@ export interface Frame {
 
 export type Phase = "down" | "move" | "up" | "cancel";
 
-export interface Backend extends FolderApi {
+export interface Backend extends FolderApi, PictureApi {
   keyGet(): Promise<string | null>;
   keySet(key: string): Promise<void>;
   keyClear(): Promise<void>;
@@ -58,6 +59,8 @@ export const appBackend: Backend = {
   uploadRead: (project, name) => invoke("upload_read", { project, name }),
   uploadWrite: (project, name, base64) => invoke("upload_write", { project, name, base64 }),
   uploadRemove: (project, name) => invoke("upload_remove", { project, name }),
+  pictureMake: (base64, mode, maxWidth, maxHeight) => invoke("picture_make", { base64, mode, maxWidth, maxHeight }),
+  pictureInfo: (base64) => invoke("picture_info", { base64 }),
 };
 
 /** The stand-in for a plain browser: the key in memory, a still picture
@@ -114,5 +117,8 @@ export function standInBackend(): Backend {
     },
     uploadWrite: async (project, name, base64) => { at(project).uploads.set(name, base64); },
     uploadRemove: async (project, name) => { at(project).uploads.delete(name); },
+    // No pictures made in a plain browser: they stay as they are.
+    pictureMake: async (base64) => [base64, 0, 0],
+    pictureInfo: async (base64) => ({ width: 0, height: 0, bytes: Math.floor((base64.length * 3) / 4), colour: false }),
   };
 }

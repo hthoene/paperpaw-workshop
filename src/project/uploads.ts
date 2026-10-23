@@ -8,6 +8,9 @@ import type { Project } from "./project";
 
 export type UploadKind = "picture" | "font" | "text";
 
+/** What becomes of an uploaded picture in the plugin (desktop/pictures.ts). */
+export type PictureMode = "keep" | "smaller-colour" | "smaller-grays";
+
 export interface UploadInfo {
   /** A name of its own in the project: lower case, `my-photo.jpg`. */
   name: string;
@@ -18,6 +21,12 @@ export interface UploadInfo {
   /** A picture's size in pixels. */
   width?: number;
   height?: number;
+  /** What becomes of a picture in the plugin, as the person chose in the
+   *  files drawer; the project's setting if not chosen. */
+  mode?: PictureMode;
+  /** Where the plugin has pictures made of it (made again when the mode
+   *  changes), and the slot's size where one was given. */
+  placed?: { path: string; slot?: { width: number; height: number } }[];
   added: string;
 }
 

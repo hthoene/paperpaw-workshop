@@ -124,7 +124,7 @@ function Window({ backend, onForgetKey }: { backend: Backend; onForgetKey(): voi
           </form>
         </section>
         <Reader backend={backend} />
-        {files && <Drawer workspace={workspace} onClose={() => setFiles(false)} />}
+        {files && <Drawer workspace={workspace} pictures={backend} onClose={() => setFiles(false)} />}
       </div>
     </div>
   );

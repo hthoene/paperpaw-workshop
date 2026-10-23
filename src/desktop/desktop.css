@@ -121,4 +121,13 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .files li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: .6rem; padding: .45rem 0; border-top: 1px solid var(--rule); }
 .file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .files small { color: var(--ink-2); }
+.files .mode {
+  grid-column: 1 / -1; justify-self: start; margin-top: -.1rem; padding: .22rem 2rem .26rem .7rem;
+  font: inherit; font-size: .85rem; color: var(--ink); background: var(--sheet) url(/chevron.svg) no-repeat right .55rem center / .8rem;
+  border: 1px solid var(--field-edge); border-radius: 999px; appearance: none; cursor: pointer;
+}
+.files .mode:hover { background-color: var(--sheet-2); }
+.setting { display: flex; gap: .65rem; align-items: flex-start; margin: 1.1rem 0 0; cursor: pointer; }
+.setting input { width: 1.05rem; height: 1.05rem; margin: .18rem 0 0; accent-color: var(--ink); }
+.setting small { display: block; margin-top: .15rem; font-size: .82rem; color: var(--ink-2); }
 .hint { margin: 1rem 0 0; font-size: .82rem; color: var(--ink-2); }

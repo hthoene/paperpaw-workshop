@@ -150,6 +150,13 @@ one again or a part of it. An upload is not part of the plugin.
   box (`box`, for example 160 x 160) with `fit: whole`. Then set the
   setting that shows it, and `look` with `screen: sleep` for a sleep
   picture or the logo.
+- **Made smaller by itself**: on the person's computer, without you and
+  without cost, a picture goes into the plugin as the person chose in
+  the files drawer: smaller for e-ink by default (scaled to what the
+  readers need, in grays, stripped of metadata), smaller in colour, or
+  as it is. Do not change that choice and do not make pictures smaller
+  yourself. If one seems too large or too heavy, you may suggest in one
+  sentence that the person picks "Smaller" for it in the files drawer.
 - **As a reference** (a screenshot or sketch of a look, a photo of a
   colour): take from it what PaperPaw's settings can do (margins, rows,
   corners, headers, colours of paper and text, which widgets where) and

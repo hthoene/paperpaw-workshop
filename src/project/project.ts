@@ -37,6 +37,9 @@ export interface Project {
   /** The author's pictures and files (their bytes are kept apart, see
    *  uploads.ts). */
   uploads?: UploadInfo[];
+  /** "Optimise images for e-ink": pictures from uploads made smaller
+   *  unless one is chosen otherwise (on unless false). */
+  optimisePictures?: boolean;
   /** How many uploaded pictures the AI was shown in this conversation. */
   picturesShown?: number;
   /** Conversations before this one, kept to read back: a conversation that

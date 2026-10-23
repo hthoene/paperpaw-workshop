@@ -1,15 +1,18 @@
 // The files drawer: what the author gives the workshop (pictures, fonts,
 // word lists, texts), kept with the project in .workshop/uploads/. The AI
-// sees their names and sizes only, until it opens one on purpose.
+// sees their names and sizes only, until it opens one on purpose. A
+// picture's choice says what the plugin gets of it (see pictures.ts).
 
 import { useEffect, useState } from "preact/hooks";
 
 import { t } from "../i18n";
-import { UploadRefused, type UploadInfo } from "../project/uploads";
+import { UploadRefused, type PictureMode, type UploadInfo } from "../project/uploads";
+import { MODES, WORKSHOP_SCREENS, modeFor, optimising, remake, type PictureApi } from "./pictures";
 import type { Workspace } from "./workspace";
 
 interface Props {
   workspace: Workspace;
+  pictures: PictureApi;
   onClose(): void;
 }
 
@@ -30,7 +33,7 @@ function about(upload: UploadInfo): string {
   return `${upload.kind}, ${sizeText(upload.bytes)}`;
 }
 
-export function Drawer({ workspace, onClose }: Props) {
+export function Drawer({ workspace, pictures, onClose }: Props) {
   const [list, setList] = useState<UploadInfo[]>(workspace.project?.uploads ?? []);
   const [over, setOver] = useState(false);
   const [problem, setProblem] = useState("");
@@ -55,6 +58,26 @@ export function Drawer({ workspace, onClose }: Props) {
     await workspace.save();
   };
 
+  // A changed choice makes again what the plugin has of the picture.
+  const choose = async (upload: UploadInfo, mode: PictureMode) => {
+    const project = workspace.project;
+    if (!project) return;
+    upload.mode = mode;
+    await remake(project, await workspace.uploads(), upload, WORKSHOP_SCREENS, pictures);
+    await workspace.save();
+  };
+
+  const setOptimise = async (on: boolean) => {
+    const project = await workspace.ensure();
+    project.optimisePictures = on;
+    const uploads = await workspace.uploads();
+    for (const upload of uploads.list().filter((u) => u.kind === "picture" && !u.mode)) {
+      await remake(project, uploads, upload, WORKSHOP_SCREENS, pictures);
+    }
+    await workspace.save();
+  };
+
+  const project = workspace.project;
   return (
     <aside class="drawer" aria-label="Files">
       <div class="drawer-head">
@@ -86,9 +109,26 @@ export function Drawer({ workspace, onClose }: Props) {
             <button type="button" class="remove" aria-label={`Remove ${u.name}`} onClick={() => void remove(u.name)}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17" /></svg>
             </button>
+            {u.kind === "picture" && project && (
+              <select
+                class="mode"
+                aria-label={`What the plugin gets of ${u.name}`}
+                value={modeFor(project, u, WORKSHOP_SCREENS)}
+                onChange={(e) => void choose(u, e.currentTarget.value as PictureMode)}
+              >
+                {MODES.map((m) => <option value={m.mode}>{m.label}</option>)}
+              </select>
+            )}
           </li>
         ))}
       </ul>
+      <label class="setting">
+        <input type="checkbox" checked={!project || optimising(project)} onChange={(e) => void setOptimise(e.currentTarget.checked)} />
+        <span>
+          Optimise images for e-ink
+          <small>Pictures go into the plugin smaller. The files here stay as they are.</small>
+        </span>
+      </label>
       <p class="hint">The AI sees names and sizes only, until it opens one.</p>
     </aside>
   );

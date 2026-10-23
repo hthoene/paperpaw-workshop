@@ -5,6 +5,7 @@
 mod emulator;
 mod key;
 mod paths;
+mod pictures;
 mod projects;
 
 use tauri::Manager;
@@ -22,6 +23,8 @@ pub fn run() {
             emulator::emulator_start,
             emulator::emulator_button,
             emulator::emulator_pointer,
+            pictures::picture_make,
+            pictures::picture_info,
             projects::projects_list,
             projects::project_create,
             projects::project_files,
