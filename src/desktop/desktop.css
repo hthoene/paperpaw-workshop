@@ -75,12 +75,20 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .checks-state.fix { color: var(--ink); text-decoration: underline; text-decoration-color: var(--field-edge); text-underline-offset: .25em; }
 .checks-state:disabled { cursor: default; }
 .checks-list {
-  position: absolute; left: 0; top: calc(100% + .4rem); z-index: 3; width: min(26rem, 80vw); max-height: 60vh; overflow: auto;
-  padding: .5rem .9rem; border-radius: .7rem; background: var(--sheet); box-shadow: 0 0 0 1px var(--rule), 0 .8rem 1.4rem -1rem rgb(0 0 0 / .5);
+  position: absolute; left: 0; top: calc(100% + .4rem); z-index: 3; width: min(30rem, 86vw); max-height: 70vh; overflow: auto;
+  padding: .3rem .9rem; border-radius: .8rem; background: var(--sheet); box-shadow: 0 0 0 1px var(--rule), 0 .8rem 1.4rem -1rem rgb(0 0 0 / .5);
 }
-.checks-list p { margin: 0; padding: .5rem 0; border-top: 1px solid var(--rule); font-size: .9rem; line-height: 1.4; }
-.checks-list p:first-child { border-top: 0; }
-.checks-list small { display: block; color: var(--ink-2); }
+.finding { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .8rem; padding: .75rem 0; border-top: 1px solid var(--rule); }
+.finding:first-child { border-top: 0; }
+.finding:not(:has(img)) { grid-template-columns: minmax(0, 1fr); }
+.finding img { width: 7.5rem; height: auto; border-radius: .35rem; box-shadow: 0 0 0 1px var(--rule); }
+.finding p { margin: 0; }
+.finding-words { font-size: .92rem; line-height: 1.45; }
+.finding-words code { font: .85em/1 ui-monospace, monospace; padding: 0 .2em; border-radius: .2em; background: var(--sheet-2); }
+.finding-where { margin-top: .2rem !important; font-size: .8rem; color: var(--ink-2); }
+.finding-do { display: flex; gap: 1rem; margin-top: .45rem !important; }
+.finding-do .link { font-size: .85rem; text-decoration: underline; text-decoration-color: var(--field-edge); text-underline-offset: .2em; }
+.finding-do .quiet { color: var(--ink-2); }
 .menu-list { position: absolute; right: 0; top: calc(100% + .4rem); z-index: 2; min-width: 11rem; padding: .35rem; border-radius: .7rem; background: var(--sheet); box-shadow: 0 0 0 1px var(--rule), 0 .8rem 1.4rem -1rem rgb(0 0 0 / .5); display: grid; }
 .menu-list button { text-align: left; padding: .5rem .7rem; border-radius: .45rem; }
 .menu-list button:hover { background: var(--sheet-2); }

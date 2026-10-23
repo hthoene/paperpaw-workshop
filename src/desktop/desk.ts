@@ -11,7 +11,7 @@ import type { Handbook } from "../handbook/handbook";
 import { browserKit } from "../pictures/kit";
 import type { Project } from "../project/project";
 import type { Backend } from "./backend";
-import { forModel, type Checker } from "./checks";
+import { forModel, shown, type Checker } from "./checks";
 import { modelFor, offered, savedChoice, type ModelChoice } from "./models";
 import { LocalBuilder } from "./builder";
 import { NativeEmulator } from "./native";
@@ -160,10 +160,11 @@ export class Desk {
     for (let fix = 0; fix < AUTO_FIXES && !workshop.error && filesNow(project) !== files; fix++) {
       // The workshop checked at the end of its turn; else check now.
       const checked = this.checker.checks.state === "done" ? this.checker.checks : await this.checker.plugin(project);
-      if (checked.state !== "done" || !checked.found.some((f) => f.level === "error")) break;
+      const found = checked.state === "done" ? shown(checked.found, project.ignoredChecks) : [];
+      if (!found.some((f) => f.level === "error")) break;
       files = filesNow(project);
       workshop.escalated = fix > 0;
-      await workshop.send(forModel(checked.found));
+      await workshop.send(forModel(found));
     }
     workshop.escalated = false;
     const dollars = project.usage.dollars - before;

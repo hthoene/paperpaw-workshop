@@ -7,7 +7,7 @@ import { useEffect, useState } from "preact/hooks";
 
 import { identity } from "../project/project";
 import type { Backend } from "./backend";
-import { forModel } from "./checks";
+import { forModel, shown } from "./checks";
 import type { Desk } from "./desk";
 import { toBase64 } from "./folders";
 import { makeSmaller, suggestions, WORKSHOP_SCREENS, type Suggestion } from "./pictures";
@@ -25,7 +25,7 @@ export function Send({ desk, backend, onClose }: Props) {
   const [said, setSaid] = useState("");
   const [smaller, setSmaller] = useState<Suggestion[]>([]);
   const checks = desk.checker.checks;
-  const errors = checks.state === "done" ? checks.found.filter((f) => f.level === "error") : [];
+  const errors = checks.state === "done" ? shown(checks.found, project?.ignoredChecks).filter((f) => f.level === "error") : [];
   const id = project ? identity(project).id : undefined;
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export function Send({ desk, backend, onClose }: Props) {
           {errors.length > 0 && (
             <div class="before">
               <p>PaperPaw's checks found {errors.length} to fix. It may not work as meant on the reader.</p>
-              <button type="button" class="link" disabled={!!desk.workshop?.busy} onClick={() => { onClose(); void desk.send(forModel(checks.state === "done" ? checks.found : [])); }}>
+              <button type="button" class="link" disabled={!!desk.workshop?.busy} onClick={() => { onClose(); void desk.send(forModel(errors)); }}>
                 Ask the AI to fix them
               </button>
             </div>

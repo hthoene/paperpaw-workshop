@@ -8,7 +8,8 @@ import { AnthropicDirect } from "../ai/anthropic";
 import { ReplayProvider, type Recording } from "../ai/replay";
 import { Handbook } from "../handbook/handbook";
 import type { Backend } from "./backend";
-import { Checker, summary } from "./checks";
+import { Checker } from "./checks";
+import { Findings } from "./Findings";
 import { Conversation } from "./Conversation";
 import { Desk } from "./desk";
 import { CHOICES, saveChoice, savedChoice, usable, type ModelChoice } from "./models";
@@ -169,7 +170,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
     <div class="window">
       <header class="bar">
         <Projects workspace={workspace} />
-        <Checks checker={checker} />
+        <Findings desk={desk} />
         <button type="button" class="link" aria-expanded={files} onClick={() => only("files", !files)}>Files</button>
         <button type="button" class="send" aria-expanded={sending} onClick={() => only("send", !sending)}>Send to reader</button>
         <div class="menu">
@@ -200,32 +201,6 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
         {settings && <Settings workspace={workspace} keyKind={keyKind} may={desk.may} onClose={() => setSettings(false)} />}
         {files && <Drawer workspace={workspace} pictures={backend} onClose={() => setFiles(false)} />}
       </div>
-    </div>
-  );
-}
-
-/** "Checks: ok" or "Checks: 2 to fix", and what they are, quietly. */
-function Checks({ checker }: { checker: Checker }) {
-  const [open, setOpen] = useState(false);
-  const checks = checker.checks;
-  const said = summary(checks);
-  if (!said) return null;
-  const found = checks.state === "done" ? checks.found : [];
-  return (
-    <div class="checks">
-      <button type="button" class={`checks-state${found.length ? " fix" : ""}`} aria-expanded={open} disabled={!found.length && checks.state !== "failed"} onClick={() => setOpen(!open)}>
-        {said}
-      </button>
-      {open && (
-        <div class="checks-list" role="status">
-          {checks.state === "failed" ? <p>{checks.message}</p> : found.map((f) => (
-            <p>
-              <strong>{f.place}</strong> {f.message}
-              {f.seen.length > 0 && <small>{f.seen.join(", ")}</small>}
-            </p>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

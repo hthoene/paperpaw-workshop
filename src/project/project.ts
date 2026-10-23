@@ -42,6 +42,9 @@ export interface Project {
   optimisePictures?: boolean;
   /** How many uploaded pictures the AI was shown in this conversation. */
   picturesShown?: number;
+  /** PaperPaw's findings the person chose to ignore (desktop/checks.ts
+   *  `ignoredKey`): not counted, not given to the AI. */
+  ignoredChecks?: string[];
   /** Conversations before this one, kept to read back: a conversation that
    *  grew too long goes on in a fresh one (append-only, never cut). */
   earlier?: Anthropic.MessageParam[][];

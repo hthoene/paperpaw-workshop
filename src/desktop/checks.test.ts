@@ -41,3 +41,15 @@ describe("the checks", () => {
     expect(summary(checker.checks)).toBe("Checks: ok");
   });
 });
+
+describe("a finding for the person", () => {
+  it("says where it was seen in words, and stays away once ignored", async () => {
+    const { where } = await import("./Findings");
+    const { ignoredKey, shown } = await import("./checks");
+    const f: Found = { ...cut, seen: ["xteink-x4 de light default", "xteink-x4-pro de light default", "xteink-x4 en light default", "boox-go-7 pseudo light default"] };
+    expect(where(f)).toBe("on X4, X4 Pro and Boox Go 7, in German and English");
+    expect(where({ ...cut, seen: [] })).toBe("");
+    expect(shown([cut, f], [ignoredKey(cut)])).toEqual([]);
+    expect(shown([cut], [])).toEqual([cut]);
+  });
+});

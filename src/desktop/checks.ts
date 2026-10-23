@@ -15,6 +15,18 @@ export interface Found {
   message: string;
   /** Where it was seen: `xteink-x4 de`, ... */
   seen: string[];
+  /** The spot, marked on the check's picture (a PNG data URL), if it took one. */
+  picture?: string | null;
+}
+
+/** How a finding the person chose to ignore is remembered. */
+export function ignoredKey(f: Pick<Found, "check" | "place" | "message">): string {
+  return `${f.check}|${f.place}|${f.message}`;
+}
+
+/** The findings the person did not choose to ignore. */
+export function shown(found: Found[], ignored: string[] = []): Found[] {
+  return found.filter((f) => !ignored.includes(ignoredKey(f)));
 }
 
 /** The Rust side's call (or a stand-in's). */
