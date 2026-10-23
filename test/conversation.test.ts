@@ -88,3 +88,14 @@ describe("steps in a row", () => {
     ]);
   });
 });
+
+describe("the reader's steps", () => {
+  it("say what was done on the reader, in words for the person", async () => {
+    const { stepText } = await import("../src/app/conversation");
+    expect(stepText("control", { do: "widget", id: "duck.fact" })).toBe("Put it on the home screen");
+    expect(stepText("control", { do: "wait", id: "duck" })).toBe("Waited for it to show");
+    expect(stepText("control", { do: "emit", id: "duck.due" })).toBe("Controlled the reader: emit");
+    expect(stepText("look", {})).toBe("Looked at it on the reader");
+    expect(stepText("look", { device: "Boox Go 7" })).toBe("Looked at it on the Boox Go 7");
+  });
+});

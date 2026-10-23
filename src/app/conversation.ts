@@ -103,7 +103,15 @@ export function stepText(tool: string, input: Record<string, unknown>): string {
   // The upload tools name their target `to` and their upload `upload`.
   if (typeof input?.to === "string") vars.path = input.to;
   if (typeof input?.upload === "string") vars.name = input.upload;
-  if ((tool === "look" || tool === "press") && !vars.device) vars.device = "X4";
+  // The reader shown, where the step does not name one.
+  if (["look", "press", "control"].includes(tool) && !vars.device) vars.device = "reader";
+  // control: what it did, said for the person where there are words for it.
+  if (tool === "control" && typeof input?.do === "string") {
+    vars.what = input.do;
+    if (typeof input.id === "string") vars.id = input.id;
+    const own = t(`step.control.${input.do}`, vars);
+    if (own !== `step.control.${input.do}`) return own;
+  }
   if (Array.isArray(input?.fixtures)) vars.n = String(input.fixtures.length);
   return t(`step.${tool}`, vars);
 }
