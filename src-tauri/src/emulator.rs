@@ -19,6 +19,10 @@ use tauri::{AppHandle, Emitter, State};
 /// The readers the window offers, by the profiles' ids.
 pub const PROFILES: [&str; 3] = ["xteink-x4", "xteink-x4-pro", "boox-go-7"];
 
+/// The readers' settings in the workshop: no "How it works here" hints
+/// over the screens a plugin is tried on.
+const SETTINGS: &str = "[help]\nshow = false\n";
+
 /// How long the thread waits at most between looks, when the device asks
 /// for nothing sooner (a clock, an animation).
 const IDLE_MS: u64 = 50;
@@ -148,7 +152,7 @@ fn start(profile: &str, library: &Path) -> Result<Device, String> {
     prepare_library(library).map_err(|e| format!("{}: {e}", library.display()))?;
     let storage = device::library(library).map_err(|e| format!("{}: {e}", library.display()))?;
     let mut device =
-        Device::new(profile, None, storage, false).map_err(|e| format!("{}: {e}", profile.device.id))?;
+        Device::new(profile, Some(SETTINGS.into()), storage, false).map_err(|e| format!("{}: {e}", profile.device.id))?;
     // Frames as they end up, not the panel's flashing on the way.
     device.panel.animate = false;
     device.start();
