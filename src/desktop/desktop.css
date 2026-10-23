@@ -35,7 +35,9 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .line input::placeholder { color: var(--ink-2); opacity: 1; }
 .line input:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--ink); }
 .go {
-  padding: 0 1.4rem; border-radius: 999px; background: var(--ink); color: var(--sheet);
+  /* Literata sets its letters low in the line: a little room below lifts
+     them to the button's middle (measured by the capitals' ink). */
+  padding: 0 1.4rem 3px; border-radius: 999px; background: var(--ink); color: var(--sheet);
   font: 600 1rem/1 var(--display); transition: background-color .2s;
 }
 .go:hover:not(:disabled) { background: #3a3631; }
@@ -73,7 +75,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* The reader */
 .reader { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; justify-items: center; gap: .8rem; padding: 1rem 1rem 1.1rem; min-height: 0; }
 .which { display: flex; gap: .3rem; }
-.which button { padding: .32rem .85rem .3rem; border-radius: 999px; font: 500 .92rem/1.2 var(--display); color: var(--ink-2); }
+.which button { padding: calc(.32rem - 1.5px) .85rem calc(.3rem + 1.5px); border-radius: 999px; font: 500 .92rem/1.2 var(--display); color: var(--ink-2); }
 .which button:hover { color: var(--ink); }
 .which .on { color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
 .device {
