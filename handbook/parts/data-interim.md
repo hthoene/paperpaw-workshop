@@ -9,8 +9,8 @@
 | A home screen of their own | `settings.ini`: the widgets of each page in order, `[home] page-1 = home.clock, home.continue` (pages 1 to 8), and the widgets' own settings (`settings/home`) |
 | A theme to choose in Settings | `presets.ini`: presets of the kind `core.theme` (see Presets below) |
 | Buttons, taps or swipes doing something else | `keymap.ini`: bindings in layers (`[keymap.global]`, `[keymap.core.reader]` ...) to action ids |
-| One press doing several things (ten pages on, night mode and a bigger font) | `actions.ini` (formats 3): an action of up to 16 steps, bound in `keymap.ini` |
-| Different menus, a menu of its own | `menus.ini` (formats 3): entries added, placed or taken out of any menu, menus of its own |
+| One press doing several things (ten pages on, night mode and a bigger font) | `actions.ini` (formats 3): an action of up to 16 steps, a `run` line each (`notify:` takes a key of `i18n/<lang>.ini`), bound in `keymap.ini` |
+| Different menus, a menu of its own | `menus.ini` (formats 3): entries added, placed or taken out of another plugin's menu (`[menu core.reader-menu]`), menus of its own (a section of its own name, `title`, an `entries` line each) |
 | Texts in another language, or other words | `i18n/<lang>.ini` |
 | Its own logo | a `.png` and `[core] logo = plugins/<id>/logo.png` in `settings.ini` |
 | A picture while the reader sleeps | pictures in a folder of the plugin (`sleep/1.png` ...) and in `settings.ini` `[sleep] show = sleep.show.picture`, `folder = plugins/<id>/sleep` |
