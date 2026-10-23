@@ -145,9 +145,10 @@ is the only crate there is: no `std`, no other crates. `alloc` is there
    write the code for what it showed. The reader beside the conversation
    fetches from the internet as a reader does. `look`, `press` and
    `control` say which requests the plugin made and how each was
-   answered; a reply takes a moment, so `wait` for the text it brings
-   (or `look` again) before you judge it. Say to the person what you saw
-   come back.
+   answered; a reply takes a moment, so wait before you judge it: for a
+   text every reply brings, or, where each reply differs (a random fact),
+   `look` again a moment later rather than wait for a text an earlier
+   reply had. Say to the person what you saw come back.
 6. Leave the reader showing it (a widget with `control` `widget`, a
    screen with `control` `show`), then tell the person what it does,
    what they see now and how they reach it on their reader.
