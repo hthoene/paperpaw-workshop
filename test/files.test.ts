@@ -55,3 +55,13 @@ describe("small edits", () => {
     expect((await editFile.run({ path: "none.ini", edits: [{ old: "a", new: "b" }] }, context)).isError).toBe(true);
   });
 });
+
+describe("a plugin with code", () => {
+  it("may hold its how-it-works texts by language, as PaperPaw's sample does", async () => {
+    const { pathProblem } = await import("../src/project/rules");
+    expect(pathProblem("how/en.txt", "code")).toBeNull();
+    expect(pathProblem("how/de.txt", "code")).toBeNull();
+    expect(pathProblem("how/notes/en.txt", "code")).not.toBeNull();
+    expect(pathProblem("build.rs", "code")).not.toBeNull();
+  });
+});

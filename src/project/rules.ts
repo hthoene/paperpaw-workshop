@@ -37,7 +37,7 @@ export function validVersion(version: string): boolean {
 
 /** Paths a plugin with code holds (as the builder takes them,
  *  builder/project.mjs): its crate, its translations, its folder. */
-const CODE_PATHS = [/^Cargo\.toml$/, /^src\/[a-z0-9_/]+\.rs$/, /^i18n\/[a-z]{2,3}(-[A-Za-z]+)?\.ini$/, /^plugin\/.+$/, /^(README|LICENCE|LICENSE)(\.md|\.txt)?$/];
+const CODE_PATHS = [/^Cargo\.toml$/, /^src\/[a-z0-9_/]+\.rs$/, /^i18n\/[a-z]{2,3}(-[A-Za-z]+)?\.ini$/, /^how\/[a-z]{2,3}(-[A-Za-z]+)?\.txt$/, /^plugin\/.+$/, /^(README|LICENCE|LICENSE)(\.md|\.txt)?$/];
 /** The most files a plugin with code's project holds. */
 export const MAX_CODE_FILES = 200;
 
@@ -50,7 +50,7 @@ export function pathProblem(path: string, kind: "data" | "code" = "data"): strin
     if (base) return base;
     if (path.startsWith("plugin/")) return pathProblem(path.slice("plugin/".length));
     if (!CODE_PATHS.some((p) => p.test(path))) {
-      return "a plugin with code holds Cargo.toml, src/*.rs, i18n/<language>.ini and its folder plugin/ (plugin.ini and what it brings)";
+      return "a plugin with code holds Cargo.toml, src/*.rs, i18n/<language>.ini, how/<language>.txt (how it works, as PaperPaw's sample has it) and its folder plugin/ (plugin.ini and what it brings)";
     }
     return null;
   }

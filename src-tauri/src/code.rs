@@ -25,6 +25,8 @@ const KINDS: &[(&str, usize)] = &[
     ("Cargo.toml", 16 << 10),
     ("src/", 256 << 10),
     ("i18n/", 128 << 10),
+    // "How it works" texts, by language, as PaperPaw's sample has them.
+    ("how/", 16 << 10),
     ("plugin/", 8 << 20),
     ("README", 64 << 10),
     ("LICENCE", 64 << 10),
@@ -151,7 +153,7 @@ pub fn problems(files: &[(String, Vec<u8>)]) -> Vec<String> {
             continue;
         }
         match KINDS.iter().find(|(start, _)| path == start || path.starts_with(start)) {
-            None => out.push(format!("{path}: a project holds Cargo.toml, src/*.rs, i18n/<lang>.ini, the plugin's folder plugin/ and a README.")),
+            None => out.push(format!("{path}: a project holds Cargo.toml, src/*.rs, i18n/<lang>.ini, how/<lang>.txt, the plugin's folder plugin/ and a README.")),
             Some((_, max)) if bytes.len() > *max => out.push(format!("{path}: larger than {} KB.", max >> 10)),
             Some(_) => {}
         }
@@ -254,7 +256,7 @@ pub fn diagnostics(output: &str, root: &str) -> Vec<Diagnostic> {
 fn lay_out(dir: &Path, files: &[(String, Vec<u8>)], krate: &Crate, sdk: &str) -> Result<(), String> {
     let plugin = dir.join("plugin");
     // The sources anew (a file removed is gone), the build's target kept.
-    for gone in ["src", "i18n"] {
+    for gone in ["src", "i18n", "how"] {
         let _ = std::fs::remove_dir_all(plugin.join(gone));
     }
     let write = |path: PathBuf, bytes: &[u8]| -> Result<(), String> {
@@ -263,7 +265,7 @@ fn lay_out(dir: &Path, files: &[(String, Vec<u8>)], krate: &Crate, sdk: &str) ->
         }
         std::fs::write(&path, bytes).map_err(|e| format!("{}: {e}", path.display()))
     };
-    for (path, bytes) in files.iter().filter(|(p, _)| p.starts_with("src/") || p.starts_with("i18n/")) {
+    for (path, bytes) in files.iter().filter(|(p, _)| p.starts_with("src/") || p.starts_with("i18n/") || p.starts_with("how/")) {
         write(plugin.join(path), bytes)?;
     }
     write(plugin.join("Cargo.toml"), plugin_manifest(krate, sdk).as_bytes())?;
