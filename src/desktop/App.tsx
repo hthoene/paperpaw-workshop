@@ -17,6 +17,7 @@ import { CHOICES, saveChoice, savedChoice, usable, type ModelChoice } from "./mo
 import { Drawer } from "./Drawer";
 import { Projects } from "./Projects";
 import { Reader } from "./Reader";
+import { KeySettings } from "./AuthorKey";
 import { Publish } from "./Publish";
 import { exportZip, Send } from "./Send";
 import { Workspace } from "./workspace";
@@ -208,7 +209,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
         )}
         {sending && <Send desk={desk} backend={backend} onClose={() => setSending(false)} />}
         {publishing && <Publish desk={desk} backend={backend} onClose={() => setPublishing(false)} />}
-        {settings && <Settings workspace={workspace} keyKind={keyKind} may={desk.may} onClose={() => setSettings(false)} />}
+        {settings && <Settings workspace={workspace} backend={backend} keyKind={keyKind} may={desk.may} onClose={() => setSettings(false)} />}
         {files && <Drawer workspace={workspace} pictures={backend} onClose={() => setFiles(false)} />}
       </div>
     </div>
@@ -216,7 +217,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
 }
 
 /** The app's settings: which model, for all plugins and for this one. */
-function Settings({ workspace, keyKind, may, onClose }: { workspace: Workspace; keyKind: "claude" | "paperpaw" | null; may: ModelChoice[]; onClose(): void }) {
+function Settings({ workspace, backend, keyKind, may, onClose }: { workspace: Workspace; backend: Backend; keyKind: "claude" | "paperpaw" | null; may: ModelChoice[]; onClose(): void }) {
   const [choice, setChoice] = useState<ModelChoice>(usable(savedChoice(), may));
   const project = workspace.project;
   const own = usable(project?.model as ModelChoice | undefined, may);
@@ -259,6 +260,7 @@ function Settings({ workspace, keyKind, may, onClose }: { workspace: Workspace; 
         </label>
       )}
       <p class="hint">What each turn cost shows in the conversation.</p>
+      <KeySettings backend={backend} />
     </aside>
   );
 }

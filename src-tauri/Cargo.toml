@@ -34,6 +34,8 @@ tauri-plugin-opener = "2"
 ureq = { version = "2", default-features = false, features = ["tls"] }
 # Projects put in the bin, not deleted (they can be got back).
 trash = "5"
+# The author key that signs plugins with code, as paperpaw-native does (author.rs).
+ed25519-compact = { version = "2.6", default-features = false, features = ["random"] }
 # Checking what is downloaded (rustup) before it runs.
 sha2 = "0.10"
 

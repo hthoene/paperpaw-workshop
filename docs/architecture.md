@@ -300,6 +300,36 @@ stops nothing. Then:
 
 The store's own files (`store/`) stay home.
 
+## Publishing
+
+**Publish…** ([src/desktop/Publish.tsx](../src/desktop/Publish.tsx),
+[src/desktop/publishing.ts](../src/desktop/publishing.ts),
+[src-tauri/src/publish.rs](../src-tauri/src/publish.rs)) makes a plugin
+ready for paperpaw.org's upload form; the person uploads it there and
+sends it to the moderators. Nothing is uploaded from the workshop.
+
+1. PaperPaw's checks run afresh; what they find to fix holds it back
+   until the AI fixed it or the person goes on anyway.
+2. The version must be higher than the last one packed for the store
+   (`Project.published`): "Raise to …" sets it in `plugin.ini`.
+3. The package is the form's `package`: the plugin's folder named as its
+   id, `store/` inside, within the site's file rules and limits, its
+   files in name order with fixed times (the same plugin, the same
+   bytes). It is kept in the project's `.workshop/publish/`.
+4. The form opens in the browser, and the package is shown in its folder.
+
+Plugins with code are not packed yet: the store needs a signed build for
+each reader. Their **author key** is ready
+([src-tauri/src/author.rs](../src-tauri/src/author.rs),
+[src/desktop/AuthorKey.tsx](../src/desktop/AuthorKey.tsx)): one Ed25519
+key, made the first time it is needed, kept in the system's keychain,
+never in a project and never sent anywhere. Its backup must be saved
+before anything is signed with it; it is the same kind of file as
+`paperpaw-sign key` makes (64 hexadecimal digits, not encrypted, so kept
+private). Settings show whether and when it was backed up, back it up
+again, or take it from a backup on a new computer. Signing writes the
+trailer `paperpaw-native` writes, byte for byte.
+
 ## Texts
 
 Every text the person sees is in [src/i18n/en.json](../src/i18n/en.json)

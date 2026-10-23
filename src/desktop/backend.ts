@@ -24,6 +24,14 @@ export interface Frame {
 
 export type Phase = "down" | "move" | "up" | "cancel";
 
+/** The author key as the window knows it (src-tauri's author.rs). */
+export interface AuthorStatus {
+  public: string | null;
+  fingerprint: string | null;
+  /** When it was last backed up, in seconds since 1970. */
+  backed_up: number | null;
+}
+
 export interface Backend extends FolderApi, PictureApi, CheckApi {
   keyGet(): Promise<string | null>;
   keySet(key: string): Promise<void>;
@@ -62,6 +70,18 @@ export interface Backend extends FolderApi, PictureApi, CheckApi {
   /** Opens the store's upload form in the browser and shows the package
    *  in its folder. */
   publishShow(path: string): Promise<void>;
+  /** The author key that signs plugins with code: never its secret. */
+  authorStatus(): Promise<AuthorStatus>;
+  /** Makes the author key, if there is none yet. */
+  authorCreate(): Promise<AuthorStatus>;
+  /** Saves the key's backup file where the person chose. */
+  authorBackup(path: string): Promise<AuthorStatus>;
+  /** Takes the key from a backup file. */
+  authorImport(path: string): Promise<AuthorStatus>;
+  /** Where to save the key's backup, or which backup to take, asked of
+   *  the person. */
+  askSaveKey(): Promise<string | null>;
+  askOpenKey(): Promise<string | null>;
   /** Builds the project's plugin with code for the reader beside the
    *  conversation (Rust set up first, the first time). */
   codeBuild(project: string): Promise<BuildResult>;
@@ -123,6 +143,15 @@ export const appBackend: Backend = {
   saveFile: (path, base64) => invoke("save_file", { path, base64 }),
   publishSave: (project, name, base64) => invoke("publish_save", { project, name, base64 }),
   publishShow: (path) => invoke("publish_show", { path }),
+  authorStatus: () => invoke("author_status"),
+  authorCreate: () => invoke("author_create"),
+  authorBackup: (path) => invoke("author_backup", { path }),
+  authorImport: (path) => invoke("author_import", { path }),
+  askSaveKey: () => save({ title: "Save the backup of your author key", defaultPath: "paperpaw-author.key", filters: [{ name: "Author key", extensions: ["key"] }] }),
+  askOpenKey: async () => {
+    const chosen = await open({ title: "The backup of your author key", filters: [{ name: "Author key", extensions: ["key"] }] });
+    return typeof chosen === "string" ? chosen : null;
+  },
   codeBuild: (project) => invoke("code_build", { project }),
   onBuildProgress: async (told) => listen<string>("build-progress", (event) => told(event.payload)),
   buildToolsInstall: () => invoke("build_tools_install"),
@@ -197,6 +226,8 @@ export function standInBackend(): Backend {
     // A plain browser keeps no package and opens no form.
     publishSave: async (project, name) => `${project}/.workshop/publish/${name}`,
     publishShow: async () => {},
+    // An author key in memory, its backup said done when asked.
+    ...memoryAuthor(),
     codeBuild: async () => {
       throw new Error("Plugins with code are built in the app.");
     },
@@ -249,5 +280,19 @@ export function standInBackend(): Backend {
     pictureInfo: async (base64) => ({ width: 0, height: 0, bytes: Math.floor((base64.length * 3) / 4), colour: false }),
     // No checks in a plain browser: nothing found.
     pluginCheck: async () => [],
+  };
+}
+
+/** The author key of the stand-in: in memory, never a real key. */
+function memoryAuthor(): Pick<Backend, "authorStatus" | "authorCreate" | "authorBackup" | "authorImport" | "askSaveKey" | "askOpenKey"> {
+  let status: AuthorStatus = { public: null, fingerprint: null, backed_up: null };
+  const made: AuthorStatus = { public: "0".repeat(64), fingerprint: "0000 0000 0000 0000", backed_up: null };
+  return {
+    authorStatus: async () => status,
+    authorCreate: async () => (status = status.public ? status : { ...made }),
+    authorBackup: async () => (status = { ...status, backed_up: Math.floor(Date.now() / 1000) }),
+    authorImport: async () => (status = { ...made, backed_up: Math.floor(Date.now() / 1000) }),
+    askSaveKey: async () => "paperpaw-author.key",
+    askOpenKey: async () => "paperpaw-author.key",
   };
 }

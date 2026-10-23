@@ -2,6 +2,7 @@
 //! in the keychain, projects as folders in Documents, files dropped in,
 //! sending a plugin to a reader, and building plugins with code.
 
+mod author;
 mod checks;
 mod code;
 mod emulator;
@@ -47,6 +48,10 @@ pub fn run() {
             pictures::picture_make,
             pictures::picture_info,
             publish::publish_save,
+            author::author_status,
+            author::author_create,
+            author::author_backup,
+            author::author_import,
             publish::publish_show,
             projects::projects_list,
             projects::project_create,
