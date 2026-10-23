@@ -4,6 +4,8 @@ handbook/.work/
 *.log
 .DS_Store
 .env
+.env.*
+*.key
 coverage/
 test-results/
 handbook/registry/Cargo.lock

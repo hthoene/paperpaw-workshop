@@ -31,6 +31,9 @@ reader and type the address it shows), over the USB cable, or onto its
 card. The reader asks before it takes a plugin with code, or anything
 over the cable. Or keep it as a zip with **Export zip** in the menu.
 
+When a newer workshop is out, Settings says so, and it updates when you
+say so. Your projects stay as they are.
+
 ## No Claude key?
 
 Ask for a **PaperPaw key** at
@@ -55,8 +58,14 @@ small budget, so you can try the workshop before you get a key of your own.
 - **It keeps nothing on our side.** Your plugins are folders in
   *Documents/PaperPaw Workshop* on your computer. Your key stays in your
   computer's keychain.
-- **It talks to no one else.** Only to Anthropic with your key, or to
-  PaperPaw's key service with a PaperPaw key. No account, no tracking.
+- **It talks only to whom it must.** To Anthropic with your key, or to
+  PaperPaw's key service with a PaperPaw key. To GitHub, when you open
+  Settings, to see whether a newer workshop is out. To Rust's own servers
+  and crates.io, the first time you make a plugin with code. To
+  paperpaw.org, when you publish a plugin there. And to addresses you
+  name yourself: the workshop asks you before it fetches an example from
+  one, and the reader beside the conversation fetches what your plugin
+  asks for, as your reader would. No account, no tracking.
 - **It does not spend more than it must.** With your own key you pay
   Anthropic for what you use. The workshop uses the smallest model that
   does the job, keeps the conversation short, and shows each turn's cost.
@@ -64,7 +73,8 @@ small budget, so you can try the workshop before you get a key of your own.
 
 ## What you need
 
-- Windows 10 or 11. macOS and Linux follow.
+- Windows 10 or 11. There is no build for macOS or Linux yet; they are
+  planned for later.
 - A Claude key, or a PaperPaw key.
 - For plugins with code: about 1 GB of room. The workshop sets up Rust by
   itself the first time. On Windows it also needs Microsoft's C++ build

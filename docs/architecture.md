@@ -12,7 +12,11 @@ person's Claude key, or to the key service in [proxy/](../proxy/README.md)
 with a PaperPaw key, and to nothing else (the window's
 Content-Security-Policy in
 [src-tauri/tauri.conf.json](../src-tauri/tauri.conf.json) allows only
-those two).
+those two). The computer's side reaches further only for what the person
+does: GitHub's releases for the workshop's updates (when Settings opens),
+Rust's servers and crates.io for plugins with code, paperpaw.org to
+publish, and an address the person named for an example of its answer
+(`fetch_sample`, asked first, public addresses only).
 
 ```
 src/
