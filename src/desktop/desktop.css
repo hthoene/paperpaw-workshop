@@ -14,11 +14,27 @@
   --field-edge: #7d7568;
   --mark: #3b625f;
   --bezel: #262624;
+  /* Scrollbars: a muted ink, darker where the pointer is. */
+  --scroll: #a59d8f;
+  --scroll-near: #6f685d;
   --display: "Literata", Georgia, serif;
   --text: "Albert Sans", system-ui, sans-serif;
   color-scheme: light;
 }
 * { box-sizing: border-box; }
+/* Scrollbars: thin, a round thumb on no track and no arrows, the same in
+   every part that scrolls (the conversation, the projects, settings, the
+   findings, the files); the text field's is inset from its round
+   corners (below). Where a browser has no such scrollbars, its own thin
+   ones in the same colours. */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-thumb { border: 3px solid transparent; border-radius: 5px; background: var(--scroll) padding-box; }
+::-webkit-scrollbar-thumb:hover, ::-webkit-scrollbar-thumb:active { background-color: var(--scroll-near); }
+::-webkit-scrollbar-button { display: none; }
+@supports not selector(::-webkit-scrollbar) {
+  * { scrollbar-width: thin; scrollbar-color: var(--scroll) transparent; }
+}
 html, body { margin: 0; height: 100%; background: var(--sheet); color: var(--ink); font: 400 15px/1.55 var(--text); }
 #app { height: 100%; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
@@ -68,7 +84,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   padding: .35rem; border-radius: .7rem; background: var(--sheet); box-shadow: 0 0 0 1px var(--rule), 0 .8rem 1.4rem -1rem rgb(0 0 0 / .5);
 }
 .project-list .news { display: grid; padding-bottom: .3rem; margin-bottom: .3rem; border-bottom: 1px solid var(--rule); }
-.project-list .recent { overflow: auto; display: grid; align-content: start; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.project-list .recent { overflow: auto; display: grid; align-content: start; }
 .project-list button { display: grid; gap: .1rem; text-align: left; padding: .5rem .7rem; border-radius: .45rem; font: 500 1rem/1.3 var(--display); }
 .project-list button small { font: 400 .8rem/1.3 var(--text); color: var(--ink-2); }
 .project-list button:hover, .project-list .on { background: var(--sheet-2); }
@@ -92,7 +108,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .shelves button { padding: .35rem 0 .45rem; margin-bottom: -1px; color: var(--ink-2); border-bottom: 2px solid transparent; font-size: .9rem; }
 .shelves .on { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
 .all-projects .said { margin: .5rem 0 0; font-size: .86rem; color: var(--ink-2); }
-.all-list { list-style: none; margin: .3rem 0 0; padding: 0; overflow: auto; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.all-list { list-style: none; margin: .3rem 0 0; padding: 0; overflow: auto; }
 .all-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: .6rem; padding: .15rem 0; border-top: 1px solid var(--rule); }
 .all-list li:first-child { border-top: 0; }
 .all-list li.on .open span { font-weight: 600; }
@@ -153,7 +169,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 }
 .to-new svg { width: .95rem; height: .95rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .to-new:hover { background: var(--sheet-2); }
-.log { overflow: auto; padding: 1.6rem 2rem; display: grid; align-content: start; gap: 1.1rem; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.log { overflow: auto; padding: 1.6rem 2rem; display: grid; align-content: start; gap: 1.1rem; }
 .empty { margin: 18vh auto 0; max-width: 26rem; text-align: center; color: var(--ink-2); font: 400 1.15rem/1.55 var(--display); }
 .ask { padding: .9rem 1.2rem 1.1rem; min-height: 4.7rem; align-items: flex-end; }
 /* The room above and below the words is a clear border, not padding: it
@@ -163,10 +179,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .ask textarea:focus-visible { box-shadow: 0 0 0 2px var(--ink); }
 /* Long words: a quiet thin bar inside the rounded field, only when it
    scrolls, kept clear of its round ends, without arrows. */
-.ask textarea::-webkit-scrollbar { width: 10px; }
-.ask textarea::-webkit-scrollbar-track { margin: 1.1rem 0; background: transparent; }
-.ask textarea::-webkit-scrollbar-thumb { border: 3px solid transparent; border-radius: 5px; background: var(--rule) padding-box; }
-.ask textarea::-webkit-scrollbar-button { display: none; }
+.ask textarea::-webkit-scrollbar-track { margin: 1.1rem 0; }
 .ask .go { height: 2.75rem; }
 
 /* The conversation */
