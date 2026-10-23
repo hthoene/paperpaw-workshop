@@ -150,6 +150,9 @@ pub struct Emulator {
     /// The open project's plugin, the one the reader runs of those in its
     /// folder (`show_plugin`).
     plugin: Mutex<Option<String>>,
+    /// The open project, by its folder: another one starts with the home
+    /// screen as the reader has it, no widget shown alone (`show_project`).
+    project: Mutex<Option<String>>,
     /// The devices' bodies as the program said them, with the program
     /// they are of (`bodies`).
     bodies: Mutex<Option<(PathBuf, Value)>>,
@@ -170,6 +173,7 @@ impl Emulator {
             last_start: Mutex::new(None),
             home: Mutex::new(None),
             plugin: Mutex::new(None),
+            project: Mutex::new(None),
             bodies: Mutex::new(None),
         }
     }
@@ -249,6 +253,19 @@ impl Emulator {
         let mut shown = self.plugin.lock().map_err(|e| e.to_string())?;
         let other = shown.as_deref() != plugin;
         *shown = plugin.map(String::from);
+        Ok(other)
+    }
+
+    /// The reader shows project `project`: another than before, its home
+    /// screen is the reader's own again (a widget an earlier project's
+    /// conversation showed alone is not this one's); whether it is another.
+    pub fn show_project(&self, project: &str) -> Result<bool, String> {
+        let mut shown = self.project.lock().map_err(|e| e.to_string())?;
+        let other = shown.as_deref() != Some(project);
+        if other {
+            *shown = Some(project.to_string());
+            *self.home.lock().map_err(|e| e.to_string())? = None;
+        }
         Ok(other)
     }
 
@@ -574,7 +591,7 @@ pub async fn emulator_sync(emulator: State<'_, Emulator>, shown: State<'_, Shown
     let id = plugin_id(&files);
     // Only this project's plugin runs: those of projects open before are
     // switched off.
-    let other = emulator.show_plugin(id.as_deref())?;
+    let other = emulator.show_project(&project)? | emulator.show_plugin(id.as_deref())?;
     let Some(profile) = shown.0.lock().map_err(|e| e.to_string())?.clone() else { return Ok(()) };
     let library = crate::paths::emulator_library(&profile)?;
     let Some(id) = id else { return if other { emulator.reload() } else { Ok(()) } };
@@ -744,6 +761,17 @@ mod tests {
         assert!(emulator.show_plugin(Some("duck")).unwrap());
         assert!(!emulator.show_plugin(Some("duck")).unwrap());
         assert!(emulator.show_plugin(None).unwrap());
+    }
+
+    #[test]
+    fn another_project_shows_the_reader_s_own_home_screen() {
+        let emulator = Emulator::new(|| Err("none".into()), |_| {});
+        assert!(emulator.show_project("Duck facts").unwrap());
+        *emulator.home.lock().unwrap() = Some("duck.fact".into());
+        assert!(!emulator.show_project("Duck facts").unwrap(), "the same one keeps it");
+        assert_eq!(emulator.home.lock().unwrap().as_deref(), Some("duck.fact"));
+        assert!(emulator.show_project("Night owl").unwrap());
+        assert_eq!(*emulator.home.lock().unwrap(), None);
     }
 
     #[test]
