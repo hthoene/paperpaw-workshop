@@ -227,7 +227,7 @@ const sampleCode = exists("samples/hello-plugin/src/lib.rs")
 // are topics.
 const RECIPES = {
   "widget-fetch": "A widget with data from the web: JSON fetched over HTTP, shown wrapped",
-  settings: "Settings of a plugin's own (text, choice, switch, number), read by a widget",
+  settings: "A widget's own settings (text, choice, switch, number), in the widget's settings group",
 };
 const recipeFiles = (name) => {
   const dir = path.join(here, "recipes", name);

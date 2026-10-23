@@ -5,8 +5,12 @@
 //! - the plugin, which says it uses the network (`Uses::NETWORK`);
 //! - the widget (`Widget`, `WidgetSpec`, `add_widget`) with its look, as
 //!   every widget has it (frame, room, text size, alignment);
+//! - a setting of the widget's own, how often it fetches: in the widget's
+//!   settings group (`widgets::settings_group`, each setting's group the
+//!   widget's id), which the home screen's widget editor opens and the
+//!   Settings list leaves out;
 //! - the request (`Command::Http`) when PaperPaw starts and wakes, and
-//!   again later (`Command::Work`, only while there is a network);
+//!   again later as set (`Command::Work`, only while there is a network);
 //! - the reply, an event of the plugin's own (`Event<HttpReply>`): its
 //!   JSON read (`json::object`, `json::text`), kept, and the widget told
 //!   (`widgets::changed`);
@@ -27,6 +31,7 @@ use core::time::Duration;
 use paperpaw_sdk::builtin::events;
 use paperpaw_sdk::event::Event;
 use paperpaw_sdk::replies::HttpReply;
+use paperpaw_sdk::setting::{Setting, Text};
 use paperpaw_sdk::ui::UiStyle;
 use paperpaw_sdk::widgets::{self, Align, Frame, Padding, Size, Widget, WidgetSpec, Wrapped};
 use paperpaw_sdk::work::{Moments, Work};
@@ -45,30 +50,48 @@ const URL: &str = "https://quotes.example.org/api/today";
 const FETCHED: Event<HttpReply> = Event::new("quote.fetched");
 /// Time to fetch it again.
 const DUE: Event<()> = Event::new("quote.due");
-/// How often, at most.
-const EVERY: Duration = Duration::from_secs(6 * 60 * 60);
+/// How often it fetches, a setting of the widget's: one of [`EVERY_CHOICES`].
+const EVERY: Setting<Text> = Setting::new("quote.today.every");
+/// Each a translation key of its name.
+const EVERY_CHOICES: [&str; 3] = ["quote.every.hour", "quote.every.six-hours", "quote.every.wake"];
 
-/// The widget's look, as every widget has it: its frame, its room, its
-/// text size and alignment (`<widget>.frame` …, read by `draw_frame`).
-static LOOK: [SettingSpec; 4] = [
+/// The widget's settings, all in its own group (the group is the widget's
+/// id): how often it fetches, and its look, as every widget has it (its
+/// frame, its room, its text size and alignment, `<widget>.frame` …, read
+/// by `draw_frame`).
+static SETTINGS: [SettingSpec; 5] = [
+    SettingSpec::fixed_choice("quote.today.every", "quote.setting.every", &EVERY_CHOICES, EVERY_CHOICES[0], WIDGET)
+        .described("quote.setting.every.help"),
     widgets::frame_spec("quote.today.frame", WIDGET, Frame::None),
     widgets::padding_spec("quote.today.padding", WIDGET, Padding::Auto),
     widgets::size_spec("quote.today.size", WIDGET, Size::Medium, false),
     widgets::align_spec("quote.today.align", WIDGET, Align::Center),
 ];
 
+/// How long until it fetches again, as its setting says; none when it
+/// fetches only as the reader wakes.
+fn every(env: &Env<'_>) -> Option<Duration> {
+    match env.settings.read(&EVERY) {
+        "quote.every.wake" => None,
+        "quote.every.six-hours" => Some(Duration::from_secs(6 * 60 * 60)),
+        _ => Some(Duration::from_secs(60 * 60)),
+    }
+}
+
 /// What the handlers and the widget share: the text fetched last.
 type Shared = Rc<RefCell<Option<String>>>;
 
-/// Asks for the text, and for the next time: later, and only while
-/// there is a network (nothing wakes the device or the radio for it).
-fn fetch(out: &mut alloc::vec::Vec<Command>) {
+/// Asks for the text, and for the next time as set: later, and only
+/// while there is a network (nothing wakes the device or the radio for it).
+fn fetch(env: &Env<'_>, out: &mut alloc::vec::Vec<Command>) {
     out.push(Command::Http(HttpRequest::new("GET", URL, FETCHED)));
-    let next = Work::network(DUE.id().clone())
-        .optional()
-        .after(EVERY)
-        .at_moments(Moments::WAKE | Moments::ONLINE);
-    out.push(Command::Work(next));
+    if let Some(after) = every(env) {
+        let next = Work::network(DUE.id().clone())
+            .optional()
+            .after(after)
+            .at_moments(Moments::WAKE | Moments::ONLINE);
+        out.push(Command::Work(next));
+    }
 }
 
 /// The plugin.
@@ -91,7 +114,7 @@ impl Plugin for Quote {
 
         // When to fetch: at the start, on waking, and when it is due.
         for event in [events::STARTED, events::RESUME, DUE] {
-            r.on(event, |_, _, out| fetch(out))?;
+            r.on(event, |env, _, out| fetch(env, out))?;
         }
         // The reply: its JSON read, kept, the widget drawn anew.
         let kept = shared.clone();
@@ -111,10 +134,11 @@ impl Plugin for Quote {
             out.push(widgets::changed(&WIDGET));
         })?;
 
-        // The widget: its settings of look, and how it is made for a
-        // screen that shows it.
+        // The widget: its own settings group and its settings (not a
+        // page in Settings: the widget editor opens them), and how it is
+        // made for a screen that shows it.
         r.add_setting_group(widgets::settings_group(&WIDGET, "quote.widget"))?;
-        r.add_settings(&LOOK)?;
+        r.add_settings(&SETTINGS)?;
         r.add_widget(
             WidgetSpec::new(WIDGET, "quote.widget", move |_| {
                 Box::new(Today {

@@ -1,12 +1,19 @@
 `src/lib.rs`:
 
 ```rust
-//! Settings of a plugin's own, in a group of its own, and a widget that
-//! shows what they say: a motto, typed in (`text`), shown plain or in
+//! A widget's settings: a motto, typed in (`text`), shown plain or in
 //! quotes (`choice`), in capitals or not (`switch`), on at most so many
-//! lines (`number`). The settings screen lists the group; the kernel
-//! keeps the values; `env.settings.read` reads them; a widget is read
-//! anew (`update`) when a setting changes.
+//! lines (`number`). Settings of a widget belong to the widget: its own
+//! settings group (`widgets::settings_group`, the group's id the
+//! widget's), which the home screen's widget editor opens and the
+//! Settings list leaves out. The kernel keeps the values;
+//! `env.settings.read` reads them; a widget is read anew (`update`) when
+//! a setting changes.
+//!
+//! Only what applies to the whole plugin goes on a page in Settings: a
+//! group of its own with an icon, under Customise by its order (201 and
+//! up), e.g. `r.add_setting_group(SettingGroupSpec::new(GROUP,
+//! "my.title").order(210))?; r.add_icon(GROUP, Cow::Borrowed("star"))?;`.
 
 #![no_std]
 
@@ -21,21 +28,20 @@ use paperpaw_sdk::setting::{Setting, Text};
 use paperpaw_sdk::ui::UiStyle;
 use paperpaw_sdk::widgets::{self, Align, Frame, Padding, Size, Widget, WidgetSpec, Wrapped};
 use paperpaw_sdk::{
-    Canvas, Choices, Env, Id, Manifest, Plugin, Rect, RegisterError, Registrar, SettingGroupSpec,
-    SettingSpec, Version,
+    Canvas, Choices, Env, Id, Manifest, Plugin, Rect, RegisterError, Registrar, SettingSpec,
+    Version,
 };
 
 /// Ids start with the plugin's id: `motto.…`.
 pub const PLUGIN: Id = Id::new_static("motto");
-/// Its group of settings, listed in the settings by its title.
-pub const GROUP: Id = Id::new_static("motto.group");
-/// The widget.
+/// The widget; its settings group has its id.
 pub const WIDGET: Id = Id::new_static("motto.widget");
-/// The settings, each by its id and the type of its value.
-pub const TEXT: Setting<Text> = Setting::new("motto.text");
-pub const STYLE: Setting<Text> = Setting::new("motto.style");
-pub const CAPITALS: Setting<bool> = Setting::new("motto.capitals");
-pub const LINES: Setting<i64> = Setting::new("motto.lines");
+/// The widget's settings, each by its id (`<widget>.<key>`) and the type
+/// of its value.
+pub const TEXT: Setting<Text> = Setting::new("motto.widget.text");
+pub const STYLE: Setting<Text> = Setting::new("motto.widget.style");
+pub const CAPITALS: Setting<bool> = Setting::new("motto.widget.capitals");
+pub const LINES: Setting<i64> = Setting::new("motto.widget.lines");
 /// The choices of `STYLE`, each the translation key of its name.
 static STYLES: [&str; 2] = ["motto.style.plain", "motto.style.quoted"];
 
@@ -63,22 +69,21 @@ impl Plugin for Motto {
     }
 
     fn register(&self, r: &mut Registrar) -> Result<(), RegisterError> {
-        // The group, then each setting in it: its title and help are
-        // translation keys; the last values are the defaults.
-        r.add_setting_group(SettingGroupSpec::new(GROUP, "motto.title"))?;
+        // The widget's settings group, then each setting in it: its title
+        // and help are translation keys; the last values are the defaults.
+        r.add_setting_group(widgets::settings_group(&WIDGET, "motto.widget"))?;
         r.add_setting(
             SettingSpec::text(&TEXT, "motto.setting.text", "Read a little every day")
-                .group(GROUP)
+                .group(WIDGET)
                 .description("motto.setting.text.help"),
         )?;
         r.add_setting(
             SettingSpec::choice(&STYLE, "motto.setting.style", Choices::from(&STYLES[..]), STYLES[0])
-                .group(GROUP),
+                .group(WIDGET),
         )?;
-        r.add_setting(SettingSpec::switch(&CAPITALS, "motto.setting.capitals", false).group(GROUP))?;
-        r.add_setting(SettingSpec::number(&LINES, "motto.setting.lines", 1, 6, 3).group(GROUP))?;
-
-        r.add_setting_group(widgets::settings_group(&WIDGET, "motto.widget"))?;
+        r.add_setting(SettingSpec::switch(&CAPITALS, "motto.setting.capitals", false).group(WIDGET))?;
+        r.add_setting(SettingSpec::number(&LINES, "motto.setting.lines", 1, 6, 3).group(WIDGET))?;
+        // Its look, as every widget has it, in the same group.
         r.add_settings(&LOOK)?;
         r.add_widget(
             WidgetSpec::new(WIDGET, "motto.widget", |_| Box::new(Shown::default()))
@@ -187,7 +192,6 @@ plural = one-other
 [messages]
 motto.plugin.name = Motto
 motto.plugin.description = A motto of your own as a widget.
-motto.title = Motto
 motto.widget = Motto
 motto.setting.text = Words
 motto.setting.text.help = What the widget says.
@@ -201,5 +205,5 @@ motto.setting.lines = Lines at most
 `how/en.txt`:
 
 ```text
-A widget with a motto of your own. Set its words and how it looks in the settings, under Motto.
+A widget with a motto of your own. Place it on the home screen, then edit it there to set its words and how it looks.
 ```

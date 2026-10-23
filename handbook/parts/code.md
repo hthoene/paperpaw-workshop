@@ -77,6 +77,15 @@ is the only crate there is: no `std`, no other crates. `alloc` is there
    text every reply brings, or, where each reply differs (a random fact),
    `look` again a moment later rather than wait for a text an earlier
    reply had. Say to the person what you saw come back.
+Settings of a widget belong to the widget: put them in its settings
+group (`widgets::settings_group` with the widget's id, each setting's
+group the widget's id, its id `<widget>.<key>`), as both recipes do. The
+home screen's widget editor opens that group, and Settings does not list
+it; to see it, `control` `slot` `core.settings` with `params` `{id: <the
+widget's id>}`. Use a page in Settings only for what applies to the whole
+plugin, and then give it a group of its own with an icon (`add_icon`),
+placed under Customise by its order (201 and up).
+
 6. Leave the reader showing it (a widget with `control` `widget`, a
    screen with `control` `show`), then tell the person what it does,
    what they see now and how they reach it on their reader.
