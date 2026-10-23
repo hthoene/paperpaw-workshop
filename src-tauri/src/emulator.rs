@@ -22,8 +22,12 @@ use serde::Serialize;
 use serde_json::{Value, json};
 use tauri::{AppHandle, Emitter, State};
 
-/// The protocol of `paperpaw-emu --stdio` the workshop speaks.
+/// The protocol of `paperpaw-emu --stdio` the workshop speaks at least.
+/// A newer one only adds requests and fields (PaperPaw's stdio docs), so
+/// an emulator of a newer one is taken too.
 pub const PROTOCOL: u64 = 1;
+/// The protocol that has `slot` (and `set`, `setting`, `wait`, …).
+pub const SLOTS: u64 = 2;
 
 /// The readers the window offers, by the profiles' ids.
 pub const PROFILES: [&str; 3] = ["xteink-x4", "xteink-x4-pro", "boox-go-7"];
@@ -146,6 +150,9 @@ pub struct Emulator {
     /// The open project's plugin, the one the reader runs of those in its
     /// folder (`show_plugin`).
     plugin: Mutex<Option<String>>,
+    /// The devices' bodies as the program said them, with the program
+    /// they are of (`bodies`).
+    bodies: Mutex<Option<(PathBuf, Value)>>,
 }
 
 impl Emulator {
@@ -163,6 +170,7 @@ impl Emulator {
             last_start: Mutex::new(None),
             home: Mutex::new(None),
             plugin: Mutex::new(None),
+            bodies: Mutex::new(None),
         }
     }
 
@@ -293,6 +301,49 @@ impl Emulator {
         self.send(&json!({"op": "open", "screen": screen, "params": params}))
     }
 
+    /// Opens the screen bound to `slot` (`core.settings`), as a plugin
+    /// would; false where the emulator's protocol has no `slot` yet.
+    pub fn slot(&self, slot: &str, params: &Value) -> Result<bool, String> {
+        let speaks = self.ready().is_some_and(|r| r.protocol >= SLOTS);
+        if speaks {
+            self.send(&json!({"op": "slot", "slot": slot, "params": params}))?;
+        }
+        Ok(speaks)
+    }
+
+    /// Each device's body around its screen and its keys where they sit
+    /// (PaperPaw's docs/web-emulator.md, "The body and its keys"), by
+    /// profile id, as `paperpaw-emu --registry` says them; asked once of
+    /// each program. None for a device whose emulator says no body (one
+    /// from before bodies).
+    pub fn bodies(&self) -> Result<Value, String> {
+        let program = (self.program)()?;
+        let mut kept = self.bodies.lock().map_err(|e| e.to_string())?;
+        if let Some((_, bodies)) = kept.as_ref().filter(|(of, _)| *of == program) {
+            return Ok(bodies.clone());
+        }
+        let folder = std::env::temp_dir().join(format!("paperpaw-workshop-registry-{}", std::process::id()));
+        std::fs::create_dir_all(&folder).map_err(|e| e.to_string())?;
+        let file = folder.join("registry.json");
+        let mut command = Command::new(&program);
+        command.arg("--registry").arg(&file).stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null());
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            command.creation_flags(0x0800_0000);
+        }
+        let status = command.status().map_err(|e| format!("{}: {e}", program.display()))?;
+        let text = std::fs::read_to_string(&file);
+        let _ = std::fs::remove_dir_all(&folder);
+        let registry: Value = match (status.success(), text) {
+            (true, Ok(text)) => serde_json::from_str(&text).map_err(|e| e.to_string())?,
+            _ => return Err(format!("{} --registry did not answer", program.display())),
+        };
+        let bodies = bodies_of(&registry);
+        *kept = Some((program, bodies.clone()));
+        Ok(bodies)
+    }
+
     /// Who answers, once the program said it.
     pub fn ready(&self) -> Option<Ready> {
         self.shared.lock().ok().and_then(|s| s.ready.clone())
@@ -344,7 +395,7 @@ fn read_events(out: impl BufRead, shared: &Mutex<Shared>, tell: &(dyn Fn(Event) 
                     fingerprint: text("fingerprint"),
                     toolchain: text("toolchain"),
                 };
-                if ready.protocol != PROTOCOL {
+                if ready.protocol < PROTOCOL {
                     tell(Event::Error(format!(
                         "This PaperPaw emulator speaks protocol {}, the workshop {PROTOCOL}: choose another PaperPaw version.",
                         ready.protocol
@@ -542,6 +593,24 @@ pub fn same_plugin(folder: &Path, files: &[(String, Vec<u8>)]) -> bool {
     there.len() == files.len() && files.iter().all(|(path, bytes)| std::fs::read(folder.join(path)).is_ok_and(|b| &b == bytes))
 }
 
+/// Of a registry (`paperpaw-emu --registry`), each profile's body, by
+/// its id: those that have one.
+pub fn bodies_of(registry: &Value) -> Value {
+    let bodies = registry["profiles"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|p| Some((p["id"].as_str()?.to_string(), p.get("body").filter(|b| b.is_object())?.clone())))
+        .collect::<serde_json::Map<_, _>>();
+    Value::Object(bodies)
+}
+
+/// The devices' bodies with their keys, by profile id.
+#[tauri::command]
+pub async fn emulator_bodies(emulator: State<'_, Emulator>) -> Result<Value, String> {
+    emulator.bodies()
+}
+
 /// Shows widget `widget` (`<plugin>.<name>`) alone on the first page of
 /// the home screen of the reader beside the conversation.
 #[tauri::command]
@@ -569,6 +638,12 @@ pub async fn emulator_shot(emulator: State<'_, Emulator>) -> Result<String, Stri
 #[tauri::command]
 pub async fn emulator_open(emulator: State<'_, Emulator>, screen: String, params: Option<Value>) -> Result<(), String> {
     emulator.open(&screen, &params.unwrap_or_else(|| json!({})))
+}
+
+/// Opens a slot's screen; false where the emulator cannot (an older one).
+#[tauri::command]
+pub async fn emulator_slot(emulator: State<'_, Emulator>, slot: String, params: Option<Value>) -> Result<bool, String> {
+    emulator.slot(&slot, &params.unwrap_or_else(|| json!({})))
 }
 
 #[tauri::command]
@@ -622,6 +697,33 @@ mod tests {
         let s = shared.lock().unwrap();
         assert_eq!(s.ready.as_ref().unwrap().paperpaw, "0.4.0");
         assert_eq!(s.warnings, ["a plugin warned"]);
+    }
+
+    #[test]
+    fn a_registry_s_bodies_by_profile() {
+        let registry = json!({"profiles": [
+            {"id": "xteink-x4", "body": {"bezel": [7, 7, 30, 7], "keys": [{"button": "back", "place": "below", "at": 19, "length": 17, "keys": ["Escape"]}]}},
+            {"id": "old-one"},
+        ]});
+        let bodies = bodies_of(&registry);
+        assert_eq!(bodies["xteink-x4"]["keys"][0]["button"], "back");
+        assert!(bodies.get("old-one").is_none());
+        assert_eq!(bodies_of(&json!({})), json!({}));
+    }
+
+    #[test]
+    fn the_emulator_says_its_devices_bodies() {
+        let Some(program) = program() else {
+            eprintln!("skipped: PAPERPAW_EMU names no emulator");
+            return;
+        };
+        let emulator = Emulator::new(move || Ok(program.clone()), |_| {});
+        let bodies = emulator.bodies().unwrap();
+        // An emulator from before bodies says none: nothing to check then.
+        if let Some(x4) = bodies.get("xteink-x4") {
+            assert!(x4["keys"].as_array().is_some_and(|k| !k.is_empty()));
+        }
+        assert_eq!(emulator.bodies().unwrap(), bodies, "asked once, kept");
     }
 
     #[test]
@@ -686,7 +788,7 @@ mod tests {
         };
         assert_eq!((frame.width, frame.height), (480, 800));
         assert!(frame.buttons.iter().any(|b| b == "page-forward"));
-        assert_eq!(emulator.ready().unwrap().protocol, PROTOCOL);
+        assert!(emulator.ready().unwrap().protocol >= PROTOCOL);
         let parts = emulator.describe().unwrap();
         assert!(parts["parts"].as_array().is_some_and(|p| !p.is_empty()));
         assert!(emulator.shot().unwrap().starts_with("iVBOR"), "a PNG");

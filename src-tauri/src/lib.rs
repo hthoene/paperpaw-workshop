@@ -47,6 +47,8 @@ pub fn run() {
             emulator::emulator_run,
             emulator::emulator_told,
             emulator::emulator_ready,
+            emulator::emulator_bodies,
+            emulator::emulator_slot,
             emulator::emulator_widget,
             checks::plugin_check,
             code::code_build,

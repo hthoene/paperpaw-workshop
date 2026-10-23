@@ -122,9 +122,14 @@ export class NativeEmulator implements Emulator {
         await settle();
         return { ok: true };
       case "slot": {
-        const screen = SLOT_SCREENS[id!];
-        if (!screen) throw new NotYet(`The slot "${id}"`);
-        await this.backend.emulatorOpen(screen, Object.fromEntries(rest.map(unpair)));
+        const params = Object.fromEntries(rest.map(unpair));
+        // The emulator's own, where its protocol has slots; else the
+        // screen PaperPaw's own plugins bind to it.
+        if (!(await this.backend.emulatorSlot(id!, params))) {
+          const screen = SLOT_SCREENS[id!];
+          if (!screen) throw new NotYet(`The slot "${id}"`);
+          await this.backend.emulatorOpen(screen, params);
+        }
         await settle();
         return { ok: true };
       }
@@ -166,8 +171,8 @@ export class NativeEmulator implements Emulator {
   }
 }
 
-/** The screens PaperPaw's own plugins bind to its slots: the emulator
- *  opens screens, not slots (their `bind_slot`). */
+/** The screens PaperPaw's own plugins bind to its slots, for an emulator
+ *  that opens screens, not slots (protocol 1; their `bind_slot`). */
 const SLOT_SCREENS: Record<string, string> = {
   "core.settings": "settings.list",
   "core.home": "home.dashboard",

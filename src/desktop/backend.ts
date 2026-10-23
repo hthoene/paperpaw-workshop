@@ -51,6 +51,25 @@ export interface Frame {
 
 export type Phase = "down" | "move" | "up" | "cancel";
 
+/** Where a device's key sits on its body (PaperPaw's docs/web-emulator.md,
+ *  "The body and its keys"): an edge, or the face below or beside the
+ *  screen; its middle and length along that place, in hundredths. */
+export interface BodyKey {
+  button: string;
+  place: "top" | "right" | "bottom" | "left" | "below" | "beside";
+  at: number;
+  length: number;
+  /** The computer's keys that press it, as KeyboardEvent.key names them. */
+  keys: string[];
+}
+
+/** A device's body around its screen: the bezel, top, right, bottom and
+ *  left, in hundredths of the screen's width, and its keys. */
+export interface Body {
+  bezel: [number, number, number, number];
+  keys: BodyKey[];
+}
+
 /** What building for the readers needs (src-tauri's device.rs). */
 export interface DeviceReadiness {
   x4: boolean;
@@ -100,6 +119,12 @@ export interface Backend extends FolderApi, PictureApi, CheckApi, HistoryApi {
    *  reader starts again so. */
   emulatorWidget(widget: string): Promise<void>;
   emulatorRun(action: string): Promise<void>;
+  /** Opens the screen bound to `slot`; false where the emulator has no
+   *  slots yet (an older protocol). */
+  emulatorSlot(slot: string, params?: Record<string, string>): Promise<boolean>;
+  /** The devices' bodies with their keys, by profile id; none for an
+   *  emulator from before bodies. */
+  emulatorBodies(): Promise<Record<string, Body>>;
   /** The plugins' warnings and requests since asked last. */
   emulatorTold(): Promise<[string[], string[]]>;
   /** Which PaperPaw answers, once it said so. */
@@ -215,6 +240,8 @@ export const appBackend: Backend = {
   emulatorOpen: (screen, params) => invoke("emulator_open", { screen, params }),
   emulatorWidget: (widget) => invoke("emulator_widget", { widget }),
   emulatorRun: (action) => invoke("emulator_run", { action }),
+  emulatorSlot: (slot, params) => invoke("emulator_slot", { slot, params }),
+  emulatorBodies: () => invoke("emulator_bodies"),
   emulatorTold: () => invoke("emulator_told"),
   emulatorReady: () => invoke("emulator_ready"),
   sendWifi: (project, address) => invoke("send_wifi", { project, address }),
@@ -337,6 +364,8 @@ export function standInBackend(): Backend {
     emulatorOpen: async () => {},
     emulatorWidget: async () => {},
     emulatorRun: async () => {},
+    emulatorSlot: async () => false,
+    emulatorBodies: async () => ({}),
     emulatorTold: async () => [[], []],
     emulatorReady: async () => null,
     sendWifi: async () => { throw new Error("Sending to a reader needs the app."); },

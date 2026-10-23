@@ -203,7 +203,8 @@ conversation shows, as a catalog key.
 The reader is PaperPaw's own emulator, `paperpaw-emu`, as a program of its
 own ([src-tauri/src/emulator.rs](../src-tauri/src/emulator.rs)). The
 workshop runs it with `--stdio` and talks to it one JSON object a line each
-way (PaperPaw's `shells/desktop/src/stdio.rs`, protocol 1):
+way (PaperPaw's `shells/desktop/src/stdio`, protocol 1 at least: a
+newer one only adds, and with 2 `slot` opens a slot's screen itself):
 
 - requests: `start` (a device, its library, its settings, whether it may
   load code), `button`, `pointer`, `reload`, `describe`, `run`, `open`,
@@ -216,6 +217,17 @@ The plugin being made is copied into the emulated reader's own folder
 (`plugins/<id>/`, as on a reader's card), and the reader started again on
 it, only when its files changed. If the program stops, the next request
 starts it again.
+
+The device is drawn in its body, with its keys where they sit on the
+real one, as the emulator says (`paperpaw-emu --registry`, each
+profile's `body`, asked once of each program): the X4's four keys below
+the screen and its power key and rocker on the right edge, the X4 Pro's
+page keys on both edges, power on top and home below, the Boox Go 7's
+page keys beside the screen ([src/desktop/body.ts](../src/desktop/body.ts),
+the layout of PaperPaw's web frame). Each key takes the mouse, a touch
+and the computer's keys the profile binds, and presses the same button
+the AI's `press` names. An emulator from before bodies shows the screen
+in a plain frame, its buttons on the keyboard alone.
 
 The AI's tools see it as an `Emulator`
 ([src/emulator/emulator.ts](../src/emulator/emulator.ts)):
