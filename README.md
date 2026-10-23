@@ -109,4 +109,16 @@ PaperPaw build it brings along; with the update key in
 `TAURI_SIGNING_PRIVATE_KEY` it is signed for updates, and
 `dist-installer/` holds what a release attaches.
 
+A release is a tag `v<version>`, the version of
+`src-tauri/tauri.conf.json`. Its workflow
+([`.github/workflows/release.yml`](.github/workflows/release.yml))
+builds the Windows installer with the emulator of the PaperPaw release
+that [`paperpaw-release.txt`](paperpaw-release.txt) names. It fetches
+that emulator from PaperPaw's release and takes it only where its
+checksum and PaperPaw's signature hold. It signs the installer for
+updates with the repository's secret `TAURI_SIGNING_PRIVATE_KEY`, and
+attaches the installer, its signature and `latest.json`, which
+installed workshops ask for. There are no installers for macOS or Linux
+yet.
+
 Licensed under the [Apache License 2.0](LICENSE).

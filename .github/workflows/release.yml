@@ -1,0 +1,91 @@
+# The workshop's release, on a tag v<version> (the version of
+# src-tauri/tauri.conf.json, e.g. v0.1.0-beta.1): the Windows installer
+# with PaperPaw's emulator and paperpaw-dev of the PaperPaw release
+# paperpaw-release.txt names, fetched from that release and taken only
+# where its checksum and its signature by PaperPaw's release key hold
+# (scripts/paperpaw-release.mjs). The installer is signed for the
+# workshop's own updates with the key in the secret
+# TAURI_SIGNING_PRIVATE_KEY (its password, if it has one, in
+# TAURI_SIGNING_PRIVATE_KEY_PASSWORD), and attached to a release of the
+# tag with its signature and latest.json, which installed workshops ask
+# for (tauri.conf.json's updater: releases/latest/download/latest.json).
+#
+# Windows only for now. PaperPaw's releases have emulators for macOS and
+# Linux too; their installers can follow as jobs of their own.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    name: Windows installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - name: The tag is the app's version
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          conf="$(node -p 'require("./src-tauri/tauri.conf.json").version')"
+          if [[ "$version" != "$conf" ]]; then
+            echo "::error::the tag is $GITHUB_REF_NAME, src-tauri/tauri.conf.json says $conf"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          echo "PAPERPAW=$(tr -d '[:space:]' < paperpaw-release.txt)" >> "$GITHUB_ENV"
+      - name: PaperPaw's emulator, from its release, checked
+        shell: pwsh
+        run: |
+          $zip = node scripts/paperpaw-release.mjs $env:PAPERPAW windows-x64 "$env:RUNNER_TEMP/paperpaw"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          Expand-Archive -Path $zip -DestinationPath "$env:RUNNER_TEMP/paperpaw/bin"
+          Add-Content -Path $env:GITHUB_ENV -Value "PAPERPAW_EMU=$env:RUNNER_TEMP/paperpaw/bin/paperpaw-emu.exe"
+      # paperpaw-sign packs plugins with code for the readers (Publish…).
+      # Taken from the release where its emulator zip has it; until then
+      # built from the release's tag.
+      - name: paperpaw-sign of that release
+        shell: bash
+        run: |
+          bin="$RUNNER_TEMP/paperpaw/bin"
+          if [[ ! -f "$bin/paperpaw-sign.exe" ]]; then
+            cargo install --locked --git https://github.com/hthoene/paperpaw --tag "v$PAPERPAW" \
+              paperpaw-sign --root "$RUNNER_TEMP/sign"
+            cp "$RUNNER_TEMP/sign/bin/paperpaw-sign.exe" "$bin/"
+          fi
+      - run: npm ci
+      - run: npm test
+      - name: The installer, signed for updates
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          if [[ -z "$TAURI_SIGNING_PRIVATE_KEY" ]]; then
+            echo "::error::no TAURI_SIGNING_PRIVATE_KEY: installed workshops take only signed updates"
+            exit 1
+          fi
+          npm run app:installer
+      # Not marked as a pre-release, betas neither: installed workshops ask
+      # for releases/latest, which GitHub never points at a pre-release.
+      - name: Make the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" --latest \
+            --title "PaperPaw Workshop $VERSION" \
+            --notes "PaperPaw Workshop $VERSION, with PaperPaw $PAPERPAW. Download paperpaw-workshop-$VERSION-setup.exe for Windows 10 or 11." \
+            dist-installer/*

@@ -61,11 +61,12 @@ const said = { paperpaw: ready.paperpaw, protocol: ready.protocol, fingerprint: 
 writeFileSync(join(into, "version.json"), `${JSON.stringify(said, null, 2)}\n`);
 console.log(`installer: PaperPaw ${ready.paperpaw} (${ready.fingerprint})`);
 
-// A PaperPaw in work: its SDK is not on crates.io, so it comes along.
+// A PaperPaw in work (`-dev`): its SDK is not on crates.io, so it comes
+// along. A release, betas included, is there: plugins name its version.
 const sdk = join(root, "src-tauri", "resources", "sdk");
 const readme = readFileSync(join(sdk, "README.md"), "utf8");
 for (const name of readdirSync(sdk)) if (name !== "README.md") rmSync(join(sdk, name), { recursive: true });
-if (ready.paperpaw.includes("-")) {
+if (ready.paperpaw.includes("-dev")) {
   const checkout = process.env.PAPERPAW_SRC ?? resolve(dirname(emu), "..", "..");
   const crates = bundleSdk(checkout, sdk, ready.paperpaw);
   // The README stays: bundleSdk empties the folder.
