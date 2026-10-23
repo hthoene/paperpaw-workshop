@@ -8,11 +8,13 @@ mod key;
 mod paths;
 mod pictures;
 mod projects;
+mod send;
 
 use tauri::Manager;
 
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             app.manage(emulator::for_app(app.handle().clone()));
             app.manage(emulator::Shown(std::sync::Mutex::new(None)));
@@ -33,6 +35,9 @@ pub fn run() {
             emulator::emulator_told,
             emulator::emulator_ready,
             checks::plugin_check,
+            send::send_wifi,
+            send::send_card,
+            send::save_file,
             pictures::picture_make,
             pictures::picture_info,
             projects::projects_list,

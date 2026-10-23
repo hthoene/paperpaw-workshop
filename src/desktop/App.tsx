@@ -14,6 +14,7 @@ import { CHOICES, offered, saveChoice, savedChoice, usable, type ModelChoice } f
 import { Drawer } from "./Drawer";
 import { Projects } from "./Projects";
 import { Reader } from "./Reader";
+import { exportZip, Send } from "./Send";
 import { Workspace } from "./workspace";
 
 interface Props {
@@ -118,6 +119,14 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
   const [menu, setMenu] = useState(false);
   const [files, setFiles] = useState(false);
   const [settings, setSettings] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [notice, setNotice] = useState("");
+  // One panel at a time over the reader's side.
+  const only = (which: "files" | "settings" | "send", on: boolean) => {
+    setFiles(which === "files" && on);
+    setSettings(which === "settings" && on);
+    setSending(which === "send" && on);
+  };
 
   useEffect(() => {
     const stops = [
@@ -146,16 +155,16 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
       <header class="bar">
         <Projects workspace={workspace} />
         <Checks checker={checker} />
-        <button type="button" class="link" aria-expanded={files} onClick={() => setFiles(!files)}>Files</button>
-        <button type="button" class="send">Send to reader</button>
+        <button type="button" class="link" aria-expanded={files} onClick={() => only("files", !files)}>Files</button>
+        <button type="button" class="send" aria-expanded={sending} onClick={() => only("send", !sending)}>Send to reader</button>
         <div class="menu">
           <button type="button" class="dots" aria-label="Menu" aria-expanded={menu} onClick={() => setMenu(!menu)}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" /></svg>
           </button>
           {menu && (
             <div class="menu-list" role="menu">
-              <button type="button" role="menuitem">Export zip</button>
-              <button type="button" role="menuitem" onClick={() => { setMenu(false); setSettings(true); }}>Settings</button>
+              <button type="button" role="menuitem" onClick={() => { setMenu(false); void exportZip(desk, backend).then(setNotice, (e: unknown) => setNotice(String(e))); }}>Export zip</button>
+              <button type="button" role="menuitem" onClick={() => { setMenu(false); only("settings", true); }}>Settings</button>
               <button type="button" role="menuitem" onClick={() => { setMenu(false); onForgetKey(); }}>Remove key</button>
             </div>
           )}
@@ -164,6 +173,15 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
       <div class="main">
         <Conversation desk={desk} />
         <Reader backend={backend} shown={desk.shown} onChoose={(id) => void desk.choose(id)} />
+        {notice && (
+          <p class="notice" role="status">
+            {notice}
+            <button type="button" class="close" aria-label="Close" onClick={() => setNotice("")}>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+            </button>
+          </p>
+        )}
+        {sending && <Send desk={desk} backend={backend} onClose={() => setSending(false)} />}
         {settings && <Settings workspace={workspace} keyKind={keyKind} onClose={() => setSettings(false)} />}
         {files && <Drawer workspace={workspace} pictures={backend} onClose={() => setFiles(false)} />}
       </div>

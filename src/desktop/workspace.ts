@@ -2,7 +2,7 @@
 // first file (then a folder is made), one picked from the list, or a new
 // one. Saves after every change, only what changed (see folders.ts).
 
-import { identity, type Kind, type Project } from "../project/project";
+import { shownName, type Kind, type Project } from "../project/project";
 import { Uploads } from "../project/uploads";
 import { Folders, type FolderApi, type Listed } from "./folders";
 
@@ -41,7 +41,7 @@ export class Workspace {
   /** The name the bar shows: the plugin's own, else its folder's. */
   get name(): string {
     if (!this.project) return "New plugin";
-    return identity(this.project).name ?? this.project.key;
+    return shownName(this.project) ?? this.project.key;
   }
 
   /** The project, made now if there is none yet. */

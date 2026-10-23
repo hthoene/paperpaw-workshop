@@ -26,6 +26,10 @@ png = "0.17"
 # Pictures for plugins, made smaller on the computer (pictures.rs).
 image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp", "gif"] }
 oxipng = { version = "9", default-features = false, features = ["parallel"] }
+# Choosing where a plugin goes (a zip, a reader's card).
+tauri-plugin-dialog = "2"
+# Sending a plugin to a reader over Wi-Fi (its transfer page's API).
+ureq = { version = "2", default-features = false }
 
 [dev-dependencies]
 tempfile = "3"

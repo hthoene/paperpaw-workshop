@@ -113,6 +113,15 @@ export function identity(project: Project): { id?: string; name?: string; versio
   };
 }
 
+/** The plugin's name as people read it: plugin.ini's `name`, which may be
+ *  a key of its English catalog (`i18n/en.ini`), then that text. */
+export function shownName(project: Project): string | undefined {
+  const name = identity(project).name;
+  if (!name) return undefined;
+  const catalog = project.files[project.kind === "code" ? "plugin/i18n/en.ini" : "i18n/en.ini"];
+  return (typeof catalog === "string" ? iniValue(parseIni(catalog), "messages", name) : undefined) ?? name;
+}
+
 /** The files as the AI and the emulator see them: text as text, the
  *  rest as bytes. Writing checks the store's rules first. */
 export class Files {

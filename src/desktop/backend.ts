@@ -4,6 +4,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { open, save } from "@tauri-apps/plugin-dialog";
 
 import type { CheckApi } from "./checks";
 import type { FolderApi } from "./folders";
@@ -44,6 +45,16 @@ export interface Backend extends FolderApi, PictureApi, CheckApi {
   emulatorTold(): Promise<[string[], string[]]>;
   /** Which PaperPaw answers, once it said so. */
   emulatorReady(): Promise<Ready | null>;
+  /** The project's plugin to a reader over Wi-Fi, at the transfer address
+   *  it shows; the plugin's id. */
+  sendWifi(project: string, address: string): Promise<string>;
+  /** The project's plugin onto a reader's card at `card`; where it went. */
+  sendCard(project: string, card: string): Promise<string>;
+  /** Where to save a file, asked of the person; null if they did not say. */
+  askSave(name: string): Promise<string | null>;
+  /** A folder (a reader's card), asked of the person. */
+  askFolder(): Promise<string | null>;
+  saveFile(path: string, base64: string): Promise<void>;
 }
 
 /** A part of the screen, as PaperPaw describes it. */
@@ -88,6 +99,14 @@ export const appBackend: Backend = {
   emulatorRun: (action) => invoke("emulator_run", { action }),
   emulatorTold: () => invoke("emulator_told"),
   emulatorReady: () => invoke("emulator_ready"),
+  sendWifi: (project, address) => invoke("send_wifi", { project, address }),
+  sendCard: (project, card) => invoke("send_card", { project, card }),
+  askSave: (name) => save({ defaultPath: name, filters: [{ name: "Plugin", extensions: ["zip"] }] }),
+  askFolder: async () => {
+    const chosen = await open({ directory: true, title: "The reader's card" });
+    return typeof chosen === "string" ? chosen : null;
+  },
+  saveFile: (path, base64) => invoke("save_file", { path, base64 }),
   projectsList: () => invoke("projects_list"),
   projectCreate: (name, meta) => invoke("project_create", { name, meta }),
   projectFiles: (project) => invoke("project_files", { project }),
@@ -145,6 +164,11 @@ export function standInBackend(): Backend {
     emulatorRun: async () => {},
     emulatorTold: async () => [[], []],
     emulatorReady: async () => null,
+    sendWifi: async () => { throw new Error("Sending to a reader needs the app."); },
+    sendCard: async () => { throw new Error("Sending to a reader needs the app."); },
+    askSave: async () => null,
+    askFolder: async () => null,
+    saveFile: async () => {},
     projectsList: async () => [...folders].map(([folder, f]) => ({ folder, meta: f.meta })),
     projectCreate: async (name, meta) => {
       let folder = name || "New plugin";

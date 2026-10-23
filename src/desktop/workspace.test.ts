@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { standInBackend } from "./backend";
+import { newProject, shownName } from "../project/project";
 import { Workspace } from "./workspace";
 
 const notMeasured = async () => ({ width: 0, height: 0 });
@@ -35,5 +36,17 @@ describe("the workspace", () => {
     await workspace.open("Clock");
     expect(workspace.project?.key).toBe("Clock");
     expect(workspace.name).toBe("Clock");
+  });
+});
+
+describe("a plugin's name", () => {
+  it("is read from its English catalog where plugin.ini names a key", () => {
+    const project = newProject();
+    project.files["plugin.ini"] = "[plugin]\nid = calm\nname = calm.name\n";
+    expect(shownName(project)).toBe("calm.name");
+    project.files["i18n/en.ini"] = "[meta]\nlanguage = en\n\n[messages]\ncalm.name = Calm look\n";
+    expect(shownName(project)).toBe("Calm look");
+    project.files["plugin.ini"] = "[plugin]\nid = calm\nname = Just a name\n";
+    expect(shownName(project)).toBe("Just a name");
   });
 });
