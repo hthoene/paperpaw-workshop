@@ -89,7 +89,22 @@ of these calls (`Backend`), and a stand-in for a plain browser
 The messages are only ever added to, never changed. That keeps the prompt
 cache working (the handbook is cached once and read cheaply after) and keeps
 the AI's thinking valid from one round to the next. Thinking blocks are
-never taken out.
+never taken out. Old tool results are cleared on Anthropic's side once the
+prompt grows (`CLEARING`), never what the docs and the project's files
+said (`KEPT_TOOLS`): cleared, the model would look them up again and again.
+
+The loop keeps a turn from going round in circles:
+
+- a lookup or a file read asked again in the same turn with the same input
+  is answered with where its first answer is (until a file changes);
+- after 15 looks without a change, a tool result tells the model to write
+  with what it has, or to ask the person;
+- a turn that cost more than $0.25 without changing a file pauses
+  (`paused`): the conversation says what it cost, calmly, and "Go on".
+
+The conversation shows the same tool used several times in a row as one
+line, with how many and what about
+([src/app/conversation.ts](../src/app/conversation.ts)).
 
 A **provider** ([src/ai/provider.ts](../src/ai/provider.ts)) is who answers:
 
@@ -100,8 +115,11 @@ A **provider** ([src/ai/provider.ts](../src/ai/provider.ts)) is who answers:
 - `ReplayProvider`: a recorded conversation (`src/ai/examples/*.json`), for
   tests and for `?example=` in `npm run dev`.
 
-A project is a data plugin or a plugin with code (`Project.kind`). The
-kind picks the model (Haiku for data, Sonnet for code; another in
+A project is a data plugin or a plugin with code (`Project.kind`). A new
+one takes the kind its first words ask for
+([src/desktop/kind.ts](../src/desktop/kind.ts)): one short question to
+Haiku ("code" or "data"), else the words; "New plugin with code" sets it
+at once. The bar shows it beside the name. The kind picks the model (Haiku for data, Sonnet for code; another in
 Settings, [src/desktop/models.ts](../src/desktop/models.ts)), the tools
 (`DATA_TOOLS` or `CODE_TOOLS`), the system prompt
 (`handbook.promptFor(kind)`) and how much the model thinks
@@ -210,7 +228,14 @@ in `emulator/` beside the app. `paperpaw-dev` lies beside it.
 `npm run app:installer` ([scripts/installer.mjs](../scripts/installer.mjs))
 copies `paperpaw-emu` and `paperpaw-dev` of the build `PAPERPAW_EMU` names
 into `src-tauri/resources/emulator/` (with `version.json`: PaperPaw's
-version, its fingerprint, its compiler) and runs `tauri build`. The
+version, its fingerprint, its compiler) and runs `tauri build`. For a
+PaperPaw in work (`0.4.0-dev`), whose SDK is not on crates.io, it also
+brings that SDK ([scripts/sdk.mjs](../scripts/sdk.mjs)): the SDK's crates
+and those they need, of the checkout the emulator was built in
+(`PAPERPAW_SRC`, else two folders above it), unchanged, as the
+fingerprint of a PaperPaw in work hashes their very files; and the
+workspace's Cargo.toml with them as its only members. It lies in `sdk/`
+beside the app, with `version.txt`. The
 installer is NSIS, for the person alone (no administrator), and fetches
 Microsoft's WebView2 only where Windows lacks it. It is not signed yet, so
 Windows SmartScreen warns before the first start.
@@ -257,6 +282,18 @@ npm run handbook -- --repo ../paperpaw --ref <ref>
   PaperPaw. `data-interim.md` holds what PaperPaw's docs do not gather yet
   (the data files and their formats, home screens) and goes when they do.
 
+`lookup_docs` gives the SDK's items whole: a trait with every method,
+required or with a default, each with its signature and the first lines
+of its documentation; a struct with its fields and how it is made. A long
+topic is cut only between whole items, and what is left out is named.
+
+**Recipes** ([handbook/recipes/](../handbook/recipes/)) are complete
+plugins with code for common tasks: a widget with JSON from the web (in
+`code.md` whole), settings of its own (a topic). A test builds each
+against the emulator's SDK without a warning (code.rs,
+`the_handbook_s_recipes_build_without_a_warning`, with `PAPERPAW_EMU` and
+`PAPERPAW_SDK`), so they never go stale.
+
 `registry.json` is also what the checks in
 [src/checks/data.ts](../src/checks/data.ts) use, so the rules the AI reads
 and the rules its files are checked against are the same.
@@ -279,7 +316,8 @@ The `build` tool ([src/tools/build.ts](../src/tools/build.ts)) goes to a
 2. It is built as PaperPaw's emulator loads code: a `cdylib` with the
    SDK's `plugin!` line and its `outline` feature (`code-host.dll`,
    `.so`, `.dylib`), against the SDK of that PaperPaw (`=<version>` from
-   crates.io, or `PAPERPAW_SDK` while the workshop is worked on), by the
+   crates.io; for a PaperPaw in work the one the installer brought, or
+   `PAPERPAW_SDK` while the workshop is worked on), by the
    very compiler the emulator names in `ready`: the emulator loads only
    code with its own fingerprint.
 3. The compiler's messages about the plugin's own files come back to the
