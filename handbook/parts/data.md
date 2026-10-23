@@ -16,9 +16,9 @@ see each picture in the message, named (`The author added picture
 one again or a part of it. An upload is not part of the plugin.
 
 - **To build in** (a sleep picture, a logo, a picture for the home
-  screen): `convert_picture` makes it for e-ink, gray, fitted and
-  dithered, and writes it into the plugin, then shows you how the X4
-  shows it. Judge that: faces and the main subject not cut off, not too
+  screen): `convert_picture` takes the part you say, fits it and tones
+  it, and writes it into the plugin, made smaller as the person chose
+  (below), then shows you how the X4 shows it. Judge that: faces and the main subject not cut off, not too
   dark (e-ink is darker than a screen: lighten a dark photo with
   `brightness` or `gamma` around 1.3), drawings crisp. A logo goes in a
   box (`box`, for example 160 x 160) with `fit: whole`. Then set the
