@@ -6,6 +6,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { open, save } from "@tauri-apps/plugin-dialog";
 
+import type { BuildResult } from "../build/client";
 import type { CheckApi } from "./checks";
 import type { FolderApi } from "./folders";
 import type { PictureApi } from "./pictures";
@@ -55,6 +56,11 @@ export interface Backend extends FolderApi, PictureApi, CheckApi {
   /** A folder (a reader's card), asked of the person. */
   askFolder(): Promise<string | null>;
   saveFile(path: string, base64: string): Promise<void>;
+  /** Builds the project's plugin with code for the reader beside the
+   *  conversation (Rust set up first, the first time). */
+  codeBuild(project: string): Promise<BuildResult>;
+  /** Calls `told` with what a build is doing, in the person's words. */
+  onBuildProgress(told: (text: string) => void): Promise<() => void>;
 }
 
 /** A part of the screen, as PaperPaw describes it. */
@@ -107,6 +113,8 @@ export const appBackend: Backend = {
     return typeof chosen === "string" ? chosen : null;
   },
   saveFile: (path, base64) => invoke("save_file", { path, base64 }),
+  codeBuild: (project) => invoke("code_build", { project }),
+  onBuildProgress: async (told) => listen<string>("build-progress", (event) => told(event.payload)),
   projectsList: () => invoke("projects_list"),
   projectCreate: (name, meta) => invoke("project_create", { name, meta }),
   projectFiles: (project) => invoke("project_files", { project }),
@@ -169,6 +177,10 @@ export function standInBackend(): Backend {
     askSave: async () => null,
     askFolder: async () => null,
     saveFile: async () => {},
+    codeBuild: async () => {
+      throw new Error("Plugins with code are built in the app.");
+    },
+    onBuildProgress: async () => () => {},
     projectsList: async () => [...folders].map(([folder, f]) => ({ folder, meta: f.meta })),
     projectCreate: async (name, meta) => {
       let folder = name || "New plugin";

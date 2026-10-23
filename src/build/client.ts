@@ -8,7 +8,7 @@
 // limits. Tests give a fake.
 
 /** The reader's module, or a plugin file for a device. */
-export type Target = "web" | "x4" | "x4-pro";
+export type Target = "web" | "x4" | "x4-pro" | "host";
 
 /** One message of the compiler, about the plugin's own files. */
 export interface Diagnostic {
@@ -38,6 +38,10 @@ export interface BuildResult {
 export type ProjectFiles = Record<string, { text: string } | { base64: string }>;
 
 export interface Builder {
+  /** What the reader beside the conversation runs: PaperPaw's web module
+   *  with the plugin in it (`web`, the default), or the plugin's own
+   *  library loaded by PaperPaw's emulator on this computer (`host`). */
+  readonly target?: Target;
   /** Builds `files` for `targets`; `onState` hears "queued" and "building". */
   build(files: ProjectFiles, targets: Target[], onState?: (state: string, position: number) => void, signal?: AbortSignal): Promise<BuildResult>;
 }

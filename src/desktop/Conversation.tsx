@@ -41,7 +41,7 @@ export function Conversation({ desk }: { desk: Desk }) {
         ))}
         {said.map((line, i) => <Said key={i} line={line} />)}
         {workshop?.live && <div class="ai">{workshop.live}</div>}
-        {busy && !workshop?.live && <div class="step busy">{workshop?.thinking ? lastLine(workshop.thinking) : "Thinking…"}</div>}
+        {busy && !workshop?.live && <div class="step busy">{desk.building || (workshop?.thinking ? lastLine(workshop.thinking) : "Working…")}</div>}
         {workshop?.error && <p class="problem" role="alert">{workshop.error}</p>}
         {workshop?.long && !busy && (
           <button type="button" class="go fresh" onClick={() => workshop.freshConversation()}>Go on in a fresh conversation</button>

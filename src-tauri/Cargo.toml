@@ -29,7 +29,9 @@ oxipng = { version = "9", default-features = false, features = ["parallel"] }
 # Choosing where a plugin goes (a zip, a reader's card).
 tauri-plugin-dialog = "2"
 # Sending a plugin to a reader over Wi-Fi (its transfer page's API).
-ureq = { version = "2", default-features = false }
+ureq = { version = "2", default-features = false, features = ["tls"] }
+# Checking what is downloaded (rustup) before it runs.
+sha2 = "0.10"
 
 [dev-dependencies]
 tempfile = "3"

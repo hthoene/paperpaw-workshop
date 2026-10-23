@@ -176,6 +176,9 @@ impl Emulator {
             "profile": profile,
             "library": library.to_string_lossy(),
             "settings": SETTINGS,
+            // Plugins with code built here run: the reader's folder is the
+            // workshop's own, nothing else puts code into it.
+            "trust_code": true,
         });
         *self.last_start.lock().map_err(|e| e.to_string())? = Some(request.clone());
         self.ask(request, "started", "start").map(|_| ())
@@ -418,7 +421,9 @@ pub fn emulator_pointer(emulator: State<'_, Emulator>, phase: String, x: i32, y:
 /// The project's plugin put on the reader shown, which starts again on it.
 #[tauri::command]
 pub async fn emulator_sync(emulator: State<'_, Emulator>, shown: State<'_, Shown>, project: String) -> Result<(), String> {
-    let files = crate::projects::plugin_files(&crate::paths::projects()?, &project)?;
+    let root = crate::paths::projects()?;
+    // A plugin with code: its folder and its last build.
+    let files = crate::code::for_emulator(&crate::projects::folder(&root, &project)?, crate::projects::plugin_files(&root, &project)?);
     let Some(id) = plugin_id(&files) else { return Ok(()) };
     let Some(profile) = shown.0.lock().map_err(|e| e.to_string())?.clone() else { return Ok(()) };
     place_plugin(&crate::paths::emulator_library(&profile)?, &id, &files)?;

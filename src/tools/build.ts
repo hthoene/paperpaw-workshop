@@ -20,7 +20,7 @@ export const build: WorkshopTool<Record<string, never>> = {
     if (!context.builder) return { content: "There is no builder here: plugins with code need it (docker compose --profile code up).", isError: true, step };
     let result: BuildResult;
     try {
-      result = await context.builder.build(projectFiles(context.files.all()), ["web"]);
+      result = await context.builder.build(projectFiles(context.files.all()), [context.builder.target ?? "web"]);
     } catch (e) {
       if (e instanceof BuilderRefused) {
         return { content: `paperpaw.org did not build it: ${e.message} Say so to the person in a sentence; nothing is wrong with the plugin's code.`, isError: true, step };
@@ -44,6 +44,8 @@ export const build: WorkshopTool<Record<string, never>> = {
     }
     const module = result.files.find((f) => f.target === "web");
     if (module) await context.reader.useModule(module.url);
+    // Built for this computer: the reader takes the plugin's folder with it.
+    if (result.files.some((f) => f.target === "host")) await context.sync();
     const warned = warnings.length ? `\n\n${warnings.length} warnings:\n\n${warnings.map((w) => w.rendered.trim()).join("\n\n").slice(0, MAX_OUTPUT)}` : "";
     return {
       content: `Built in ${result.seconds ?? "?"} s. The reader beside the conversation now runs PaperPaw with the plugin in it; look and press to see it.${warned}`,

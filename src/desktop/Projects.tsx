@@ -39,6 +39,9 @@ export function Projects({ workspace }: { workspace: Workspace }) {
           <button type="button" role="menuitem" class="new" onClick={() => { workspace.fresh(); setOpen(false); }}>
             New plugin
           </button>
+          <button type="button" role="menuitem" class="new" onClick={() => { workspace.fresh("code"); setOpen(false); }}>
+            New plugin with code
+          </button>
           {workspace.listed.map((p) => (
             <button
               type="button"

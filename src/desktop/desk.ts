@@ -13,6 +13,7 @@ import type { Project } from "../project/project";
 import type { Backend } from "./backend";
 import { forModel, type Checker } from "./checks";
 import { modelFor, offered, savedChoice, type ModelChoice } from "./models";
+import { LocalBuilder } from "./builder";
 import { NativeEmulator } from "./native";
 import type { Workspace } from "./workspace";
 
@@ -39,6 +40,8 @@ export class Desk {
   /** The reader shown, by profile id. */
   profile = "xteink-x4";
   lastTurn: TurnCost | null = null;
+  /** What a build of a plugin with code is doing, while it runs. */
+  building = "";
   private listeners = new Set<() => void>();
   private stopWorkshop: (() => void) | undefined;
 
@@ -54,6 +57,11 @@ export class Desk {
     private allowed: string[] = [],
   ) {
     workspace.subscribe(() => void this.follow());
+    workspace.codeSample = handbook.codeSample;
+    void backend.onBuildProgress((text) => {
+      this.building = text;
+      this.changed();
+    });
   }
 
   subscribe(listener: () => void): () => void {
@@ -94,7 +102,8 @@ export class Desk {
   }
 
   private async attach(project: Project): Promise<Workshop> {
-    const workshop = new Workshop(project, this.handbook, this.provider, browserKit, this.workspace.folders.uploads(), undefined, () => this.workspace.save());
+    const builder = new LocalBuilder(this.backend, () => this.workspace.project?.key, () => this.workspace.save());
+    const workshop = new Workshop(project, this.handbook, this.provider, browserKit, this.workspace.folders.uploads(), builder, () => this.workspace.save());
     workshop.chooseModel = (p) => modelFor(savedChoice(), p, p.kind, this.may);
     const shown = this.handbook.profile(this.profile);
     if (shown) workshop.profile = shown;
@@ -122,6 +131,7 @@ export class Desk {
     let files = filesNow(project);
     const said = project.messages.length;
     await workshop.send(text);
+    this.building = "";
     const heard = project.messages.length > said;
     // A turn that changed the plugin: PaperPaw's checks, and what they
     // find to fix back to the AI, short and without pictures.

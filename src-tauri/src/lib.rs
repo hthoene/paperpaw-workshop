@@ -3,12 +3,14 @@
 //! sending a plugin to a reader, and building plugins with code.
 
 mod checks;
+mod code;
 mod emulator;
 mod key;
 mod paths;
 mod pictures;
 mod projects;
 mod send;
+mod toolchain;
 
 use tauri::Manager;
 
@@ -35,6 +37,7 @@ pub fn run() {
             emulator::emulator_told,
             emulator::emulator_ready,
             checks::plugin_check,
+            code::code_build,
             send::send_wifi,
             send::send_card,
             send::save_file,
