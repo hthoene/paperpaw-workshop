@@ -100,7 +100,7 @@ export class Desk {
     if (shown) workshop.profile = shown;
     this.workshop = workshop;
     this.stopWorkshop = workshop.subscribe(() => this.changed());
-    await workshop.attachEmulator(new NativeEmulator(this.backend, () => this.workspace.project?.key, this.checker, () => this.workspace.save()));
+    await workshop.attachEmulator(new NativeEmulator(this.backend, () => this.workspace.project, this.checker, () => this.workspace.save()));
     return workshop;
   }
 
@@ -111,28 +111,33 @@ export class Desk {
     this.lastTurn = null;
   }
 
-  /** The person's words: the project made if there is none, then one turn. */
-  async send(text: string): Promise<void> {
-    if (!text.trim() || this.workshop?.busy) return;
+  /** The person's words: the project made if there is none, then one
+   *  turn. Whether they reached the model (if not, they are not kept). */
+  async send(text: string): Promise<boolean> {
+    if (!text.trim() || this.workshop?.busy) return false;
     const project = await this.workspace.ensure();
     const workshop = this.workshop?.project === project ? this.workshop : await this.attach(project);
     const before = project.usage.dollars;
     const model = workshop.model;
     let files = filesNow(project);
+    const said = project.messages.length;
     await workshop.send(text);
+    const heard = project.messages.length > said;
     // A turn that changed the plugin: PaperPaw's checks, and what they
     // find to fix back to the AI, short and without pictures.
     for (let fix = 0; fix < AUTO_FIXES && !workshop.error && filesNow(project) !== files; fix++) {
       // The workshop checked at the end of its turn; else check now.
-      const checked = this.checker.checks.state === "done" ? this.checker.checks : await this.checker.run(project.key);
+      const checked = this.checker.checks.state === "done" ? this.checker.checks : await this.checker.plugin(project);
       if (checked.state !== "done" || !checked.found.some((f) => f.level === "error")) break;
       files = filesNow(project);
       workshop.escalated = fix > 0;
       await workshop.send(forModel(checked.found));
     }
     workshop.escalated = false;
-    this.lastTurn = { dollars: project.usage.dollars - before, model: modelName(model) };
+    const dollars = project.usage.dollars - before;
+    this.lastTurn = dollars > 0 ? { dollars, model: modelName(model) } : null;
     this.changed();
+    return heard;
   }
 
   stop(): void {

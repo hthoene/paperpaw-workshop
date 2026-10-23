@@ -9,6 +9,7 @@ import type { Finding } from "../checks/data";
 import type { Emulator } from "../emulator/emulator";
 import type { Fixture, InputEvent, NetworkMode, PluginFiles, ScreenshotResult, Screen, SeenRequest } from "../emulator/protocol";
 import type { Profile } from "../handbook/handbook";
+import type { Project } from "../project/project";
 import type { Backend, Part } from "./backend";
 import type { Checker } from "./checks";
 
@@ -31,8 +32,9 @@ export class NativeEmulator implements Emulator {
 
   constructor(
     private backend: Backend,
-    /** The project's folder, for the reader and the checks. */
-    private project: () => string | undefined,
+    /** The project (its folder's name and its files), for the reader and
+     *  the checks. */
+    private project: () => Project | null,
     private checker: Checker,
     /** Saves the project's files to its folder, before the reader takes
      *  them. */
@@ -50,7 +52,7 @@ export class NativeEmulator implements Emulator {
   async setFiles(_plugin: PluginFiles): Promise<void> {
     await this.saved();
     const project = this.project();
-    if (project) await this.backend.emulatorSync(project);
+    if (project) await this.backend.emulatorSync(project.key);
   }
 
   async input(event: InputEvent): Promise<void> {
@@ -81,7 +83,7 @@ export class NativeEmulator implements Emulator {
     if (plugins?.length) throw new NotYet("Checking plugins with code");
     const project = this.project();
     if (!project) return [];
-    const done = await this.checker.run(project);
+    const done = await this.checker.plugin(project);
     if (done.state === "failed") throw new Error(done.message);
     return done.state === "done" ? done.found.map(({ check, level, place, message }) => ({ check, level, place, message })) : [];
   }

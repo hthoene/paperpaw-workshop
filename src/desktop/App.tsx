@@ -126,7 +126,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
       desk.subscribe(() => redraw((n) => n + 1)),
       // After every change PaperPaw's checks (see checks.ts); the reader
       // got the plugin already (the workshop puts it there).
-      workspace.afterSave((project) => void checker.run(project.key)),
+      workspace.afterSave((project) => void checker.plugin(project)),
     ];
     void workspace.refresh();
     // The reader, before any project.
@@ -138,7 +138,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
   const open = workspace.project?.key;
   useEffect(() => {
     checker.reset();
-    if (open) void checker.run(open);
+    if (workspace.project) void checker.plugin(workspace.project);
   }, [open, checker]);
 
   return (

@@ -23,7 +23,10 @@ export function Conversation({ desk }: { desk: Desk }) {
     const text = draft.trim();
     if (!text || busy) return;
     setDraft("");
-    void desk.send(text);
+    // Words that never reached the model come back to be sent again.
+    void desk.send(text).then((heard) => {
+      if (!heard) setDraft((now) => now || text);
+    });
   };
 
   return (
