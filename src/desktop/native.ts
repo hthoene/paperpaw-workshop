@@ -15,6 +15,8 @@ import type { Checker } from "./checks";
 
 /** How long a long press is held. */
 const LONG_MS = 800;
+/** How long the reader takes to draw its sleep screen. */
+const SLEEP_MS = 1500;
 /** How often `until` looks. */
 const LOOK_MS = 250;
 
@@ -66,15 +68,23 @@ export class NativeEmulator implements Emulator {
     await this.backend.emulatorButton(event.name, false);
   }
 
-  async screenshot(profile?: Profile, _dark?: boolean, _screen?: Screen): Promise<ScreenshotResult> {
+  async screenshot(profile?: Profile, _dark?: boolean, screen?: Screen): Promise<ScreenshotResult> {
     const shown = this.shown;
     const other = profile && shown && profile.id !== shown.id;
     if (other) await this.backend.emulatorStart(profile.id);
+    // Asleep: as a person puts it to sleep, with its power button, woken
+    // again after the picture.
+    const asleep = screen === "sleep" && (profile ?? shown)?.buttons.includes("power");
+    if (asleep) {
+      await this.input({ kind: "button", name: "power" });
+      await new Promise((r) => setTimeout(r, SLEEP_MS));
+    }
     try {
       const png = await this.backend.emulatorShot();
       const at = profile ?? shown;
       return { png, width: at?.width ?? 0, height: at?.height ?? 0 };
     } finally {
+      if (asleep) await this.input({ kind: "button", name: "power" });
       if (other) await this.backend.emulatorStart(shown.id);
     }
   }

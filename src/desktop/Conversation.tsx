@@ -3,26 +3,52 @@
 // writing now, and what the last turn cost. Enter sends; Shift+Enter is a
 // new line.
 
+import { Fragment } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 
 import { lines, type Line } from "../app/conversation";
-import { costText, type Desk } from "./desk";
+import type { Project } from "../project/project";
+import { about, details, unusual, type Turn } from "./costs";
+import type { Desk } from "./desk";
 
 export function Conversation({ desk }: { desk: Desk }) {
   const [draft, setDraft] = useState("");
-  const bottom = useRef<HTMLDivElement>(null);
+  const log = useRef<HTMLDivElement>(null);
+  // Whether the person is at the end (then what comes keeps in view), and
+  // whether something came while they read further up.
+  const stick = useRef(true);
+  const [unseen, setUnseen] = useState(false);
   const workshop = desk.workshop;
   const project = desk.workspace.project;
   const said = lines(project?.messages ?? []);
   const busy = !!workshop?.busy;
 
-  // The newest at the bottom, in view.
-  useEffect(() => bottom.current?.scrollIntoView({ block: "end" }), [said.length, workshop?.live, busy]);
+  const down = (smooth: boolean) => {
+    const l = log.current;
+    if (!l) return;
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    l.scrollTo({ top: l.scrollHeight, behavior: smooth && !still ? "smooth" : "auto" });
+  };
+  const scrolled = () => {
+    const l = log.current;
+    if (!l) return;
+    stick.current = l.scrollHeight - l.scrollTop - l.clientHeight < 24;
+    if (stick.current) setUnseen(false);
+  };
+  // What is shown changed: kept in view at the end, else said with "New".
+  const shown = `${project?.key}|${said.length}|${workshop?.live.length ?? 0}|${workshop?.thinking.length ?? 0}|${busy}|${desk.building}|${desk.lastTurn?.dollars ?? 0}|${workshop?.error ?? ""}`;
+  useEffect(() => {
+    if (stick.current) down(false);
+    else setUnseen(true);
+  }, [shown]);
 
   const send = () => {
     const text = draft.trim();
     if (!text || busy) return;
     setDraft("");
+    stick.current = true;
+    setUnseen(false);
+    requestAnimationFrame(() => down(true));
     // Words that never reached the model come back to be sent again.
     void desk.send(text).then((heard) => {
       if (!heard) setDraft((now) => now || text);
@@ -31,7 +57,7 @@ export function Conversation({ desk }: { desk: Desk }) {
 
   return (
     <section class="talk" aria-label="Conversation">
-      <div class="log" aria-live="polite">
+      <div class="log" aria-live="polite" ref={log} onScroll={scrolled}>
         {!said.length && !busy && <p class="empty">What should your reader do? A look, a home screen, a tool: say it in your own words.</p>}
         {(project?.earlier ?? []).map((earlier, n) => (
           <details class="earlier" key={`earlier-${n}`}>
@@ -39,7 +65,12 @@ export function Conversation({ desk }: { desk: Desk }) {
             {lines(earlier).map((line, i) => <Said key={i} line={line} />)}
           </details>
         ))}
-        {said.map((line, i) => <Said key={i} line={line} />)}
+        {segments(project).map((segment, n) => (
+          <Fragment key={n}>
+            {segment.lines.map((line, i) => <Said key={i} line={line} />)}
+            {segment.turn && <Cost turn={segment.turn} before={segment.before} />}
+          </Fragment>
+        ))}
         {workshop?.live && <div class="ai">{workshop.live}</div>}
         {busy && !workshop?.live && <div class="step busy">{desk.building || (workshop?.thinking ? lastLine(workshop.thinking) : "Working…")}</div>}
         {workshop?.error && <p class="problem" role="alert">{workshop.error}</p>}
@@ -47,13 +78,13 @@ export function Conversation({ desk }: { desk: Desk }) {
           <button type="button" class="go fresh" onClick={() => workshop.freshConversation()}>Go on in a fresh conversation</button>
         )}
         {desk.buildTools && <BuildTools desk={desk} />}
-        {desk.lastTurn && !busy && (
-          <p class="cost">
-            This turn: {costText(desk.lastTurn.dollars)} with {desk.lastTurn.model}. So far: {costText(project?.usage.dollars ?? 0)}.
-          </p>
-        )}
-        <div ref={bottom} />
       </div>
+      {unseen && (
+        <button type="button" class="to-new" onClick={() => { stick.current = true; setUnseen(false); down(true); }}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v13M6 12l6 6 6-6" /></svg>
+          New
+        </button>
+      )}
       <form class="line ask" onSubmit={(e) => { e.preventDefault(); send(); }}>
         <textarea
           aria-label="Your message"
@@ -107,5 +138,32 @@ function BuildTools({ desk }: { desk: Desk }) {
         {desk.buildTools === "installing" ? "Installing…" : "Install the build tools"}
       </button>
     </div>
+  );
+}
+
+/** The conversation by the person's turns, each with what it cost; what
+ *  follows the last one counted (a turn running) without. */
+function segments(project: Project | null): { lines: Line[]; turn?: Turn; before: Turn[] }[] {
+  const messages = project?.messages ?? [];
+  const conversation = project?.earlier?.length ?? 0;
+  const turns = (project?.turns ?? []).filter((t) => t.conversation === conversation && t.end <= messages.length);
+  const out: { lines: Line[]; turn?: Turn; before: Turn[] }[] = [];
+  let start = 0;
+  for (const [i, turn] of turns.entries()) {
+    if (turn.end <= start) continue;
+    out.push({ lines: lines(messages.slice(start, turn.end)), turn, before: turns.slice(0, i) });
+    start = turn.end;
+  }
+  out.push({ lines: lines(messages.slice(start)), before: turns });
+  return out;
+}
+
+/** What a turn cost, roughly and quietly; the details on hover. */
+function Cost({ turn, before }: { turn: Turn; before: Turn[] }) {
+  return (
+    <p class="cost" title={details(turn)}>
+      {about(turn.dollars)}
+      {unusual(turn, before) && <span> · more than usual, as a long answer or a plugin with code can be</span>}
+    </p>
   );
 }

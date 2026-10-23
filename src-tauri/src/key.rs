@@ -12,9 +12,16 @@ fn entry() -> Result<Entry, String> {
     Entry::new(SERVICE, ACCOUNT).map_err(|e| e.to_string())
 }
 
-/// The key kept, if any.
+/// The key kept, if any. A debug build tried with a test key takes it from
+/// the file `PAPERPAW_TEST_KEY_FILE` names, read now and kept nowhere (not
+/// in the keychain); release builds have no such way.
 #[tauri::command]
 pub fn key_get() -> Result<Option<String>, String> {
+    #[cfg(debug_assertions)]
+    if let Some(file) = std::env::var_os("PAPERPAW_TEST_KEY_FILE") {
+        let key = std::fs::read_to_string(file).map_err(|_| "the test key could not be read".to_string())?;
+        return Ok(Some(key.trim().to_string()));
+    }
     match entry()?.get_password() {
         Ok(key) => Ok(Some(key)),
         Err(keyring::Error::NoEntry) => Ok(None),

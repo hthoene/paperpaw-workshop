@@ -67,7 +67,7 @@ describe("projects as folders", () => {
     const { api } = memoryApi();
     const folders = new Folders(api);
     const clock = await folders.create("Clock", "code");
-    expect(await folders.list()).toEqual([{ folder: "Clock", name: "Clock", kind: "code", updated: expect.any(String) }]);
+    expect(await folders.list()).toEqual([{ folder: "Clock", name: "Clock", kind: "code", updated: expect.any(String), month: 0 }]);
     // Once it has a plugin.ini, by the plugin's name in its English catalog.
     clock.files["plugin/plugin.ini"] = "[plugin]\nid = clock\nname = clock.name\n";
     clock.files["plugin/i18n/en.ini"] = "[messages]\nclock.name = Big clock\n";

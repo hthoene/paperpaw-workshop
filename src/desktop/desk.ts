@@ -14,6 +14,7 @@ import type { Backend } from "./backend";
 import { forModel, shown, type Checker } from "./checks";
 import { modelFor, offered, savedChoice, type ModelChoice } from "./models";
 import { LocalBuilder } from "./builder";
+import { thisMonth, turnOf } from "./costs";
 import { NativeEmulator } from "./native";
 import type { Workspace } from "./workspace";
 
@@ -78,14 +79,25 @@ export class Desk {
     this.listeners.forEach((l) => l());
   }
 
+  /** A PaperPaw key's budget and what it spent, as its proxy says. */
+  keyBudget: { budget: number; spent: number } | null = null;
+
+  /** What this plugin and this month came to, for the bar. */
+  get spent(): { plugin: number; month: number } {
+    const project = this.workspace.project;
+    const others = this.workspace.listed.filter((l) => l.folder !== project?.key).reduce((n, l) => n + (l.month ?? 0), 0);
+    return { plugin: project?.usage.dollars ?? 0, month: others + thisMonth(project?.turns ?? []) };
+  }
+
   /** What a PaperPaw key allows, as its proxy says (GET /v1/key). */
   async askProxy(base: string, apiKey: string): Promise<void> {
     if (this.key !== "paperpaw") return;
     try {
       const answer = await fetch(`${base}/v1/key`, { headers: { "x-api-key": apiKey } });
       if (!answer.ok) return;
-      const info = (await answer.json()) as { models?: unknown };
+      const info = (await answer.json()) as { models?: unknown; budget?: unknown; spent?: unknown };
       if (Array.isArray(info.models)) this.allowed = info.models.filter((m): m is string => typeof m === "string");
+      if (typeof info.budget === "number" && typeof info.spent === "number") this.keyBudget = { budget: info.budget, spent: info.spent };
       this.changed();
     } catch {
       // Not reached: Automatic, as before.
@@ -149,6 +161,7 @@ export class Desk {
     const project = await this.workspace.ensure();
     const workshop = this.workshop?.project === project ? this.workshop : await this.attach(project);
     const before = project.usage.dollars;
+    const usage = { ...project.usage };
     const model = workshop.model;
     let files = filesNow(project);
     const said = project.messages.length;
@@ -169,6 +182,11 @@ export class Desk {
     workshop.escalated = false;
     const dollars = project.usage.dollars - before;
     this.lastTurn = dollars > 0 ? { dollars, model: modelName(model) } : null;
+    if (heard) {
+      (project.turns ??= []).push(turnOf(usage, project.usage, project.messages.length, project.earlier?.length ?? 0, modelName(model)));
+      if (this.keyBudget) this.keyBudget.spent += dollars;
+      void this.workspace.save();
+    }
     this.changed();
     return heard;
   }
@@ -191,13 +209,4 @@ export class Desk {
   stop(): void {
     this.workshop?.stop();
   }
-}
-
-/** A cost in the person's words: under a cent, cents, dollars. */
-export function costText(dollars: number): string {
-  const cents = dollars * 100;
-  if (cents < 1) return "under a cent";
-  if (cents < 1.5) return "1 cent";
-  if (cents < 100) return `${Math.round(cents)} cents`;
-  return `$${dollars.toFixed(2)}`;
 }

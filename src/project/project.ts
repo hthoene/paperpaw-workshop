@@ -45,6 +45,8 @@ export interface Project {
   /** PaperPaw's findings the person chose to ignore (desktop/checks.ts
    *  `ignoredKey`): not counted, not given to the AI. */
   ignoredChecks?: string[];
+  /** What each turn of the person cost (desktop/costs.ts). */
+  turns?: import("../desktop/costs").Turn[];
   /** Conversations before this one, kept to read back: a conversation that
    *  grew too long goes on in a fresh one (append-only, never cut). */
   earlier?: Anthropic.MessageParam[][];

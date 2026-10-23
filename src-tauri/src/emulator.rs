@@ -348,8 +348,16 @@ pub fn place_plugin(library: &Path, id: &str, files: &[(String, Vec<u8>)]) -> Re
         return Err(format!("`{id}` is no plugin id"));
     }
     let folder = library.join("plugins").join(id);
-    if folder.exists() {
-        std::fs::remove_dir_all(&folder).map_err(|e| format!("{}: {e}", folder.display()))?;
+    // The reader may still hold the folder (Windows refuses to remove what
+    // is open): then it is brought up to date file by file instead, what is
+    // gone from the plugin removed, the rest written over.
+    if folder.exists() && std::fs::remove_dir_all(&folder).is_err() {
+        let keep: Vec<PathBuf> = files.iter().map(|(p, _)| folder.join(p)).collect();
+        let mut stale = Vec::new();
+        collect_files(&folder, &mut stale);
+        for file in stale.into_iter().filter(|f| !keep.contains(f)) {
+            std::fs::remove_file(&file).map_err(|e| format!("{}: {e}", file.display()))?;
+        }
     }
     for (path, bytes) in files {
         let file = folder.join(path);
@@ -359,6 +367,18 @@ pub fn place_plugin(library: &Path, id: &str, files: &[(String, Vec<u8>)]) -> Re
         std::fs::write(&file, bytes).map_err(|e| format!("{path}: {e}"))?;
     }
     Ok(())
+}
+
+/// Every file under `dir`, into `out`.
+fn collect_files(dir: &Path, out: &mut Vec<PathBuf>) {
+    for entry in std::fs::read_dir(dir).into_iter().flatten().flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            collect_files(&path, out);
+        } else {
+            out.push(path);
+        }
+    }
 }
 
 /// The plugin's id, from its `plugin.ini` (`[plugin]`, `id = ...`).
@@ -426,8 +446,20 @@ pub async fn emulator_sync(emulator: State<'_, Emulator>, shown: State<'_, Shown
     let files = crate::code::for_emulator(&crate::projects::folder(&root, &project)?, crate::projects::plugin_files(&root, &project)?);
     let Some(id) = plugin_id(&files) else { return Ok(()) };
     let Some(profile) = shown.0.lock().map_err(|e| e.to_string())?.clone() else { return Ok(()) };
-    place_plugin(&crate::paths::emulator_library(&profile)?, &id, &files)?;
+    let library = crate::paths::emulator_library(&profile)?;
+    // Unchanged, the reader stays where it is (a screen opened, asleep).
+    if same_plugin(&library.join("plugins").join(&id), &files) {
+        return Ok(());
+    }
+    place_plugin(&library, &id, &files)?;
     emulator.reload()
+}
+
+/// Whether `folder` holds exactly `files`, byte for byte.
+pub fn same_plugin(folder: &Path, files: &[(String, Vec<u8>)]) -> bool {
+    let mut there = Vec::new();
+    collect_files(folder, &mut there);
+    there.len() == files.len() && files.iter().all(|(path, bytes)| std::fs::read(folder.join(path)).is_ok_and(|b| &b == bytes))
 }
 
 /// What the screen shows, part by part, for the AI.
@@ -514,6 +546,13 @@ mod tests {
         assert!(folder.path().join("plugins/my-look/i18n/en.ini").exists());
         assert!(!folder.path().join("plugins/my-look/old").exists(), "the one before replaced");
         assert!(place_plugin(folder.path(), "../x", &files).is_err());
+        let placed = folder.path().join("plugins/my-look");
+        assert!(same_plugin(&placed, &files), "unchanged: the reader is not started again");
+        assert!(!same_plugin(&placed, &files[..1]), "a file gone");
+        let mut changed = files.clone();
+        changed[1].1 = b"x = z
+".to_vec();
+        assert!(!same_plugin(&placed, &changed));
     }
 
     #[test]

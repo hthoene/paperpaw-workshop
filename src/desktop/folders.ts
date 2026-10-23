@@ -5,6 +5,7 @@
 
 import { NO_USAGE, shownName, type Kind, type Project } from "../project/project";
 import { isText } from "../project/rules";
+import { thisMonth, type Turn } from "./costs";
 import type { UploadStore } from "../project/uploads";
 
 /** The Rust side's project calls (or a stand-in's). */
@@ -29,6 +30,8 @@ export interface Listed {
   name: string;
   kind: Kind;
   updated: string;
+  /** What its turns cost this month. */
+  month?: number;
 }
 
 export function toBase64(bytes: Uint8Array): string {
@@ -79,6 +82,7 @@ export class Folders {
         name: nameOf(parsed, folder),
         kind: parsed.kind === "code" ? "code" : "data",
         updated: typeof parsed.updated === "string" ? parsed.updated : "",
+        month: thisMonth(Array.isArray(parsed.turns) ? (parsed.turns as Turn[]) : []),
       };
     });
   }

@@ -9,6 +9,7 @@ import { ReplayProvider, type Recording } from "../ai/replay";
 import { Handbook } from "../handbook/handbook";
 import type { Backend } from "./backend";
 import { Checker } from "./checks";
+import { about } from "./costs";
 import { Findings } from "./Findings";
 import { Conversation } from "./Conversation";
 import { Desk } from "./desk";
@@ -128,7 +129,10 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
   const checker = useMemo(() => new Checker(backend), [backend]);
   const desk = useMemo(() => {
     const provider = example() ?? (keyKind === "paperpaw" ? new AnthropicDirect(apiKey, PROXY, "provider.paperpaw") : new AnthropicDirect(apiKey));
-    return new Desk(workspace, backend, checker, handbook, provider, keyKind);
+    const made = new Desk(workspace, backend, checker, handbook, provider, keyKind);
+    // While the workshop is worked on: its test runs drive the desk.
+    if (import.meta.env.DEV) (window as unknown as { workshop?: unknown }).workshop = { desk: made };
+    return made;
   }, [workspace, backend, checker, handbook, apiKey, keyKind]);
   const [, redraw] = useState(0);
   const [menu, setMenu] = useState(false);
@@ -171,6 +175,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
       <header class="bar">
         <Projects workspace={workspace} />
         <Findings desk={desk} />
+        <Spent desk={desk} />
         <button type="button" class="link" aria-expanded={files} onClick={() => only("files", !files)}>Files</button>
         <button type="button" class="send" aria-expanded={sending} onClick={() => only("send", !sending)}>Send to reader</button>
         <div class="menu">
@@ -250,5 +255,25 @@ function Settings({ workspace, keyKind, may, onClose }: { workspace: Workspace; 
       )}
       <p class="hint">What each turn cost shows in the conversation.</p>
     </aside>
+  );
+}
+
+/** What this plugin and this month came to, quietly; with a PaperPaw key,
+ *  what is left on it. */
+function Spent({ desk }: { desk: Desk }) {
+  if (desk.keyBudget) {
+    const left = Math.max(0, desk.keyBudget.budget - desk.keyBudget.spent);
+    return (
+      <span class="spent" title="What is left on your PaperPaw key, roughly">
+        {about(left)} of {about(desk.keyBudget.budget).replace(/^about /, "")} left
+      </span>
+    );
+  }
+  const { plugin, month } = desk.spent;
+  if (plugin <= 0 && month <= 0) return null;
+  return (
+    <span class="spent" title="What Anthropic charges your key, roughly, in US dollars as Anthropic counts them">
+      {about(plugin)} for this plugin · {about(month).replace(/^about /, "")} this month
+    </span>
   );
 }

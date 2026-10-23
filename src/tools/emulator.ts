@@ -36,7 +36,8 @@ export const check: WorkshopTool<Record<string, never>> = {
 };
 
 async function screen(context: ToolContext, device: string | undefined, dark: boolean | undefined, which?: "home" | "sleep") {
-  const profile = deviceNamed(context, device);
+  // No device named: the one the person sees, as it is.
+  const profile = device ? deviceNamed(context, device) : context.reader.shown();
   const shot = await context.emulator.screenshot(profile, dark, which);
   return { profile, shot };
 }
@@ -63,7 +64,7 @@ async function seen(context: ToolContext, shot: { png: string; width: number; he
 export const look: WorkshopTool<{ device?: string; dark?: boolean; screen?: "home" | "sleep" }> = {
   name: "look",
   description:
-    "See the reader's screen with the plugin, as a picture: the home screen of a device, or what it shows asleep (screen: sleep, with its sleep picture or logo), light or dark (night mode). Use it to judge the result as a careful designer would.",
+    "See the reader's screen with the plugin, as a picture: what the device shown shows now (a screen you opened with control stays open), or what it shows asleep (screen: sleep, with its sleep picture or logo), light or dark (night mode). Another device starts at its home screen. Use it only where the look itself matters.",
   schema: z.object({ device: DEVICE.optional(), dark: z.boolean().optional(), screen: z.enum(["home", "sleep"]).optional() }).strict(),
   async run({ device, dark, screen: which }, context) {
     await context.sync();
