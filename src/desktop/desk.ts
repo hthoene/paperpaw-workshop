@@ -37,8 +37,9 @@ export interface TurnCost {
 
 export class Desk {
   workshop: Workshop | null = null;
-  /** The reader shown, by profile id. */
-  profile = "xteink-x4";
+  /** The reader shown, by profile id: the X4 Pro first, which takes
+   *  touches as well as buttons. */
+  profile = "xteink-x4-pro";
   lastTurn: TurnCost | null = null;
   /** What a build of a plugin with code is doing, while it runs. */
   building = "";

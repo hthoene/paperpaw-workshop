@@ -1,168 +1,98 @@
-# PaperPaw plugin workshop
+<p align="center">
+  <img src="docs/images/cat.png" width="260" alt="A kitten putting puzzle pieces together">
+</p>
 
-Make plugins for [PaperPaw](https://paperpaw.org) by talking to an AI, and
-try them at once on a reader in your browser.
+<h1 align="center">PaperPaw Workshop</h1>
 
-You say what you want ("a dark look with big letters", "a home screen with
-the clock and my last book"). The AI writes the plugin's files, checks them,
-looks at the result on an emulated reader and fixes what it sees. When you
-like it, you download the plugin as a ZIP and put it on your reader.
+<p align="center">
+  <b>Make your own plugins for your e-reader by saying what you want.</b>
+</p>
 
-The workshop makes **data plugins**: themes, home screen layouts, key
-bindings, fonts and texts. And, with the builder running on your own
-computer, **plugins with code**: new screens, widgets and tools, written
-in Rust by the AI (see below).
+You say what your reader should do. The workshop makes the plugin and shows
+it on a reader right in the window. When you like it, it goes onto your
+reader. It works with [PaperPaw](https://paperpaw.org), first on the
+Xteink X4 and X4 Pro.
 
-## Try it
+## In three steps
 
-You need [Docker](https://www.docker.com/). In this folder:
+1. **Download** the workshop for your computer from the
+   [releases](https://github.com/hthoene/paperpaw-workshop/releases).
+2. **Paste your Claude key** when it starts. You get one in the
+   [Claude Console](https://console.anthropic.com/).
+3. **Describe your plugin** in your own words: "A calm dark look for
+   reading at night", "The clock and my last book on the home screen".
 
-```bash
-docker compose up --build
-```
+<p align="center">
+  <img src="docs/images/window.png" width="860" alt="The workshop's window: the conversation about a calm dark look on the left, and on the right an X4 Pro showing its home screen in that look">
+</p>
 
-Then open <http://localhost:8080>. Stop it with `Ctrl+C`, or with
-`docker compose down` if it runs in the background.
+When it looks right, **Send to reader**: over Wi-Fi (open Transfer on the
+reader and type the address it shows), or onto its card. Or keep it as a
+zip with **Export zip** in the menu.
 
-On the start page you can:
+## No Claude key?
 
-- **Watch an example**: a recorded conversation plays back, with the real
-  tools and the real reader. It costs nothing and needs no key.
-- **Use your own key**: paste a key from the
-  [Claude Console](https://console.anthropic.com/). The key stays in your
-  browser and goes to Anthropic only: the page may not talk to anyone
-  else (its Content-Security-Policy says so). You pay Anthropic for what
-  you use; the workshop shows what each turn cost.
+Ask for a **PaperPaw key** at
+[workshop.paperpaw.org/apply](https://workshop.paperpaw.org/apply). A
+person reads every request. A PaperPaw key works for a while and up to a
+small budget, so you can try the workshop before you get a key of your own.
 
-On paperpaw.org there is a third way, **the free quota**: authors apply
-for it at paperpaw.org/account/workshop, and once an admin accepts, the
-site pays for their plugins up to a monthly budget (Claude Haiku 5.5 for
-data plugins, Claude Sonnet 5.5 for code; admins need no application).
-Claude Opus 5.5 can be chosen at the start with your own key only, and
-stays the plugin's model.
+## What it does
 
-Your projects are kept in your browser (IndexedDB), not on a server.
-**Import** on the start page makes a project again of a plugin's folder or
-a ZIP of it: what the workshop gives as downloads, or a plugin's source
-(a ZIP of its repository); it says what it took and what it left out. On
-paperpaw.org a plugin's page offers its owner "Edit in the workshop",
-which imports the published version the same way (`#/import/<address>`,
-the version's package or kept source, fetched from the site itself).
+- Makes **looks, home screens, buttons and texts**: plugins of a few text
+  files. And **plugins with code**, such as new screens and tools.
+- Shows the plugin on an **X4 Pro, an X4 and a Boox Go 7**, drawn by
+  PaperPaw itself. Tap the screen or use the arrow keys.
+- **Checks** the plugin as PaperPaw checks plugins, on every reader and in
+  every language it has: text that is cut off, parts that overlap, margins,
+  what works with buttons alone. What it finds goes back to the AI to fix.
+- Makes your **pictures** small and right for e-ink, if you like.
+- Shows what each turn **cost**.
 
-**The reader, driven directly**: the AI opens a plugin's screen, a slot or
-an action at once, reads what the screen shows part by part instead of
-guessing from a picture, and waits for a screen (`control`, PaperPaw's
-remote-control commands in its web emulator). **The network**: nothing a
-plugin asks goes to the internet on paperpaw.org; the AI writes recorded
-answers for its requests (`set_fixtures`, kept with the project) and is
-told which requests the plugin made. On your own computer (docker compose,
-npm run dev) a switch below the reader lets the rest go to the internet
-(on by default), as far as the services allow a browser (CORS).
+## What it does not do
 
-**Pictures**: "Add a picture" beside the message field (or drop one on
-the conversation). The AI builds it into the plugin, made for e-ink
-(a picture while the reader sleeps, a logo), or takes ideas from it (a
-screenshot of a look you like). Your pictures stay in your browser; the
-AI sees a smaller copy. The second example on the start page shows it.
+- **It keeps nothing on our side.** Your plugins are folders in
+  *Documents/PaperPaw Workshop* on your computer. Your key stays in your
+  computer's keychain.
+- **It talks to no one else.** Only to Anthropic with your key, or to
+  PaperPaw's key service with a PaperPaw key. No account, no tracking.
+- **It does not spend more than it must.** With your own key you pay
+  Anthropic for what you use. The workshop uses the smallest model that
+  does the job, keeps the conversation short, and shows each turn's cost.
+  In Settings you can choose another model.
 
-When you like your plugin, **Share it in the store** fills in everything
-the store asks for: the AI writes its description from your conversation
-(change what you like), the screenshots are taken on the reader for you,
-and on paperpaw.org you send it with two clicks once signed in. Here on
-your own computer there is no store: download it for the store instead
-and upload it at paperpaw.org/submit.
+## What you need
 
-### Plugins with code
+- Windows 10 or 11. macOS and Linux follow.
+- A Claude key, or a PaperPaw key.
+- For plugins with code: about 1 GB of room. The workshop sets up Rust by
+  itself the first time. On Windows it also needs Microsoft's C++ build
+  tools.
 
-A plugin with code needs the **builder**, a container that compiles it
-together with PaperPaw. It is made from a copy of PaperPaw next to this
-folder, once:
+## For developers
 
-```bash
-npm run builder-source -- --repo ../paperpaw --ref plugin-store
-```
+The workshop is a [Tauri](https://tauri.app/) app: the window is
+TypeScript with Preact (`src/desktop`, using the conversation, tools and
+checks in `src/`), the computer's side is Rust (`src-tauri`). The reader
+is PaperPaw's own emulator, `paperpaw-emu`, a program of each PaperPaw
+release, so a new PaperPaw needs no new workshop.
 
-```bash
-docker compose --profile code up --build --renew-anon-volumes
-```
+To build it you need Node 24, Rust and
+[Tauri's prerequisites](https://tauri.app/start/prerequisites/). Then:
 
-The first build of the builder takes a while (it compiles PaperPaw for
-the browser, the X4 and the X4 Pro ahead, so your builds take seconds).
-Compiling runs code, so the builder is closed in: no internet, no port
-of its own, its root read-only, nothing of your computer mounted, its
-own unprivileged user, limits on processors, memory and time
-([what a build may do](docs/architecture.md#what-a-build-may-do)). Then tick
-**This needs code** on the start page, or watch the third example
-(`#/example/quote-a-day`): the AI starts from PaperPaw's sample plugin,
-writes Rust, builds it, reads the compiler's errors and fixes them, and
-the reader beside the conversation runs PaperPaw with the plugin in it.
-**Download** then builds it for the device the reader shows (the X4 or
-the X4 Pro) and saves the plugin's folder with its `code.ppn` (not
-signed yet) as a ZIP, for the `plugins` folder of the reader's card.
-
-Plugins with code use Claude Sonnet 5.5: some cents to a dollar a
-plugin, more than a data plugin.
-
-> **About the reader:** the reader beside the conversation is PaperPaw
-> itself, its web emulator (`public/emulator/`), so you see your plugin as
-> an X4, an X4 Pro or a Boox will show it. "What the checker says" is
-> PaperPaw's own checker, paperpaw-dev.
-
-## Working on the workshop
-
-You need [Node.js](https://nodejs.org/) 22 or newer.
-
-```bash
+```sh
 npm install
+npm run app
 ```
 
-```bash
-npm run dev
-```
+While you work on it, point it at a PaperPaw you built yourself:
+`PAPERPAW_EMU` names its `paperpaw-emu` (with `paperpaw-dev` beside it),
+and `PAPERPAW_SDK` its `crates/paperpaw-sdk` for plugins with code.
+`npm run dev` with `?example=night-owl` in the address plays a recorded
+conversation instead of asking the model.
 
-Then open the address it prints (usually <http://localhost:5173>).
-Changes show at once.
+Tests: `npm test`, and `cargo test` in `src-tauri`. The key service for
+PaperPaw keys is in [`proxy/`](proxy/README.md). An installer comes from
+`npm run app:build`.
 
-| Command | What it does |
-|---|---|
-| `npm run dev` | The workshop with live reloading |
-| `npm test` | All tests (no key needed: they replay recorded conversations) |
-| `npm run typecheck` | Checks the TypeScript |
-| `npm run build` | The finished site in `dist/` |
-| `npm run handbook -- --repo ../paperpaw --ref main` | Makes the handbook anew (see below) |
-| `npm run emulator -- --repo ../paperpaw --ref main` | Builds the reader anew from PaperPaw (needs Rust and `rustup target add wasm32-unknown-unknown`) |
-| `npm run builder-source -- --repo ../paperpaw --ref plugin-store` | PaperPaw's source for the builder (`builder/paperpaw.tar`) |
-| `docker compose --profile code up` | The workshop's server and the builder: `npm run dev` builds through that server (port 8080) |
-
-How the parts fit together is in [docs/architecture.md](docs/architecture.md).
-Start there if you want to add a tool, a check or a text.
-
-### The handbook
-
-The AI reads a handbook about PaperPaw: what a plugin may contain, every
-setting with its range, every widget, action and device. It is made from a
-PaperPaw tag or branch, so it matches that version exactly, and it lives in
-`public/handbook/`.
-
-To make it anew you need a copy of the PaperPaw repository next to this one
-and [Rust](https://rustup.rs/) (the settings and widgets are read from
-PaperPaw itself):
-
-```bash
-npm run handbook -- --repo ../paperpaw --ref v0.4.0
-```
-
-`--skip-registry` keeps the settings and widgets from last time and only
-reads the docs anew (no Rust needed). `public/handbook/meta.json` says which
-version the handbook was made from.
-
-### All texts in one place
-
-Every text the workshop shows is in [src/i18n/en.json](src/i18n/en.json),
-read through `t("key")`. A test makes sure no key is missing. Translations
-can be added as more files next to it.
-
-## Licence
-
-Apache-2.0, see [LICENSE](LICENSE). The fonts in `public/fonts/` come with
-their own licences (SIL Open Font License) next to them.
+Licensed under the [Apache License 2.0](LICENSE).

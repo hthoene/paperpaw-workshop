@@ -5,6 +5,7 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
 
 import { AnthropicDirect } from "../ai/anthropic";
+import { ReplayProvider, type Recording } from "../ai/replay";
 import { Handbook } from "../handbook/handbook";
 import type { Backend } from "./backend";
 import { Checker, summary } from "./checks";
@@ -84,6 +85,19 @@ function FirstStart({ onKey }: { onKey(key: string): Promise<void> }) {
   );
 }
 
+/** While the workshop is worked on (`npm run dev` only): `?example=<name>`
+ *  plays a recorded conversation (src/ai/examples) in place of the model,
+ *  its tools run for real; for trying the window and its screenshots
+ *  without a key's cost. */
+const EXAMPLES = import.meta.glob<Recording>("../ai/examples/*.json", { eager: true, import: "default" });
+
+function example(): ReplayProvider | undefined {
+  if (!import.meta.env.DEV) return undefined;
+  const name = new URLSearchParams(location.search).get("example");
+  const recording = name ? EXAMPLES[`../ai/examples/${name}.json`] : undefined;
+  return recording ? new ReplayProvider(recording, 600) : undefined;
+}
+
 /** Where a PaperPaw key's requests go: PaperPaw's proxy, which speaks
  *  Anthropic's API and passes on what the key allows. */
 export const PROXY = "https://workshop.paperpaw.org";
@@ -112,7 +126,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
   const workspace = useMemo(() => new Workspace(backend), [backend]);
   const checker = useMemo(() => new Checker(backend), [backend]);
   const desk = useMemo(() => {
-    const provider = keyKind === "paperpaw" ? new AnthropicDirect(apiKey, PROXY, "provider.paperpaw") : new AnthropicDirect(apiKey);
+    const provider = example() ?? (keyKind === "paperpaw" ? new AnthropicDirect(apiKey, PROXY, "provider.paperpaw") : new AnthropicDirect(apiKey));
     return new Desk(workspace, backend, checker, handbook, provider, keyKind);
   }, [workspace, backend, checker, handbook, apiKey, keyKind]);
   const [, redraw] = useState(0);

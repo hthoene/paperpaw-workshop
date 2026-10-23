@@ -7,6 +7,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "app": "tauri dev",
+    "app:build": "tauri build",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
@@ -17,7 +19,7 @@
     "quota-copy": "node scripts/quota-copy.mjs"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.137.0",

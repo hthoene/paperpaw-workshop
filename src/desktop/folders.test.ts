@@ -66,8 +66,14 @@ describe("projects as folders", () => {
   it("lists projects by their plugin's name or their folder", async () => {
     const { api } = memoryApi();
     const folders = new Folders(api);
-    await folders.create("Clock", "code");
+    const clock = await folders.create("Clock", "code");
     expect(await folders.list()).toEqual([{ folder: "Clock", name: "Clock", kind: "code", updated: expect.any(String) }]);
+    // Once it has a plugin.ini, by the plugin's name in its English catalog.
+    clock.files["plugin/plugin.ini"] = "[plugin]\nid = clock\nname = clock.name\n";
+    clock.files["plugin/i18n/en.ini"] = "[messages]\nclock.name = Big clock\n";
+    await folders.save(clock);
+    expect((await folders.list())[0]!.name).toBe("Big clock");
+    expect(await folders.load("Clock")).not.toHaveProperty("shown");
   });
 
   it("keeps the drawer's files apart, by name", async () => {

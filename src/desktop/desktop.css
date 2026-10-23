@@ -87,7 +87,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 .main { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(22rem, 30%); min-height: 0; }
 .talk { display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; border-right: 1px solid var(--rule); }
-.log { overflow: auto; padding: 1.6rem 2rem; display: grid; align-content: start; gap: 1.1rem; }
+.log { overflow: auto; padding: 1.6rem 2rem; display: grid; align-content: start; gap: 1.1rem; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
 .empty { margin: 18vh auto 0; max-width: 26rem; text-align: center; color: var(--ink-2); font: 400 1.15rem/1.55 var(--display); }
 .ask { padding: .9rem 1.2rem 1.1rem; min-height: 4.7rem; align-items: flex-end; }
 .ask textarea { resize: none; min-height: 2.75rem; max-height: 12rem; padding-top: .7rem; padding-bottom: .7rem; line-height: 1.4; border-radius: 1.4rem; field-sizing: content; }
@@ -98,6 +98,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .log .me { justify-self: end; padding: .6rem .95rem .65rem; border-radius: 1.1rem 1.1rem .3rem 1.1rem; background: var(--sheet-2); }
 .log .ai { font: 400 1.04rem/1.6 var(--display); }
 .log .step { font-size: .86rem; color: var(--ink-2); padding-left: .9rem; border-left: 2px solid var(--rule); }
+/* Steps in a row read as one quiet column. */
+.log .step + .step { margin-top: -.85rem; padding-top: .25rem; }
 .log .step.failed { border-left-color: var(--field-edge); }
 .log .step.busy { animation: breathe 1.6s ease-in-out infinite; }
 @keyframes breathe { 50% { opacity: .45; } }

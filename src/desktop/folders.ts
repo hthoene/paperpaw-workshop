@@ -3,7 +3,7 @@
 // A project loads whole and saves what changed since: the files written or
 // removed, then its record (project.json, conversation.json).
 
-import { NO_USAGE, type Kind, type Project } from "../project/project";
+import { NO_USAGE, shownName, type Kind, type Project } from "../project/project";
 import { isText } from "../project/rules";
 import type { UploadStore } from "../project/uploads";
 
@@ -47,10 +47,11 @@ export function fromBase64(base64: string): Uint8Array {
 const utf8 = new TextEncoder();
 const fromUtf8 = new TextDecoder();
 
-/** What project.json keeps: everything but the files and the messages. */
+/** What project.json keeps: everything but the files and the messages,
+ *  and the plugin's name for the list (`shown`, not part of the project). */
 function metaOf(project: Project): string {
   const { files: _files, messages: _messages, earlier: _earlier, key: _key, ...meta } = project;
-  return JSON.stringify(meta, null, 2);
+  return JSON.stringify({ ...meta, shown: shownName(project) }, null, 2);
 }
 
 function conversationOf(project: Project): string {
@@ -59,7 +60,7 @@ function conversationOf(project: Project): string {
 
 /** The name a project shows: its plugin's (plugin.ini), else its folder's. */
 function nameOf(meta: Record<string, unknown>, folder: string): string {
-  return typeof meta.name === "string" && meta.name ? meta.name : folder;
+  return typeof meta.shown === "string" && meta.shown ? meta.shown : folder;
 }
 
 export class Folders {
@@ -103,7 +104,7 @@ export class Folders {
 
   async load(folder: string): Promise<Project> {
     const [meta, conversation] = await this.api.projectLoad(folder);
-    const record = JSON.parse(meta) as Omit<Project, "key" | "files" | "messages">;
+    const { shown: _shown, ...record } = JSON.parse(meta) as Omit<Project, "key" | "files" | "messages"> & { shown?: string };
     const talk = conversation ? (JSON.parse(conversation) as Pick<Project, "messages" | "earlier">) : { messages: [] };
     const files: Record<string, string | Uint8Array> = {};
     for (const { path } of await this.api.projectFiles(folder)) {
