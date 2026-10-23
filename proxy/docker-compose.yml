@@ -1,0 +1,21 @@
+# The proxy on paperpaw.org's server: `docker compose up -d --build` here,
+# its settings in .env beside this file (see README.md), Caddy in front.
+services:
+  proxy:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+      PORT: "8080"
+    volumes:
+      - proxy-data:/data
+    # Caddy reaches it on the host's loopback only.
+    ports:
+      - "127.0.0.1:8085:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+
+volumes:
+  proxy-data:

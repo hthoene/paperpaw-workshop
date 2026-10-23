@@ -1,5 +1,5 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { ReplayProvider, type Answer } from "../src/ai/replay";
 import { lines } from "../src/app/conversation";
@@ -96,5 +96,21 @@ describe("the desk", () => {
     await desk.send("Hello");
     expect(provider.requests).toHaveLength(1);
     expect(checked).toBe(0);
+  });
+
+  it("offers what a PaperPaw key's proxy allows, and Automatic where it does not answer", async () => {
+    const backend = standInBackend();
+    const provider = new ReplayProvider({ title: "none", user: [], answers: [] });
+    const desk = new Desk(new Workspace(backend), backend, new Checker({ pluginCheck: async () => [] }), handbook(), provider, "paperpaw");
+    expect(desk.may).toEqual(["auto"]);
+    const fetched = vi.fn(async () => new Response(JSON.stringify({ models: ["claude-haiku-5-5", "claude-sonnet-5-5"] })));
+    vi.stubGlobal("fetch", fetched);
+    await desk.askProxy("https://proxy.test", "ppw-abcdefghijklmnop");
+    expect(desk.may).toEqual(["auto", "claude-haiku-5-5", "claude-sonnet-5-5"]);
+    expect(fetched).toHaveBeenCalledWith("https://proxy.test/v1/key", { headers: { "x-api-key": "ppw-abcdefghijklmnop" } });
+    vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("offline"); }));
+    await desk.askProxy("https://proxy.test", "ppw-abcdefghijklmnop");
+    expect(desk.may).toEqual(["auto", "claude-haiku-5-5", "claude-sonnet-5-5"]);
+    vi.unstubAllGlobals();
   });
 });

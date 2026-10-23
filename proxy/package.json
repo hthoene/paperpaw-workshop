@@ -1,0 +1,17 @@
+{
+  "name": "paperpaw-workshop-proxy",
+  "private": true,
+  "description": "The PaperPaw Workshop's free quota: PaperPaw keys in place of a Claude key",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node src/main.mjs",
+    "admin": "node src/admin.mjs"
+  },
+  "dependencies": {
+    "nodemailer": "10.0.16"
+  }
+}

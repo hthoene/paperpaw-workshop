@@ -54,7 +54,7 @@ export class Desk {
     /** Which key: Claude's own, or PaperPaw's (its proxy decides the models). */
     private key: "claude" | "paperpaw" | null,
     /** The models a PaperPaw key may use, as its proxy says. */
-    private allowed: string[] = [],
+    public allowed: string[] = [],
   ) {
     workspace.subscribe(() => void this.follow());
     workspace.codeSample = handbook.codeSample;
@@ -71,6 +71,20 @@ export class Desk {
 
   private changed(): void {
     this.listeners.forEach((l) => l());
+  }
+
+  /** What a PaperPaw key allows, as its proxy says (GET /v1/key). */
+  async askProxy(base: string, apiKey: string): Promise<void> {
+    if (this.key !== "paperpaw") return;
+    try {
+      const answer = await fetch(`${base}/v1/key`, { headers: { "x-api-key": apiKey } });
+      if (!answer.ok) return;
+      const info = (await answer.json()) as { models?: unknown };
+      if (Array.isArray(info.models)) this.allowed = info.models.filter((m): m is string => typeof m === "string");
+      this.changed();
+    } catch {
+      // Not reached: Automatic, as before.
+    }
   }
 
   /** The models one may pick with this key. */

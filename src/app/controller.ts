@@ -526,6 +526,9 @@ export class Workshop {
 export function message(e: unknown): string {
   // paperpaw.org's refusals say why in their own words.
   if (e instanceof QuotaRefused) return e.message;
+  // So do PaperPaw's proxy's, for a PaperPaw key (budget used, expired).
+  const said = e instanceof Anthropic.APIError ? (e.error as { error?: { message?: unknown } } | undefined)?.error?.message : undefined;
+  if (typeof said === "string" && said.includes("PaperPaw key")) return said;
   if (e instanceof Anthropic.AuthenticationError || e instanceof Anthropic.PermissionDeniedError) return t("workshop.error.key");
   if (e instanceof Anthropic.RateLimitError) return t("workshop.error.rate");
   if (e instanceof Anthropic.APIConnectionError) return t("workshop.error.network");

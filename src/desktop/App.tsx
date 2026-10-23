@@ -10,7 +10,7 @@ import type { Backend } from "./backend";
 import { Checker, summary } from "./checks";
 import { Conversation } from "./Conversation";
 import { Desk } from "./desk";
-import { CHOICES, offered, saveChoice, savedChoice, usable, type ModelChoice } from "./models";
+import { CHOICES, saveChoice, savedChoice, usable, type ModelChoice } from "./models";
 import { Drawer } from "./Drawer";
 import { Projects } from "./Projects";
 import { Reader } from "./Reader";
@@ -138,6 +138,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
       workspace.afterSave((project) => void checker.plugin(project)),
     ];
     void workspace.refresh();
+    void desk.askProxy(PROXY, apiKey);
     // The reader, before any project.
     void desk.choose(desk.profile).catch(() => {});
     return () => stops.forEach((stop) => stop());
@@ -182,7 +183,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
           </p>
         )}
         {sending && <Send desk={desk} backend={backend} onClose={() => setSending(false)} />}
-        {settings && <Settings workspace={workspace} keyKind={keyKind} onClose={() => setSettings(false)} />}
+        {settings && <Settings workspace={workspace} keyKind={keyKind} may={desk.may} onClose={() => setSettings(false)} />}
         {files && <Drawer workspace={workspace} pictures={backend} onClose={() => setFiles(false)} />}
       </div>
     </div>
@@ -216,10 +217,7 @@ function Checks({ checker }: { checker: Checker }) {
 }
 
 /** The app's settings: which model, for all plugins and for this one. */
-function Settings({ workspace, keyKind, onClose }: { workspace: Workspace; keyKind: "claude" | "paperpaw" | null; onClose(): void }) {
-  // The proxy's list for a PaperPaw key comes with the AI loop; until
-  // then such a key is offered Automatic only.
-  const may = offered(keyKind);
+function Settings({ workspace, keyKind, may, onClose }: { workspace: Workspace; keyKind: "claude" | "paperpaw" | null; may: ModelChoice[]; onClose(): void }) {
   const [choice, setChoice] = useState<ModelChoice>(usable(savedChoice(), may));
   const project = workspace.project;
   const own = usable(project?.model as ModelChoice | undefined, may);
