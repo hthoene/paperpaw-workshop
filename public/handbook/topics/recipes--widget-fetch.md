@@ -133,6 +133,16 @@ impl Plugin for Quote {
     }
 }
 
+/// The lines of text it has room for.
+const LINES: u16 = 4;
+
+/// The height its frame and padding take, at `width`: what the look
+/// leaves of a tall area, taken from it.
+fn frame_room(env: &Env<'_>, width: u16) -> u16 {
+    let tall = Rect::new(0, 0, width, 1000);
+    tall.height - widgets::look::look(env, WIDGET.as_str(), tall).area.height
+}
+
 /// The widget: what it shows, read in `update`, drawn in `draw`.
 struct Today {
     shared: Shared,
@@ -168,11 +178,10 @@ impl Widget for Today {
         false
     }
 
-    /// As high as its text wrapped at `width`, at most six lines.
+    /// Four lines of its text, and its frame: the screen lays it out
+    /// before the reply comes, so its height does not follow the text.
     fn height(&self, env: &Env<'_>, width: u16) -> u16 {
-        let size = Self::size(env);
-        let most = widgets::line_height(env, size) * 6;
-        Wrapped::new(env, self.shown(env), size, width, most).height(env)
+        widgets::line_height(env, Self::size(env)) * LINES + frame_room(env, width)
     }
 
     /// Its frame, then the text wrapped inside it.

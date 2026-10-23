@@ -134,8 +134,12 @@ impl Widget for Shown {
         false
     }
 
+    /// Its text wrapped inside its frame, and the frame.
     fn height(&self, env: &Env<'_>, width: u16) -> u16 {
-        Wrapped::new(env, &motto(env), Self::size(env), width, Self::most(env)).height(env)
+        let tall = Rect::new(0, 0, width, 1000);
+        let inside = widgets::look::look(env, WIDGET.as_str(), tall).area;
+        let text = Wrapped::new(env, &motto(env), Self::size(env), inside.width, Self::most(env));
+        text.height(env) + (tall.height - inside.height)
     }
 
     fn draw(&self, canvas: &mut Canvas<'_>, env: &Env<'_>, area: Rect) {

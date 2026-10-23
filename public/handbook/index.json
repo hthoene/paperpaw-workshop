@@ -382,14 +382,14 @@
   "title": "Recipe: A widget with data from the web: JSON fetched over HTTP, shown wrapped",
   "file": "recipes--widget-fetch.md",
   "summary": "`src/lib.rs`:\n\n```rust\n//! A widget that shows a text fetched from the web as JSON: here a quote\n//! of the day from `https://quotes.example.org/api/today`, whi",
-  "tokens": 2076
+  "tokens": 2171
  },
  {
   "id": "recipes/settings",
   "title": "Recipe: Settings of a plugin's own (text, choice, switch, number), read by a widget",
   "file": "recipes--settings.md",
   "summary": "`src/lib.rs`:\n\n```rust\n//! Settings of a plugin's own, in a group of its own, and a widget that\n//! shows what they say: a motto, typed in (`text`), shown plain",
-  "tokens": 1717
+  "tokens": 1785
  },
  {
   "id": "widgets",
