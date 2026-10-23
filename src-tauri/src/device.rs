@@ -32,11 +32,20 @@ pub const X4_TARGET_MB: u32 = 62;
 /// (`samples/hello-native/.cargo/config.toml`), and its aliases, which the
 /// store's rebuild runs (`cargo x4`, `cargo +esp x4pro`).
 pub const CARGO_CONFIG: &str = r#"# How a native plugin is built (PaperPaw's docs/plugins.md): linked with
-# `paperpaw-plugin.x` (which the SDK brings), its relocations kept for
-# the packer. Keep it as it is: paperpaw.org rebuilds the plugin with it.
+# `paperpaw-plugin.x` (the copy beside this folder, as the PaperPaw
+# release has it), its relocations kept for the packer. Keep both as they
+# are: paperpaw.org rebuilds the plugin with them.
+#
+# - The X4 (ESP32-C3, RISC-V): `cargo x4`, with the toolchain the
+#   PaperPaw release names.
+# - The X4 Pro (ESP32-S3, Xtensa): `cargo +esp x4pro`, with espup's `esp`
+#   toolchain and the core libraries of the PaperPaw release
+#   (`paperpaw-xtensa-std-<version>.tar.gz`, installed with PaperPaw's
+#   tools/xtensa-std/install.sh), so that the plugin's code is the same
+#   on every computer.
 [alias]
 x4 = "build --release --target riscv32imc-unknown-none-elf"
-x4pro = "build --release --target xtensa-esp32s3-none-elf -Zbuild-std=core,alloc"
+x4pro = "build --release --target xtensa-esp32s3-none-elf"
 
 [target.riscv32imc-unknown-none-elf]
 rustflags = [
@@ -57,6 +66,27 @@ rustflags = [
     "--cfg", "paperpaw_plugin",
 ]
 "#;
+
+/// The linker script a plugin is linked with, beside `.cargo/config.toml`.
+pub const LINKER_SCRIPT: &str = "paperpaw-plugin.x";
+
+/// The linker script of the SDK `sdk` names (a Cargo.toml line, see
+/// `code::sdk`): PaperPaw's `paperpaw-native` brings it, and since its
+/// plugin interface 2 no build script puts it where the linker looks, so
+/// the crate keeps a copy, as PaperPaw's sample does. From the checkout
+/// `repository` of an SDK on this computer, else from Cargo's registry in
+/// `cargo_home` once the SDK is fetched.
+pub fn linker_script(sdk: &str, repository: Option<&Path>, cargo_home: &Path) -> Option<Vec<u8>> {
+    if let Some(repository) = repository {
+        return std::fs::read(repository.join("crates").join("paperpaw-native").join(LINKER_SCRIPT)).ok();
+    }
+    let version = sdk.split_once("version = \"=")?.1.split('"').next()?;
+    let crate_dir = format!("paperpaw-native-{version}");
+    std::fs::read_dir(cargo_home.join("registry").join("src"))
+        .ok()?
+        .flatten()
+        .find_map(|index| std::fs::read(index.path().join(&crate_dir).join(LINKER_SCRIPT)).ok())
+}
 
 /// Where the binary's source lies in the crate: apart from `src/`, so that
 /// no file of the project's can be it.
@@ -304,6 +334,16 @@ pub fn build_x4(
     // The checkout around an SDK on this computer
     // (`<repository>/crates/paperpaw-sdk`, see `code::local_sdk`).
     let local_sdk = crate::code::sdk_path(sdk).and_then(|sdk| Some(sdk.parent()?.parent()?.to_path_buf()));
+    // The linker script beside .cargo/config.toml, in the source too, so
+    // that the store's rebuild links with the very same.
+    let Some(script) = linker_script(sdk, local_sdk.as_deref(), &cargo_home) else {
+        built.problems.push(format!("{LINKER_SCRIPT} of PaperPaw's SDK is not here: it links the plugin."));
+        return built;
+    };
+    if let Err(e) = std::fs::write(dir.join(LINKER_SCRIPT), script) {
+        built.problems.push(format!("{LINKER_SCRIPT}: {e}"));
+        return built;
+    }
     let lines = remaps(dir, &cargo_home, local_sdk.as_deref());
     if let Err(e) = std::fs::write(&args, lines.join("\n") + "\n") {
         built.problems.push(e.to_string());
@@ -384,6 +424,30 @@ mod tests {
     use super::*;
 
     const MANIFEST: &str = "[package]\nname = \"my-clock\"\nversion = \"0.2.0\"\n\n[package.metadata.paperpaw]\nplugin = \"MyClock\"\n\n[dependencies]\npaperpaw-sdk = \"0.5\"\n";
+
+    #[test]
+    fn the_linker_script_comes_from_the_sdk_a_checkout_or_the_registry() {
+        let at = tempfile::tempdir().unwrap();
+        // A checkout's: crates/paperpaw-native beside the SDK.
+        let repository = at.path().join("paperpaw");
+        std::fs::create_dir_all(repository.join("crates/paperpaw-native")).unwrap();
+        std::fs::write(repository.join("crates/paperpaw-native").join(LINKER_SCRIPT), b"checkout").unwrap();
+        let local = "{ path = \"x/crates/paperpaw-sdk\", features = [\"outline\"] }";
+        assert_eq!(linker_script(local, Some(&repository), at.path()).as_deref(), Some(&b"checkout"[..]));
+        // A release's: the registry's paperpaw-native of the SDK's very version.
+        let home = at.path().join("cargo");
+        let index = home.join("registry/src/index.crates.io-1949cf8c6b5b557f");
+        for (version, text) in [("0.5.0", "release"), ("0.5.1", "next")] {
+            std::fs::create_dir_all(index.join(format!("paperpaw-native-{version}"))).unwrap();
+            std::fs::write(index.join(format!("paperpaw-native-{version}")).join(LINKER_SCRIPT), text).unwrap();
+        }
+        let released = "{ version = \"=0.5.0\", features = [\"outline\"] }";
+        assert_eq!(linker_script(released, None, &home).as_deref(), Some(&b"release"[..]));
+        assert_eq!(linker_script("{ version = \"=0.6.0\" }", None, &home), None);
+        assert!(CARGO_CONFIG.contains("-Tpaperpaw-plugin.x"));
+        // The X4 Pro links with the release's core libraries, as PaperPaw's sample.
+        assert!(!CARGO_CONFIG.contains("build-std"));
+    }
 
     #[test]
     fn the_crate_for_the_readers_is_one_package_as_the_store_rebuilds_it() {

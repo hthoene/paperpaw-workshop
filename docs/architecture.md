@@ -436,7 +436,11 @@ A plugin with code also needs a build for each reader, signed, and its
 source ([src-tauri/src/device.rs](../src-tauri/src/device.rs)). The
 project becomes a crate of its own: one package with the plugin's
 library and a binary with PaperPaw's `plugin!` line, the sample's
-`.cargo/config.toml` and `rust-toolchain.toml`. It is built for the X4
+`.cargo/config.toml` and `rust-toolchain.toml`, and the SDK's
+`paperpaw-plugin.x` beside them (its `paperpaw-native`'s, from the
+checkout or Cargo's registry: since PaperPaw's plugin interface 2 no
+build script brings it), so that the source the store rebuilds links the
+same. It is built for the X4
 (`cargo x4 --locked`) as paperpaw.org rebuilds it: with a
 `--remap-path-prefix` for every folder that holds Rust (the source as
 `/plugin`, Cargo's home as `/cargo`), so that no path of this computer
