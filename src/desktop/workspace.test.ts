@@ -50,3 +50,21 @@ describe("a plugin's name", () => {
     expect(shownName(project)).toBe("Just a name");
   });
 });
+
+describe("many plugins", () => {
+  it("are renamed, put away in the archive, brought back and binned", async () => {
+    const backend = standInBackend();
+    const workspace = new Workspace(backend);
+    await workspace.ensure("Clock");
+    await workspace.rename("Clock", "Big clock");
+    expect(workspace.project?.key).toBe("Big clock");
+    await workspace.archive("Big clock");
+    expect(workspace.project).toBeNull();
+    expect(workspace.listed).toEqual([]);
+    expect((await workspace.folders.archived()).map((p) => p.folder)).toEqual(["Big clock"]);
+    await workspace.restore("Big clock");
+    expect(workspace.listed.map((p) => p.folder)).toEqual(["Big clock"]);
+    await workspace.trash("Big clock");
+    expect(workspace.listed).toEqual([]);
+  });
+});

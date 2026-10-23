@@ -86,9 +86,9 @@ pub fn list(root: &Path) -> Result<Vec<Summary>, String> {
     Ok(found.into_iter().map(|(_, s)| s).collect())
 }
 
-/// A new project's folder, named after `name` (made unique), with its
-/// `project.json`; its folder name.
-pub fn create(root: &Path, name: &str, meta: &str) -> Result<String, String> {
+/// A folder's name for `name` in `root`: what a folder may be called,
+/// made unique with " 2", " 3" ….
+fn unique(root: &Path, name: &str) -> String {
     let base: String = name
         .chars()
         .map(|c| if c.is_alphanumeric() || c == ' ' || c == '-' { c } else { '-' })
@@ -97,18 +97,54 @@ pub fn create(root: &Path, name: &str, meta: &str) -> Result<String, String> {
         .chars()
         .take(60)
         .collect();
-    let base = if base.is_empty() { "New plugin".to_string() } else { base };
-    std::fs::create_dir_all(root).map_err(|e| e.to_string())?;
+    let base = if base.is_empty() || base == ARCHIVE { "New plugin".to_string() } else { base };
     let mut name = base.clone();
     let mut n = 2;
     while root.join(&name).exists() {
         name = format!("{base} {n}");
         n += 1;
     }
+    name
+}
+
+/// A new project's folder, named after `name` (made unique), with its
+/// `project.json`; its folder name.
+pub fn create(root: &Path, name: &str, meta: &str) -> Result<String, String> {
+    std::fs::create_dir_all(root).map_err(|e| e.to_string())?;
+    let name = unique(root, name);
     let dir = folder(root, &name)?;
     std::fs::create_dir_all(dir.join(WORKSHOP).join(UPLOADS)).map_err(|e| e.to_string())?;
     std::fs::write(dir.join(WORKSHOP).join(PROJECT_JSON), meta).map_err(|e| e.to_string())?;
     Ok(name)
+}
+
+/// Where archived projects are kept: a folder beside them, still on disk.
+pub const ARCHIVE: &str = "Archive";
+
+/// Renames the project's folder after `name` (made unique); its new name.
+pub fn rename(root: &Path, project: &str, name: &str) -> Result<String, String> {
+    let from = folder(root, project)?;
+    let to = unique(root, name);
+    std::fs::rename(&from, root.join(&to)).map_err(|e| format!("{project}: {e}"))?;
+    Ok(to)
+}
+
+/// Puts the project's folder away into `Archive/`; its name there.
+pub fn archive(root: &Path, project: &str) -> Result<String, String> {
+    let from = folder(root, project)?;
+    let shelf = root.join(ARCHIVE);
+    std::fs::create_dir_all(&shelf).map_err(|e| e.to_string())?;
+    let to = unique(&shelf, project);
+    std::fs::rename(&from, shelf.join(&to)).map_err(|e| format!("{project}: {e}"))?;
+    Ok(to)
+}
+
+/// Brings an archived project back; its name among the others.
+pub fn restore(root: &Path, name: &str) -> Result<String, String> {
+    let from = folder(&root.join(ARCHIVE), name)?;
+    let to = unique(root, name);
+    std::fs::rename(&from, root.join(&to)).map_err(|e| format!("{name}: {e}"))?;
+    Ok(to)
 }
 
 /// The plugin's files of the project (not the workshop's own), sorted.
@@ -217,6 +253,36 @@ fn root() -> Result<PathBuf, String> {
 #[tauri::command]
 pub fn projects_list() -> Result<Vec<Summary>, String> {
     list(&root()?)
+}
+
+#[tauri::command]
+pub fn project_rename(project: String, name: String) -> Result<String, String> {
+    rename(&root()?, &project, &name)
+}
+
+#[tauri::command]
+pub fn project_archive(project: String) -> Result<String, String> {
+    archive(&root()?, &project)
+}
+
+#[tauri::command]
+pub fn project_restore(name: String) -> Result<String, String> {
+    restore(&root()?, &name)
+}
+
+/// The archived projects, the last changed first.
+#[tauri::command]
+pub fn projects_archived() -> Result<Vec<Summary>, String> {
+    list(&root()?.join(ARCHIVE))
+}
+
+/// Moves the project's folder to the system's bin (Recycle Bin, Trash),
+/// where the person can still get it back.
+#[tauri::command]
+pub fn project_trash(project: String, archived: bool) -> Result<(), String> {
+    let root = root()?;
+    let dir = folder(&if archived { root.join(ARCHIVE) } else { root }, &project)?;
+    trash::delete(&dir).map_err(|e| format!("{project}: {e}"))
 }
 
 #[tauri::command]
@@ -352,5 +418,22 @@ mod tests {
         remove(root, &name, "fonts/a/b.ttf", false).unwrap();
         assert!(!root.join("P/fonts").exists());
         assert!(remove(root, &name, "missing.ini", false).is_ok());
+    }
+
+    #[test]
+    fn a_project_is_renamed_archived_and_brought_back() {
+        let root = tempfile::tempdir().unwrap();
+        let root = root.path();
+        let clock = create(root, "Clock", "{}").unwrap();
+        create(root, "Calm", "{}").unwrap();
+        assert_eq!(rename(root, &clock, "Calm").unwrap(), "Calm 2", "names stay unique");
+        let away = archive(root, "Calm 2").unwrap();
+        let names = |dir: &Path| list(dir).unwrap().into_iter().map(|s| s.folder).collect::<Vec<_>>();
+        assert_eq!(names(root), ["Calm"], "the archive is no project");
+        assert_eq!(names(&root.join(ARCHIVE)), [away.clone()]);
+        assert_eq!(restore(root, &away).unwrap(), "Calm 2");
+        assert!(names(&root.join(ARCHIVE)).is_empty());
+        assert!(rename(root, "../x", "y").is_err());
+        assert_eq!(create(root, ARCHIVE, "{}").unwrap(), "New plugin", "no project takes the archive's name");
     }
 }

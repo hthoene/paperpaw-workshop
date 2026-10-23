@@ -130,6 +130,11 @@ export const appBackend: Backend = {
   uploadRead: (project, name) => invoke("upload_read", { project, name }),
   uploadWrite: (project, name, base64) => invoke("upload_write", { project, name, base64 }),
   uploadRemove: (project, name) => invoke("upload_remove", { project, name }),
+  projectRename: (project, name) => invoke("project_rename", { project, name }),
+  projectArchive: (project) => invoke("project_archive", { project }),
+  projectRestore: (name) => invoke("project_restore", { name }),
+  projectsArchived: () => invoke("projects_archived"),
+  projectTrash: (project, archived) => invoke("project_trash", { project, archived }),
   pictureMake: (base64, mode, maxWidth, maxHeight) => invoke("picture_make", { base64, mode, maxWidth, maxHeight }),
   pictureInfo: (base64) => invoke("picture_info", { base64 }),
   pluginCheck: (project) => invoke("plugin_check", { project }),
@@ -140,6 +145,7 @@ export const appBackend: Backend = {
 export function standInBackend(): Backend {
   let key: string | null = null;
   const folders = new Map<string, { meta: string; conversation: string; files: Map<string, string>; uploads: Map<string, string> }>();
+  const archive = new Map<string, { meta: string; conversation: string; files: Map<string, string>; uploads: Map<string, string> }>();
   const at = (project: string) => {
     const found = folders.get(project);
     if (!found) throw new Error(`no project ${project}`);
@@ -206,6 +212,27 @@ export function standInBackend(): Backend {
     },
     uploadWrite: async (project, name, base64) => { at(project).uploads.set(name, base64); },
     uploadRemove: async (project, name) => { at(project).uploads.delete(name); },
+    projectRename: async (project, name) => {
+      let to = name || "New plugin";
+      for (let n = 2; folders.has(to); n++) to = `${name} ${n}`;
+      folders.set(to, at(project));
+      folders.delete(project);
+      return to;
+    },
+    projectArchive: async (project) => {
+      archive.set(project, at(project));
+      folders.delete(project);
+      return project;
+    },
+    projectRestore: async (name) => {
+      const found = archive.get(name);
+      if (!found) throw new Error(`no project ${name}`);
+      folders.set(name, found);
+      archive.delete(name);
+      return name;
+    },
+    projectsArchived: async () => [...archive].map(([folder, f]) => ({ folder, meta: f.meta })),
+    projectTrash: async (project, archived) => { (archived ? archive : folders).delete(project); },
     // No pictures made in a plain browser: they stay as they are.
     pictureMake: async (base64) => [base64, 0, 0],
     pictureInfo: async (base64) => ({ width: 0, height: 0, bytes: Math.floor((base64.length * 3) / 4), colour: false }),

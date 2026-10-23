@@ -30,6 +30,8 @@ oxipng = { version = "9", default-features = false, features = ["parallel"] }
 tauri-plugin-dialog = "2"
 # Sending a plugin to a reader over Wi-Fi (its transfer page's API).
 ureq = { version = "2", default-features = false, features = ["tls"] }
+# Projects put in the bin, not deleted (they can be got back).
+trash = "5"
 # Checking what is downloaded (rustup) before it runs.
 sha2 = "0.10"
 

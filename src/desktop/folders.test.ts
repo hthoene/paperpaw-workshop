@@ -24,6 +24,12 @@ function memoryApi() {
     uploadRead: async (p, n) => { const b = folders.get(p)!.uploads.get(n); if (!b) throw new Error("missing"); return b; },
     uploadWrite: async (p, n, b) => { folders.get(p)!.uploads.set(n, b); },
     uploadRemove: async (p, n) => { folders.get(p)!.uploads.delete(n); },
+    // The rest of the project list is the stand-in's (backend.ts); not used here.
+    projectRename: async () => "",
+    projectArchive: async () => "",
+    projectRestore: async () => "",
+    projectsArchived: async () => [],
+    projectTrash: async () => {},
   };
   return { api, folders, writes };
 }

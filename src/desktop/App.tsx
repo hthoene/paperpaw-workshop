@@ -271,9 +271,10 @@ function Spent({ desk }: { desk: Desk }) {
   }
   const { plugin, month } = desk.spent;
   if (plugin <= 0 && month <= 0) return null;
+  const monthly = `${about(month).replace(/^about /, "")} this month`;
   return (
     <span class="spent" title="What Anthropic charges your key, roughly, in US dollars as Anthropic counts them">
-      {about(plugin)} for this plugin · {about(month).replace(/^about /, "")} this month
+      {plugin > 0 ? `${about(plugin)} for this plugin · ${monthly}` : `about ${monthly}`}
     </span>
   );
 }

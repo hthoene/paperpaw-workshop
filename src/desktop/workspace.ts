@@ -72,6 +72,35 @@ export class Workspace {
     this.changed();
   }
 
+  /** Renames a project's folder; the one open is opened again under it. */
+  async rename(folder: string, name: string): Promise<void> {
+    await this.saving;
+    const to = await this.folders.api.projectRename(folder, name);
+    if (this.project?.key === folder) this.project = await this.folders.load(to);
+    await this.refresh();
+  }
+
+  /** Puts a project away (its folder stays, in the archive). */
+  async archive(folder: string): Promise<void> {
+    await this.saving;
+    if (this.project?.key === folder) this.project = null;
+    await this.folders.api.projectArchive(folder);
+    await this.refresh();
+  }
+
+  async restore(name: string): Promise<void> {
+    await this.folders.api.projectRestore(name);
+    await this.refresh();
+  }
+
+  /** Moves a project to the system's bin. */
+  async trash(folder: string, archived = false): Promise<void> {
+    await this.saving;
+    if (!archived && this.project?.key === folder) this.project = null;
+    await this.folders.api.projectTrash(folder, archived);
+    await this.refresh();
+  }
+
   /** Saves the project, one save after the other. */
   save(): Promise<void> {
     const project = this.project;

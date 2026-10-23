@@ -22,6 +22,12 @@ export interface FolderApi {
   uploadRead(project: string, name: string): Promise<string>;
   uploadWrite(project: string, name: string, base64: string): Promise<void>;
   uploadRemove(project: string, name: string): Promise<void>;
+  projectRename(project: string, name: string): Promise<string>;
+  projectArchive(project: string): Promise<string>;
+  projectRestore(name: string): Promise<string>;
+  projectsArchived(): Promise<{ folder: string; meta: string }[]>;
+  /** To the system's bin, where it can still be got back. */
+  projectTrash(project: string, archived: boolean): Promise<void>;
 }
 
 /** A project in the list: its folder, the plugin's name if it has one. */
@@ -71,11 +77,21 @@ export class Folders {
    *  only what changed. */
   private saved = new Map<string, Map<string, string | Uint8Array>>();
 
-  constructor(private api: FolderApi) {}
+  constructor(readonly api: FolderApi) {}
 
   async list(): Promise<Listed[]> {
-    const found = await this.api.projectsList();
-    return found.map(({ folder, meta }) => {
+    return this.listed(await this.api.projectsList());
+  }
+
+  /** The projects put away in the archive. */
+  async archived(): Promise<Listed[]> {
+    return this.listed(await this.api.projectsArchived());
+  }
+
+  /** The projects of a listing, the last worked on first (by their
+   *  record's `updated`, the file's time where there is none). */
+  private listed(found: { folder: string; meta: string }[]): Listed[] {
+    const listed = found.map(({ folder, meta }): Listed => {
       const parsed = JSON.parse(meta) as Record<string, unknown>;
       return {
         folder,
@@ -85,6 +101,8 @@ export class Folders {
         month: thisMonth(Array.isArray(parsed.turns) ? (parsed.turns as Turn[]) : []),
       };
     });
+    // Stable: those without a time keep the file's order.
+    return listed.map((l, i) => ({ l, i })).sort((a, b) => (b.l.updated || "").localeCompare(a.l.updated || "") || a.i - b.i).map(({ l }) => l);
   }
 
   /** A new project in a folder named `name`; its plugin starts from `files`. */

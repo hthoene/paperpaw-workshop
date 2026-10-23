@@ -58,11 +58,58 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .projects { position: relative; margin-right: auto; }
 .bar .project { display: flex; align-items: center; gap: .3rem; padding: .3rem .4rem .3rem 0; font: 600 1.15rem/1 var(--display); }
 .bar .project svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: var(--ink-2); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.project-list { position: absolute; left: 0; top: calc(100% + .4rem); z-index: 3; width: 20rem; max-height: 60vh; overflow: auto; padding: .35rem; border-radius: .7rem; background: var(--sheet); box-shadow: 0 0 0 1px var(--rule), 0 .8rem 1.4rem -1rem rgb(0 0 0 / .5); display: grid; }
+.project-list {
+  position: absolute; left: 0; top: calc(100% + .4rem); z-index: 3; width: 21rem;
+  /* Never off the screen: the recent ones scroll inside, the new ones and "All" stay. */
+  max-height: min(34rem, calc(100vh - 5rem)); display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+  padding: .35rem; border-radius: .7rem; background: var(--sheet); box-shadow: 0 0 0 1px var(--rule), 0 .8rem 1.4rem -1rem rgb(0 0 0 / .5);
+}
+.project-list .news { display: grid; padding-bottom: .3rem; margin-bottom: .3rem; border-bottom: 1px solid var(--rule); }
+.project-list .recent { overflow: auto; display: grid; align-content: start; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
 .project-list button { display: grid; gap: .1rem; text-align: left; padding: .5rem .7rem; border-radius: .45rem; font: 500 1rem/1.3 var(--display); }
 .project-list button small { font: 400 .8rem/1.3 var(--text); color: var(--ink-2); }
 .project-list button:hover, .project-list .on { background: var(--sheet-2); }
-.project-list .new { font-weight: 600; border-bottom: 1px solid var(--rule); border-radius: .45rem .45rem 0 0; margin-bottom: .25rem; }
+.project-list .new { font-weight: 600; }
+.project-list .all { margin-top: .3rem; padding-top: .55rem; border-top: 1px solid var(--rule); border-radius: 0 0 .45rem .45rem; font: 500 .92rem/1.3 var(--text); color: var(--ink-2); }
+
+/* All projects: a sheet over the window. */
+.sheet-shade { position: fixed; inset: 0; z-index: 20; display: grid; place-items: start center; padding: 4.5rem 1rem 1rem; background: rgb(29 27 24 / .18); }
+.all-projects {
+  width: min(38rem, 100%); max-height: calc(100vh - 6rem); display: grid; grid-template-rows: auto auto auto auto minmax(0, 1fr);
+  padding: 1.1rem 1.3rem 1rem; border-radius: 1rem; background: var(--sheet); box-shadow: 0 0 0 1px var(--rule), 0 1.4rem 2.4rem -1.4rem rgb(0 0 0 / .55);
+}
+.all-projects h2 { margin: 0; font: 600 1.3rem/1.2 var(--display); }
+.all-tools { display: flex; gap: .8rem; align-items: center; }
+.all-tools input {
+  flex: 1; min-width: 0; padding: .6rem 1rem; border: 0; border-radius: 999px; background: var(--sheet-2); color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--field-edge); font: 400 .95rem/1.4 var(--text);
+}
+.all-tools input:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--ink); }
+.shelves { display: flex; gap: 1.2rem; margin: .9rem 0 .2rem; border-bottom: 1px solid var(--rule); }
+.shelves button { padding: .35rem 0 .45rem; margin-bottom: -1px; color: var(--ink-2); border-bottom: 2px solid transparent; font-size: .9rem; }
+.shelves .on { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
+.all-projects .said { margin: .5rem 0 0; font-size: .86rem; color: var(--ink-2); }
+.all-list { list-style: none; margin: .3rem 0 0; padding: 0; overflow: auto; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+.all-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: .6rem; padding: .15rem 0; border-top: 1px solid var(--rule); }
+.all-list li:first-child { border-top: 0; }
+.all-list li.on .open span { font-weight: 600; }
+.all-list .open { display: grid; gap: .05rem; padding: .45rem .5rem; border-radius: .45rem; text-align: left; min-width: 0; }
+.all-list .open span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 1rem/1.3 var(--display); }
+.all-list .open small { font-size: .8rem; color: var(--ink-2); }
+.all-list button.open:hover { background: var(--sheet-2); }
+.all-list .row-do { display: flex; gap: .9rem; padding-right: .3rem; font: 400 .84rem/1.3 var(--text); opacity: 0; transition: opacity .15s; }
+/* A row's actions where the pointer or the keyboard is, the list calm. */
+.all-list li:hover .row-do, .all-list li:focus-within .row-do, .all-list li.on .row-do { opacity: 1; }
+.all-list .row-do .link { font: inherit; }
+@media (prefers-reduced-motion: reduce) { .all-list .row-do { transition: none; } }
+.all-list .rename, .all-list .confirm { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; padding: .45rem .5rem; font-size: .9rem; }
+.all-list .confirm span { flex: 1 1 18rem; }
+.all-list .rename .link, .all-list .confirm .link { font: 500 .88rem/1.3 var(--text); }
+.all-list .confirm .link:not(.quiet) { text-decoration: underline; text-decoration-color: var(--field-edge); text-underline-offset: .2em; }
+.all-list .rename input { flex: 1; min-width: 10rem; padding: .4rem .8rem; border: 0; border-radius: 999px; background: var(--sheet-2); box-shadow: inset 0 0 0 1px var(--field-edge); font: inherit; color: var(--ink); }
+.all-list .none { display: block; padding: 1.2rem .5rem; color: var(--ink-2); border: 0; }
+.link.quiet { color: var(--ink-2); }
+.link.quiet:hover { color: var(--ink); }
 .bar .link { font: 500 .98rem/1 var(--display); }
 .bar .send { padding: .5rem 1rem .55rem; border-radius: 999px; background: var(--ink); color: var(--sheet); font: 600 .98rem/1 var(--display); }
 .menu { position: relative; }
