@@ -1,37 +1,78 @@
 # How the workshop is built
 
-The workshop is a static site: TypeScript with [Preact](https://preactjs.com/),
-built by [Vite](https://vite.dev/). Everything runs in the browser. A server
-only hands out the files (nginx in `local/`); it never sees a key or a plugin.
+The workshop is a [Tauri](https://tauri.app/) app. The window is
+TypeScript with [Preact](https://preactjs.com/), built by
+[Vite](https://vite.dev/); the computer's side is Rust. The reader beside
+the conversation and PaperPaw's checks are PaperPaw's own programs,
+`paperpaw-emu` and `paperpaw-dev`, of the PaperPaw release the workshop
+works with, so a new PaperPaw needs no new workshop.
+
+Nothing goes to a server of ours. The window talks to Anthropic with the
+person's Claude key, or to the key service in [proxy/](../proxy/README.md)
+with a PaperPaw key, and to nothing else (the window's
+Content-Security-Policy in
+[src-tauri/tauri.conf.json](../src-tauri/tauri.conf.json) allows only
+those two).
 
 ```
 src/
-  app/        the pages (Preact) and the controller between them and the rest
+  desktop/    the window: the app (App.tsx), the desk that ties a project
+              to its workshop, the project list, the files drawer, the
+              reader, the checks, sending, costs, models
+  app/        the workshop of one project (controller.ts) and how its
+              conversation is shown; shared with the web workshop
   ai/         the conversation loop, who answers it (providers), prices
-  tools/      what the AI can do: files, docs, check, look, press, set_entry,
-              and the author's uploads (list, view, convert a picture, place a file)
-  pictures/   pictures for e-ink: gray, fitted, toned, dithered, PNG
+  tools/      what the AI can do: files, docs, look, press, build, and the
+              person's uploads (list, view, convert a picture, place a file)
+  pictures/   pictures for e-ink in the window: gray, fitted, toned, the
+              X4's preview
   handbook/   finding and reading topics of the handbook
-  checks/     the rules a data plugin must follow
-  emulator/   the interface to the reader, and the frame behind it
-  publish/    sharing in the store: its API, screenshots, the AI's draft
-  project/    a project, its files, its uploads, its store entry, storage, the ZIP
+  checks/     the workshop's own rules for a data plugin (a few, before
+              PaperPaw's checks)
+  emulator/   the interface to the reader the tools use
+  project/    a project, its files, its uploads, the rules of its paths
   i18n/       every text, and t()
-  build/      the build API's client: a plugin with code to the builder
+  build/      the interface to a builder of plugins with code
+src-tauri/    the computer's side (Rust): see below
 handbook/     how the handbook is made from PaperPaw (Node and Rust)
-builder/      the builder's container: compiles plugins with code (Node, Rust)
+proxy/        the key service for PaperPaw keys (Node)
 public/       fonts, the icon, the made handbook
-test/         the tests (Vitest)
+test/         the tests (Vitest); the Rust side's are in its files
 ```
 
-Each folder knows only the ones below it in this list of who uses whom:
+Each folder of `src/` knows only the ones after it in this list of who
+uses whom:
 
 ```
-app  ->  publish  ->  ai  ->  tools  ->  emulator, handbook, checks, project
+desktop  ->  app  ->  ai  ->  tools  ->  emulator, handbook, checks, project
 ```
 
 `ai` does not know `app`, and `tools` do not know `ai`. The loop gets its
-tools and its provider handed in, so tests can hand in others.
+tools and its provider handed in, so tests can hand in others. What only
+the app can do (the emulator, the checks, building, making pictures) the
+desktop hands to the workshop through interfaces of `src/`
+(`Emulator`, `Builder`, `ToolContext.optimise`).
+
+## The computer's side
+
+[src-tauri/src/lib.rs](../src-tauri/src/lib.rs) lists every command the
+window may call. Each file is one concern:
+
+| File | What it does |
+|---|---|
+| `key.rs` | The key in the system's keychain (Credential Manager, Keychain, Secret Service), never in a file |
+| `paths.rs` | Where things are: projects in *Documents/PaperPaw Workshop*, the app's own in the system's place for app data |
+| `projects.rs` | Projects as plain folders: the plugin's files right in it, the workshop's in `.workshop/` (`project.json`, `conversation.json`, `uploads/`); rename, archive, the bin. Every path checked to stay inside |
+| `emulator.rs` | `paperpaw-emu --stdio`, driven over its standard input and output |
+| `checks.rs` | `paperpaw-dev check` on the project's folder, its findings with a picture of the spot |
+| `code.rs` | Plugins with code: the crate checked, then built for the emulator |
+| `toolchain.rs` | Rust for plugins with code, set up in the app's folder, the compiler the emulator names; on Windows, Microsoft's C++ build tools |
+| `pictures.rs` | Pictures made smaller, as the person chose; the AI's shape of an upload made so |
+| `send.rs` | The plugin onto a reader: over Wi-Fi, onto its card, or as a zip |
+
+[src/desktop/backend.ts](../src/desktop/backend.ts) is the window's side
+of these calls (`Backend`), and a stand-in for a plain browser
+(`npm run dev`), which keeps everything in memory.
 
 ## A turn of the conversation
 
@@ -45,144 +86,123 @@ tools and its provider handed in, so tests can hand in others.
 
 The messages are only ever added to, never changed. That keeps the prompt
 cache working (the handbook is cached once and read cheaply after) and keeps
-the AI's thinking valid from one round to the next.
+the AI's thinking valid from one round to the next. Thinking blocks are
+never taken out.
 
 A **provider** ([src/ai/provider.ts](../src/ai/provider.ts)) is who answers:
 
-- `AnthropicDirect`: the person's own key, straight from the browser.
+- `AnthropicDirect` ([src/ai/anthropic.ts](../src/ai/anthropic.ts)): the
+  Messages API, with the person's Claude key (`sk-ant-…`) at Anthropic,
+  or with a PaperPaw key (`ppw-…`) at the key service, which speaks the
+  same API. The key's kind decides.
 - `ReplayProvider`: a recorded conversation (`src/ai/examples/*.json`), for
-  the example on the start page and for tests.
-- `QuotaProxy` ([src/ai/quota.ts](../src/ai/quota.ts)): paperpaw.org's
-  free quota, for both kinds. The page sends only the conversation and
-  the project's kind to the site's counting proxy, which chooses the
-  model by the kind and asks Anthropic with the workshop's own prompt and
-  tools for it (copied there by `npm run quota-copy`) and streams the
-  answer back unchanged; the SDK reads it as with a key. A project
-  started with Opus (`Project.model`, with one's own key) stays on the
-  key.
+  tests and for `?example=` in `npm run dev`.
 
 A project is a data plugin or a plugin with code (`Project.kind`). The
-kind picks the model (Haiku for data, Sonnet for code), the tools
-(`DATA_TOOLS` or `CODE_TOOLS`) and the system prompt
-(`handbook.promptFor(kind)`).
+kind picks the model (Haiku for data, Sonnet for code; another in
+Settings, [src/desktop/models.ts](../src/desktop/models.ts)), the tools
+(`DATA_TOOLS` or `CODE_TOOLS`), the system prompt
+(`handbook.promptFor(kind)`) and how much the model thinks
+(`thinkingFor` in the loop). A PaperPaw key allows only the models the key
+service names.
+
+After a turn that changed the plugin, the desk
+([src/desktop/desk.ts](../src/desktop/desk.ts)) runs PaperPaw's checks
+and, if they find something to fix, gives the AI their short findings in
+another turn, at most twice per message of the person (the second time
+thinking more). What each turn cost is kept with the project and shown
+beside it ([src/desktop/costs.ts](../src/desktop/costs.ts)).
 
 ## Tools
 
 A tool ([src/tools/tool.ts](../src/tools/tool.ts)) is a name, a description
 the AI reads, a zod schema for its input, and a `run` function. `run` gets a
-`ToolContext` (the project's files, the emulator, the handbook, the devices)
-and returns what the AI reads plus a `step`: the line the conversation shows,
-as a catalog key.
+`ToolContext` (the project's files, the emulator, the handbook, the devices,
+the uploads) and returns what the AI reads plus a `step`: the line the
+conversation shows, as a catalog key.
 
 **Adding a tool:**
 
 1. Write it in a file in `src/tools/`.
-2. Add it to `DATA_TOOLS` in [src/tools/registry.ts](../src/tools/registry.ts).
-   Add it at the end: the order is part of the cached prompt.
+2. Add it to `DATA_TOOLS` (or `CODE_TOOLS`) in
+   [src/tools/registry.ts](../src/tools/registry.ts). Add it at the end:
+   the order is part of the cached prompt.
 3. Add its step text `step.<name>` to [src/i18n/en.json](../src/i18n/en.json).
 4. Test it: call `run` with a bench from [test/helpers.ts](../test/helpers.ts),
    or record a conversation that uses it and replay it in
    [test/loop.test.ts](../test/loop.test.ts).
 
-## The emulator
+## The reader
 
-The workshop talks to the reader through one interface, `Emulator` in
-[src/emulator/emulator.ts](../src/emulator/emulator.ts):
+The reader is PaperPaw's own emulator, `paperpaw-emu`, as a program of its
+own ([src-tauri/src/emulator.rs](../src-tauri/src/emulator.rs)). The
+workshop runs it with `--stdio` and talks to it one JSON object a line each
+way (PaperPaw's `shells/desktop/src/stdio.rs`, protocol 1):
 
-| Method | What it does |
-|---|---|
-| `start(profile, dark, plugin)` | Boots a device with the plugin |
-| `setFiles(plugin)` | Gives it the plugin's files as they are now |
-| `input(event)` | Presses a button or taps the screen |
-| `screenshot(profile?, dark?, screen?)` | The screen as a PNG |
-| `check()` | What the reader found wrong with the plugin |
+- requests: `start` (a device, its library, its settings, whether it may
+  load code), `button`, `pointer`, `reload`, `describe`, `run`, `open`,
+  `shot`, `quit`;
+- events: `ready` (with the compiler a plugin with code needs), `started`,
+  `frame` (the panel as a PNG, only when it changed), `described`, `shot`,
+  `request`, `warning`, `error`.
 
-`FrameEmulator` puts this through `postMessage` to a frame (`frame.html`) in
-a sandboxed iframe. The messages are in
-[src/emulator/protocol.ts](../src/emulator/protocol.ts):
+The plugin being made is copied into the emulated reader's own folder
+(`plugins/<id>/`, as on a reader's card), and the reader started again on
+it, only when its files changed. If the program stops, the next request
+starts it again.
 
-1. The workshop sends `hello` until the frame answers `ready`
-   (either may load first). `ready` says whether it is the stub.
-2. Then each request (`start`, `files`, `input`, `screenshot`, `check`)
-   carries an `id`, and the frame answers with the same `id`, `ok` and a
-   `result` or an `error`.
+The AI's tools see it as an `Emulator`
+([src/emulator/emulator.ts](../src/emulator/emulator.ts)):
+[src/desktop/native.ts](../src/desktop/native.ts) is that interface on top
+of these commands. There is one reader at a time: a screenshot of another
+device starts that one, then the one shown again. The device shown at the
+start is the X4 Pro; the X4 and the Boox Go 7 are a click away.
 
-The frame answers with **PaperPaw itself**: its web emulator (PaperPaw's
-`shells/web`, the kernel, plugins, device profiles and panel compiled to
-WebAssembly), built into `public/emulator/paperpaw-web.wasm` by
-`npm run emulator` ([scripts/emulator.mjs](../scripts/emulator.mjs); what it
-was built from is in `public/emulator/meta.json`). The frame drives it
-through PaperPaw's own loader (`paperpaw-web.js`, copied beside
-[src/emulator/frame/shell/reader.ts](../src/emulator/frame/shell/reader.ts)),
-not through PaperPaw's frame page, because the workshop asks for more:
-
-- screenshots of another device, in night mode or asleep, without
-  changing the reader the author sees: a second instance of the module
-  takes them;
-- the checker's findings in the workshop's shape: paperpaw-dev's
-  `package`, `lint` and `visual` checks, on the device shown;
-- a module that stops (PaperPaw panicked, or ran out of the device's
-  memory) is loaded anew, and the request says what happened.
-
-Where the module is missing (a checkout that never ran `npm run
-emulator`), the stub answers instead ([src/emulator/frame/stub.ts](../src/emulator/frame/stub.ts)):
-a rough home screen from the plugin's look and layout, and the workshop's
-own checks.
-
-The frame runs without `allow-same-origin`, so its origin is opaque: it
-cannot read the workshop's storage or the key. What follows from that is
-handled in [local/nginx.conf](../local/nginx.conf): its scripts and the
-module are loaded with CORS (`/assets/` and `/emulator/` allow any
-origin), and its Content-Security-Policy names the server's real origin
-instead of `'self'` (for scripts, and for fetching the module), with
-`'wasm-unsafe-eval'` for WebAssembly.
-In `npm run dev` the frame gets `allow-same-origin`, because Vite's dev
-server sends no CORS headers.
-
-**What a plugin's code can do to the page.** A plugin with code runs in
-the reader, so its mistakes do too: a loop that never ends, a check that
-takes minutes, memory that only grows. None of it may reach the
-workshop's page:
-
-- PaperPaw runs in a worker of the frame's
-  ([shell/worker.ts](../src/emulator/frame/shell/worker.ts)), made from a
-  blob (a sandboxed page may start no worker from an address; the frame's
-  policy allows `worker-src blob:`). The frame's own thread only draws
-  the frames the worker sends and passes touches on, so the page and the
-  frame stay usable whatever the plugin does.
-- A watchdog in the frame
-  ([shell/host.ts](../src/emulator/frame/shell/host.ts)) gives each
-  request its time (15 s for a press, 60 for the checks, 90 for a new
-  module) and asks an idle worker every 2 s whether it is there. A
-  worker that does not answer is ended; a new one starts with the same
-  module and device, on its home screen, and the request says what
-  happened, for the AI to fix. The page's own timeout (120 s) is longer,
-  so the frame always answers first. A worker stopped while nothing was
-  asked (a timer of the plugin's that never returned) has no request to
-  fail: the frame says so to the page (`stopped`), which shows it to the
-  author and tells the AI at its next look or press.
-- The module's memory may grow to 512 MB at most (linked so: PaperPaw
-  needs some 70, the Boox's screen included); at the cap it traps, and
-  the reader starts again as after a panic. A module larger than 48 MB
-  is not run.
+Where it comes from: `PAPERPAW_EMU` names a build of one's own while the
+workshop is worked on; otherwise the release's program, kept in the app's
+folder (`emulators/<version>/`). `paperpaw-dev` lies beside it.
 
 Tests use `FakeEmulator` ([src/emulator/fake.ts](../src/emulator/fake.ts)).
 
+## PaperPaw's checks
+
+After every change, and before the plugin is sent or exported,
+[src-tauri/src/checks.rs](../src-tauri/src/checks.rs) runs
+`paperpaw-dev check` on the project's folder, on every device the workshop
+shows and in every language the plugin has: its files (package), its texts
+and settings (lint), what it draws (text cut off, parts overlapping or
+outside their cell, uneven margins, focus not shown, small touch targets,
+contrast) and whether every screen is reached and left with buttons alone.
+
+What is to fix goes to the AI (short, without pictures) and to the person
+([src/desktop/Findings.tsx](../src/desktop/Findings.tsx)): each finding
+with a small picture of its spot, "Let the AI fix it" and "Ignore". The
+checks the person ignores stay ignored for the project.
+
 ## The handbook
 
-The AI's system prompt is `public/handbook/data.md`: the rules for data
-plugins, every setting with its range and every widget, in about 10k tokens.
-Everything else is in topics (`public/handbook/topics/`) that the AI reads
-with `lookup_docs` when it needs them.
+The AI's system prompt is `public/handbook/data.md` or `code.md`. It holds
+the workshop's own part (how to work with the person, the project, the
+tools), and PaperPaw's: its guide's sections for plugins, every setting
+with its range, every widget and action. Everything else is in topics
+(`public/handbook/topics/`) that the AI reads with `lookup_docs` when it
+needs them.
 
 [handbook/generate.mjs](../handbook/generate.mjs) makes all of it from a
-PaperPaw tag or branch:
+PaperPaw tag, branch or commit:
+
+```sh
+npm run handbook -- --repo ../paperpaw --ref <ref>
+```
 
 - the docs, taken from `git archive` of that ref;
-- the settings, widgets, actions and devices, read by a small Rust program
-  ([handbook/registry/](../handbook/registry/)) that builds PaperPaw's
-  emulator and asks it;
-- the hand-written parts in [handbook/parts/](../handbook/parts/).
+- the settings, widgets, actions and devices, from PaperPaw's registry
+  (`paperpaw-emu --registry`, or a file of it with `--registry`);
+- the SDK's items for plugins with code, from its source;
+- the workshop's own parts in [handbook/parts/](../handbook/parts/). Only
+  how the workshop works belongs there; what PaperPaw is comes from
+  PaperPaw. `data-interim.md` holds what PaperPaw's docs do not gather yet
+  (the data files and their formats, home screens) and goes when they do.
 
 `registry.json` is also what the checks in
 [src/checks/data.ts](../src/checks/data.ts) use, so the rules the AI reads
@@ -191,133 +211,96 @@ and the rules its files are checked against are the same.
 ## Plugins with code
 
 A plugin with code is a Rust crate: `Cargo.toml` (with
-`[package.metadata.paperpaw] plugin = "Type"`), `src/*.rs`, `i18n/*.ini`
-and `plugin/` (its `plugin.ini`). A new one starts from PaperPaw's sample
-plugin (`public/handbook/code-sample.json`).
+`[package.metadata.paperpaw] plugin = "Type"`), `src/*.rs`,
+`i18n/*.ini`, `how/*.txt` and `plugin/` (its `plugin.ini`). A new one
+starts from PaperPaw's sample plugin (`public/handbook/code-sample.json`).
 
-The `build` tool ([src/tools/build.ts](../src/tools/build.ts)) sends the
-files to the builder through
-[src/build/client.ts](../src/build/client.ts) and answers the AI with
-the compiler's messages about the plugin's own files (errors first), or,
-when it built, puts the new module into the reader. The page reaches the
-builder on its own origin, `/api/v1/workshop/builds`: the workshop's
-nginx passes it on to the builder (and `npm run dev` to that nginx);
-the builder has no port of its own.
+The `build` tool ([src/tools/build.ts](../src/tools/build.ts)) goes to a
+`Builder`; in the app that is
+[src/desktop/builder.ts](../src/desktop/builder.ts), which calls
+[src-tauri/src/code.rs](../src-tauri/src/code.rs):
 
-The builder ([builder/](../builder/)) is a container with PaperPaw's
-source, every crate it needs (no network while building) and PaperPaw
-compiled ahead for `wasm32` and the X4's `riscv32imc`. For a build it:
+1. The project's files are checked: only the paths above, no `build.rs`,
+   no crate but `paperpaw-sdk`, no sections of Cargo's own. The workshop
+   writes the Cargo.toml it builds with.
+2. It is built as PaperPaw's emulator loads code: a `cdylib` with the
+   SDK's `plugin!` line and its `outline` feature (`code-host.dll`,
+   `.so`, `.dylib`), against the SDK of that PaperPaw (`=<version>` from
+   crates.io, or `PAPERPAW_SDK` while the workshop is worked on), by the
+   very compiler the emulator names in `ready`: the emulator loads only
+   code with its own fingerprint.
+3. The compiler's messages about the plugin's own files come back to the
+   AI, errors first. When it built, the library goes into the reader's
+   plugin folder and the reader starts again with code allowed.
 
-1. checks the files ([builder/project.mjs](../builder/project.mjs)): only
-   the paths above, no `build.rs`, no crates but `paperpaw-sdk`, no
-   sections of Cargo's own;
-2. for the reader, compiles a small **harness** crate: PaperPaw's web
-   shell with the plugin added (`pp_plugins`, which the reader calls on
-   each new instance), into one WebAssembly module;
-3. for the X4 and the X4 Pro, compiles a native wrapper
-   (`paperpaw_sdk::plugin!`) and packs it with `paperpaw-sign pack` into
-   a `.ppn`, not signed, and checks the chip it names. The X4's compiler
-   is the image's Rust, the X4 Pro's espup's `esp` toolchain, both of
-   the versions the firmware is built with (PaperPaw's
-   `shells/xteink/versions.env`): a plugin file runs only on firmware
-   built by the same compiler;
-4. keeps the files a day at `/api/v1/workshop/builds/{id}/files/{name}`.
+Builds live in the app's folder (`builds/<project>/`), so the next one is
+quick. The first plugin with code sets up Rust in the app's folder
+([src-tauri/src/toolchain.rs](../src-tauri/src/toolchain.rs)): rustup from
+rust-lang.org, its SHA-256 checked, then the emulator's compiler; the
+person's own Rust is left alone. On Windows the compiler links with
+Microsoft's linker: without Visual Studio's C++ build tools the workshop
+says so and offers to install them (winget, the VCTools workload).
 
-One build runs at a time; others wait their turn (the answer says where
-they are). Since PaperPaw is compiled ahead, a plugin's
-first build takes a few seconds (7 for the quote example, the reader's
-module and the X4's file) and a build after a change about one.
+## The person's pictures and files
 
-### What a build may do
+People add pictures (and fonts or texts) to their messages, or drop them
+into the files drawer ([src/desktop/Drawer.tsx](../src/desktop/Drawer.tsx)).
+Two uses, which the AI tells apart from what the person says: **material**
+it builds into the plugin (a sleep picture, a logo), and **references** it
+looks at to make a design (a screenshot or sketch of a look).
 
-Compiling runs code: the build scripts and procedural macros of the
-crates built. An author's crate adds none: the builder writes the
-Cargo.toml it compiles with (the author's only gives the crate's name,
-its version and the plugin's type), and a plugin may name no crate but
-the SDK, so what runs are those of PaperPaw's own dependencies, locked
-by its Cargo.lock and in the image since it was made. An author's code
-itself runs at no point of a build, only in the reader later (below).
-All the same, the builder is closed in, here and on paperpaw.org:
+- **Uploads are not plugin files.** They are kept in the project's
+  `.workshop/uploads/`, within limits
+  ([src/project/uploads.ts](../src/project/uploads.ts)). The AI gets a
+  reduced copy (at most 1,568 pixels on the long side, re-encoded, so no
+  metadata goes along), at most 4 a message and 12 a conversation.
+- **Pictures for the readers** are made on the computer
+  ([src-tauri/src/pictures.rs](../src-tauri/src/pictures.rs)), as the
+  person chose for each in the drawer, by default as the project's
+  "Optimise images for e-ink" says: smaller in 16 grays (the reader
+  dithers to its panel), smaller in colour, or as it is. Scaled to what
+  the readers need at most, stripped of metadata, compressed with oxipng,
+  never interlaced. A changed choice makes the picture again.
+- **The tools** `list_uploads`, `view_upload`, `convert_picture` and
+  `place_file` are in [src/tools/uploads.ts](../src/tools/uploads.ts).
+  `convert_picture` says the part, the fit (fill or whole, a box for a
+  logo) and the tone; the app makes it so in the person's mode, and the
+  tool answers with how the X4 shows the file written, so the AI judges
+  its own work. The AI never chooses the mode.
+- Before sending, pictures larger than the readers need, in colour where
+  no reader shows it, or heavy are suggested to be made smaller; nothing
+  changes unless the person says so
+  ([src/desktop/pictures.ts](../src/desktop/pictures.ts)).
 
-| | On one's computer (docker-compose.yml) | On paperpaw.org (its `rebuild/workshop.sh`) |
-|---|---|---|
-| Network | a network without internet, shared with the workshop's server only | none at all |
-| File system | root read-only; writable only copies of what cargo writes to | the same, fresh for each build, gone with it |
-| Mounted | nothing of the computer | nothing of the host |
-| User | its own, unprivileged, no capabilities, no new privileges | the same |
-| Limits | 2 processors, 4 GB, 512 processes; 180 s a module, 300 s a file | the same, 300 s a build in all, gVisor where the host has it |
-| Builds | one at a time | one at a time, in a container of its own each |
+## Onto the reader
 
-The harness adds the plugin with PaperPaw's own hook
-(`paperpaw_web::set_plugins`, from its `pp_plugins`, which PaperPaw's
-loader calls first). paperpaw-dev checks the build in the reader as
-`paperpaw-dev check --plugin <id>` does (its texts, its screens drawn,
-reach, frame times and memory): the `check` tool, and "What the checker
-says" beside the compiler's warnings and errors.
+**Send to reader** ([src/desktop/Send.tsx](../src/desktop/Send.tsx),
+[src-tauri/src/send.rs](../src-tauri/src/send.rs)) first says what
+PaperPaw's checks found to fix and which pictures could be smaller, and
+stops nothing. Then:
 
-## Sharing in the store
+- **Wi-Fi**: through the reader's Transfer page, its address with its key
+  as the reader shows it (`http://<reader>/?k=<key>`). The Transfer API
+  never overwrites (a file sent where one is gets a free name), so the
+  plugin's folder there is removed first and made again. PaperPaw's
+  atomic `POST /api/plugin/<id>` takes its place once a release has it.
+- **Card**: into `plugins/<id>/` of the reader's card in this computer.
+- **Export zip**: the plugin as a zip to keep or share.
 
-The share page (`#/p/<project>/share`) takes a plugin from "works on the
-reader" to "sent to the moderators" in as few steps as there can be:
-
-1. **Its page in the store** is drafted by the AI from the conversation
-   ([src/publish/draft.ts](../src/publish/draft.ts): one request whose only
-   tool is `set_entry`, asked for by name), and the author changes what
-   they like. The entry
-   lives in `store/store.ini` ([src/project/entry.ts](../src/project/entry.ts)),
-   with the store's own limits.
-2. **Screenshots** are taken on the emulator, on each device and once at
-   night ([src/publish/screenshots.ts](../src/publish/screenshots.ts)), and
-   kept in `store/` as the store reads them.
-3. **Send**: sign in on paperpaw.org (a mail link that leads back), then
-   "Check it in the store" uploads the package as the store's form does,
-   the store checks it and keeps a draft, and "Send it to the moderators"
-   sends that draft.
-
-The page knows the store only through `StoreApi`
-([src/publish/store.ts](../src/publish/store.ts)): `SiteStore` is
-paperpaw.org's, `FakeStore` stands in for tests, the example and
-`npm run dev`. The requests are described in [store-api.md](store-api.md).
-Where there is no store (the workshop on your own computer) or it has
-not opened yet, the page offers the same package as a download, to upload
-at paperpaw.org/submit.
-
-`store/` goes to the store only: the ZIP for a reader's card and the
-files the emulator gets leave it out.
-
-## The author's pictures and files
-
-Authors add pictures (and fonts or texts) to their messages with "Add a
-picture" or by dropping them on the conversation. Two uses, which the AI
-tells apart from what the author says: **material** it builds into the
-plugin (a sleep picture, a logo), and **references** it looks at to make
-a design (a screenshot or sketch of a look).
-
-- **Uploads are not plugin files.** [src/project/uploads.ts](../src/project/uploads.ts)
-  keeps them with the project, their bytes in an IndexedDB store of their
-  own (so saving a project does not write them again), within limits
-  (kinds by their bytes, sizes, megapixels, how many). They never go to a
-  server; the AI gets a reduced copy (at most 1,568 pixels on the long
-  side, re-encoded, so no metadata goes along), at most 4 a message and
-  12 a conversation.
-- **Pictures for the readers** are made in the browser by pure functions
-  in [src/pictures/](../src/pictures/): gray, fitted (fill or whole, a
-  crop, a box for a logo), toned for e-ink (levels, brightness, contrast,
-  gamma), dithered to the panel's grays (four on the X4: diffusion for
-  photos, line art for drawings), written as 2 or 4-bit gray PNG. One
-  file per screen size once PaperPaw can pick one; until then one file
-  for the largest screen the plugin is for.
-- **The tools** `list_uploads`, `view_upload`, `convert_picture` (which
-  answers with how the X4 shows the result, so the AI judges its own
-  work) and `place_file` are in [src/tools/uploads.ts](../src/tools/uploads.ts).
-  The browser parts (decoding, the AI's copy) come through a
-  `PictureKit` ([src/pictures/kit.ts](../src/pictures/kit.ts)), which tests
-  replace with a fake.
-- The stub reader shows the sleep screen ("Asleep" beside the reader,
-  `look` with `screen: sleep`): the plugin's sleep picture, or its logo.
+The store's own files (`store/`) stay home.
 
 ## Texts
 
-Every text the person sees is in [src/i18n/en.json](../src/i18n/en.json) and
-read with `t("key", { values })`. Texts the AI reads (tool descriptions,
-tool results) are English in the code, since they are prompt, not interface.
+Every text the person sees is in [src/i18n/en.json](../src/i18n/en.json)
+and read with `t("key", { values })`, or written in the window's
+components in English. Texts the AI reads (tool descriptions, tool
+results) are English in the code, since they are prompt, not interface.
+
+## Left from the web workshop
+
+The workshop began as a web page. Its parts the app does not use are still
+in the repository: the reader in a frame (`frame.html`,
+`src/emulator/frame/`), the builder's container (`builder/`, `Dockerfile`,
+`docker-compose.yml`, `local/`), sharing in the store (`src/publish/`,
+[store-api.md](store-api.md)) and the web pages in `src/app/`. They go
+when the app has what they did.
