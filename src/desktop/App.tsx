@@ -2,10 +2,13 @@
 // window, the conversation on the left, the reader on the right, a thin
 // bar above with the project, its files, sending it to a reader and a menu.
 
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useMemo, useState } from "preact/hooks";
 
 import type { Backend } from "./backend";
+import { Drawer } from "./Drawer";
+import { Projects } from "./Projects";
 import { Reader } from "./Reader";
+import { Workspace } from "./workspace";
 
 interface Props {
   backend: Backend;
@@ -75,13 +78,23 @@ function FirstStart({ onKey }: { onKey(key: string): Promise<void> }) {
 }
 
 function Window({ backend, onForgetKey }: { backend: Backend; onForgetKey(): void }) {
+  const workspace = useMemo(() => new Workspace(backend), [backend]);
+  const [, redraw] = useState(0);
   const [menu, setMenu] = useState(false);
+  const [files, setFiles] = useState(false);
   const [draft, setDraft] = useState("");
+
+  useEffect(() => {
+    const stop = workspace.subscribe(() => redraw((n) => n + 1));
+    void workspace.refresh();
+    return stop;
+  }, [workspace]);
+
   return (
     <div class="window">
       <header class="bar">
-        <button type="button" class="project">New plugin</button>
-        <button type="button" class="link">Files</button>
+        <Projects workspace={workspace} />
+        <button type="button" class="link" aria-expanded={files} onClick={() => setFiles(!files)}>Files</button>
         <button type="button" class="send">Send to reader</button>
         <div class="menu">
           <button type="button" class="dots" aria-label="Menu" aria-expanded={menu} onClick={() => setMenu(!menu)}>
@@ -111,6 +124,7 @@ function Window({ backend, onForgetKey }: { backend: Backend; onForgetKey(): voi
           </form>
         </section>
         <Reader backend={backend} />
+        {files && <Drawer workspace={workspace} onClose={() => setFiles(false)} />}
       </div>
     </div>
   );
