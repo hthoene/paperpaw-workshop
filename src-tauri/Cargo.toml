@@ -1,0 +1,26 @@
+[package]
+name = "paperpaw-workshop"
+version = "0.1.0"
+description = "Make PaperPaw plugins with AI, on your own computer"
+license = "Apache-2.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "paperpaw_workshop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# The key in the system's own keychain: Windows Credential Manager, the
+# macOS Keychain, the Secret Service on Linux.
+keyring = { version = "3", features = ["windows-native", "apple-native", "sync-secret-service"] }
+dirs = "6"
+
+[dev-dependencies]
+tempfile = "3"
