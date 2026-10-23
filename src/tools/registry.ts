@@ -8,6 +8,7 @@ import { setEntry } from "./entry";
 import { deleteFile, editFile, listFiles, readFile, writeFile } from "./files";
 import { build } from "./build";
 import type { WorkshopTool } from "./tool";
+import { fetchSample } from "./sample";
 import { convertPicture, listUploads, placeFile, viewUpload } from "./uploads";
 
 export const DATA_TOOLS: WorkshopTool<any>[] = [
@@ -44,4 +45,6 @@ export const CODE_TOOLS: WorkshopTool<any>[] = [
   check,
   control,
   setFixtures,
+  // Last: the order is part of the cached prompt.
+  fetchSample,
 ];

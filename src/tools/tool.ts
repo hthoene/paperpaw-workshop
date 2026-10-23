@@ -45,6 +45,9 @@ export interface ToolContext {
     real(): boolean;
   };
   lastBuild?(result: BuildResult): void;
+  /** Examples of what addresses the person named answer (sample.ts),
+   *  where the app can fetch them. */
+  samples?: import("./sample").Samples;
   /** Makes a picture of an upload as `shape` says and as the person chose
    *  for it (smaller, in grays or colours, or kept), where the app can: the
    *  file to write at `to`. Without it, convert_picture dithers itself. */

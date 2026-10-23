@@ -59,6 +59,8 @@ export class Desk {
   /** A state of the history the reader shows in place of the project,
    *  while the person looks at it before going back to it. */
   previewing: { id: string; ready: boolean; problem: string } | null = null;
+  /** The person is asked whether the AI may fetch from a site. */
+  asking: { host: string; answer(choice: "once" | "always" | "no"): void } | null = null;
   private listeners = new Set<() => void>();
   private stopWorkshop: (() => void) | undefined;
 
@@ -152,6 +154,7 @@ export class Desk {
     workshop.chooseModel = (p) => modelFor(savedChoice(), p, p.kind, this.may);
     // PaperPaw's emulator here fetches from the internet as a reader does.
     workshop.withoutTools = ["set_fixtures"];
+    workshop.samples = { consent: (host) => this.consent(project, host), fetch: (url) => this.backend.sampleFetch(url) };
     workshop.optimise = (upload, to, shape) => pictureOf(project, workshop.uploads, upload, to, WORKSHOP_SCREENS, this.backend, { shape });
     const shown = this.handbook.profile(this.profile);
     if (shown) workshop.profile = shown;
@@ -227,6 +230,27 @@ export class Desk {
     }
     this.changed();
     return heard;
+  }
+
+  /** Whether the person lets the AI fetch an example from `host`: always
+   *  for this project if they said so, else asked in the conversation. */
+  private consent(project: Project, host: string): Promise<boolean> {
+    if (project.fetchAllowed?.includes(host)) return Promise.resolve(true);
+    return new Promise((resolve) => {
+      this.asking = {
+        host,
+        answer: (choice) => {
+          this.asking = null;
+          if (choice === "always") {
+            (project.fetchAllowed ??= []).push(host);
+            void this.workspace.save();
+          }
+          resolve(choice !== "no");
+          this.changed();
+        },
+      };
+      this.changed();
+    });
   }
 
   /** Shows state `id` of the history on the reader, the project left as
@@ -322,6 +346,8 @@ export class Desk {
   }
 
   stop(): void {
+    // A question open: not fetched.
+    this.asking?.answer("no");
     this.workshop?.stop();
   }
 }

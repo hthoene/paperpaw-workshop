@@ -40,7 +40,7 @@ export function Conversation({ desk }: { desk: Desk }) {
     if (stick.current) setUnseen(false);
   };
   // What is shown changed: kept in view at the end, else said with "New".
-  const shown = `${project?.key}|${said.length}|${workshop?.live.length ?? 0}|${workshop?.thinking.length ?? 0}|${busy}|${desk.building}|${desk.lastTurn?.dollars ?? 0}|${workshop?.error ?? ""}|${desk.history.current}|${desk.previewing?.ready ?? ""}|${workshop?.paused ?? ""}`;
+  const shown = `${project?.key}|${said.length}|${workshop?.live.length ?? 0}|${workshop?.thinking.length ?? 0}|${busy}|${desk.building}|${desk.lastTurn?.dollars ?? 0}|${workshop?.error ?? ""}|${desk.history.current}|${desk.previewing?.ready ?? ""}|${workshop?.paused ?? ""}|${desk.asking?.host ?? ""}`;
   useEffect(() => {
     if (stick.current) down(false);
     else setUnseen(true);
@@ -85,6 +85,7 @@ export function Conversation({ desk }: { desk: Desk }) {
         )}
         {desk.buildTools && <BuildTools desk={desk} />}
         {workshop && workshop.paused !== null && !busy && <Paused desk={desk} dollars={workshop.paused} />}
+        {desk.asking && <Asking desk={desk} host={desk.asking.host} />}
         <PreviewBar desk={desk} />
       </div>
       {unseen && (
@@ -119,8 +120,35 @@ export function Conversation({ desk }: { desk: Desk }) {
 
 function Said({ line }: { line: Line }) {
   if (line.kind === "step") return <div class={`step${line.failed ? " failed" : ""}`}>{line.text}</div>;
+  if (line.kind === "sample") {
+    return (
+      <details class={`step sample${line.failed ? " failed" : ""}`}>
+        <summary>{line.text}</summary>
+        <pre>{line.detail}</pre>
+      </details>
+    );
+  }
   if (line.kind === "added") return <div class="step">Added {line.text}</div>;
   return <div class={line.kind}>{line.text}</div>;
+}
+
+/** The AI would fetch an example from a site the person named: asked
+ *  once a site, plainly, what goes where. */
+function Asking({ desk, host }: { desk: Desk; host: string }) {
+  const answer = (choice: "once" | "always" | "no") => desk.asking?.answer(choice);
+  return (
+    <div class="offer" role="alertdialog" aria-label={`Fetch ${host}?`}>
+      <p>
+        Fetch an example from {host}? The AI wants to see what the address you gave answers, to read it right. Only that
+        request goes out, from this computer; what comes back shows here.
+      </p>
+      <div class="offer-do">
+        <button type="button" class="go" onClick={() => answer("once")}>Allow once</button>
+        <button type="button" class="link" onClick={() => answer("always")}>Always for this project</button>
+        <button type="button" class="link quiet" onClick={() => answer("no")}>No</button>
+      </div>
+    </div>
+  );
 }
 
 /** A turn that cost more than it may without changing the plugin:

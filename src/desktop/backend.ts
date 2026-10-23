@@ -128,6 +128,9 @@ export interface Backend extends FolderApi, PictureApi, CheckApi, HistoryApi {
   projectsImport(path: string): Promise<[string, boolean][] | null>;
   /** A plugin's ZIP at `path`, in base64. */
   importRead(path: string): Promise<string>;
+  /** An example of what `url` answers (sample.rs): public addresses,
+   *  GET, cut to 4 KB. */
+  sampleFetch(url: string): Promise<import("../tools/sample").Sample>;
   /** Where to save an export, or which file to import, asked of the person. */
   askSaveExport(name: string): Promise<string | null>;
   askOpenImport(): Promise<string | null>;
@@ -210,6 +213,7 @@ export const appBackend: Backend = {
   projectsExport: (projects, path) => invoke("projects_export", { projects, path }),
   projectsImport: (path) => invoke("projects_import", { path }),
   importRead: (path) => invoke("import_read", { path }),
+  sampleFetch: (url) => invoke("sample_fetch", { url }),
   askSaveExport: (name) => save({ title: "Export", defaultPath: name, filters: [{ name: "Workshop export", extensions: ["zip"] }] }),
   askOpenImport: async () => {
     const chosen = await open({ title: "Import", filters: [{ name: "A workshop export or a plugin", extensions: ["zip"] }] });
@@ -302,6 +306,7 @@ export function standInBackend(): Backend {
     projectsExport: async () => { throw new Error("Exporting needs the app."); },
     projectsImport: async () => null,
     importRead: async () => { throw new Error("Importing needs the app."); },
+    sampleFetch: async () => { throw new Error("Fetching an example needs the app."); },
     askSaveExport: async () => null,
     askOpenImport: async () => null,
     projectsList: async () => [...folders].map(([folder, f]) => ({ folder, meta: f.meta })),

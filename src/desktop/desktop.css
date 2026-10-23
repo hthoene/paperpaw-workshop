@@ -56,9 +56,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .window { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); }
 .bar { position: relative; z-index: 5; display: flex; align-items: center; gap: 1.4rem; padding: .65rem 1.2rem; border-bottom: 1px solid var(--rule); }
 .projects { position: relative; margin-right: auto; }
-.bar .project { display: flex; align-items: baseline; gap: .3rem; padding: .3rem .4rem .3rem 0; font: 600 1.15rem/1 var(--display); }
-/* The kind beside the name: with code, without, or as the first words ask. */
-.bar .project .kind { margin-left: .2rem; font: 400 .78rem/1 var(--text); color: var(--ink-2); white-space: nowrap; }
+.bar .project { display: flex; align-items: center; gap: .3rem; padding: .3rem .4rem .3rem 0; font: 600 1.15rem/1 var(--display); }
+/* The kind beside the name: with code, without, or as the first words
+   ask; in the middle of the name's letters, which Literata sets low. */
+.bar .project .kind { position: relative; top: .1em; margin-left: .2rem; font: 400 .78rem/1 var(--text); color: var(--ink-2); white-space: nowrap; }
 .bar .project svg { align-self: center; width: 1.1rem; height: 1.1rem; fill: none; stroke: var(--ink-2); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .project-list {
   position: absolute; left: 0; top: calc(100% + .4rem); z-index: 3; width: 21rem;
@@ -297,6 +298,9 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .log .back-here .link:disabled { opacity: .45; cursor: default; }
 .log .offer.preview { position: sticky; bottom: 0; box-shadow: 0 0 0 1px var(--rule); }
 .offer-do { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+/* An example fetched from the web: the step, its answer to unfold. */
+.log details.sample summary { cursor: pointer; }
+.log details.sample pre { margin: .4rem 0 0; max-height: 14rem; overflow: auto; padding: .5rem .7rem; border-radius: .5rem; background: var(--sheet-2); font-size: .78rem; white-space: pre-wrap; overflow-wrap: anywhere; }
 .versions { margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
 .versions h3 { margin: 0 0 .5rem; font: 600 .9rem/1.3 var(--text); }
 .versions ul { margin: 0; padding: 0; list-style: none; display: grid; gap: .35rem; }

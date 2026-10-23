@@ -2686,6 +2686,7 @@ dependencies = [
  "tempfile",
  "trash",
  "ureq",
+ "url",
  "zip",
 ]
 

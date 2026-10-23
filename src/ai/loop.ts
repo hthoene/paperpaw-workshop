@@ -23,11 +23,14 @@ export const MAX_TOKENS = 32_000;
 /** The tools whose results stay for the whole conversation: what the
  *  docs say and what the project holds are small, and cleared the model
  *  would look them up again and again. */
-export const KEPT_TOOLS = ["lookup_docs", "read_file", "list_files", "list_uploads"];
+export const KEPT_TOOLS = ["lookup_docs", "read_file", "list_files", "list_uploads", "fetch_sample"];
 
 /** Tools that only look. Asked again in one turn with the same input,
  *  they answer with where the first answer is, not with it again. */
 export const LOOKING_TOOLS = KEPT_TOOLS;
+/** The most uses of a tool in one turn, where there is a most. */
+export const PER_TURN: Record<string, number> = { fetch_sample: 5 };
+
 /** Tools that change the plugin's files (and so what reading them gives). */
 export const CHANGING_TOOLS = ["write_file", "edit_file", "delete_file", "place_file", "convert_picture", "set_entry"];
 /** After this many looks in a turn without a change, the model is told
@@ -167,6 +170,7 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
   // What this turn looked at (by input, the call that answered), how
   // often since the last change, and whether it changed a file.
   const seen = new Map<string, string>();
+  const used = new Map<string, number>();
   let looks = 0;
   let changed = false;
   const before = project.usage.dollars;
@@ -211,6 +215,13 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
       const key = looking ? inputKey(call.name, call.input) : "";
       const earlier = looking ? seen.get(key) : undefined;
       let result: Anthropic.ToolResultBlockParam;
+      const most = PER_TURN[call.name];
+      if (!earlier && most !== undefined && (used.get(call.name) ?? 0) >= most) {
+        result = { type: "tool_result", tool_use_id: call.id, content: `${call.name} is used at most ${most} times in one turn.`, is_error: true };
+        results.push(result);
+        continue;
+      }
+      if (!earlier && most !== undefined) used.set(call.name, (used.get(call.name) ?? 0) + 1);
       if (earlier) {
         // Answered in this turn already, and still so: where, not again.
         result = {

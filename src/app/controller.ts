@@ -5,6 +5,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 import { runTurn, type Said, type TurnEnd } from "../ai/loop";
+import { namedBy, personsUrls, type Samples } from "../tools/sample";
 import { MODELS, modelName } from "../ai/pricing";
 import type { Provider } from "../ai/provider";
 import { QuotaRefused } from "../ai/quota";
@@ -50,6 +51,9 @@ export class Workshop {
   /** Tools this workshop does without (the app's reader fetches from the
    *  internet itself: no recorded answers). */
   withoutTools: string[] = [];
+  /** Asking the person and fetching an example, where the app can
+   *  (`fetch_sample`); which addresses are the person's is said here. */
+  samples?: Pick<Samples, "consent" | "fetch">;
   /** The last turn paused, as it cost this much (dollars) without
    *  changing the plugin: the person says whether it goes on. */
   paused: number | null = null;
@@ -201,6 +205,11 @@ export class Workshop {
           this.project.fixtures = fixtures;
         },
         real: () => this.networkMode === "real",
+      },
+      samples: this.samples && {
+        allowed: (url) => namedBy(personsUrls(this.project.messages), url),
+        consent: (host) => this.samples!.consent(host),
+        fetch: (url) => this.samples!.fetch(url),
       },
       lastBuild: (result) => {
         this.build = result;

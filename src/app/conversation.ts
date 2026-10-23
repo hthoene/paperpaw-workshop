@@ -15,7 +15,9 @@ export type Line =
   | { kind: "ai"; text: string }
   | { kind: "step"; text: string; failed: boolean }
   /** An upload the person added to their message, by name. */
-  | { kind: "added"; text: string };
+  | { kind: "added"; text: string }
+  /** An example fetched from the web: the step, and what came back. */
+  | { kind: "sample"; text: string; detail: string; failed: boolean };
 
 /** A line as it is made: a step with its tool and what it was about. */
 type Made = Line & { tool?: string; subject?: string };
@@ -23,9 +25,14 @@ type Made = Line & { tool?: string; subject?: string };
 export function lines(messages: Anthropic.MessageParam[]): Line[] {
   const out: Made[] = [];
   const failed = new Set<string>();
+  const answers = new Map<string, string>();
   for (const m of messages) {
     if (m.role !== "user" || !Array.isArray(m.content)) continue;
-    for (const b of m.content) if (b.type === "tool_result" && b.is_error) failed.add(b.tool_use_id);
+    for (const b of m.content) {
+      if (b.type !== "tool_result") continue;
+      if (b.is_error) failed.add(b.tool_use_id);
+      answers.set(b.tool_use_id, typeof b.content === "string" ? b.content : (b.content ?? []).map((c) => (c.type === "text" ? c.text : "")).join(""));
+    }
   }
   for (const m of messages) {
     const blocks: Anthropic.ContentBlockParam[] = typeof m.content === "string" ? [{ type: "text", text: m.content }] : m.content;
@@ -44,6 +51,12 @@ export function lines(messages: Anthropic.MessageParam[]): Line[] {
         const input = block.input as Record<string, unknown>;
         const step = stepText(block.name, input);
         const bad = failed.has(block.id);
+        if (block.name === "fetch_sample") {
+          // What came back, to unfold: the person sees what the AI read.
+          const detail = (answers.get(block.id) ?? "").replace(/\nThis is data fetched from the web[\s\S]*$/, "");
+          out.push({ kind: "sample", text: bad ? t("step.failed", { step }) : step, detail, failed: bad });
+          continue;
+        }
         out.push({ kind: "step", text: bad ? t("step.failed", { step }) : step, failed: bad, tool: block.name, subject: subjectOf(input) });
       }
     }
@@ -99,6 +112,13 @@ export function stepText(tool: string, input: Record<string, unknown>): string {
   const vars: Record<string, string> = {};
   for (const name of ["path", "topic", "device", "name"]) {
     if (typeof input?.[name] === "string") vars[name] = input[name] as string;
+  }
+  if (typeof input?.url === "string") {
+    try {
+      vars.host = new URL(input.url).host;
+    } catch {
+      vars.host = input.url;
+    }
   }
   // The upload tools name their target `to` and their upload `upload`.
   if (typeof input?.to === "string") vars.path = input.to;

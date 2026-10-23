@@ -14,6 +14,7 @@ mod paths;
 mod pictures;
 mod projects;
 mod publish;
+mod sample;
 mod send;
 mod toolchain;
 
@@ -86,6 +87,7 @@ pub fn run() {
             export::projects_export,
             export::projects_import,
             export::import_read,
+            sample::sample_fetch,
         ])
         .run(tauri::generate_context!())
         .expect("the workshop could not start");

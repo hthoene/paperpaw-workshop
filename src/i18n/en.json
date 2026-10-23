@@ -306,5 +306,7 @@
   "step.control.describe": "Read what the screen shows",
   "step.control.run": "Ran {id}",
   "step.control.slot": "Opened {id}",
-  "steps.control.widget": "Put it on the home screen ({n} times)"
+  "steps.control.widget": "Put it on the home screen ({n} times)",
+  "step.fetch_sample": "Fetched an example from {host}",
+  "steps.fetch_sample": "Fetched examples ({n}): {about}"
 }
