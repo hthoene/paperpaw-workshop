@@ -1,5 +1,5 @@
-// The Windows installer, with PaperPaw's emulator in it: paperpaw-emu and
-// paperpaw-dev of the PaperPaw build `PAPERPAW_EMU` names are copied into
+// The Windows installer, with PaperPaw's emulator in it: paperpaw-emu,
+// paperpaw-dev and paperpaw-sign of the PaperPaw build `PAPERPAW_EMU` names are copied into
 // src-tauri/resources/emulator/ (the installer puts them beside the app),
 // and what they are is said beside them (version.json); then `tauri build`.
 //
@@ -29,6 +29,10 @@ if (!existsSync(dev)) {
 for (const name of readdirSync(into)) if (name !== "README.md") rmSync(join(into, name), { recursive: true });
 copyFileSync(emu, join(into, `paperpaw-emu${exe}`));
 copyFileSync(dev, join(into, `paperpaw-dev${exe}`));
+// paperpaw-sign packs plugins with code for the readers (Publish…).
+const sign = join(dirname(emu), `paperpaw-sign${exe}`);
+if (existsSync(sign)) copyFileSync(sign, join(into, `paperpaw-sign${exe}`));
+else console.warn(`installer: no paperpaw-sign beside ${emu}: Publish… cannot pack plugins with code (cargo build --release -p paperpaw-sign).`);
 
 // What it is, as it says when it starts (`ready`: PaperPaw's version, its
 // fingerprint, the compiler of plugins with code).

@@ -2,7 +2,7 @@ import { unzipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 
 import { newProject } from "../project/project";
-import { higher, raised, recordPublished, uploadPackage, versionState, withVersion } from "./publishing";
+import { higher, raised, recordPublished, uploadPackage, versionState, withCrateVersion, withVersion } from "./publishing";
 
 const INI = "[plugin]\nid = night-owl\nname = Night owl\nversion = 1.0.0\nformats = 1\n";
 
@@ -61,7 +61,22 @@ describe("publishing a plugin", () => {
     expect(project.published).toEqual([{ version: "1.0.0", packed: "2026-10-24T10:00:00.000Z" }]);
   });
 
-  it("does not pack a plugin with code yet", () => {
-    expect(uploadPackage(newProject("code", { "plugin/plugin.ini": INI })).ok).toBe(false);
+  it("packs a plugin with code as its folder plugin/, its crate and its build apart", () => {
+    const project = newProject("code", {
+      "Cargo.toml": "[package]\nname = \"night-owl\"\n",
+      "src/lib.rs": "#![no_std]",
+      "plugin/plugin.ini": INI,
+      "plugin/i18n/de.ini": "[messages]\n",
+    });
+    project.files["plugin/code.ppn"] = new Uint8Array([1, 2, 3]);
+    const packed = uploadPackage(project);
+    if (!packed.ok) throw new Error(packed.problems.join("; "));
+    expect(Object.keys(unzipSync(packed.zip))).toEqual(["night-owl/i18n/de.ini", "night-owl/plugin.ini"]);
+  });
+
+  it("raises a plugin with code's version in its crate too", () => {
+    expect(withCrateVersion("[package]\nname = \"a\"\nversion = \"1.0.0\"\n\n[dependencies]\nx = { version = \"1.0.0\" }\n", "1.0.1")).toBe(
+      "[package]\nname = \"a\"\nversion = \"1.0.1\"\n\n[dependencies]\nx = { version = \"1.0.0\" }\n",
+    );
   });
 });

@@ -24,6 +24,26 @@ export interface Frame {
 
 export type Phase = "down" | "move" | "up" | "cancel";
 
+/** What building for the readers needs (src-tauri's device.rs). */
+export interface DeviceReadiness {
+  x4: boolean;
+  x4_mb: number;
+  x4_pro: boolean;
+  sign: boolean;
+}
+
+/** A build for the readers. */
+export interface DeviceBuilt {
+  state: "done" | "failed";
+  problems: string[];
+  diagnostics: { level: string; file?: string | null; rendered: string; message: string }[];
+  log_tail: string;
+  ppn: string | null;
+  source: string | null;
+  fingerprint: string | null;
+  size: number;
+}
+
 /** The author key as the window knows it (src-tauri's author.rs). */
 export interface AuthorStatus {
   public: string | null;
@@ -70,6 +90,13 @@ export interface Backend extends FolderApi, PictureApi, CheckApi {
   /** Opens the store's upload form in the browser and shows the package
    *  in its folder. */
   publishShow(path: string): Promise<void>;
+  /** What building a plugin with code for the readers needs, and has. */
+  deviceReadiness(): Promise<DeviceReadiness>;
+  /** Fetches the X4's part of Rust (about `x4_mb` MB). */
+  deviceToolchainInstall(): Promise<void>;
+  /** Builds the project's plugin with code for the X4, signed, with its
+   *  source as a ZIP, into the project's `.workshop/publish/`. */
+  deviceBuild(project: string, id: string, version: string): Promise<DeviceBuilt>;
   /** The author key that signs plugins with code: never its secret. */
   authorStatus(): Promise<AuthorStatus>;
   /** Makes the author key, if there is none yet. */
@@ -143,6 +170,9 @@ export const appBackend: Backend = {
   saveFile: (path, base64) => invoke("save_file", { path, base64 }),
   publishSave: (project, name, base64) => invoke("publish_save", { project, name, base64 }),
   publishShow: (path) => invoke("publish_show", { path }),
+  deviceReadiness: () => invoke("device_readiness"),
+  deviceToolchainInstall: () => invoke("device_toolchain_install"),
+  deviceBuild: (project, id, version) => invoke("device_build", { project, id, version }),
   authorStatus: () => invoke("author_status"),
   authorCreate: () => invoke("author_create"),
   authorBackup: (path) => invoke("author_backup", { path }),
@@ -226,6 +256,10 @@ export function standInBackend(): Backend {
     // A plain browser keeps no package and opens no form.
     publishSave: async (project, name) => `${project}/.workshop/publish/${name}`,
     publishShow: async () => {},
+    // No builds for the readers in a plain browser.
+    deviceReadiness: async () => ({ x4: false, x4_mb: 62, x4_pro: false, sign: false }),
+    deviceToolchainInstall: async () => { throw new Error("Building for the readers needs the app."); },
+    deviceBuild: async () => { throw new Error("Building for the readers needs the app."); },
     // An author key in memory, its backup said done when asked.
     ...memoryAuthor(),
     codeBuild: async () => {

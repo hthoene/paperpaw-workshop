@@ -318,8 +318,23 @@ sends it to the moderators. Nothing is uploaded from the workshop.
    bytes). It is kept in the project's `.workshop/publish/`.
 4. The form opens in the browser, and the package is shown in its folder.
 
-Plugins with code are not packed yet: the store needs a signed build for
-each reader. Their **author key** is ready
+A plugin with code also needs a build for each reader, signed, and its
+source ([src-tauri/src/device.rs](../src-tauri/src/device.rs)). The
+project becomes a crate of its own: one package with the plugin's
+library and a binary with PaperPaw's `plugin!` line, the sample's
+`.cargo/config.toml` and `rust-toolchain.toml`. It is built for the X4
+(`cargo x4 --locked`) as paperpaw.org rebuilds it: with a
+`--remap-path-prefix` for every folder that holds Rust (the source as
+`/plugin`, Cargo's home as `/cargo`), so that no path of this computer
+and no Windows `\` gets into the file. The release's `paperpaw-sign`
+packs it, and the author key signs it. The very source built goes to
+the form as a ZIP, so no public repository is needed. The X4's part of
+Rust is fetched the first time, its size said first. The X4 Pro's builds
+come once a PaperPaw release brings `core` and `alloc` built ahead for
+it. The form then takes three files: the package, the X4's build and the
+source.
+
+Their **author key**
 ([src-tauri/src/author.rs](../src-tauri/src/author.rs),
 [src/desktop/AuthorKey.tsx](../src/desktop/AuthorKey.tsx)): one Ed25519
 key, made the first time it is needed, kept in the system's keychain,

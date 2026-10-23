@@ -78,13 +78,33 @@ export function withVersion(ini: string, version: string): string {
   return lines.join("\n");
 }
 
+/** Cargo.toml with its package's version raised to `version` (a plugin
+ *  with code says its version there as well as in plugin/plugin.ini). */
+export function withCrateVersion(manifest: string, version: string): string {
+  let inPackage = false;
+  let done = false;
+  return manifest
+    .split("\n")
+    .map((line) => {
+      const section = /^\s*\[([^\]]+)\]\s*$/.exec(line);
+      if (section) inPackage = section[1]!.trim() === "package";
+      else if (inPackage && !done && /^\s*version\s*=/.test(line)) {
+        done = true;
+        return `version = "${version}"`;
+      }
+      return line;
+    })
+    .join("\n");
+}
+
 /** The package for the form, or what keeps it from being made. */
 export type Packed = { ok: true; name: string; zip: Uint8Array; id: string; version: string } | { ok: false; problems: string[] };
 
 /** The plugin without code as the upload form takes it. */
 export function uploadPackage(project: Project): Packed {
-  if (project.kind === "code") return { ok: false, problems: ["a plugin with code needs its builds for each reader, which the workshop does not make yet"] };
   const { id, version } = identity(project);
+  // A plugin with code: its folder is plugin/, its builds go apart.
+  const folder = project.kind === "code" ? "plugin/" : "";
   const problems: string[] = [];
   if (!id) problems.push("plugin.ini names no id");
   else if (!validId(id)) problems.push(`the id "${id}" is not lower-case letters, digits and hyphens, at most 40`);
@@ -93,8 +113,11 @@ export function uploadPackage(project: Project): Packed {
   let installed = 0;
   let total = 0;
   const encoder = new TextEncoder();
-  for (const path of Object.keys(project.files).sort()) {
-    const content = project.files[path]!;
+  for (const whole of Object.keys(project.files).sort()) {
+    if (!whole.startsWith(folder)) continue;
+    const path = whole.slice(folder.length);
+    if (folder && path === "code.ppn") continue;
+    const content = project.files[whole]!;
     const bytes = typeof content === "string" ? encoder.encode(content) : content;
     const problem = pathProblem(path);
     if (problem) problems.push(`${path}: ${problem}`);
@@ -107,7 +130,9 @@ export function uploadPackage(project: Project): Packed {
     files[path] = bytes;
   }
   if (!files["plugin.ini"]) problems.push("there is no plugin.ini");
-  if (installed > MAX_FILES) problems.push(`a reader installs at most ${MAX_FILES} files of a plugin; this one has ${installed}`);
+  // A plugin with code gets its build as one more file.
+  const room = folder ? MAX_FILES - 1 : MAX_FILES;
+  if (installed > room) problems.push(`a reader installs at most ${room} files of this plugin; this one has ${installed}`);
   if (total > MAX_BYTES) problems.push("more than 40 MB unpacked");
   if (problems.length || !id || !version) return { ok: false, problems };
   const tree: Record<string, [Uint8Array, { mtime: Date }]> = {};
