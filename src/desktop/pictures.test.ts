@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { newProject } from "../project/project";
 import { MemoryUploads, Uploads } from "../project/uploads";
 import { fromBase64, toBase64 } from "./folders";
-import { WORKSHOP_SCREENS, makeSmaller, modeFor, placePicture, remake, suggestions, type PictureApi, type Screen } from "./pictures";
+import { WORKSHOP_SCREENS, colourScreen, makeSmaller, modeFor, placePicture, remake, suggestions, type PictureApi, type Screen } from "./pictures";
 
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 13, 10, 26, 10, 1, 2, 3]);
 const measured = async () => ({ width: 2000, height: 3000 });
@@ -84,5 +84,14 @@ describe("pictures for the plugin", () => {
     expect(said(project.files["big.png"])).toBe("smaller-grays");
     project.optimisePictures = false;
     expect(await suggestions(project, WORKSHOP_SCREENS, api)).toEqual([]);
+  });
+});
+
+describe("a colour screen", () => {
+  it("is what the registry says, else what its summary names", () => {
+    const screen: Screen = { id: "kobo-libra-colour", width: 1264, height: 1680, summary: "Linux, 7\" 1264x1680" };
+    expect(colourScreen({ ...screen, colour_screen: true })).toBe(true);
+    expect(colourScreen({ ...screen, summary: "Kaleido 3 colour" })).toBe(true);
+    expect(colourScreen({ ...screen, summary: "Kaleido 3 colour", colour_screen: false })).toBe(false);
   });
 });

@@ -24,7 +24,7 @@ export interface PictureApi {
 }
 
 /** A reader's screen, as much as pictures need of it. */
-export type Screen = Pick<Profile, "id" | "width" | "height" | "summary">;
+export type Screen = Pick<Profile, "id" | "width" | "height" | "summary" | "colour_screen">;
 
 /** The readers the workshop shows (the handbook's registry). */
 export const WORKSHOP_SCREENS: Screen[] = [
@@ -33,10 +33,11 @@ export const WORKSHOP_SCREENS: Screen[] = [
   { id: "boox-go-7", width: 1264, height: 1680, summary: 'Android, 7" Carta 1300 1264x1680, touch + page buttons' },
 ];
 
-/** Whether a screen shows colours. The registry's `colors` says whether a
- *  theme may set colours, not this; its summary names the panel. */
+/** Whether a screen shows colours: the registry says so (version 2);
+ *  before, its summary named the panel. (`colors` says whether a theme may
+ *  set colours, not this.) */
 export function colourScreen(screen: Screen): boolean {
-  return /kaleido|gallery|colou?r\b/i.test(screen.summary);
+  return screen.colour_screen ?? /kaleido|gallery|colou?r\b/i.test(screen.summary);
 }
 
 /** Whether the project makes its pictures smaller unless one says
