@@ -9,6 +9,7 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import type { BuildResult } from "../build/client";
 import type { CheckApi } from "./checks";
 import type { FolderApi } from "./folders";
+import { memoryHistory, type History, type HistoryApi } from "./history";
 import type { PictureApi } from "./pictures";
 
 /** A frame of the reader's panel, as the Rust side sends it. */
@@ -52,7 +53,7 @@ export interface AuthorStatus {
   backed_up: number | null;
 }
 
-export interface Backend extends FolderApi, PictureApi, CheckApi {
+export interface Backend extends FolderApi, PictureApi, CheckApi, HistoryApi {
   keyGet(): Promise<string | null>;
   keySet(key: string): Promise<void>;
   keyClear(): Promise<void>;
@@ -116,6 +117,17 @@ export interface Backend extends FolderApi, PictureApi, CheckApi {
   onBuildProgress(told: (text: string) => void): Promise<() => void>;
   /** Microsoft's C++ build tools through winget (Windows). */
   buildToolsInstall(): Promise<void>;
+  /** Writes projects (none named: all, the archive's too) into one file
+   *  at `path`; how many. */
+  projectsExport(projects: string[], path: string): Promise<number>;
+  /** Brings back the projects of an export at `path`, beside those there:
+   *  their folders and whether archived; null if it is not an export. */
+  projectsImport(path: string): Promise<[string, boolean][] | null>;
+  /** A plugin's ZIP at `path`, in base64. */
+  importRead(path: string): Promise<string>;
+  /** Where to save an export, or which file to import, asked of the person. */
+  askSaveExport(name: string): Promise<string | null>;
+  askOpenImport(): Promise<string | null>;
 }
 
 /** A part of the screen, as PaperPaw describes it. */
@@ -185,6 +197,20 @@ export const appBackend: Backend = {
   codeBuild: (project) => invoke("code_build", { project }),
   onBuildProgress: async (told) => listen<string>("build-progress", (event) => told(event.payload)),
   buildToolsInstall: () => invoke("build_tools_install"),
+  historyBegin: (project, at, conversation) => invoke<History>("history_begin", { project, at, conversation }),
+  historySnapshot: (project, kind, at, conversation) => invoke<History>("history_snapshot", { project, kind, at: at ?? null, conversation: conversation ?? null }),
+  historyList: (project) => invoke<History>("history_list", { project }),
+  historyRestore: (project, id) => invoke<History>("history_restore", { project, id }),
+  historyMark: (project, version, date) => invoke<History>("history_mark", { project, version, date }),
+  historyPreview: (project, id) => invoke("history_preview", { project, id }),
+  projectsExport: (projects, path) => invoke("projects_export", { projects, path }),
+  projectsImport: (path) => invoke("projects_import", { path }),
+  importRead: (path) => invoke("import_read", { path }),
+  askSaveExport: (name) => save({ title: "Export", defaultPath: name, filters: [{ name: "Workshop export", extensions: ["zip"] }] }),
+  askOpenImport: async () => {
+    const chosen = await open({ title: "Import", filters: [{ name: "A workshop export or a plugin", extensions: ["zip"] }] });
+    return typeof chosen === "string" ? chosen : null;
+  },
   projectsList: () => invoke("projects_list"),
   projectCreate: (name, meta) => invoke("project_create", { name, meta }),
   projectFiles: (project) => invoke("project_files", { project }),
@@ -267,6 +293,12 @@ export function standInBackend(): Backend {
     },
     onBuildProgress: async () => () => {},
     buildToolsInstall: async () => {},
+    ...memoryHistory((project) => at(project).files),
+    projectsExport: async () => { throw new Error("Exporting needs the app."); },
+    projectsImport: async () => null,
+    importRead: async () => { throw new Error("Importing needs the app."); },
+    askSaveExport: async () => null,
+    askOpenImport: async () => null,
     projectsList: async () => [...folders].map(([folder, f]) => ({ folder, meta: f.meta })),
     projectCreate: async (name, meta) => {
       let folder = name || "New plugin";

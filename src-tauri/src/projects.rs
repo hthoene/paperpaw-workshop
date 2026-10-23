@@ -88,7 +88,7 @@ pub fn list(root: &Path) -> Result<Vec<Summary>, String> {
 
 /// A folder's name for `name` in `root`: what a folder may be called,
 /// made unique with " 2", " 3" ….
-fn unique(root: &Path, name: &str) -> String {
+pub(crate) fn unique(root: &Path, name: &str) -> String {
     let base: String = name
         .chars()
         .map(|c| if c.is_alphanumeric() || c == ' ' || c == '-' { c } else { '-' })

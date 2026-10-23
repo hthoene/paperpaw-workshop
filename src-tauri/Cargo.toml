@@ -40,6 +40,9 @@ ed25519-compact = { version = "2.6", default-features = false, features = ["rand
 zip = { version = "2", default-features = false, features = ["deflate"] }
 # Checking what is downloaded (rustup) before it runs.
 sha2 = "0.10"
+# The projects' history (history.rs): a Git repository of each project's
+# own, through libgit2 built into the app, so no Git is needed.
+git2 = { version = "0.20", default-features = false, features = ["vendored-libgit2"] }
 
 [dev-dependencies]
 tempfile = "3"

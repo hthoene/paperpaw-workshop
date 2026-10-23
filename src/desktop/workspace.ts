@@ -64,6 +64,18 @@ export class Workspace {
     this.changed();
   }
 
+  /** A project made elsewhere (a plugin imported): a folder of its own,
+   *  named after `name`, and opened. */
+  async adopt(made: Project, name: string): Promise<Project> {
+    await this.saving;
+    const project = await this.folders.create(name, made.kind, {}, made.model);
+    project.files = { ...made.files };
+    this.project = project;
+    await this.save();
+    await this.refresh();
+    return project;
+  }
+
   /** A new plugin (with code or without): no folder until something is
    *  said or added. */
   fresh(kind: Kind = "data"): void {

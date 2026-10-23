@@ -148,6 +148,8 @@ export function Publish({ desk, backend, onClose }: Props) {
       made.unshift({ path, name: packed.name, field: "the package" });
       recordPublished(project, packed.version);
       await desk.workspace.save();
+      // The state packed, marked in the history to go back to.
+      await desk.markPublished(packed.version);
       setStep({ at: "packed", made });
       await backend.publishShow(path);
     } catch (e) {

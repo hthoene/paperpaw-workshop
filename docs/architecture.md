@@ -69,6 +69,8 @@ window may call. Each file is one concern:
 | `toolchain.rs` | Rust for plugins with code, set up in the app's folder, the compiler the emulator names; on Windows, Microsoft's C++ build tools |
 | `pictures.rs` | Pictures made smaller, as the person chose; the AI's shape of an upload made so |
 | `send.rs` | The plugin onto a reader: over Wi-Fi, onto its card, or as a zip |
+| `history.rs` | The project's history: a state after every answer that changed the plugin, going back to one, the versions packed for the store |
+| `export.rs` | Projects to another computer: one file with everything of a project, or of all, and bringing it back |
 
 [src/desktop/backend.ts](../src/desktop/backend.ts) is the window's side
 of these calls (`Backend`), and a stand-in for a plain browser
@@ -112,6 +114,46 @@ and, if they find something to fix, gives the AI their short findings in
 another turn, at most twice per message of the person (the second time
 thinking more). What each turn cost is kept with the project and shown
 beside it ([src/desktop/costs.ts](../src/desktop/costs.ts)).
+
+## The history
+
+After every turn that changed the plugin, the desk keeps the plugin as
+it is in the project's history
+([src-tauri/src/history.rs](../src-tauri/src/history.rs)), and once
+before the first change. Under each answer that has such a state, the
+conversation offers "Back to this state"
+([src/desktop/GoBack.tsx](../src/desktop/GoBack.tsx)): the reader first
+shows that state, the project left as it is (a plugin with code is
+built as it was, in a folder of builds of its own); then the person goes
+back to it, or keeps the plugin as it is. Going back is kept as a state
+of its own, so nothing is lost and going forward again is the same step.
+The conversation is not changed by it. Each **Publish…** marks the state
+it packed with its version and date; the files drawer lists them, each
+with "Back to this state".
+
+It is a Git repository of the project's own in `.workshop/history/`,
+bare, through libgit2 built into the app: no Git is needed, and the
+person never sees it as one. Files with the same bytes are kept once, so
+a picture is kept once however often the plugin changes. It keeps the
+plugin's files only: not `.workshop/` (the conversation, the person's
+files, the packages), not builds (`target/`), never a key file
+(`*.key`). An imported plugin's history starts at the import; a project
+from before the history, at its next change.
+
+## Another computer
+
+"Export project…" and "Export all projects…" in the menu write one file
+([src-tauri/src/export.rs](../src-tauri/src/export.rs)): a ZIP with
+`paperpaw-workshop.json` and each project's folder as it is, the
+archive's too: the plugin's files, the person's files, the history with
+its marked versions, the conversation and the project's settings. Not
+builds or packages, which are made again, and never the author key, which
+has a backup of its own (the menu says so, with the way to it).
+
+"Import…" takes such a file, or a plugin's ZIP as before
+([src/project/import.ts](../src/project/import.ts)). The projects of an
+export come back beside those there, under a new name where one is
+taken: an import never overwrites.
 
 ## Tools
 

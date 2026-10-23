@@ -7,6 +7,8 @@ mod checks;
 mod device;
 mod code;
 mod emulator;
+mod export;
+mod history;
 mod key;
 mod paths;
 mod pictures;
@@ -74,6 +76,15 @@ pub fn run() {
             projects::upload_read,
             projects::upload_write,
             projects::upload_remove,
+            history::history_begin,
+            history::history_snapshot,
+            history::history_list,
+            history::history_restore,
+            history::history_mark,
+            history::history_preview,
+            export::projects_export,
+            export::projects_import,
+            export::import_read,
         ])
         .run(tauri::generate_context!())
         .expect("the workshop could not start");

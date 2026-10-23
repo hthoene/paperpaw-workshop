@@ -7,12 +7,16 @@ import { useEffect, useState } from "preact/hooks";
 
 import { t } from "../i18n";
 import { UploadRefused, type PictureMode, type UploadInfo } from "../project/uploads";
+import type { Desk } from "./desk";
+import { Versions } from "./GoBack";
 import { MODES, WORKSHOP_SCREENS, modeFor, optimising, remake, type PictureApi } from "./pictures";
 import type { Workspace } from "./workspace";
 
 interface Props {
   workspace: Workspace;
   pictures: PictureApi;
+  /** For the versions packed for the store, with their states. */
+  desk?: Desk;
   onClose(): void;
 }
 
@@ -33,7 +37,7 @@ function about(upload: UploadInfo): string {
   return `${upload.kind}, ${sizeText(upload.bytes)}`;
 }
 
-export function Drawer({ workspace, pictures, onClose }: Props) {
+export function Drawer({ workspace, pictures, desk, onClose }: Props) {
   const [list, setList] = useState<UploadInfo[]>(workspace.project?.uploads ?? []);
   const [over, setOver] = useState(false);
   const [problem, setProblem] = useState("");
@@ -130,6 +134,7 @@ export function Drawer({ workspace, pictures, onClose }: Props) {
         </span>
       </label>
       <p class="hint">The AI sees names and sizes only, until it opens one.</p>
+      {desk && <Versions desk={desk} onLook={onClose} />}
     </aside>
   );
 }

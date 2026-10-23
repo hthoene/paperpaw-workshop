@@ -143,6 +143,8 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
   const [sending, setSending] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [notice, setNotice] = useState("");
+  // What an export or an import says, or why it could not.
+  const tell = (done: Promise<string>) => done.then(setNotice, (e: unknown) => setNotice(e instanceof Error ? e.message : String(e)));
   // One panel at a time over the reader's side.
   const only = (which: "files" | "settings" | "send" | "publish", on: boolean) => {
     setFiles(which === "files" && on);
@@ -190,6 +192,15 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
             <div class="menu-list" role="menu">
               <button type="button" role="menuitem" onClick={() => { setMenu(false); only("publish", true); }}>Publish…</button>
               <button type="button" role="menuitem" onClick={() => { setMenu(false); void exportZip(desk, backend).then(setNotice, (e: unknown) => setNotice(String(e))); }}>Export zip</button>
+              <hr />
+              <button type="button" role="menuitem" disabled={!workspace.project} onClick={() => { setMenu(false); void tell(desk.exportProjects("this")); }}>Export project…</button>
+              <button type="button" role="menuitem" onClick={() => { setMenu(false); void tell(desk.exportProjects("all")); }}>Export all projects…</button>
+              <button type="button" role="menuitem" onClick={() => { setMenu(false); void tell(backend.askOpenImport().then((path) => (path ? desk.importFile(path) : ""))); }}>Import…</button>
+              <p class="menu-note">
+                Exports hold everything but your author key, which has its own backup.{" "}
+                <button type="button" class="link" onClick={() => { setMenu(false); only("settings", true); }}>Back up the key</button>
+              </p>
+              <hr />
               <button type="button" role="menuitem" onClick={() => { setMenu(false); only("settings", true); }}>Settings</button>
               <button type="button" role="menuitem" onClick={() => { setMenu(false); onForgetKey(); }}>Remove key</button>
             </div>
@@ -210,7 +221,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
         {sending && <Send desk={desk} backend={backend} onClose={() => setSending(false)} />}
         {publishing && <Publish desk={desk} backend={backend} onClose={() => setPublishing(false)} />}
         {settings && <Settings workspace={workspace} backend={backend} keyKind={keyKind} may={desk.may} onClose={() => setSettings(false)} />}
-        {files && <Drawer workspace={workspace} pictures={backend} onClose={() => setFiles(false)} />}
+        {files && <Drawer workspace={workspace} pictures={backend} desk={desk} onClose={() => setFiles(false)} />}
       </div>
     </div>
   );

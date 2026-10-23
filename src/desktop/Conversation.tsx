@@ -1,7 +1,8 @@
 // The conversation: the person's words, the AI's, a quiet line for each
 // thing it did (app/conversation.ts, from the messages alone), what it is
-// writing now, and what the last turn cost. Enter sends; Shift+Enter is a
-// new line.
+// writing now, what the last turn cost, and under an answer that changed
+// the plugin "Back to this state" (GoBack.tsx). Enter sends; Shift+Enter
+// is a new line.
 
 import { Fragment } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
@@ -10,6 +11,8 @@ import { lines, type Line } from "../app/conversation";
 import type { Project } from "../project/project";
 import { about, details, unusual, type Turn } from "./costs";
 import type { Desk } from "./desk";
+import { afterAnswers } from "./history";
+import { BackHere, PreviewBar } from "./GoBack";
 
 export function Conversation({ desk }: { desk: Desk }) {
   const [draft, setDraft] = useState("");
@@ -22,6 +25,7 @@ export function Conversation({ desk }: { desk: Desk }) {
   const project = desk.workspace.project;
   const said = lines(project?.messages ?? []);
   const busy = !!workshop?.busy;
+  const states = afterAnswers(desk.history, project?.earlier?.length ?? 0);
 
   const down = (smooth: boolean) => {
     const l = log.current;
@@ -36,7 +40,7 @@ export function Conversation({ desk }: { desk: Desk }) {
     if (stick.current) setUnseen(false);
   };
   // What is shown changed: kept in view at the end, else said with "New".
-  const shown = `${project?.key}|${said.length}|${workshop?.live.length ?? 0}|${workshop?.thinking.length ?? 0}|${busy}|${desk.building}|${desk.lastTurn?.dollars ?? 0}|${workshop?.error ?? ""}`;
+  const shown = `${project?.key}|${said.length}|${workshop?.live.length ?? 0}|${workshop?.thinking.length ?? 0}|${busy}|${desk.building}|${desk.lastTurn?.dollars ?? 0}|${workshop?.error ?? ""}|${desk.history.current}|${desk.previewing?.ready ?? ""}`;
   useEffect(() => {
     if (stick.current) down(false);
     else setUnseen(true);
@@ -44,7 +48,7 @@ export function Conversation({ desk }: { desk: Desk }) {
 
   const send = () => {
     const text = draft.trim();
-    if (!text || busy) return;
+    if (!text || busy || desk.previewing) return;
     setDraft("");
     stick.current = true;
     setUnseen(false);
@@ -65,10 +69,12 @@ export function Conversation({ desk }: { desk: Desk }) {
             {lines(earlier).map((line, i) => <Said key={i} line={line} />)}
           </details>
         ))}
+        {said.length > 0 && <BackHere desk={desk} snapshot={states.get(0)} label="Back to how it began" />}
         {segments(project).map((segment, n) => (
           <Fragment key={n}>
             {segment.lines.map((line, i) => <Said key={i} line={line} />)}
             {segment.turn && <Cost turn={segment.turn} before={segment.before} />}
+            {segment.turn && <BackHere desk={desk} snapshot={states.get(segment.turn.end)} />}
           </Fragment>
         ))}
         {workshop?.live && <div class="ai">{workshop.live}</div>}
@@ -78,6 +84,7 @@ export function Conversation({ desk }: { desk: Desk }) {
           <button type="button" class="go fresh" onClick={() => workshop.freshConversation()}>Go on in a fresh conversation</button>
         )}
         {desk.buildTools && <BuildTools desk={desk} />}
+        <PreviewBar desk={desk} />
       </div>
       {unseen && (
         <button type="button" class="to-new" onClick={() => { stick.current = true; setUnseen(false); down(true); }}>
@@ -102,7 +109,7 @@ export function Conversation({ desk }: { desk: Desk }) {
         {busy ? (
           <button type="button" class="go" onClick={() => desk.stop()}>Stop</button>
         ) : (
-          <button type="submit" class="go" disabled={!draft.trim()}>Send</button>
+          <button type="submit" class="go" disabled={!draft.trim() || !!desk.previewing}>Send</button>
         )}
       </form>
     </section>
