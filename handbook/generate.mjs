@@ -21,7 +21,9 @@
 //
 // Options: --repo <path to a PaperPaw clone> (default ../paperpaw),
 // --ref <tag or branch> (default main), --skip-registry (reuse the last
-// handbook/.work/registry.json), --out <folder> (default public/handbook).
+// handbook/.work/registry.json), --registry <file> (what that ref's
+// `paperpaw-emu --registry` wrote, in place of building the dump),
+// --out <folder> (default public/handbook).
 
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
@@ -42,6 +44,7 @@ const repo = path.resolve(root, option("repo", "../paperpaw"));
 const ref = option("ref", "main");
 const out = path.resolve(root, option("out", "public/handbook"));
 const skipRegistry = process.argv.includes("--skip-registry");
+const givenRegistry = option("registry", "");
 
 function run(cmd, args, opts = {}) {
   const r = spawnSync(cmd, args, { encoding: "utf8", maxBuffer: 1 << 28, ...opts });
@@ -67,7 +70,9 @@ console.log(`handbook: PaperPaw ${ref} (${commit.slice(0, 10)})`);
 
 // 2. The registry, from the standard app at that ref.
 const registryFile = path.join(work, "registry.json");
-if (!skipRegistry) {
+if (givenRegistry) {
+  fs.copyFileSync(path.resolve(givenRegistry), registryFile);
+} else if (!skipRegistry) {
   fs.copyFileSync(path.join(tree, "Cargo.lock"), path.join(here, "registry", "Cargo.lock"));
   console.log("handbook: building the registry dump (the first time takes minutes)");
   const r = spawnSync(
@@ -96,9 +101,11 @@ function sections(markdown) {
   });
 }
 const plugins = sections(read("docs/plugins.md"));
-const section = (title) => {
-  const s = plugins.find((x) => x.title === title);
-  if (!s) throw new Error(`docs/plugins.md has no section "${title}" at ${ref}`);
+/** The section `title` of the plugin guide; several titles: the first
+ *  there is (a section renamed between releases). */
+const section = (...titles) => {
+  const s = titles.map((t) => plugins.find((x) => x.title === t)).find(Boolean);
+  if (!s) throw new Error(`docs/plugins.md has no section "${titles.join('" or "')}" at ${ref}`);
   return s.body;
 };
 const readme = sections(read("README.md"));
@@ -183,13 +190,13 @@ const data = [
   part("data.md"),
   "# From PaperPaw's documentation",
   section("Plugins without code").replace(/^## /, "## "),
-  section("Presets and home screen layouts"),
+  section("Presets and home screen layouts", "Presets"),
   customisation ? customisation.body : "",
   "## The default key map\n\nInputs (`button.<name>`, `long.<name>`, `tap.<zone>`, `swipe.<direction>` ...) and the actions they run, as PaperPaw ships them; a plugin's `keymap.ini` overrides single bindings in the same layers.\n\n```ini\n" +
     keymap +
     "\n```",
   "# Samples\n\nComplete data plugins that come with PaperPaw.",
-  ...sampleList.filter((s) => ["airy-theme", "reading-nook", "large-print"].includes(s.id)).map((s) => s.body),
+  ...sampleList.filter((s) => ["airy-theme", "reading-nook", "large-print", "theme-paw"].includes(s.id)).map((s) => s.body),
   "# What this PaperPaw has\n\nOnly these ids exist. `lookup_docs` has the settings of every other plugin (`settings/<plugin>`) and more.",
   "## The look settings\n\n" + settingsTable(inGroup("core.group.look")),
   "## The reading settings\n\n" + settingsTable(inGroup("core.group.reading")),

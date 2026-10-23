@@ -1,6 +1,6 @@
 ### Firmware updates
 
-Where PaperPaw is the device's firmware (the X4), `env.firmware` says
+Where PaperPaw is the device's firmware (the X4s), `env.firmware` says
 which version runs and how an install goes; elsewhere it is `None`.
 `Command::Firmware(FirmwareCommand::Install { path, key, older })`
 installs a signed update file: `key` is the key of one not signed by

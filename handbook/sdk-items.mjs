@@ -57,7 +57,19 @@ export function readItems(source) {
       doc.push(comment[1]);
       continue;
     }
-    if (/^\s*#\[/.test(line)) continue;
+    if (/^\s*#\[/.test(line)) {
+      // An attribute over several lines (`#[allow(\n …,\n)]`): to its end,
+      // the doc comment above kept for the item below.
+      let depth = 0;
+      for (let j = i; j < lines.length; j++) {
+        for (const c of lines[j]) depth += c === "[" ? 1 : c === "]" ? -1 : 0;
+        if (depth <= 0) {
+          i = j;
+          break;
+        }
+      }
+      continue;
+    }
     const impl = /^impl(?:<[^>]*>)?\s+(?:[\w:<>, '&]+\s+for\s+)?([A-Z]\w*)/.exec(line);
     if (impl) owner = impl[1];
     else if (/^}/.test(line)) owner = null;

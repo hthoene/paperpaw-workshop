@@ -7,17 +7,19 @@
 | `[core] mono-text` | Text darkness | `core.mono-text.light`, `core.mono-text.normal`, `core.mono-text.full` | `core.mono-text.normal` | How full letters are drawn without grays; full helps on pale screens. |
 | `[core] speak-focus` | Say what is chosen | `true`, `false` | `false` | Says the row or button the buttons move to, for using PaperPaw without looking. |
 | `[core] voice` | Voice | `core.voice.system` | `core.voice.system` | What reads aloud. Automatic: the system's voice, or where the device has none, a plugin's that speaks the language; or a plugin's for the languages it speaks. |
-| `[core] edge-ends` | Edges for swipes: top and bottom | 0 to 25 | `10` | How far in from the edge a swipe still counts as one in from the edge (home, quick panel, back); 0: none there. On Android the outermost strip is the system's. |
-| `[core] edge-sides` | Edges for swipes: left and right | 0 to 25 | `5` | How far in from the edge a swipe still counts as one in from the edge (home, quick panel, back); 0: none there. On Android the outermost strip is the system's. |
+| `[core] edge-ends` | Edges for swipes: top and bottom | 0 to 25 | `10` | How far in from the edge a swipe still counts as one in from the edge (home, quick panel, back); 0: none there. Where the system takes the outermost strip for its own swipes, it keeps it. |
+| `[core] edge-sides` | Edges for swipes: left and right | 0 to 25 | `5` | How far in from the edge a swipe still counts as one in from the edge (home, quick panel, back); 0: none there. Where the system takes the outermost strip for its own swipes, it keeps it. |
 | `[core] library-folder` | Library folder | text | `books` | The folder with your books. |
+| `[core] device-name` | Device name | text | `PaperPaw X4` | What this reader is called where others see it: Calibre, the progress server, your router and a phone setting up Wi-Fi. Takes effect the next time it connects. |
 | `[core] ui-size` | Menu text size | 7 to 24 | `9` | Size of menus, lists and the status line. |
 | `[core] ui-contrast` | Contrast | `core.contrast.normal`, `core.contrast.strong` | `core.contrast.normal` | Strong draws gray hints and notes in black, easier to read on screens with few grays. |
 | `[core] ui-header` | Headers | `core.header.plain`, `core.header.light`, `core.header.dark` | `core.header.plain` | The top of menus and lists: the title on the page, black on white with a line below, or white on black. |
+| `[core] widgets.frame` | Frames of widgets | `core.frame.own`, `core.frame.none`, `core.frame.line`, `core.frame.card`, `core.frame.dark` | `core.frame.own` | One frame for every widget whose own is not chosen in its settings: a line, a card, a dark card or none. |
 | `[core] ui-corners` | Corners | `core.corners.square`, `core.corners.small`, `core.corners.round`, `core.corners.soft` | `core.corners.soft` | Of highlighted rows, buttons and boxes; round and soft ones make buttons and switches pills. |
 | `[core] ui-focus` | Highlight | `core.focus.fill`, `core.focus.ring`, `core.focus.soft` | `core.focus.fill` | How the chosen row is shown: a dark bar, a frame, or a light bar (a frame on screens of black and white alone). |
 | `[core] ui-separators` | Lines between rows | `core.separators.inset`, `core.separators.line`, `core.separators.none` | `core.separators.inset` | Light lines, fainter lines from where the text starts, or none. |
 | `[core] ui-groups` | Groups | `core.groups.plain`, `core.groups.cards` | `core.groups.plain` | The sections of lists as they are or on rounded cards. |
-| `[core] ui-title` | Title size | 100 to 200 | `130` | Size of the titles at the top of menus and lists, in percent of the text's. |
+| `[core] ui-title` | Title size | 100 to 200 | `115` | Size of the titles at the top of menus and lists, in percent of the text's. |
 | `[core] ui-margin` | Margins of menus | 0 to 15 | `4` | Space at the left and right of menus and lists. |
 | `[core] ui-row` | Row height | 120 to 300 | `160` | Height of the rows of menus and lists, relative to their text. |
 | `[core] ui-lines` | Lines | 1 to 10 | `3` | How thick lines and frames are drawn. |
@@ -26,6 +28,7 @@
 | `[core] keymap-preset` | Button layout | `core.standard`, `core.two-buttons`, `core.left-handed` | `core.standard` | What the device's buttons do. |
 | `[core] full-refresh-interval` | Full refresh | 0 to 1000 | `6` | A flashing refresh after this many page turns removes ghosting; 0 never flashes. |
 | `[core] flash-screens` | Flash when screens change | `true`, `false` | `false` | A full refresh when another screen opens leaves no trace of the last one, but takes longer: three and a half seconds on the X4. |
+| `[core] pictures-in-grays` | Pictures in grays | `true`, `false` | `true` | A screen with pictures, such as covers or a sleep screen's picture, shows them in four grays when it opens or changes whole: finer, but a little slower to show. What changes on it after shows in black and white. |
 | `[core] sleep-after` | Sleep after | 0 to 120 | `10` | Minutes without use after which the device goes to sleep by itself; 0: never. Not while reading aloud or downloading. |
 | `[core] rotation` | Turn the screen | `core.rotation.upright`, `core.rotation.landscape`, `core.rotation.upside-down`, `core.rotation.landscape-flipped` | `core.rotation.upright` | Upright or on its side, e.g. for pictures and comics. Turned while reading with “Only this book” on, it is turned for that book alone. |
 | `[core] button-hints` | Show what the buttons do | `true`, `false` | `true` | A row at the bottom of the screen names what each button below it does. Not while reading. |
@@ -43,7 +46,7 @@
 | `[core] paper-color` | Paper colour | `core.paper.white`, `core.paper.cream`, `core.paper.sepia`, `core.paper.sand`, `core.paper.light-gray`, `core.paper.mint`, `core.paper.light-blue`, `core.paper.rose`, `core.paper.own` | `core.paper.white` | Softer than black on white, easier on the eyes on bright screens. Pictures take the colours too; night mode swaps them. |
 | `[core] paper-color-own` | Own paper colour | text | `#f4ecd8` | A colour code such as #5b4636 (red, green, blue), used when the colour above is "Own colour". |
 | `[core] status-font` | Font | `core.status-font.ui`, `core.status-font.book`, `Literata`, `Source Sans 3` | `core.status-font.ui` | The font of the status lines while reading: as the menus', as the book's, or one of its own. |
-| `[core] reading-font` | Font | `core.font.default`, `Literata`, `Source Sans 3` | `core.font.default` | The book's font uses the fonts a book brings (else Literata); any other font is used for all text. Add your own: put .ttf or .otf files into the fonts folder. |
+| `[core] reading-font` | Font | `core.font.default`, `Literata`, `Source Sans 3` | `core.font.default` | The book's font is Literata, or the fonts a book brings on devices that draw them (not the X4 and X4 Pro). Any other font is used for all text. |
 | `[core] font-size` | Font size | 6 to 40 | `9` | Size of the book text. |
 | `[core] line-spacing` | Line spacing | 80 to 250 | `135` | Distance between lines, relative to the font size. Below 100 % lines come closer than the font sets them, for fonts with much room between lines. |
 | `[core] font-weight` | Font weight | 0 to 4 | `0` | Darker, bolder text with any font; helps on light screens. |
@@ -112,6 +115,8 @@
 | `[core] saving.store` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | Follow the mode, or keep this plugin's background work as in Normal while saving, or let it use the network only when you ask. |
 | `[core] network.wikipedia` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
 | `[core] saving.wikipedia` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | Follow the mode, or keep this plugin's background work as in Normal while saving, or let it use the network only when you ask. |
+| `[core] network.vocabulary` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
+| `[core] saving.vocabulary` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | Follow the mode, or keep this plugin's background work as in Normal while saving, or let it use the network only when you ask. |
 | `[core] network.translate` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
 | `[core] saving.translate` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | Follow the mode, or keep this plugin's background work as in Normal while saving, or let it use the network only when you ask. |
 | `[core] network.news` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |

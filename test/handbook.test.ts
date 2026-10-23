@@ -26,7 +26,7 @@ describe("the generated handbook", () => {
     expect(book.find("settings/home").topic?.title).toBe("Settings of home");
     const { topic, candidates } = book.find("home screen layout presets");
     expect(topic).toBeUndefined();
-    expect(candidates.map((t) => t.id)).toContain("docs/presets-and-home-screen-layouts");
+    expect(candidates.map((t) => t.id)).toContain("docs/presets");
   });
 
   it("cuts long topics and says where to look instead", async () => {

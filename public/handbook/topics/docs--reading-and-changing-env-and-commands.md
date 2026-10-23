@@ -8,5 +8,6 @@ emit an event, run an action, show a short message, make an HTTP
 request, keep a password, and so on. The kernel runs the commands after
 the plugin's code returns.
 
-This keeps plugins simple to test and the API message-based, so the same
-model works for sandboxed plugins later.
+This keeps plugins simple to test and the API message-based. It does
+not confine them: a plugin runs as native code without a sandbox (see
+[Plugins as files](#plugins-as-files)).

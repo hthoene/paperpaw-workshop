@@ -22,9 +22,25 @@ between frames. `env.work` says where a work stands, for the plugin's
 own page; background work never shows a notice over reading. The power
 mode (`env.power`) makes deadlines longer or holds network work back;
 most plugins need not read it.
-Read large JSON answers as they stream with `paperpaw_json::stream`
-(the crate `paperpaw-json`), so they
-need little memory. `Command::Serve` serves HTTP to the local network,
-e.g. for transfers from a computer or typing on a phone; what happens
-to it comes as `ServerNotice`s, and to sockets (`Command::Connect`,
-`Command::Broadcast`) as `SocketNotice`s.
+Read large JSON answers as they stream with
+`paperpaw_sdk::json::stream`, so they need little memory.
+`Command::Serve` serves HTTP to the local network, e.g. for transfers
+from a computer or typing on a phone; what happens to it comes as
+`ServerNotice`s. Serve only while the screen showing the
+address is open, and guard it as `paperpaw_sdk::served` does: a key
+drawn anew each time in the address (`served::key`), checked by a
+`served::Guard`, which turns requests away for a while after a few
+wrong keys. Where PaperPaw runs Wi-Fi itself (the X4s),
+`paperpaw_sdk::wifi` says the radio's state, and
+`WifiCommand::Host` opens a network of the device's own for a phone to
+join, as the Wi-Fi transfer does without a router.
+
+Other protocols go over sockets ([ADR 0014](adr/0014-sockets-for-plugins.md)):
+`Command::Connect` opens a TCP connection, `Command::SocketSend` sends,
+and `Command::SocketRead` asks for what comes next, as text
+(`SocketRead::Text`) or as a file of a known length written to storage as
+it comes (`SocketRead::File`), so files of any size never need to fit in
+memory. `Command::Broadcast` finds services in the local network by a
+UDP datagram and their answers. Everything comes back as events
+(`SocketNotice`s, `socket_params`); a socket closes when the screen
+showing as it was opened is closed.

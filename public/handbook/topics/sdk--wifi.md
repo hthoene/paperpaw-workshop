@@ -12,6 +12,9 @@ pub fn paperpaw_sdk::wifi::JoinFailure::from_param(&str) -> core::option::Option
 pub fn paperpaw_sdk::wifi::JoinFailure::missing() -> core::option::Option<Self>
 pub fn paperpaw_sdk::wifi::JoinFailure::to_param(&self) -> alloc::string::String
 pub enum paperpaw_sdk::wifi::WifiCommand
+pub paperpaw_sdk::wifi::WifiCommand::Host
+pub paperpaw_sdk::wifi::WifiCommand::Host::password: alloc::string::String
+pub paperpaw_sdk::wifi::WifiCommand::Host::ssid: alloc::string::String
 pub paperpaw_sdk::wifi::WifiCommand::Join
 pub paperpaw_sdk::wifi::WifiCommand::Join::password: alloc::string::String
 pub paperpaw_sdk::wifi::WifiCommand::Join::ssid: alloc::string::String
@@ -20,6 +23,10 @@ pub paperpaw_sdk::wifi::WifiCommand::Off
 pub paperpaw_sdk::wifi::WifiCommand::On
 pub paperpaw_sdk::wifi::WifiCommand::Scan
 pub fn paperpaw_sdk::wifi::WifiCommand::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+pub paperpaw_sdk::wifi::WifiState::Hosting
+pub paperpaw_sdk::wifi::WifiState::Hosting::address: alloc::string::String
+pub paperpaw_sdk::wifi::WifiState::Hosting::guests: u8
+pub paperpaw_sdk::wifi::WifiState::Hosting::ssid: alloc::string::String
 pub paperpaw_sdk::wifi::WifiState::Joining
 pub paperpaw_sdk::wifi::WifiState::Joining::ssid: alloc::string::String
 pub paperpaw_sdk::wifi::WifiState::Off
@@ -27,6 +34,7 @@ pub paperpaw_sdk::wifi::WifiState::On
 pub paperpaw_sdk::wifi::WifiState::Online
 pub paperpaw_sdk::wifi::WifiState::Online::address: alloc::string::String
 pub paperpaw_sdk::wifi::WifiState::Online::ssid: alloc::string::String
+pub fn paperpaw_sdk::wifi::WifiState::is_hosting(&self) -> bool
 pub fn paperpaw_sdk::wifi::WifiState::is_on(&self) -> bool
 pub fn paperpaw_sdk::wifi::WifiState::is_online(&self) -> bool
 pub fn paperpaw_sdk::wifi::WifiState::ssid(&self) -> core::option::Option<&str>
@@ -44,6 +52,7 @@ pub fn paperpaw_sdk::wifi::WifiNetwork::bars(&self) -> u8
 pub const paperpaw_sdk::wifi::NETWORK_WAIT_MS: u64
 pub const paperpaw_sdk::wifi::SECRET_PREFIX: &str
 pub fn paperpaw_sdk::wifi::forget(&str) -> paperpaw_sdk::secrets::SecretChange
+pub fn paperpaw_sdk::wifi::join_code(&str, &str) -> alloc::string::String
 pub fn paperpaw_sdk::wifi::keep(&str, &str) -> paperpaw_sdk::secrets::SecretChange
 pub fn paperpaw_sdk::wifi::known<'a>(impl core::iter::traits::collect::IntoIterator<Item = &'a paperpaw_sdk::secrets::Secret>) -> alloc::vec::Vec<(alloc::string::String, alloc::string::String)>
 pub fn paperpaw_sdk::wifi::secret_id(&str) -> alloc::string::String

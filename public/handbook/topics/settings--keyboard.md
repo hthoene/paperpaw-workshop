@@ -1,3 +1,4 @@
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
 | `[keyboard] layouts` | Keyboard layouts | list | `keyboard.layout.auto` | The layouts to type with; with several, a key switches between them. Hold a letter for accents. |
+| `[keyboard] umlaut-keys` | Umlaut keys | `true`, `false` | `false` | Keys of their own for ä, ö, ü and ß in German, in rows of eleven keys. Off, they come from holding a, o, u and s. |

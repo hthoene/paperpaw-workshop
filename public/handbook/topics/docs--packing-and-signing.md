@@ -14,4 +14,5 @@ paperpaw-sign plugin my-plugin-x4.ppn             # what it holds, and who signe
 closures), symbols it cannot find, and code that reaches an address
 fixed in the firmware or ROM directly. The signature goes into the file
 itself, so it travels with it; a device remembers the author's key at
-the first install and warns when an update is signed by another.
+the first install (from the store, the key the plugin library names for
+its author) and warns when an update is signed by another.

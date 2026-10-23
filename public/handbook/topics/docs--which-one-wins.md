@@ -1,6 +1,7 @@
 ### Which one wins
 
-- **Slots.** The screen the user chose in `[slots]`; else the binding
+- **Slots.** The screen the user chose in `[slots]` (*Screens*,
+  above); else the binding
   with the highest `Priority` (`FALLBACK`, `DEFAULT`, `PREFERRED`, or
   any number); between equal priorities, the one registered later,
   that is of the plugin loaded later.

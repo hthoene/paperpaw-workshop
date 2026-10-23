@@ -23,5 +23,5 @@ by name). Build it for both chips:
 
 ```sh
 cargo x4                  # riscv32imc-unknown-none-elf, the X4
-cargo +esp x4pro          # xtensa-esp32s3-none-elf, the X4 Pro (espup's toolchain)
+cargo +esp x4pro          # xtensa-esp32s3-none-elf, the X4 Pro and X4 Classic (espup's toolchain)
 ```

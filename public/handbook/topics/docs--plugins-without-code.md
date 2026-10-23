@@ -15,12 +15,12 @@ plugins/large-print/
                  regular, bold, italic, bold-italic (packs, or .ttf/.otf
                  where scalable fonts are drawn)
   styles.css     a stylesheet for books, after a book's own (EPUB)
-  presets.ini    ready-made sets of settings, e.g. home screen layouts
+  presets.ini    ready-made sets of settings, e.g. themes
   marks.ini      words marked on book pages by patterns (formats 2)
   menus.ini      entries of menus, a menu of one's own (formats 3)
   actions.ini    actions made of steps (formats 3)
   icons.ini      icons of actions and settings: item = icon-name (formats 3)
-  points/*.txt   lines for a point, one a line, e.g. core.about.txt (formats 3)
+  points/*.txt   lines for a point, one a line, e.g. about.lines.txt (formats 3)
   setup.ini      steps of the first-run setup (formats 3)
 ```
 
@@ -127,12 +127,14 @@ PaperPaw, switched off in the plugin manager.
 The fonts browser (`plugins/fonts-browser`) downloads fonts as such
 plugins from paperpaw.org: font files for devices with scalable fonts
 and the memory for them, packs for the others. The store
-(`plugins/store`, *More plugins*) lists every other data plugin of the
-plugin library made for the device and installs, updates and removes it
-([ADR 0023](adr/0023-plugin-store.md)). Both build on the SDK's
-`install` module: an `Installer` downloads a `Package`'s files one after
-another into `plugins/.<id>.part`, checks each by its size and SHA-1,
-then has the kernel install it (`Command::InstallPlugin`) in place of
+(`plugins/store`, *More plugins*) lists the other plugins of the plugin
+library made for the device, data plugins and, where PaperPaw loads
+them and a build fits, plugins with code, and installs, updates and
+removes them ([ADR 0023](adr/0023-plugin-store.md)). Both build on the
+SDK's `install` module: an `Installer` downloads a `Package`'s files one
+after another into `plugins/.<id>.part`, checks each by its size and
+digest (SHA-1 or SHA-256), then has the kernel install it
+(`Command::InstallPlugin`) in place of
 every version of it before, what was chosen from it still chosen; the
 job is kept on the storage, so it goes on with no screen open.
 
@@ -146,22 +148,11 @@ code add theirs with `Registrar::add_stylesheet`.
 
 A `presets.ini` holds presets (see above), a section each: its `kind`,
 its `name` and `description` (translation keys from its `i18n`, or the
-text itself), then the settings it sets by their whole id:
-
-```ini
-[nook]
-kind = home.layout
-name = reading-nook.nook
-description = reading-nook.nook.help
-home.page-1 = widgets.word-clock@1 0/0 4x2, home.continue@1 0/2 4x2, home.recent@1 0/4 4x2
-home.rows = 6
-```
-
-So anyone can make a home screen layout and share it: it is offered
-with the home screen's own. Pictures over the page for the sleep screen
-are presets of `sleep.overlay` the same way: the picture (or a widget,
-`sleep.overlay-widget`), and where it goes and how large it is if the
-preset likes (what it leaves out stays as the reader set it).
+text itself), then the settings it sets by their whole id. Themes are
+such presets (`kind = core.theme`, above). Pictures over the page for
+the sleep screen are presets of `sleep.overlay`: the picture (or a
+widget, `sleep.overlay-widget`), and where it goes and how large it is
+if the preset likes (what it leaves out stays as the reader set it).
 
 ```ini
 [owl]
@@ -173,6 +164,5 @@ sleep.overlay-size = 40
 ```
 
 The picture's clear parts show the page, so a PNG with transparency
-looks best. [`samples/plugins`](../samples/plugins) has
-five: large print, three themes (airy, paw, calm ink) and a layout
-(reading nook).
+looks best. [`samples/plugins`](../samples/plugins) has large print,
+three themes (airy, paw, calm ink) and a home screen (reading nook).

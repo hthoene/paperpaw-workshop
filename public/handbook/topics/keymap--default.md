@@ -30,7 +30,7 @@ button.menu = core.menu
 button.home = core.home
 button.power = core.sleep
 long.back = core.home
-long.confirm = core.menu
+long.confirm = core.long-confirm
 long.menu = core.toggle-night-mode
 
 tap.top-left = core.prev-page

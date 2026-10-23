@@ -14,4 +14,7 @@ online for goes out: a screen that needs the network says so on itself
 and offers *Go online*, which sends `Command::GoOnline` (the network for
 that screen until it closes); anything else is refused with
 `Reason::Offline` and may try again on `events::WORK_ALLOWED`.
-`Command::CancelHttp` takes requests back.
+`Command::CancelHttp` takes requests back. Where a server or a computer
+is told which device this is (a sync service, Calibre), the name is
+`env.device_name()`: the one the reader set under *Device name*, else
+the model's; a plugin never makes one of its own.

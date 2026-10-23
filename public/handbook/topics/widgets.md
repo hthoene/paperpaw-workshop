@@ -13,8 +13,10 @@
 | `stats.widget.calendar` | Reading calendar |
 | `stats.widget.year` | Books this year |
 | `stats.widget.streak` | Reading streak |
+| `reading-goal.widget` | Reading cat |
 | `vocabulary.widget.word` | Word of the day |
 | `vocabulary.widget.saved` | Words saved |
+| `vocabulary.widget.due` | Cards due |
 | `news.widget.headlines` | News headlines |
 | `weather.now` | Weather now |
 | `weather.forecast` | Forecast |

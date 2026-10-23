@@ -97,14 +97,17 @@ What each wish becomes:
 |---|---|
 | A different look (margins, rows, headers, corners, highlight, lines, lists on cards, title size) | `settings.ini`: new defaults for the appearance settings (`[core]` `ui-...`), see the look settings below |
 | Bigger or smaller text, another font in books, spacing, margins of book pages | `settings.ini` with the reading settings (`[core]` `font-size`, `line-spacing`, `margin` ...); `fonts/` for a font family of its own; `styles.css` for book styles |
-| A home screen of their own | `presets.ini`: a preset of the kind `home.layout`, placing widgets on pages |
+| A home screen of their own | `settings.ini`: the widgets of each page in order, `[home] page-1 = home.clock, home.continue` (pages 1 to 8), and the widgets' own settings (`settings/home`) |
+| A theme to choose in Settings | `presets.ini`: presets of the kind `core.theme` (see Presets below) |
 | Buttons, taps or swipes doing something else | `keymap.ini`: bindings in layers (`[keymap.global]`, `[keymap.core.reader]` ...) to action ids |
-| Different menus | Nothing: menus are the person's own choice, made on the device with the menu editor (or `[menus]` in its `paperpaw.ini`); a data plugin does not set them. Say so, and offer key bindings instead |
+| One press doing several things (ten pages on, night mode and a bigger font) | `actions.ini` (formats 3): an action of up to 16 steps, bound in `keymap.ini` |
+| Different menus, a menu of its own | `menus.ini` (formats 3): entries added, placed or taken out of any menu, menus of its own |
 | Texts in another language, or other words | `i18n/<lang>.ini` |
 | Its own logo | a `.png` and `[core] logo = plugins/<id>/logo.png` in `settings.ini` |
 | A picture while the reader sleeps | pictures in a folder of the plugin (`sleep/1.png` ...) and in `settings.ini` `[sleep] show = sleep.show.picture`, `folder = plugins/<id>/sleep` |
 | A picture on the home screen | the widget `widgets.picture` in the layout, its pictures in a folder of the plugin, `[widgets] picture.folder = plugins/<id>/pictures` |
-| Its own icons, a background behind screens | Not yet: icons come from icon font packs, and PaperPaw has no background picture. Say so |
+| Other icons for actions and settings | `icons.ini` (formats 3): `item = icon-name`, from the icons PaperPaw has |
+| A background behind screens | Not yet: PaperPaw has no background picture. Say so |
 
 A plugin's `settings.ini` sets defaults: what the person chose in
 Settings on the device still wins, and switching the plugin off in the
@@ -121,8 +124,9 @@ version = 1.0.0
 formats = 1
 ```
 
-`formats` is the version of the data files' formats it is made for (2
-only when it has `marks.ini`).
+`formats` is the version of the data files' formats it is made for: 1,
+2 with `marks.ini`, 3 with `menus.ini`, `actions.ini`, `icons.ini`,
+`points/` or `setup.ini`.
 
 Settings in `settings.ini` are written by their plugin as the section
 and the rest of the id as the key: the setting `core.ui-row` is
@@ -137,11 +141,11 @@ values, written in full (`core.header.light`). Use `lookup_docs` with
 `settings/<plugin>` (for example `settings/home`, `settings/reader`) to
 see the settings of other plugins.
 
-A home screen layout places widgets on a grid of `home.columns` columns
-and `home.rows` rows: `<widget-id>@<n> <column>/<row> <width>x<height>`,
-separated by commas, one page per setting `home.page-1` to
-`home.page-4`; `@<n>` numbers the placements so each may have settings
-of its own (`home.recent@1.count = 8`). The widgets are listed below.
+A home screen page lists its widgets in order, separated by commas,
+one page per setting `home.page-1` to `home.page-8` (an empty page is
+left out); `home.columns` sets how many sit side by side. Each widget
+has settings of its own (`home.clock.size`, `home.date.align`); see
+`settings/home`. The widgets are listed below.
 
 ## Pictures the person gives you
 
@@ -196,12 +200,12 @@ plugins/large-print/
                  regular, bold, italic, bold-italic (packs, or .ttf/.otf
                  where scalable fonts are drawn)
   styles.css     a stylesheet for books, after a book's own (EPUB)
-  presets.ini    ready-made sets of settings, e.g. home screen layouts
+  presets.ini    ready-made sets of settings, e.g. themes
   marks.ini      words marked on book pages by patterns (formats 2)
   menus.ini      entries of menus, a menu of one's own (formats 3)
   actions.ini    actions made of steps (formats 3)
   icons.ini      icons of actions and settings: item = icon-name (formats 3)
-  points/*.txt   lines for a point, one a line, e.g. core.about.txt (formats 3)
+  points/*.txt   lines for a point, one a line, e.g. about.lines.txt (formats 3)
   setup.ini      steps of the first-run setup (formats 3)
 ```
 
@@ -308,12 +312,14 @@ PaperPaw, switched off in the plugin manager.
 The fonts browser (`plugins/fonts-browser`) downloads fonts as such
 plugins from paperpaw.org: font files for devices with scalable fonts
 and the memory for them, packs for the others. The store
-(`plugins/store`, *More plugins*) lists every other data plugin of the
-plugin library made for the device and installs, updates and removes it
-([ADR 0023](adr/0023-plugin-store.md)). Both build on the SDK's
-`install` module: an `Installer` downloads a `Package`'s files one after
-another into `plugins/.<id>.part`, checks each by its size and SHA-1,
-then has the kernel install it (`Command::InstallPlugin`) in place of
+(`plugins/store`, *More plugins*) lists the other plugins of the plugin
+library made for the device, data plugins and, where PaperPaw loads
+them and a build fits, plugins with code, and installs, updates and
+removes them ([ADR 0023](adr/0023-plugin-store.md)). Both build on the
+SDK's `install` module: an `Installer` downloads a `Package`'s files one
+after another into `plugins/.<id>.part`, checks each by its size and
+digest (SHA-1 or SHA-256), then has the kernel install it
+(`Command::InstallPlugin`) in place of
 every version of it before, what was chosen from it still chosen; the
 job is kept on the storage, so it goes on with no screen open.
 
@@ -327,22 +333,11 @@ code add theirs with `Registrar::add_stylesheet`.
 
 A `presets.ini` holds presets (see above), a section each: its `kind`,
 its `name` and `description` (translation keys from its `i18n`, or the
-text itself), then the settings it sets by their whole id:
-
-```ini
-[nook]
-kind = home.layout
-name = reading-nook.nook
-description = reading-nook.nook.help
-home.page-1 = widgets.word-clock@1 0/0 4x2, home.continue@1 0/2 4x2, home.recent@1 0/4 4x2
-home.rows = 6
-```
-
-So anyone can make a home screen layout and share it: it is offered
-with the home screen's own. Pictures over the page for the sleep screen
-are presets of `sleep.overlay` the same way: the picture (or a widget,
-`sleep.overlay-widget`), and where it goes and how large it is if the
-preset likes (what it leaves out stays as the reader set it).
+text itself), then the settings it sets by their whole id. Themes are
+such presets (`kind = core.theme`, above). Pictures over the page for
+the sleep screen are presets of `sleep.overlay`: the picture (or a
+widget, `sleep.overlay-widget`), and where it goes and how large it is
+if the preset likes (what it leaves out stays as the reader set it).
 
 ```ini
 [owl]
@@ -354,46 +349,38 @@ sleep.overlay-size = 40
 ```
 
 The picture's clear parts show the page, so a PNG with transparency
-looks best. [`samples/plugins`](../samples/plugins) has
-five: large print, three themes (airy, paw, calm ink) and a layout
-(reading nook).
+looks best. [`samples/plugins`](../samples/plugins) has large print,
+three themes (airy, paw, calm ink) and a home screen (reading nook).
 
-### Presets and home screen layouts
+### Presets
 
 A preset is a ready-made set of setting values chosen as a whole
-(`paperpaw_sdk::presets`), such as a layout of the home screen. It has a
-kind, named by the plugin that offers such presets: the home screen
-offers those of `home.layout` in its chooser (in the first-run setup,
-and under *Add* while editing it), shows each on itself before it is
-kept, and applies the one chosen. Add presets kept in the program with
-`Registrar::add_presets` (a `static` list of `Preset::fixed`), for your
-own kind or another plugin's:
+(`paperpaw_sdk::presets`). It has a kind, named by the plugin that
+offers such presets: that plugin lists those of its kind
+(`env.settings.presets().of_kind(kind)`), works out what one changes
+(`Preset::changes` with the settings it covers), shows it
+(`Command::PreviewSettings`: the values show on every screen without
+being kept, until the screen that asked closes) and keeps it
+(`presets::commands`); the settings of its kind that a preset leaves
+out go back to their defaults. The kinds PaperPaw's own plugins offer
+are themes (`core.theme`, below), pictures over the page for the sleep
+screen (`sleep.overlay`, see [Plugins without code](#plugins-without-code))
+and the power modes (`core.power-mode`, which the kernel wears). Add
+presets kept in the program with `Registrar::add_presets` (a `static`
+list of `Preset::fixed`), for your own kind or another plugin's:
 
 ```rust
-static LAYOUTS: [Preset; 1] = [Preset::fixed(
-    "my.nook",
-    "home.layout",
-    "my.nook",      // translation keys of its name
-    "my.nook.help", // and of a sentence on it
-    "home.page-1 = widgets.word-clock@1 0/0 4x2, home.continue@1 0/2 4x2
-home.rows = 6",
+static THEMES: [Preset; 1] = [Preset::fixed(
+    "my.dusk",
+    presets::THEME,
+    "my.dusk",      // translation keys of its name
+    "my.dusk.help", // and of a sentence on it
+    "core.ui-focus = core.focus.ring
+core.ui-separators = core.separators.none",
 )];
 
-r.add_presets(&LAYOUTS)?;
+r.add_presets(&THEMES)?;
 ```
-
-A layout sets the pages (`home.page-1` to `home.page-4`, as
-`widgets::grid` writes them) and whatever of the home screen's look it
-wants (`home.columns`, `home.rows`, `home.status-bar`,
-`home.footer.dots` ...); what it leaves out goes back to its default.
-Widgets placed as `id@1` have settings of their own in it
-(`home.recent@1.count = 8`), so a layout gives them their looks without
-touching the widget's other placements. To offer presets of a kind of
-your own, list them (`env.settings.presets().of_kind(kind)`), work out
-what one changes (`Preset::changes` with the settings it covers), show
-it (`Command::PreviewSettings`: the values show on every screen without
-being kept, until the screen that asked closes) and keep it
-(`presets::commands`).
 
 A theme is a preset of the kind `core.theme` (`presets::THEME`): values
 for the appearance settings. Where any plugin brings one, the
@@ -481,7 +468,7 @@ button.menu = core.menu
 button.home = core.home
 button.power = core.sleep
 long.back = core.home
-long.confirm = core.menu
+long.confirm = core.long-confirm
 long.menu = core.toggle-night-mode
 
 tap.top-left = core.prev-page
@@ -598,15 +585,15 @@ line-spacing = 145
 `plugin.ini`:
 
 ```ini
-# A home screen layout is a data plugin too: a preset of the kind
-# home.layout in presets.ini. Copy this folder into the `plugins` folder
-# of your device and restart; the layout is offered with the others
-# (Edit home screen in the menu, then Add, then Home screen layouts).
+# A home screen of its own is a data plugin too: new defaults for the
+# home screen's settings in settings.ini. Copy this folder into the
+# `plugins` folder of your device and restart; the home screen shows it
+# until you arrange it yourself.
 [plugin]
 id = reading-nook
 name = Reading nook
-description = A home screen layout: the time in words, the book being read and the ones before it.
-version = 1.0.0
+description = A home screen: the time in words, the book being read and the ones before it.
+version = 1.1.0
 formats = 1
 ```
 
@@ -620,9 +607,7 @@ plural = one-other
 
 [messages]
 reading-nook.plugin.name = Leseecke
-reading-nook.plugin.description = Ein Layout der Startseite: die Uhrzeit in Worten, das Buch, das man liest, und die davor.
-reading-nook.nook = Leseecke
-reading-nook.nook.help = Die Uhrzeit in Worten, das Buch, das du liest, und die davor.
+reading-nook.plugin.description = Eine Startseite: die Uhrzeit in Worten, das Buch, das du liest, und die davor.
 ```
 
 `i18n/en.ini`:
@@ -634,26 +619,63 @@ name = English
 plural = one-other
 
 [messages]
-reading-nook.nook = Reading nook
-reading-nook.nook.help = The time in words, the book you are reading and the ones before it.
+reading-nook.plugin.name = Reading nook
+reading-nook.plugin.description = A home screen: the time in words, the book being read and the ones before it.
 ```
 
-`presets.ini`:
+`settings.ini`:
 
 ```ini
-# Each section is a preset: its kind, its name and a sentence on it
-# (translation keys, see i18n, or plain text), then the settings it sets,
-# as in paperpaw.ini but with the whole id. What a layout leaves out of
-# the home screen's look goes back to its default when it is used.
-# Widgets placed as `id@1` have settings of their own in the layout.
-[nook]
-kind = home.layout
-name = reading-nook.nook
-description = reading-nook.nook.help
-home.page-1 = widgets.word-clock@1 0/0 4x2, home.continue@1 0/2 4x2, home.recent@1 0/4 4x2
-home.page-2 = home.tools
-home.rows = 6
-home.recent@1.heading = off
+# New defaults for the home screen, written as in paperpaw.ini: the time
+# in words, the book being read and the ones before it, the tools on the
+# next page. What the reader arranges still wins.
+[home]
+page-1 = "widgets.word-clock 0/0 4x2, home.continue 0/2 4x2, home.recent 0/4 4x2"
+page-2 = home.tools
+rows = 6
+```
+
+## Sample: theme-paw
+
+`plugin.ini`:
+
+```ini
+# A theme is a data plugin: new defaults for the appearance settings
+# (Settings > Customise > Appearance, with advanced settings). Copy this
+# folder into the `plugins` folder of your device and restart; switch it
+# off in the plugin manager to go back. What you choose still wins.
+[plugin]
+id = theme-paw
+name = Paw
+description = Round and friendly: a frame for the highlight, no lines, taller rows.
+version = 1.0.0
+formats = 1
+```
+
+`i18n/de.ini`:
+
+```ini
+[meta]
+language = de
+name = Deutsch
+plural = one-other
+
+[messages]
+theme-paw.plugin.name = Pfote
+theme-paw.plugin.description = Rund und freundlich: ein Rahmen als Hervorhebung, keine Linien, höhere Zeilen.
+```
+
+`settings.ini`:
+
+```ini
+[core]
+ui-corners = core.corners.soft
+ui-focus = core.focus.ring
+ui-header = core.header.plain
+ui-separators = core.separators.none
+ui-title = 140
+ui-row = 180
+ui-margin = 4
 ```
 
 # What this PaperPaw has
@@ -667,11 +689,12 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `[core] ui-size` | Menu text size | 7 to 24 | `9` | Size of menus, lists and the status line. |
 | `[core] ui-contrast` | Contrast | `core.contrast.normal`, `core.contrast.strong` | `core.contrast.normal` | Strong draws gray hints and notes in black, easier to read on screens with few grays. |
 | `[core] ui-header` | Headers | `core.header.plain`, `core.header.light`, `core.header.dark` | `core.header.plain` | The top of menus and lists: the title on the page, black on white with a line below, or white on black. |
+| `[core] widgets.frame` | Frames of widgets | `core.frame.own`, `core.frame.none`, `core.frame.line`, `core.frame.card`, `core.frame.dark` | `core.frame.own` | One frame for every widget whose own is not chosen in its settings: a line, a card, a dark card or none. |
 | `[core] ui-corners` | Corners | `core.corners.square`, `core.corners.small`, `core.corners.round`, `core.corners.soft` | `core.corners.soft` | Of highlighted rows, buttons and boxes; round and soft ones make buttons and switches pills. |
 | `[core] ui-focus` | Highlight | `core.focus.fill`, `core.focus.ring`, `core.focus.soft` | `core.focus.fill` | How the chosen row is shown: a dark bar, a frame, or a light bar (a frame on screens of black and white alone). |
 | `[core] ui-separators` | Lines between rows | `core.separators.inset`, `core.separators.line`, `core.separators.none` | `core.separators.inset` | Light lines, fainter lines from where the text starts, or none. |
 | `[core] ui-groups` | Groups | `core.groups.plain`, `core.groups.cards` | `core.groups.plain` | The sections of lists as they are or on rounded cards. |
-| `[core] ui-title` | Title size | 100 to 200 | `130` | Size of the titles at the top of menus and lists, in percent of the text's. |
+| `[core] ui-title` | Title size | 100 to 200 | `115` | Size of the titles at the top of menus and lists, in percent of the text's. |
 | `[core] ui-margin` | Margins of menus | 0 to 15 | `4` | Space at the left and right of menus and lists. |
 | `[core] ui-row` | Row height | 120 to 300 | `160` | Height of the rows of menus and lists, relative to their text. |
 | `[core] ui-lines` | Lines | 1 to 10 | `3` | How thick lines and frames are drawn. |
@@ -681,12 +704,15 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `[core] text-color-own` | Own text colour | text | `#5b4636` | A colour code such as #5b4636 (red, green, blue), used when the colour above is "Own colour". |
 | `[core] paper-color` | Paper colour | `core.paper.white`, `core.paper.cream`, `core.paper.sepia`, `core.paper.sand`, `core.paper.light-gray`, `core.paper.mint`, `core.paper.light-blue`, `core.paper.rose`, `core.paper.own` | `core.paper.white` | Softer than black on white, easier on the eyes on bright screens. Pictures take the colours too; night mode swaps them. |
 | `[core] paper-color-own` | Own paper colour | text | `#f4ecd8` | A colour code such as #5b4636 (red, green, blue), used when the colour above is "Own colour". |
-| `[home] gesture-tips` | Hint on the gestures | `true`, `false` | `true` | Shows once how the gestures go; switch it on to see it again. |
 | `[home] page-1` | Home page 1 | text | `home.clock, home.continue, home.recent` | What the page shows, item by item with its place in the grid. Change it on the home screen: the pencil below the page or a long press on it. |
 | `[home] page-2` | Home page 2 | text | `home.tools` | What the page shows, item by item with its place in the grid. Change it on the home screen: the pencil below the page or a long press on it. |
 | `[home] page-3` | Home page 3 | text | `` | What the page shows, item by item with its place in the grid. Change it on the home screen: the pencil below the page or a long press on it. |
 | `[home] page-4` | Home page 4 | text | `` | What the page shows, item by item with its place in the grid. Change it on the home screen: the pencil below the page or a long press on it. |
-| `[home] columns` | Columns | 2 to 6 | `4` | How many cells the home screen has across. |
+| `[home] page-5` | Home page 5 | text | `` | What the page shows, item by item with its place in the grid. Change it on the home screen: the pencil below the page or a long press on it. |
+| `[home] page-6` | Home page 6 | text | `` | What the page shows, item by item with its place in the grid. Change it on the home screen: the pencil below the page or a long press on it. |
+| `[home] page-7` | Home page 7 | text | `` | What the page shows, item by item with its place in the grid. Change it on the home screen: the pencil below the page or a long press on it. |
+| `[home] page-8` | Home page 8 | text | `` | What the page shows, item by item with its place in the grid. Change it on the home screen: the pencil below the page or a long press on it. |
+| `[home] columns` | Columns | 2 to 6 | `3` | How many cells the home screen has across. |
 | `[home] rows` | Rows | 0 to 12 | `0` | How many cells it has down; 0: as many as make the cells about square. |
 | `[home] tool-labels` | Names under the tools | `true`, `false` | `true` | The tools on the home screen with their names, or only their icons. |
 | `[home] focus-at-once` | Show the focus at once | `true`, `false` | `false` | Whether the frame showing what the buttons choose is there as soon as the home screen shows, or only after the first press. |
@@ -695,16 +721,12 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `[home] footer.dots` | Dots for the pages | `true`, `false` | `true` | Where one is among the pages, below them. |
 | `[home] footer.items` | More below the page | list | `` | Status items beside the dots, e.g. the battery. |
 | `[menu] style` | Menus | `menu.style.list`, `menu.style.tiles` | `menu.style.list` | Menus as a list, or as tiles with their icons at the top of the screen. |
-| `[menu] quick.left` | Top left | list | `core.status.clock, core.status.date-short` | What this part of the quick panel's top line shows: the time, the date, the battery or other status items. |
-| `[menu] quick.center` | Top centre | list | `` | What this part of the quick panel's top line shows: the time, the date, the battery or other status items. |
-| `[menu] quick.right` | Top right | list | `wifi.status, core.status.battery` | What this part of the quick panel's top line shows: the time, the date, the battery or other status items. |
-| `[menu] quick.size` | Text size at the top | 6 to 24 | `11` | The size of the time, date and battery above the quick panel. What it holds below is changed under Customise menus. |
 
 ## The reading settings
 
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
-| `[core] reading-font` | Font | `core.font.default`, `Literata`, `Source Sans 3` | `core.font.default` | The book's font uses the fonts a book brings (else Literata); any other font is used for all text. Add your own: put .ttf or .otf files into the fonts folder. |
+| `[core] reading-font` | Font | `core.font.default`, `Literata`, `Source Sans 3` | `core.font.default` | The book's font is Literata, or the fonts a book brings on devices that draw them (not the X4 and X4 Pro). Any other font is used for all text. |
 | `[core] font-size` | Font size | 6 to 40 | `9` | Size of the book text. |
 | `[core] line-spacing` | Line spacing | 80 to 250 | `135` | Distance between lines, relative to the font size. Below 100 % lines come closer than the font sets them, for fonts with much room between lines. |
 | `[core] font-weight` | Font weight | 0 to 4 | `0` | Darker, bolder text with any font; helps on light screens. |
@@ -730,10 +752,17 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `[reader] aloud-highlight` | Underline the sentence | `true`, `false` | `true` | Shows which sentence is being read. |
 | `[reader] aloud-turn-pages` | Turn pages | `true`, `false` | `true` | Reads on over the pages; else it stops at the end of the page. |
 | `[reader] aloud-timer` | Stop after | `reader.aloud-timer.off`, `reader.aloud-timer.15`, `reader.aloud-timer.30`, `reader.aloud-timer.60`, `reader.aloud-timer.90` | `reader.aloud-timer.off` | Reading aloud stops by itself after this long, e.g. at bedtime. |
+| `[reading-goal] content` | Content from | 5 to 95 | `50` | From which share of the goal the cat is content rather than meh. |
+| `[reading-goal] happy` | Happy from | 50 to 200 | `100` | From which share of the goal the cat is happy. 100 % is the goal itself. |
+| `[reading-goal] pictures` | Own pictures | text | `` | A folder with pictures named sad, meh, content and happy (PNG or JPEG) to show instead of the cats. Empty: the cats. |
 | `[aids] bold-beginnings` | Bold word beginnings | `true`, `false` | `false` | The first half of every word in bold, which some find easier to follow. |
 | `[aids] replace` | Replace words | text | `` | Pairs like “colour = color; Mr. = Mister”, for whole words in every book. |
-| `[vocabulary] collect` | Keep words looked up | `true`, `false` | `true` | Each word you look up goes into Vocabulary in the main menu, with its sentence. |
+| `[vocabulary] collect` | Keep words looked up | `true`, `false` | `true` | Each word you look up goes into Vocabulary in the tools, with its sentence. |
 | `[vocabulary] mark` | Mark vocabulary | `true`, `false` | `false` | The words in Vocabulary are marked where they occur in books of their language; choosing one looks it up again. |
+| `[vocabulary] new-per-day` | New cards a day | 0 to 200 | `20` | How many cards not seen before a review shows each day at most, besides those due again. |
+| `[vocabulary] retention` | Retention wanted | 70 to 97 | `90` | How likely you should still remember a card when it comes again. Higher means more reviews. |
+| `[vocabulary] cards-from-lookups` | Words looked up become cards | `true`, `false` | `false` | Each word you look up becomes a flash card in the deck Looked up, its sentence as the example. Add its meaning with your phone. |
+| `[vocabulary] review-on-wake` | Review on waking | `true`, `false` | `false` | The review opens as the device wakes, where flash cards are due. |
 | `[translate] to` | Translate into | `translate.to.auto`, `translate.to.ar`, `translate.to.bg`, `translate.to.cs`, `translate.to.da`, `translate.to.de`, `translate.to.el`, `translate.to.en-gb`, `translate.to.en-us`, `translate.to.es`, `translate.to.et`, `translate.to.fi`, `translate.to.fr`, `translate.to.hu`, `translate.to.id`, `translate.to.it`, `translate.to.ja`, `translate.to.ko`, `translate.to.lt`, `translate.to.lv`, `translate.to.nb`, `translate.to.nl`, `translate.to.pl`, `translate.to.pt-br`, `translate.to.pt-pt`, `translate.to.ro`, `translate.to.ru`, `translate.to.sk`, `translate.to.sl`, `translate.to.sv`, `translate.to.tr`, `translate.to.uk`, `translate.to.zh-hans` | `translate.to.auto` | The language selected text is translated into. |
 
 ## Widgets for home screen layouts
@@ -753,8 +782,10 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `stats.widget.calendar` | Reading calendar |
 | `stats.widget.year` | Books this year |
 | `stats.widget.streak` | Reading streak |
+| `reading-goal.widget` | Reading cat |
 | `vocabulary.widget.word` | Word of the day |
 | `vocabulary.widget.saved` | Words saved |
+| `vocabulary.widget.due` | Cards due |
 | `news.widget.headlines` | News headlines |
 | `weather.now` | Weather now |
 | `weather.forecast` | Forecast |
@@ -800,6 +831,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `core.home` | Home |
 | `core.left` | Left |
 | `core.library` | Library |
+| `core.long-confirm` | Menu or more |
 | `core.menu` | Menu |
 | `core.next` | Next |
 | `core.next-page` | Next page |
@@ -828,17 +860,18 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `files.shelves` | Shelves |
 | `fonts-browser.open` | More fonts |
 | `home.all-tools` | All tools |
-| `home.choose-layout` | Home screen layouts |
 | `home.edit-pages` | Edit home screen |
 | `keys.open` | Buttons and gestures |
 | `kosync.sync-now` | Sync progress |
 | `lock.now` | Lock now |
+| `lock.touch-toggle` | Lock or unlock touch |
 | `menu-editor.open` | Customise menus |
 | `news.fetch` | Fetch the news |
 | `news.open` | News |
 | `opds.open` | Catalogs |
 | `opds.sync` | Sync catalogs |
 | `plugin-manager.open` | Plugins |
+| `plugin-manager.screens.open` | Screens |
 | `power.open` | Power |
 | `profiles.next` | Next profile |
 | `profiles.open` | Profiles |
@@ -879,6 +912,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `transfer.open` | Wi-Fi transfer |
 | `update.check` | Search online |
 | `update.open` | Update |
+| `vocabulary.flash-cards` | Flash cards |
 | `vocabulary.open` | Vocabulary |
 | `weather.choose-place` | Place |
 | `weather.refresh` | Fetch the weather |

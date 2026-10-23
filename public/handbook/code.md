@@ -174,8 +174,8 @@ books opened since the start. Try it in the emulator:
 cargo run -p paperpaw-emulator --features hello -- --profile boox-go-7 --set hello.name=Ada
 ```
 
-Open the main menu (a tap at the bottom of the home screen), then
-*Tools*, then *Hello*.
+*Hello* is among the tools: open *Tools* in the main menu, then
+*Hello*.
 
 ### The plugin
 
@@ -227,8 +227,9 @@ emit an event, run an action, show a short message, make an HTTP
 request, keep a password, and so on. The kernel runs the commands after
 the plugin's code returns.
 
-This keeps plugins simple to test and the API message-based, so the same
-model works for sandboxed plugins later.
+This keeps plugins simple to test and the API message-based. It does
+not confine them: a plugin runs as native code without a sandbox (see
+[Plugins as files](#plugins-as-files)).
 
 ### Screens
 
@@ -290,7 +291,10 @@ Some rules every screen should follow:
   (`dims_below`); one looked through (a keyboard over the field it
   types into, a notice) does not. A screen whose content is best in
   grays (a picture) says so (`grays`): panels with few grays then show
-  it in more, as slowly as a full refresh.
+  it in more, as slowly as a full refresh. A screen drawn whole with
+  pictures on it (covers, `ui::draw_image`, `ui::Thumbnail`) is shown so
+  anyway where *Pictures in grays* is on; one that decides itself, or
+  whose pictures change often, says no (`pictures_in_grays`).
 - **Use the SDK's UI parts** (`paperpaw_sdk::ui`): headers, rows, lists,
   switches, numbers with − and +, messages, icons. They follow the user's
   appearance settings and line up with the rest of PaperPaw. What a
@@ -308,6 +312,80 @@ focused, on)`, with the role of what it is (`Row`, `Button`, `Switch`,
 `Check`, `Radio`, `Field`, `Image`, `Link`, `Dialog`, `Progress` …). A
 screen reader of one's own hears where the focus of the buttons goes
 (`events::FOCUS_CHANGED`: its role, label and area).
+
+### Which building block for what
+
+A plugin's screens are drawn with the SDK's `ui` module, so they look
+like PaperPaw's own, follow the reader's text size and the look chosen
+(a theme paints switches, the focus, buttons, headers, frames and more),
+and work by touch and with the buttons alone. Sizes come from
+`UiStyle::new(env)`: `margin`, `gap`, `row`, `header`, the text sizes
+(`style.size(TextRole::Body)` and the others). No block shortens a
+title or a button's word: a title is measured first and keeps its whole
+width, a box or control beside it takes what is left, and where that is
+too little the row takes a second line (ask the block for its row's
+height); only a value, the reader's own text in a field, may be
+shortened. `paperpaw-dev ui-kit` draws every block below on every
+device, in every look, light and dark, and checks that no label is
+shortened.
+
+| For | Use |
+|---|---|
+| The bar at the top, a title and a note (a page count) | `ui::draw_header`, `ui::Header` (with its arrows) |
+| Parts one below the other, from the top and the bottom | `ui::Stack` (`take`, `take_bottom`, `rest`) |
+| Equal columns side by side, e.g. two buttons | `ui::columns(area, count, gap)` |
+| A list that pages and holds the focus | `ui::ListView`, `ui::list_step` |
+| Rows of a list or of settings | `ui::draw_value_row`, `ui::draw_noted_row`, `ui::draw_switch_row`, `ui::draw_setting_row`, `ui::draw_stepper`, `ui::Slider` |
+| Sections with headings | `ui::Sections`, `ui::draw_heading` |
+| A grid of cells (covers, tiles) | `ui::Grid` (`cell`, `hit`, `step`) |
+| A group on a card or in a frame | `ui::draw_card(canvas, &style, area, Frame::Card)` returns where its parts go |
+| A button, on, focused, faint, with an icon | `ui::draw_button`, `ui::draw_faint_button`, `ui::draw_icon_button` |
+| A few options to pick at a glance, or tabs | `ui::Segments` |
+| Filters or tags in a row, each as wide as its word | `ui::Chips` (the height of their rows: `Chips::height_for`) |
+| A one-line text in a row, typed on the keyboard | `ui::draw_text_field` (its row: `text_field_height`), `ui::edit_text` |
+| A list where several may be ticked | `ui::draw_check_row` (its row: `check_row_height`; the box alone: `ui::draw_check`) |
+| Text longer than its room, scrolled by buttons and touch | `ui::TextView` |
+| A date or a time | `ui::DatePicker`, `ui::TimePicker` |
+| A box over the screen with a title, text and buttons | `ui::Dialog` |
+| Asking for text, a folder, one of several options or yes or no | `ask::text`, `ask::folder`, `ask::choice`, `ask::confirm` (screens of their own) |
+| A message where content would be, an empty list | `ui::draw_message`, `ui::draw_empty` |
+| Progress | `ui::draw_progress` |
+| An address to open on a phone, with its QR code | `ui::draw_address`, `ui::draw_qr` |
+| Offering to go online where something needs the network | `ui::OfflineOffer` |
+| What the buttons do, at the bottom | the screen's `hint` (the kernel draws the row) |
+| First-time hints over a screen | `help::add` (see [Hints for a screen](#hints-for-a-screen)) |
+| A widget's frame | `widgets::draw_frame` |
+
+Two buttons side by side, a margin from the screen's sides and bottom:
+
+```rust
+use paperpaw_sdk::ui::{self, Stack, UiStyle};
+
+let style = UiStyle::new(env);
+let margin = style.margin as u16;
+let screen = Rect::new(margin, 0, display.width - 2 * margin, display.height - margin);
+let row = Stack::new(screen, margin).take_bottom(ui::Segments::height(&style));
+let [ok, cancel] = ui::columns(row, 2, margin)[..] else { return };
+ui::draw_button(canvas, env, &style, ok, "OK", false, focus == 0);
+ui::draw_button(canvas, env, &style, cancel, "Cancel", false, focus == 1);
+```
+
+Tabs over a page, the chosen one on, moved with left and right:
+
+```rust
+let tabs = ui::Segments::new(&style, Rect::new(margin, top, width, ui::Segments::height(&style)), 3);
+tabs.draw(canvas, env, &style, &["Books", "Shelves", "Notes"], self.tab, self.focus_on_tabs.then_some(self.tab));
+// on_action: if let Some(tab) = tabs.step(self.tab, action) { self.tab = tab; }
+// on_gesture: if let Some(tab) = tabs.hit(gesture.start) { self.tab = tab; }
+```
+
+A dialog in the middle of the screen:
+
+```rust
+let mut dialog = ui::Dialog::new(env, &style, "Delete the book?", &["It goes for good."], &["Delete", "Keep"]);
+dialog.place((display.height - dialog.height()) / 2);
+dialog.draw(canvas, env, &style, Some(self.focus));
+```
 
 ### Settings
 
@@ -366,7 +444,14 @@ reader is told the translation of the key it returns. Screens of your
 own that list settings open them as the settings pages do with
 `ui::setting_opens` (its editor, the keyboard for text, the list of a
 choice's values); text typed there comes back to the kernel as
-`events::SETTING_TYPED`, which sets it.
+`events::SETTING_TYPED`, which sets it. They lay their rows out as the
+settings pages do, so that no title is cut for its control:
+`ui::row_lines` tells once, when the list is made, whether a row's
+control goes beside its title or below it and how high the row is
+(`ui::setting_height` the height alone), and `ui::draw_number_lines`,
+`ui::draw_stepper_lines`, `ui::draw_switch_lines` and
+`ui::draw_setting_row` draw it there (`RowLines::at` moves it to the
+row's place).
 
 ### Events
 
@@ -441,6 +526,28 @@ Every text a plugin shows comes from catalogs like this, added with
 translates, `format` fills `{placeholders}`, `plural` picks the form for
 a number. A test that all languages have the same keys belongs in every
 plugin (see the sample).
+
+Two messages say what a plugin is in the lists: `<id>.plugin.name` and
+`<id>.plugin.description` (a line). *How it works* says more: a few
+sentences on what it does, where it is found and how it is used, plain
+text with paragraphs apart by an empty line, one file per language
+beside the catalogs (`how/en.txt`, `how/de.txt`). The manifest names
+them; as a table in the program they take no memory until the plugin
+manager shows one (a plugin held), paged like a book:
+
+```rust
+static HOW: [(&str, &str); 2] = [
+    ("en", include_str!("../how/en.txt")),
+    ("de", include_str!("../how/de.txt")),
+];
+// In `manifest`: Manifest::new(…).description(…).how(&HOW)
+```
+
+The same text is the `description` of the plugin's entry in the store
+(see [Publishing](#publishing)), shown on its page there. A data plugin
+gives it as `<id>.plugin.how` in its catalogs, quoted, paragraphs apart
+by `\n\n`. `paperpaw-dev` warns where a plugin with code has none or a
+short one.
 
 ### Testing
 
@@ -468,8 +575,9 @@ emit an event, run an action, show a short message, make an HTTP
 request, keep a password, and so on. The kernel runs the commands after
 the plugin's code returns.
 
-This keeps plugins simple to test and the API message-based, so the same
-model works for sandboxed plugins later.
+This keeps plugins simple to test and the API message-based. It does
+not confine them: a plugin runs as native code without a sandbox (see
+[Plugins as files](#plugins-as-files)).
 
 ### Screens
 
@@ -531,7 +639,10 @@ Some rules every screen should follow:
   (`dims_below`); one looked through (a keyboard over the field it
   types into, a notice) does not. A screen whose content is best in
   grays (a picture) says so (`grays`): panels with few grays then show
-  it in more, as slowly as a full refresh.
+  it in more, as slowly as a full refresh. A screen drawn whole with
+  pictures on it (covers, `ui::draw_image`, `ui::Thumbnail`) is shown so
+  anyway where *Pictures in grays* is on; one that decides itself, or
+  whose pictures change often, says no (`pictures_in_grays`).
 - **Use the SDK's UI parts** (`paperpaw_sdk::ui`): headers, rows, lists,
   switches, numbers with − and +, messages, icons. They follow the user's
   appearance settings and line up with the rest of PaperPaw. What a
@@ -607,7 +718,14 @@ reader is told the translation of the key it returns. Screens of your
 own that list settings open them as the settings pages do with
 `ui::setting_opens` (its editor, the keyboard for text, the list of a
 choice's values); text typed there comes back to the kernel as
-`events::SETTING_TYPED`, which sets it.
+`events::SETTING_TYPED`, which sets it. They lay their rows out as the
+settings pages do, so that no title is cut for its control:
+`ui::row_lines` tells once, when the list is made, whether a row's
+control goes beside its title or below it and how high the row is
+(`ui::setting_height` the height alone), and `ui::draw_number_lines`,
+`ui::draw_stepper_lines`, `ui::draw_switch_lines` and
+`ui::draw_setting_row` draw it there (`RowLines::at` moves it to the
+row's place).
 
 ### Events
 
@@ -683,6 +801,28 @@ translates, `format` fills `{placeholders}`, `plural` picks the form for
 a number. A test that all languages have the same keys belongs in every
 plugin (see the sample).
 
+Two messages say what a plugin is in the lists: `<id>.plugin.name` and
+`<id>.plugin.description` (a line). *How it works* says more: a few
+sentences on what it does, where it is found and how it is used, plain
+text with paragraphs apart by an empty line, one file per language
+beside the catalogs (`how/en.txt`, `how/de.txt`). The manifest names
+them; as a table in the program they take no memory until the plugin
+manager shows one (a plugin held), paged like a book:
+
+```rust
+static HOW: [(&str, &str); 2] = [
+    ("en", include_str!("../how/en.txt")),
+    ("de", include_str!("../how/de.txt")),
+];
+// In `manifest`: Manifest::new(…).description(…).how(&HOW)
+```
+
+The same text is the `description` of the plugin's entry in the store
+(see [Publishing](#publishing)), shown on its page there. A data plugin
+gives it as `<id>.plugin.how` in its catalogs, quoted, paragraphs apart
+by `\n\n`. `paperpaw-dev` warns where a plugin with code has none or a
+short one.
+
 ## What plugins contribute
 
 | Contribution | Registrar | What it is |
@@ -709,8 +849,8 @@ plugin (see the sample).
 | Input filters | `add_input_filter` | See every button and finger first: pass it, take it, or run an action instead |
 | Refresh filters | `add_refresh_filter` | Change how the panel is refreshed, e.g. in full on a screen of your own |
 | Status items, lines and places | `add_status_item`, `add_status_line`, `add_status_place` | What status lines show, what a tap on an item does, how much it matters where a line is full; places where items show (`status::Place`) |
-| A look | `set_ui_look` | Another look for switches, the focus, separators, buttons, headers, button hints, progress bars and sliders on every screen (`ui::look`) |
-| Widgets | `add_widget` | Blocks for the home screen and the sleep screen |
+| A look | `set_ui_look` | Another look for switches, the focus, separators, buttons, headers, button hints, progress bars, sliders and widgets' frames on every screen (`ui::look`) |
+| Widgets and their places | `add_widget`, `add_widget_place`, `add_widget_category` | Blocks for the home screen and the sleep screen; places that show widgets (`widgets::WidgetPlace`), in a grid or above each other (`widgets::Stack`), which plugins ask whether they show theirs (`Widgets::shown`); kinds of widgets of one's own, with their icon |
 | Setup steps | `add_setup_step` | A page of the first-run setup: a setting to choose or a screen of the plugin's, where the device needs it |
 | Services | `publish` | Anything one plugin offers others, found with `env.services.get` |
 | Contributions | `contribute` | Additions to a point another plugin defined |
@@ -721,7 +861,12 @@ plugin (see the sample).
 
 Slots are how a plugin replaces another: bind your screen to
 `core.home` and it is the home screen; the user's
-`[slots]` configuration has the final word. Built-in slots are in
+`[slots]` configuration has the final word. Where several plugins offer
+a screen for a slot, *Settings, Plugins, Screens* lets the reader choose
+one (or *Automatic*, the plugins' order), and a plugin newly installed
+that offers one asks once whether to use it now. `Env::slot_choice`,
+`slot_title` and `screen_title` tell a screen of one's own the same.
+Built-in slots are in
 `builtin::slots`, built-in menus in `builtin::menus`: the main menu
 (`core.main`), its tools (`core.tools`) and the settings' pages
 (`core.settings-pages`).
@@ -745,13 +890,15 @@ it with and answers as they expect, so that every plugin works with it:
 | `core.menu` | `params::MENU`, the menu; `params::HIDE`, entries to leave out this time | shows `env.menus.items(menu)`; for an entry chosen it closes (`Command::Back`) and runs its action (`Command::RunAction`); a setting listed there it changes, or opens its editor. |
 | `core.choose-folder`, `core.choose-value` | `params::ID`, the setting | writes the folder, or the value, chosen to the setting. Name the slot as the editor (`SettingExtra::editor_slot`) to have it edited there by whichever plugin fills it. |
 | `core.choice` | `params::TITLE`, `PATH` (what it is about), the options, `REPLY`; asked with `ask::choice` | shows the options; for one chosen it closes and emits the reply as a `Picked` with the option and `path`; *Back* or a tap outside closes without one. |
+| `core.confirm` | `params::TITLE` (the question), `TEXT`, `ui::confirm::YES_LABEL`, `NO_LABEL`, `FOCUS_YES`, `REPLY`; asked with `ask::confirm` | asks yes or no, the focus on no unless `FOCUS_YES`; for an answer it closes and emits the reply as a `Confirmed` with all of its parameters; *Back* or a tap outside closes without one. |
 | `core.keyboard` | `params::TITLE`, `TEXT` (to start from), `MODE` (`text`, `number`, `password`), `REPLY`, `LIVE` | on confirming, closes and emits the event named by `reply` as a `Typed` with all of its parameters; with `live`, on each change too, with `Typed::typing` set; *Back* closes without an answer. `ask::text` asks this way. |
 
 The documentation of `builtin::slots` says the same for every slot.
 
 ### Which one wins
 
-- **Slots.** The screen the user chose in `[slots]`; else the binding
+- **Slots.** The screen the user chose in `[slots]` (*Screens*,
+  above); else the binding
   with the highest `Priority` (`FALLBACK`, `DEFAULT`, `PREFERRED`, or
   any number); between equal priorities, the one registered later,
   that is of the plugin loaded later.
@@ -919,13 +1066,14 @@ every view of it.
 
 | What | Standard | |
 |---|---|---|
-| The library to ask | `library::service(env)` (`trait Library`; a library of one's own publishes one as `library::service::SERVICE`, giving at least `each`, `records` and `version`) | a book's details, the catalog's state, queries, the index of all books, finished and favourite; a plugin may publish its own as `library::service::SERVICE` |
+| The library to ask | `library::service(env)` (`trait Library`; a library of one's own publishes one as `library::service::SERVICE`, giving at least `each`, `records` and `version`) | a book's details, the catalog's state, queries, the index of all books, finished and favourite, deleting books (`delete`, `can_delete`); a plugin may publish its own as `library::service::SERVICE` |
 | Every book, without reading each | `library::catalog` | one line a book: author, title, series, number, tags, how far read, favourite, opened, added, fields; read in pieces (`each`, `each_at`, `read_at`) |
 | Books found, a page at a time | `catalog::Query`, `query`, `found` | by how far read, words, author, series, tag, folder, added since; sorted by title, author, series or added |
 | All books to sort and filter in memory | `library::index::Index` | 24 bytes a book (2000 at most on the X4: 48 KB), kept in a file while a book is open (`save`, `load`), status changes taken with `refresh` |
 | The catalog made anew | the kernel, as work in the background, never while a book is open | walked once a view asks after a start (`library::request_catalog`, `request_catalog_anew`), for a new library folder and after `LIBRARY_CHANGED`; caught up after `BOOK_ADDED`, `BOOK_MOVED` and changed fields; `BOOK_REMOVED` leaves a book out at once; then `events::CATALOG_CHANGED` |
 | Something of one book changed | `events::BOOK_CHANGED` (`library::changed_book`, bits of `library::what`) | finished, a favourite, read further, details, cover, a field |
 | A book came | `events::BOOK_ADDED` (`library::added(path, source)`) | transfers, syncs and downloads send it |
+| A book deleted | `Library::delete` (`library::Deleted`; asking first is the view's, as the book's sheet does) | only books (`library::is_book_path`: a format known by extension or first bytes, not in PaperPaw's own folder; others refused), what fails with why; the kernel's library removes the files and sends `events::BOOK_REMOVED` for each, on which the kernel forgets the book and removes what is kept for it in the folders of `Registrar::add_book_data`; views leave it out at once |
 | What can be done with a book | `menus::BOOK`, `events::BOOK_CHOSEN` | add an action to the menu, hear which book it was chosen for |
 | Another way to open a book | `menus::OPEN_WITH`, `events::BOOK_CHOSEN` | add an action to the list of *Open with …*, beside the reading apps; it hears the book as the book menu's actions do |
 | A book's information | `slots::BOOK_INFO` | lists the fields of `add_book_field` |
@@ -1124,11 +1272,12 @@ pictures for it are offered as presets (below).
 A setting's choices are open to other plugins: `Registrar::add_choice`
 offers a value of one's own among them (in one's namespace, the
 translation key of its name), after the setting's own. The sleep screen
-takes a screen of another plugin as a mode so:
+takes a screen of another plugin as a mode so (the flash card due and
+the reading cat are such modes):
 
 ```rust
 r.add_screen(ScreenSpec::new(Id::new_static("aquarium.sleep"), "aquarium.sleep", factory))?;
-r.add_choice(paperpaw_plugin_sleep::SHOW, "aquarium.sleep")?;
+r.add_choice(Id::new_static("sleep.show"), "aquarium.sleep")?;
 ```
 
 ### Widgets
@@ -1215,42 +1364,35 @@ widget, a gap; `widgets::FILL` has no height of its own and takes its
 share of the room the others leave (`widgets::fill_height`). Both may
 be in a list more than once (`widgets::repeatable`).
 
-### Presets and home screen layouts
+### Presets
 
 A preset is a ready-made set of setting values chosen as a whole
-(`paperpaw_sdk::presets`), such as a layout of the home screen. It has a
-kind, named by the plugin that offers such presets: the home screen
-offers those of `home.layout` in its chooser (in the first-run setup,
-and under *Add* while editing it), shows each on itself before it is
-kept, and applies the one chosen. Add presets kept in the program with
-`Registrar::add_presets` (a `static` list of `Preset::fixed`), for your
-own kind or another plugin's:
+(`paperpaw_sdk::presets`). It has a kind, named by the plugin that
+offers such presets: that plugin lists those of its kind
+(`env.settings.presets().of_kind(kind)`), works out what one changes
+(`Preset::changes` with the settings it covers), shows it
+(`Command::PreviewSettings`: the values show on every screen without
+being kept, until the screen that asked closes) and keeps it
+(`presets::commands`); the settings of its kind that a preset leaves
+out go back to their defaults. The kinds PaperPaw's own plugins offer
+are themes (`core.theme`, below), pictures over the page for the sleep
+screen (`sleep.overlay`, see [Plugins without code](#plugins-without-code))
+and the power modes (`core.power-mode`, which the kernel wears). Add
+presets kept in the program with `Registrar::add_presets` (a `static`
+list of `Preset::fixed`), for your own kind or another plugin's:
 
 ```rust
-static LAYOUTS: [Preset; 1] = [Preset::fixed(
-    "my.nook",
-    "home.layout",
-    "my.nook",      // translation keys of its name
-    "my.nook.help", // and of a sentence on it
-    "home.page-1 = widgets.word-clock@1 0/0 4x2, home.continue@1 0/2 4x2
-home.rows = 6",
+static THEMES: [Preset; 1] = [Preset::fixed(
+    "my.dusk",
+    presets::THEME,
+    "my.dusk",      // translation keys of its name
+    "my.dusk.help", // and of a sentence on it
+    "core.ui-focus = core.focus.ring
+core.ui-separators = core.separators.none",
 )];
 
-r.add_presets(&LAYOUTS)?;
+r.add_presets(&THEMES)?;
 ```
-
-A layout sets the pages (`home.page-1` to `home.page-4`, as
-`widgets::grid` writes them) and whatever of the home screen's look it
-wants (`home.columns`, `home.rows`, `home.status-bar`,
-`home.footer.dots` ...); what it leaves out goes back to its default.
-Widgets placed as `id@1` have settings of their own in it
-(`home.recent@1.count = 8`), so a layout gives them their looks without
-touching the widget's other placements. To offer presets of a kind of
-your own, list them (`env.settings.presets().of_kind(kind)`), work out
-what one changes (`Preset::changes` with the settings it covers), show
-it (`Command::PreviewSettings`: the values show on every screen without
-being kept, until the screen that asked closes) and keep it
-(`presets::commands`).
 
 A theme is a preset of the kind `core.theme` (`presets::THEME`): values
 for the appearance settings. Where any plugin brings one, the
@@ -1268,6 +1410,35 @@ core.ui-corners = core.corners.soft
 core.ui-focus = core.focus.ring
 core.ui-separators = core.separators.none
 ```
+
+### Hints for a screen
+
+The first time a screen opens, a short note over it says what its
+controls do: the hints its plugin gives with `help::add`, each a text
+and, where it is about a part of the screen, that part (in thousandths
+of the screen's width and height), framed. A hint is for touch, for
+buttons or for both; a device shows those that fit its input. A tap or
+any button closes the note, and it does not come again for that screen;
+*No more hints* and the settings switch them all off.
+
+```rust
+use paperpaw_sdk::help::{self, Hint, Zone};
+
+help::add(r, SCREEN.as_str(), &[
+    Hint::touch("hello.help.tap").zone(Zone::new(0, 0, 1000, 120)),
+    Hint::buttons("hello.help.confirm"),
+    Hint::any("hello.help.back"),
+])?;
+```
+
+The texts are keys of the plugin's translations; the screen is any
+screen's id, so a plugin can add hints to another's. A screen that first
+prepares what it shows (the reader, opening a book) has its hints wait
+with `help::wait(r, SCREEN.as_str())` and says when it is ready,
+`cx.command(help::ready(&SCREEN))`: screens below another get no timers,
+so it would not get ready under them. The note is the
+`help` plugin's; another plugin can show them its own way, from
+`help::hints(env, screen)` when `events::SCREEN_SHOWN` comes.
 
 ### Passwords and keys
 
@@ -1301,7 +1472,10 @@ online for goes out: a screen that needs the network says so on itself
 and offers *Go online*, which sends `Command::GoOnline` (the network for
 that screen until it closes); anything else is refused with
 `Reason::Offline` and may try again on `events::WORK_ALLOWED`.
-`Command::CancelHttp` takes requests back.
+`Command::CancelHttp` takes requests back. Where a server or a computer
+is told which device this is (a sync service, Calibre), the name is
+`env.device_name()`: the one the reader set under *Device name*, else
+the model's; a plugin never makes one of its own.
 
 ### Work in the background
 
@@ -1327,16 +1501,32 @@ between frames. `env.work` says where a work stands, for the plugin's
 own page; background work never shows a notice over reading. The power
 mode (`env.power`) makes deadlines longer or holds network work back;
 most plugins need not read it.
-Read large JSON answers as they stream with `paperpaw_json::stream`
-(the crate `paperpaw-json`), so they
-need little memory. `Command::Serve` serves HTTP to the local network,
-e.g. for transfers from a computer or typing on a phone; what happens
-to it comes as `ServerNotice`s, and to sockets (`Command::Connect`,
-`Command::Broadcast`) as `SocketNotice`s.
+Read large JSON answers as they stream with
+`paperpaw_sdk::json::stream`, so they need little memory.
+`Command::Serve` serves HTTP to the local network, e.g. for transfers
+from a computer or typing on a phone; what happens to it comes as
+`ServerNotice`s. Serve only while the screen showing the
+address is open, and guard it as `paperpaw_sdk::served` does: a key
+drawn anew each time in the address (`served::key`), checked by a
+`served::Guard`, which turns requests away for a while after a few
+wrong keys. Where PaperPaw runs Wi-Fi itself (the X4s),
+`paperpaw_sdk::wifi` says the radio's state, and
+`WifiCommand::Host` opens a network of the device's own for a phone to
+join, as the Wi-Fi transfer does without a router.
+
+Other protocols go over sockets ([ADR 0014](adr/0014-sockets-for-plugins.md)):
+`Command::Connect` opens a TCP connection, `Command::SocketSend` sends,
+and `Command::SocketRead` asks for what comes next, as text
+(`SocketRead::Text`) or as a file of a known length written to storage as
+it comes (`SocketRead::File`), so files of any size never need to fit in
+memory. `Command::Broadcast` finds services in the local network by a
+UDP datagram and their answers. Everything comes back as events
+(`SocketNotice`s, `socket_params`); a socket closes when the screen
+showing as it was opened is closed.
 
 ### Firmware updates
 
-Where PaperPaw is the device's firmware (the X4), `env.firmware` says
+Where PaperPaw is the device's firmware (the X4s), `env.firmware` says
 which version runs and how an install goes; elsewhere it is `None`.
 `Command::Firmware(FirmwareCommand::Install { path, key, older })`
 installs a signed update file: `key` is the key of one not signed by
@@ -1352,8 +1542,13 @@ there.
 
 ## Memory
 
+PaperPaw's code guidelines ([CONTRIBUTING.md](../CONTRIBUTING.md#code-guidelines)) hold for plugins too: length limits, errors on user data, memory, comments.
+
 The smallest device, the Xteink X4, has 256 KiB of heap for everything.
-A plugin that should run there:
+PaperPaw's standard app holds some 168 KiB of it once it has started
+with the sample books, 201 KiB at its peak (the emulator, `--profile
+xteink-x4 --headless --script wait:500`). A plugin that should run
+there:
 
 - keeps little in memory: lists in files, read as they are needed;
 - reads files a piece at a time (`Storage::read_at`), never whole books;
@@ -1409,10 +1604,17 @@ pub const NAME: Setting<Text> = Setting::new("hello.name");
 #[derive(Debug, Default)]
 pub struct Hello;
 
+/// How it works, by language (see `Manifest::how`).
+static HOW: [(&str, &str); 2] = [
+    ("en", include_str!("../how/en.txt")),
+    ("de", include_str!("../how/de.txt")),
+];
+
 impl Plugin for Hello {
     fn manifest(&self) -> Manifest {
         Manifest::new(PLUGIN, "Hello", Version::new(0, 1, 0))
             .description("A sample plugin to start from.")
+            .how(&HOW)
             .uses(paperpaw_sdk::Uses::NOTHING)
     }
 

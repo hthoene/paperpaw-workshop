@@ -1,7 +1,12 @@
 ## Memory
 
+PaperPaw's code guidelines ([CONTRIBUTING.md](../CONTRIBUTING.md#code-guidelines)) hold for plugins too: length limits, errors on user data, memory, comments.
+
 The smallest device, the Xteink X4, has 256 KiB of heap for everything.
-A plugin that should run there:
+PaperPaw's standard app holds some 168 KiB of it once it has started
+with the sample books, 201 KiB at its peak (the emulator, `--profile
+xteink-x4 --headless --script wait:500`). A plugin that should run
+there:
 
 - keeps little in memory: lists in files, read as they are needed;
 - reads files a piece at a time (`Storage::read_at`), never whole books;

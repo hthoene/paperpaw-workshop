@@ -21,7 +21,8 @@ built with the plugin, as `/rust`. So:
 - commit `Cargo.lock`;
 - keep the release's compilers pinned (`rust-toolchain.toml`, the job's
   `RUST_X4`, `RUST_X4_PRO`, `ESP_GCC`) and its SDK
-  (`paperpaw-sdk = "0.5"`);
+  (`paperpaw-sdk = "0.4"`), and build again for every release until 1.0
+  (see [Which build fits](#which-build-fits));
 - never set `RUSTFLAGS`, which would replace the flags that link the
   plugin, and never publish a build made without the remapped paths;
 - put nothing of the moment or the computer into the code (a build
@@ -32,6 +33,12 @@ built with the plugin, as `/rust`. So:
 
 The sample's `build.sh`, which the job runs, builds both readers, packs
 and signs the files, and zips the folder, with and without `store/`; the
-job attaches them to the tag's release with their SHA-256 and the
-catalogue's `[[versions]]` for them. Building twice, in two folders, and
+job attaches them to the tag's release with their SHA-256. Building twice, in two folders, and
 comparing the files with `cmp` shows that the build holds.
+
+[`Plugin`]: ../crates/paperpaw-sdk/src/plugin.rs
+[`Registrar`]: ../crates/paperpaw-sdk/src/contribution.rs
+[`Env`]: ../crates/paperpaw-sdk/src/env.rs
+[`Command`]: ../crates/paperpaw-sdk/src/command.rs
+[`Screen`]: ../crates/paperpaw-sdk/src/screen.rs
+[`Widget`]: ../crates/paperpaw-sdk/src/widgets.rs

@@ -55,4 +55,11 @@ reader is told the translation of the key it returns. Screens of your
 own that list settings open them as the settings pages do with
 `ui::setting_opens` (its editor, the keyboard for text, the list of a
 choice's values); text typed there comes back to the kernel as
-`events::SETTING_TYPED`, which sets it.
+`events::SETTING_TYPED`, which sets it. They lay their rows out as the
+settings pages do, so that no title is cut for its control:
+`ui::row_lines` tells once, when the list is made, whether a row's
+control goes beside its title or below it and how high the row is
+(`ui::setting_height` the height alone), and `ui::draw_number_lines`,
+`ui::draw_stepper_lines`, `ui::draw_switch_lines` and
+`ui::draw_setting_row` draw it there (`RowLines::at` moves it to the
+row's place).

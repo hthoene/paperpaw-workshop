@@ -19,8 +19,11 @@ pub fn paperpaw_sdk::presets::Presets::of_kind<'a>(&'a self, &'a str) -> impl co
 pub fn paperpaw_sdk::presets::Presets::remove_plugin(&mut self, &str)
 pub fn paperpaw_sdk::presets::Presets::shrink_to_fit(&mut self)
 pub const paperpaw_sdk::presets::THEME: &str
+pub const paperpaw_sdk::presets::WIDGET_LOOK: &str
 pub fn paperpaw_sdk::presets::applied(&paperpaw_sdk::Settings, &[(paperpaw_sdk::Id, core::option::Option<paperpaw_sdk::SettingValue>)]) -> bool
 pub fn paperpaw_sdk::presets::commands(&paperpaw_sdk::Settings, &[(paperpaw_sdk::Id, core::option::Option<paperpaw_sdk::SettingValue>)]) -> alloc::vec::Vec<paperpaw_sdk::Command>
 pub fn paperpaw_sdk::presets::theme_changes(&paperpaw_sdk::Settings, &paperpaw_sdk::presets::Preset) -> alloc::vec::Vec<(paperpaw_sdk::Id, core::option::Option<paperpaw_sdk::SettingValue>)>
 pub fn paperpaw_sdk::presets::theme_settings(&paperpaw_sdk::Settings) -> alloc::vec::Vec<paperpaw_sdk::Id>
+pub fn paperpaw_sdk::presets::widget_look_changes(&paperpaw_sdk::Settings, &paperpaw_sdk::widgets::Widgets, &paperpaw_sdk::presets::Preset) -> alloc::vec::Vec<(paperpaw_sdk::Id, core::option::Option<paperpaw_sdk::SettingValue>)>
+pub fn paperpaw_sdk::presets::widget_look_settings(&paperpaw_sdk::Settings, &paperpaw_sdk::widgets::Widgets) -> alloc::vec::Vec<paperpaw_sdk::Id>
 ```

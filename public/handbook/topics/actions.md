@@ -14,6 +14,7 @@
 | `core.home` | Home |
 | `core.left` | Left |
 | `core.library` | Library |
+| `core.long-confirm` | Menu or more |
 | `core.menu` | Menu |
 | `core.next` | Next |
 | `core.next-page` | Next page |
@@ -42,17 +43,18 @@
 | `files.shelves` | Shelves |
 | `fonts-browser.open` | More fonts |
 | `home.all-tools` | All tools |
-| `home.choose-layout` | Home screen layouts |
 | `home.edit-pages` | Edit home screen |
 | `keys.open` | Buttons and gestures |
 | `kosync.sync-now` | Sync progress |
 | `lock.now` | Lock now |
+| `lock.touch-toggle` | Lock or unlock touch |
 | `menu-editor.open` | Customise menus |
 | `news.fetch` | Fetch the news |
 | `news.open` | News |
 | `opds.open` | Catalogs |
 | `opds.sync` | Sync catalogs |
 | `plugin-manager.open` | Plugins |
+| `plugin-manager.screens.open` | Screens |
 | `power.open` | Power |
 | `profiles.next` | Next profile |
 | `profiles.open` | Profiles |
@@ -93,6 +95,7 @@
 | `transfer.open` | Wi-Fi transfer |
 | `update.check` | Search online |
 | `update.open` | Update |
+| `vocabulary.flash-cards` | Flash cards |
 | `vocabulary.open` | Vocabulary |
 | `weather.choose-place` | Place |
 | `weather.refresh` | Fetch the weather |

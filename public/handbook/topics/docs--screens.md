@@ -58,7 +58,10 @@ Some rules every screen should follow:
   (`dims_below`); one looked through (a keyboard over the field it
   types into, a notice) does not. A screen whose content is best in
   grays (a picture) says so (`grays`): panels with few grays then show
-  it in more, as slowly as a full refresh.
+  it in more, as slowly as a full refresh. A screen drawn whole with
+  pictures on it (covers, `ui::draw_image`, `ui::Thumbnail`) is shown so
+  anyway where *Pictures in grays* is on; one that decides itself, or
+  whose pictures change often, says no (`pictures_in_grays`).
 - **Use the SDK's UI parts** (`paperpaw_sdk::ui`): headers, rows, lists,
   switches, numbers with − and +, messages, icons. They follow the user's
   appearance settings and line up with the rest of PaperPaw. What a

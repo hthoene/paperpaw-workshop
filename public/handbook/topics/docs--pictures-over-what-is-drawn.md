@@ -32,9 +32,10 @@ pictures for it are offered as presets (below).
 A setting's choices are open to other plugins: `Registrar::add_choice`
 offers a value of one's own among them (in one's namespace, the
 translation key of its name), after the setting's own. The sleep screen
-takes a screen of another plugin as a mode so:
+takes a screen of another plugin as a mode so (the flash card due and
+the reading cat are such modes):
 
 ```rust
 r.add_screen(ScreenSpec::new(Id::new_static("aquarium.sleep"), "aquarium.sleep", factory))?;
-r.add_choice(paperpaw_plugin_sleep::SHOW, "aquarium.sleep")?;
+r.add_choice(Id::new_static("sleep.show"), "aquarium.sleep")?;
 ```

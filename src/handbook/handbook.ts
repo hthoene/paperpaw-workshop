@@ -32,6 +32,9 @@ export interface Profile {
   touch: boolean;
   buttons: string[];
   colors: boolean;
+  /** Whether its screen shows colours (registry 2; older ones say it in
+   *  `summary` only). */
+  colour_screen?: boolean;
   store: string | null;
   summary: string;
 }

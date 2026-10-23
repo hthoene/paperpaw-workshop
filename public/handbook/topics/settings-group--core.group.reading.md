@@ -1,6 +1,6 @@
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
-| `[core] reading-font` | Font | `core.font.default`, `Literata`, `Source Sans 3` | `core.font.default` | The book's font uses the fonts a book brings (else Literata); any other font is used for all text. Add your own: put .ttf or .otf files into the fonts folder. |
+| `[core] reading-font` | Font | `core.font.default`, `Literata`, `Source Sans 3` | `core.font.default` | The book's font is Literata, or the fonts a book brings on devices that draw them (not the X4 and X4 Pro). Any other font is used for all text. |
 | `[core] font-size` | Font size | 6 to 40 | `9` | Size of the book text. |
 | `[core] line-spacing` | Line spacing | 80 to 250 | `135` | Distance between lines, relative to the font size. Below 100 % lines come closer than the font sets them, for fonts with much room between lines. |
 | `[core] font-weight` | Font weight | 0 to 4 | `0` | Darker, bolder text with any font; helps on light screens. |
@@ -26,8 +26,15 @@
 | `[reader] aloud-highlight` | Underline the sentence | `true`, `false` | `true` | Shows which sentence is being read. |
 | `[reader] aloud-turn-pages` | Turn pages | `true`, `false` | `true` | Reads on over the pages; else it stops at the end of the page. |
 | `[reader] aloud-timer` | Stop after | `reader.aloud-timer.off`, `reader.aloud-timer.15`, `reader.aloud-timer.30`, `reader.aloud-timer.60`, `reader.aloud-timer.90` | `reader.aloud-timer.off` | Reading aloud stops by itself after this long, e.g. at bedtime. |
+| `[reading-goal] content` | Content from | 5 to 95 | `50` | From which share of the goal the cat is content rather than meh. |
+| `[reading-goal] happy` | Happy from | 50 to 200 | `100` | From which share of the goal the cat is happy. 100 % is the goal itself. |
+| `[reading-goal] pictures` | Own pictures | text | `` | A folder with pictures named sad, meh, content and happy (PNG or JPEG) to show instead of the cats. Empty: the cats. |
 | `[aids] bold-beginnings` | Bold word beginnings | `true`, `false` | `false` | The first half of every word in bold, which some find easier to follow. |
 | `[aids] replace` | Replace words | text | `` | Pairs like “colour = color; Mr. = Mister”, for whole words in every book. |
-| `[vocabulary] collect` | Keep words looked up | `true`, `false` | `true` | Each word you look up goes into Vocabulary in the main menu, with its sentence. |
+| `[vocabulary] collect` | Keep words looked up | `true`, `false` | `true` | Each word you look up goes into Vocabulary in the tools, with its sentence. |
 | `[vocabulary] mark` | Mark vocabulary | `true`, `false` | `false` | The words in Vocabulary are marked where they occur in books of their language; choosing one looks it up again. |
+| `[vocabulary] new-per-day` | New cards a day | 0 to 200 | `20` | How many cards not seen before a review shows each day at most, besides those due again. |
+| `[vocabulary] retention` | Retention wanted | 70 to 97 | `90` | How likely you should still remember a card when it comes again. Higher means more reviews. |
+| `[vocabulary] cards-from-lookups` | Words looked up become cards | `true`, `false` | `false` | Each word you look up becomes a flash card in the deck Looked up, its sentence as the example. Add its meaning with your phone. |
+| `[vocabulary] review-on-wake` | Review on waking | `true`, `false` | `false` | The review opens as the device wakes, where flash cards are due. |
 | `[translate] to` | Translate into | `translate.to.auto`, `translate.to.ar`, `translate.to.bg`, `translate.to.cs`, `translate.to.da`, `translate.to.de`, `translate.to.el`, `translate.to.en-gb`, `translate.to.en-us`, `translate.to.es`, `translate.to.et`, `translate.to.fi`, `translate.to.fr`, `translate.to.hu`, `translate.to.id`, `translate.to.it`, `translate.to.ja`, `translate.to.ko`, `translate.to.lt`, `translate.to.lv`, `translate.to.nb`, `translate.to.nl`, `translate.to.pl`, `translate.to.pt-br`, `translate.to.pt-pt`, `translate.to.ro`, `translate.to.ru`, `translate.to.sk`, `translate.to.sl`, `translate.to.sv`, `translate.to.tr`, `translate.to.uk`, `translate.to.zh-hans` | `translate.to.auto` | The language selected text is translated into. |

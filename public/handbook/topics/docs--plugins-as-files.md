@@ -1,19 +1,26 @@
 ## Plugins as files
 
 A code plugin can also be a file, `code.ppn`, in a plugin's folder on
-the card, which the X4 and the X4 Pro load at their start (ADR 0024):
-from the plugin store or from the web flasher with the firmware. Only
-code installed runs: an installer names the file by its digest
-(`native::remember_code`, kept in `.paperpaw` where neither the Wi-Fi
-transfer nor plugins' folders reach), and a file put into a plugin's
-folder otherwise is not run (the plugin manager says why); an author
-trying their own build names it over USB
-(`tools/x4-remote.py --trust-code <id>`). Its code is the same as that of a plugin built in, and it runs
-as part of PaperPaw, at full speed and without a sandbox: it can do
-whatever PaperPaw can, also past the SDK. The X4 Pro runs it from its
-PSRAM; the X4 writes it once into flash behind its firmware (about 1.8
-MB for all its plugins together) and runs it from there, for some
-hundred bytes of RAM.
+the card, which the X4, the X4 Pro and the X4 Classic load at their
+start (ADR 0024): from the plugin store or from the web flasher with
+the firmware. Only code installed runs: an installer names the file by
+its digest (`native::remember_code`, kept in `.paperpaw` where neither
+the Wi-Fi transfer nor plugins' folders reach), and a file put into a
+plugin's folder otherwise is not run (the plugin manager says why); an
+author trying their own build names it over USB
+(`tools/x4-remote.py --trust-code <id>`). Its code is the same as that
+of a plugin built in, and it runs as part of PaperPaw, at full speed
+and without a sandbox: it can do
+whatever PaperPaw can, also past the SDK. The X4 Pro and the X4 Classic
+run it from their PSRAM; the X4 writes it once into the flash behind its
+firmware and runs it from there, not from its RAM.
+
+PaperPaw's own plugins that not every reader needs (statistics, widgets,
+Calibre, the syncs and the others of
+[`tools/plugin-files/plugins.txt`](../tools/plugin-files/plugins.txt))
+come this way on the X4s: their firmware leaves them out, and each
+release builds them as files, signed with PaperPaw's plugin key, which
+readers install from the store.
 
 [`samples/hello-native`](../samples/hello-native) is the sample plugin
 above as a file, in a workspace of its own as a plugin's own repository
@@ -44,7 +51,7 @@ by name). Build it for both chips:
 
 ```sh
 cargo x4                  # riscv32imc-unknown-none-elf, the X4
-cargo +esp x4pro          # xtensa-esp32s3-none-elf, the X4 Pro (espup's toolchain)
+cargo +esp x4pro          # xtensa-esp32s3-none-elf, the X4 Pro and X4 Classic (espup's toolchain)
 ```
 
 ### Which build fits
@@ -53,11 +60,32 @@ Until PaperPaw 1.0 a plugin file runs only on the PaperPaw it was built
 for: the same compiler for the same chip from the same SDK with the same
 features (but `kernel` and `unstable`, which only add functions). Its
 fingerprint says so, and a device loads only files with its own;
-*About* shows the device's fingerprint and the compiler to build with. Build against the SDK of the release (`paperpaw-sdk = "0.5"`)
-with the toolchain that release names, and build again for every
-release; the store and the update check show which plugins wait for a
-build. From 1.0 on, plugins will be built against a versioned interface
-and keep working across minor releases.
+*About* shows the device's fingerprint and the compiler to build with.
+Build against the SDK of the release (`paperpaw-sdk = "0.4"`) with the
+toolchain that release names, and build again for every release, until
+1.0: the fingerprint holds the SDK's version, so a release loads no file
+built for another. The
+store and the update check show which plugins wait for a build.
+
+### The file in the emulator
+
+The desktop emulator loads a plugin's code built for the computer it runs
+on, as Android loads `code.so`: a `cdylib` crate with the same
+`plugin!` line, built with the emulator's toolchain against its SDK with
+the `outline` feature (`paperpaw-sdk = { version = "0.4", features =
+["outline"] }`), is `code-host.dll`, `code-host.so` or `code-host.dylib`
+in the plugin's folder (`plugins/<id>/` of the emulator's library,
+beside its `plugin.ini`). As on a device, only code installed runs:
+`--trust-code` installs every such file in the library, and at every
+start a file changed since is refused until it is installed again.
+
+```sh
+paperpaw-emu --library my-library --trust-code
+```
+
+Over `--stdio`, `start` with `"trust_code": true` does the same, and
+`reload` loads a new build; `ready` says the fingerprint and compiler
+the emulator takes.
 
 ### Packing and signing
 
@@ -75,7 +103,8 @@ paperpaw-sign plugin my-plugin-x4.ppn             # what it holds, and who signe
 closures), symbols it cannot find, and code that reaches an address
 fixed in the firmware or ROM directly. The signature goes into the file
 itself, so it travels with it; a device remembers the author's key at
-the first install and warns when an update is signed by another.
+the first install (from the store, the key the plugin library names for
+its author) and warns when an update is signed by another.
 
 ### Trying it on a device
 
@@ -89,30 +118,33 @@ plugins/my-plugin/
   i18n/*.ini     translations, settings.ini, … as for data plugins
 ```
 
-Copy the folder onto the card (over USB: `python tools/x4-remote.py
---push my-plugin plugins/my-plugin`) and restart. The plugin manager
-lists it as one with code, and says why one does not run (built for
-another PaperPaw, damaged, no room). Over USB, `native` (and `--info`)
+Copy the folder onto the card, name its code as installed and restart
+(over USB: `python tools/x4-remote.py --push my-plugin plugins/my-plugin
+--trust-code my-plugin`). The plugin manager lists it as one with code,
+and says why one does not run (built for another PaperPaw, damaged, no
+room, not installed, changed since it was installed). Over USB, `native` (and `--info`)
 says where each plugin lies and what loading it took.
 
 A panic's calls inside a plugin are kept with its name and the offset
 into its file, e.g. `4261a402 (my-plugin+0x452)`: its function lies at
 `0x42000000 + offset - 80` in the plugin's ELF. A plugin that crashes
 before PaperPaw shows its first frame is switched off: after two such
-starts PaperPaw starts without plugins with code and says so (holding
-*Back* on the X4, *Home* on the X4 Pro, while switching it on does the
-same). The plugins it switched off are switched on again in the plugin
-manager, one at a time.
+starts PaperPaw starts without the plugin the crash was in (without all
+plugins with code where that is not known) and says so; holding *Back*
+on the X4 and the X4 Classic, *Home* on the X4 Pro, while switching it
+on starts without them too. The plugins it switched off are switched on
+again in the plugin manager, one at a time.
 
 ### Keeping it small
 
 On the X4 every plugin's file takes room in flash. A plugin carries its
-own copy of the SDK code it uses, which is most of a small plugin: of
-the sample's 63 KB on the X4, its own code is some 9 KB.
+own copy of the SDK code it uses, which is most of a small plugin: the
+sample's file for the X4 is 78 KB (76 KB of code and constant data),
+though the plugin itself is a screen, an action and a setting.
 
-- Build with `opt-level = "s"` (as PaperPaw) or `"z"` (some 5 % smaller
-  on the X4, a little slower), `lto = "fat"`, `codegen-units = 1`,
-  `panic = "abort"`, as the sample does.
+- Build with `opt-level = "s"` (as PaperPaw) or `"z"` (smaller, a little
+  slower), `lto = "fat"`, `codegen-units = 1`, `panic = "abort"`, as the
+  sample does.
 - Leave out what pulls in large parts of `core`: parsing floats from
   text (`str::parse::<f32>()`, 16 KB of tables), `{:?}` of strings.
 - Keep translations and other text in the folder's files rather than in

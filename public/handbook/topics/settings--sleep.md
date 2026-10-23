@@ -1,6 +1,6 @@
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
-| `[sleep] show` | While asleep, show | `sleep.show.cover`, `sleep.show.picture`, `sleep.show.overlay`, `sleep.show.widgets`, `sleep.show.message`, `sleep.show.page` | `sleep.show.cover` | What the screen shows while the device sleeps; e-ink keeps it without power. |
+| `[sleep] show` | While asleep, show | `sleep.show.cat`, `sleep.show.cover`, `sleep.show.picture`, `sleep.show.overlay`, `sleep.show.widgets`, `sleep.show.message`, `sleep.show.page`, `reading-goal.sleep`, `vocabulary.sleep-card` | `sleep.show.cat` | What the screen shows while the device sleeps; e-ink keeps it without power. |
 | `[sleep] folder` | Pictures folder | text | `sleep` | For "My pictures": JPEG, PNG and GIF files, one after the other. |
 | `[sleep] widgets` | Sleep screen widgets | list | `home.date, home.continue, stats.widget.today, home.recent` | For "Widgets": what the sleep screen shows, top to bottom, e.g. the book being read and today's reading. |
 | `[sleep] overlay-picture` | Picture over the page | text | `` | For "The page with a picture": the pictures folder's, one after the other, or a picture a plugin offers. |

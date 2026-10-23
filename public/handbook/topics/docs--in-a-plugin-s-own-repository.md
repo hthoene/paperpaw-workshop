@@ -37,6 +37,7 @@ profile = boox-go-7
 core.night-mode = true
 ```
 
-The CI job (`.github/workflows/paperpaw-dev.yml`) runs the tests and
-`check --plugin my-plugin --quick`, and keeps the report as the run's
-artifact, also when a check failed.
+The CI job (`.github/workflows/paperpaw-dev.yml`) runs the tests,
+`check --plugin my-plugin --quick` and the flows of `tests/flows`
+(`flows --flow tests/flows`, varied at the edges), and keeps the report
+as the run's artifact, also when a check failed.

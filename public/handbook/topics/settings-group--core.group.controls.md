@@ -1,7 +1,7 @@
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
-| `[core] edge-ends` | Edges for swipes: top and bottom | 0 to 25 | `10` | How far in from the edge a swipe still counts as one in from the edge (home, quick panel, back); 0: none there. On Android the outermost strip is the system's. |
-| `[core] edge-sides` | Edges for swipes: left and right | 0 to 25 | `5` | How far in from the edge a swipe still counts as one in from the edge (home, quick panel, back); 0: none there. On Android the outermost strip is the system's. |
+| `[core] edge-ends` | Edges for swipes: top and bottom | 0 to 25 | `10` | How far in from the edge a swipe still counts as one in from the edge (home, quick panel, back); 0: none there. Where the system takes the outermost strip for its own swipes, it keeps it. |
+| `[core] edge-sides` | Edges for swipes: left and right | 0 to 25 | `5` | How far in from the edge a swipe still counts as one in from the edge (home, quick panel, back); 0: none there. Where the system takes the outermost strip for its own swipes, it keeps it. |
 | `[core] keymap-preset` | Button layout | `core.standard`, `core.two-buttons`, `core.left-handed` | `core.standard` | What the device's buttons do. |
 | `[core] button-hints` | Show what the buttons do | `true`, `false` | `true` | A row at the bottom of the screen names what each button below it does. Not while reading. |
 | `[core] swap-page-buttons` | Swap the page buttons | `true`, `false` | `false` | While reading, the page buttons turn the other way: the one that went forward goes back, and the other way round. Menus and lists keep them as they are. |
@@ -11,3 +11,4 @@
 | `[core] swipe-distance` | Swipe distance | 2 to 50 | `8` | How far a finger must move to swipe. |
 | `[reader] corner-bookmark` | Bookmark by tapping the corner | `true`, `false` | `true` | A tap on the top right corner of a page sets or removes its bookmark. |
 | `[reader] hold-chapters` | Hold a page button for the next chapter | `true`, `false` | `true` | While reading, holding a page button goes a chapter on or back. Off, a page turns as soon as its button goes down, instead of when it is let go. |
+| `[lock] touch` | Lock touch | `true`, `false` | `false` | Taps and swipes do nothing, the buttons still work, e.g. to read with a hand on the screen. To unlock, tap the screen twice with one finger and keep it there for a moment. |

@@ -18,6 +18,8 @@
 | `[core] saving.store` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | Follow the mode, or keep this plugin's background work as in Normal while saving, or let it use the network only when you ask. |
 | `[core] network.wikipedia` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
 | `[core] saving.wikipedia` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | Follow the mode, or keep this plugin's background work as in Normal while saving, or let it use the network only when you ask. |
+| `[core] network.vocabulary` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
+| `[core] saving.vocabulary` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | Follow the mode, or keep this plugin's background work as in Normal while saving, or let it use the network only when you ask. |
 | `[core] network.translate` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
 | `[core] saving.translate` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | Follow the mode, or keep this plugin's background work as in Normal while saving, or let it use the network only when you ask. |
 | `[core] network.news` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |

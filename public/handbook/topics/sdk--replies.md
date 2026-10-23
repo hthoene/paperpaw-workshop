@@ -1,6 +1,8 @@
 ```rust
 pub fn paperpaw_sdk::replies::Chosen::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
 pub fn paperpaw_sdk::replies::Chosen::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::replies::Confirmed::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::replies::Confirmed::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::replies::HttpReply::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
 pub fn paperpaw_sdk::replies::HttpReply::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::replies::ServerNotice::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
@@ -55,6 +57,11 @@ pub paperpaw_sdk::replies::Chosen::context: paperpaw_sdk::Params
 pub paperpaw_sdk::replies::Chosen::path: alloc::string::String
 pub fn paperpaw_sdk::replies::Chosen::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
 pub fn paperpaw_sdk::replies::Chosen::to_params(&self) -> paperpaw_sdk::Params
+pub paperpaw_sdk::replies::Confirmed::context: paperpaw_sdk::Params
+pub paperpaw_sdk::replies::Confirmed::yes: bool
+pub fn paperpaw_sdk::replies::Confirmed::new(bool, paperpaw_sdk::Params) -> Self
+pub fn paperpaw_sdk::replies::Confirmed::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::replies::Confirmed::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::replies::HttpReply
 pub paperpaw_sdk::replies::HttpReply::body: alloc::string::String
 pub paperpaw_sdk::replies::HttpReply::content_type: core::option::Option<alloc::string::String>
@@ -97,6 +104,8 @@ pub fn paperpaw_sdk::replies::Typed::from_params(&paperpaw_sdk::Params) -> core:
 pub fn paperpaw_sdk::replies::Typed::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::replies::Chosen::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
 pub fn paperpaw_sdk::replies::Chosen::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::replies::Confirmed::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::replies::Confirmed::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::replies::HttpReply::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
 pub fn paperpaw_sdk::replies::HttpReply::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::replies::ServerNotice::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>

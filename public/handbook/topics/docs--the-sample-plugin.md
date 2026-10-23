@@ -9,8 +9,8 @@ books opened since the start. Try it in the emulator:
 cargo run -p paperpaw-emulator --features hello -- --profile boox-go-7 --set hello.name=Ada
 ```
 
-Open the main menu (a tap at the bottom of the home screen), then
-*Tools*, then *Hello*.
+*Hello* is among the tools: open *Tools* in the main menu, then
+*Hello*.
 
 ### The plugin
 
@@ -62,8 +62,9 @@ emit an event, run an action, show a short message, make an HTTP
 request, keep a password, and so on. The kernel runs the commands after
 the plugin's code returns.
 
-This keeps plugins simple to test and the API message-based, so the same
-model works for sandboxed plugins later.
+This keeps plugins simple to test and the API message-based. It does
+not confine them: a plugin runs as native code without a sandbox (see
+[Plugins as files](#plugins-as-files)).
 
 ### Screens
 
@@ -125,7 +126,10 @@ Some rules every screen should follow:
   (`dims_below`); one looked through (a keyboard over the field it
   types into, a notice) does not. A screen whose content is best in
   grays (a picture) says so (`grays`): panels with few grays then show
-  it in more, as slowly as a full refresh.
+  it in more, as slowly as a full refresh. A screen drawn whole with
+  pictures on it (covers, `ui::draw_image`, `ui::Thumbnail`) is shown so
+  anyway where *Pictures in grays* is on; one that decides itself, or
+  whose pictures change often, says no (`pictures_in_grays`).
 - **Use the SDK's UI parts** (`paperpaw_sdk::ui`): headers, rows, lists,
   switches, numbers with − and +, messages, icons. They follow the user's
   appearance settings and line up with the rest of PaperPaw. What a
@@ -143,6 +147,80 @@ focused, on)`, with the role of what it is (`Row`, `Button`, `Switch`,
 `Check`, `Radio`, `Field`, `Image`, `Link`, `Dialog`, `Progress` …). A
 screen reader of one's own hears where the focus of the buttons goes
 (`events::FOCUS_CHANGED`: its role, label and area).
+
+### Which building block for what
+
+A plugin's screens are drawn with the SDK's `ui` module, so they look
+like PaperPaw's own, follow the reader's text size and the look chosen
+(a theme paints switches, the focus, buttons, headers, frames and more),
+and work by touch and with the buttons alone. Sizes come from
+`UiStyle::new(env)`: `margin`, `gap`, `row`, `header`, the text sizes
+(`style.size(TextRole::Body)` and the others). No block shortens a
+title or a button's word: a title is measured first and keeps its whole
+width, a box or control beside it takes what is left, and where that is
+too little the row takes a second line (ask the block for its row's
+height); only a value, the reader's own text in a field, may be
+shortened. `paperpaw-dev ui-kit` draws every block below on every
+device, in every look, light and dark, and checks that no label is
+shortened.
+
+| For | Use |
+|---|---|
+| The bar at the top, a title and a note (a page count) | `ui::draw_header`, `ui::Header` (with its arrows) |
+| Parts one below the other, from the top and the bottom | `ui::Stack` (`take`, `take_bottom`, `rest`) |
+| Equal columns side by side, e.g. two buttons | `ui::columns(area, count, gap)` |
+| A list that pages and holds the focus | `ui::ListView`, `ui::list_step` |
+| Rows of a list or of settings | `ui::draw_value_row`, `ui::draw_noted_row`, `ui::draw_switch_row`, `ui::draw_setting_row`, `ui::draw_stepper`, `ui::Slider` |
+| Sections with headings | `ui::Sections`, `ui::draw_heading` |
+| A grid of cells (covers, tiles) | `ui::Grid` (`cell`, `hit`, `step`) |
+| A group on a card or in a frame | `ui::draw_card(canvas, &style, area, Frame::Card)` returns where its parts go |
+| A button, on, focused, faint, with an icon | `ui::draw_button`, `ui::draw_faint_button`, `ui::draw_icon_button` |
+| A few options to pick at a glance, or tabs | `ui::Segments` |
+| Filters or tags in a row, each as wide as its word | `ui::Chips` (the height of their rows: `Chips::height_for`) |
+| A one-line text in a row, typed on the keyboard | `ui::draw_text_field` (its row: `text_field_height`), `ui::edit_text` |
+| A list where several may be ticked | `ui::draw_check_row` (its row: `check_row_height`; the box alone: `ui::draw_check`) |
+| Text longer than its room, scrolled by buttons and touch | `ui::TextView` |
+| A date or a time | `ui::DatePicker`, `ui::TimePicker` |
+| A box over the screen with a title, text and buttons | `ui::Dialog` |
+| Asking for text, a folder, one of several options or yes or no | `ask::text`, `ask::folder`, `ask::choice`, `ask::confirm` (screens of their own) |
+| A message where content would be, an empty list | `ui::draw_message`, `ui::draw_empty` |
+| Progress | `ui::draw_progress` |
+| An address to open on a phone, with its QR code | `ui::draw_address`, `ui::draw_qr` |
+| Offering to go online where something needs the network | `ui::OfflineOffer` |
+| What the buttons do, at the bottom | the screen's `hint` (the kernel draws the row) |
+| First-time hints over a screen | `help::add` (see [Hints for a screen](#hints-for-a-screen)) |
+| A widget's frame | `widgets::draw_frame` |
+
+Two buttons side by side, a margin from the screen's sides and bottom:
+
+```rust
+use paperpaw_sdk::ui::{self, Stack, UiStyle};
+
+let style = UiStyle::new(env);
+let margin = style.margin as u16;
+let screen = Rect::new(margin, 0, display.width - 2 * margin, display.height - margin);
+let row = Stack::new(screen, margin).take_bottom(ui::Segments::height(&style));
+let [ok, cancel] = ui::columns(row, 2, margin)[..] else { return };
+ui::draw_button(canvas, env, &style, ok, "OK", false, focus == 0);
+ui::draw_button(canvas, env, &style, cancel, "Cancel", false, focus == 1);
+```
+
+Tabs over a page, the chosen one on, moved with left and right:
+
+```rust
+let tabs = ui::Segments::new(&style, Rect::new(margin, top, width, ui::Segments::height(&style)), 3);
+tabs.draw(canvas, env, &style, &["Books", "Shelves", "Notes"], self.tab, self.focus_on_tabs.then_some(self.tab));
+// on_action: if let Some(tab) = tabs.step(self.tab, action) { self.tab = tab; }
+// on_gesture: if let Some(tab) = tabs.hit(gesture.start) { self.tab = tab; }
+```
+
+A dialog in the middle of the screen:
+
+```rust
+let mut dialog = ui::Dialog::new(env, &style, "Delete the book?", &["It goes for good."], &["Delete", "Keep"]);
+dialog.place((display.height - dialog.height()) / 2);
+dialog.draw(canvas, env, &style, Some(self.focus));
+```
 
 ### Settings
 
@@ -201,7 +279,14 @@ reader is told the translation of the key it returns. Screens of your
 own that list settings open them as the settings pages do with
 `ui::setting_opens` (its editor, the keyboard for text, the list of a
 choice's values); text typed there comes back to the kernel as
-`events::SETTING_TYPED`, which sets it.
+`events::SETTING_TYPED`, which sets it. They lay their rows out as the
+settings pages do, so that no title is cut for its control:
+`ui::row_lines` tells once, when the list is made, whether a row's
+control goes beside its title or below it and how high the row is
+(`ui::setting_height` the height alone), and `ui::draw_number_lines`,
+`ui::draw_stepper_lines`, `ui::draw_switch_lines` and
+`ui::draw_setting_row` draw it there (`RowLines::at` moves it to the
+row's place).
 
 ### Events
 
@@ -276,6 +361,28 @@ Every text a plugin shows comes from catalogs like this, added with
 translates, `format` fills `{placeholders}`, `plural` picks the form for
 a number. A test that all languages have the same keys belongs in every
 plugin (see the sample).
+
+Two messages say what a plugin is in the lists: `<id>.plugin.name` and
+`<id>.plugin.description` (a line). *How it works* says more: a few
+sentences on what it does, where it is found and how it is used, plain
+text with paragraphs apart by an empty line, one file per language
+beside the catalogs (`how/en.txt`, `how/de.txt`). The manifest names
+them; as a table in the program they take no memory until the plugin
+manager shows one (a plugin held), paged like a book:
+
+```rust
+static HOW: [(&str, &str); 2] = [
+    ("en", include_str!("../how/en.txt")),
+    ("de", include_str!("../how/de.txt")),
+];
+// In `manifest`: Manifest::new(…).description(…).how(&HOW)
+```
+
+The same text is the `description` of the plugin's entry in the store
+(see [Publishing](#publishing)), shown on its page there. A data plugin
+gives it as `<id>.plugin.how` in its catalogs, quoted, paragraphs apart
+by `\n\n`. `paperpaw-dev` warns where a plugin with code has none or a
+short one.
 
 ### Testing
 

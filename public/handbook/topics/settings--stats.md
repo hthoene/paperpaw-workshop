@@ -1,6 +1,6 @@
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
-| `[stats] goal` | Daily reading goal | `stats.goal.off`, `stats.goal.10`, `stats.goal.15`, `stats.goal.20`, `stats.goal.30`, `stats.goal.45`, `stats.goal.60`, `stats.goal.90`, `stats.goal.120`, `stats.goal.180`, `stats.goal.240`, `stats.goal.300` | `stats.goal.off` | The “Read today” widget on the home screen shows how far you are and for how many days in a row you reached it. |
+| `[stats] goal` | Daily reading goal | `stats.goal.off`, `stats.goal.10`, `stats.goal.15`, `stats.goal.20`, `stats.goal.30`, `stats.goal.45`, `stats.goal.60`, `stats.goal.90`, `stats.goal.120`, `stats.goal.180`, `stats.goal.240`, `stats.goal.300` | `stats.goal.20` | The “Read today” widget on the home screen shows how far you are and for how many days in a row you reached it. |
 | `[stats] widget.today.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.frame.card`, `core.frame.dark` | `core.frame.none` | What the widget is drawn in: nothing, a line round it, a light card or a dark card with light text. |
 | `[stats] widget.today.padding` | Spacing | `core.padding.auto`, `core.padding.none`, `core.padding.small`, `core.padding.normal`, `core.padding.large` | `core.padding.auto` | How far what the widget shows keeps from its edges, or from its frame. Automatic suits most widgets. |
 | `[stats] widget.today.size` | Size | `core.size.small`, `core.size.medium`, `core.size.large`, `core.size.fit` | `core.size.medium` | How large the widget's text is. Where it does not fit, it is made smaller. |
