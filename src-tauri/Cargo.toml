@@ -21,6 +21,12 @@ serde_json = "1"
 # macOS Keychain, the Secret Service on Linux.
 keyring = { version = "3", features = ["windows-native", "apple-native", "sync-secret-service"] }
 dirs = "6"
+base64 = "0.22"
+png = "0.17"
+# PaperPaw's own emulator, the device model without its window, and the
+# platform's input types; pinned to a PaperPaw commit (main, 2026-10-23).
+paperpaw-emulator = { git = "https://github.com/hthoene/paperpaw", rev = "c5f539a701b8b206b33a0b8846c2664d4c5b0969", default-features = false }
+paperpaw-platform = { git = "https://github.com/hthoene/paperpaw", rev = "c5f539a701b8b206b33a0b8846c2664d4c5b0969" }
 
 [dev-dependencies]
 tempfile = "3"

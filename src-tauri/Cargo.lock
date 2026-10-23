@@ -189,6 +189,20 @@ name = "bytemuck"
 version = "1.25.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "95832e849adfb21180ccb6826a99da14e5d266ae5c2e668e1602cf234f153797"
+dependencies = [
+ "bytemuck_derive",
+]
+
+[[package]]
+name = "bytemuck_derive"
+version = "1.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a1f896587b6f2c069c73d2f0913e2d590c3990285cd2f0b6aa02b786b4c679c"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 3.0.9",
+]
 
 [[package]]
 name = "byteorder"
@@ -396,6 +410,15 @@ dependencies = [
  "bitflags 2.13.2",
  "core-foundation 0.10.1",
  "libc",
+]
+
+[[package]]
+name = "core_maths"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77745e017f5edba1a9c1d854f6f3a52dac8a12dd5af5d2f54aecf61e43d80d30"
+dependencies = [
+ "libm",
 ]
 
 [[package]]
@@ -724,6 +747,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d0881ea181b1df73ff77ffaaf9c7544ecc11e82fba9b5f27b262a3c73a332555"
 
 [[package]]
+name = "ed25519-compact"
+version = "2.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1454db4f2edb7f0e8fe0c5b375b0c978fc63244cc9f010d160e417eb10139aa8"
+
+[[package]]
 name = "embed-resource"
 version = "3.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -823,6 +852,15 @@ name = "foldhash"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb"
+
+[[package]]
+name = "font-types"
+version = "0.12.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "835ae9d781464a79026cde387f9cbc650c9a4909d7cf7e658b127e3c35d2f35d"
+dependencies = [
+ "bytemuck",
+]
 
 [[package]]
 name = "foreign-types"
@@ -1364,7 +1402,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d75e94d66081e4d8dcd098bd8dc5254800fea14a26389b298410158d834de167"
 dependencies = [
  "byteorder",
- "png",
+ "png 0.18.1",
 ]
 
 [[package]]
@@ -1750,6 +1788,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "libm"
+version = "0.2.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6d2cec3eae94f9f509c767b45932f1ada8350c4bdb85af2fcab4a3c14807981"
+
+[[package]]
 name = "libredox"
 version = "0.1.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1863,7 +1907,7 @@ dependencies = [
  "objc2-core-foundation",
  "objc2-foundation",
  "once_cell",
- "png",
+ "png 0.18.1",
  "serde",
  "thiserror 2.0.21",
  "windows-sys 0.61.2",
@@ -2176,16 +2220,677 @@ dependencies = [
 ]
 
 [[package]]
+name = "paperpaw-app"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-core",
+ "paperpaw-plugin-about",
+ "paperpaw-plugin-aids",
+ "paperpaw-plugin-battery",
+ "paperpaw-plugin-browser",
+ "paperpaw-plugin-calibre",
+ "paperpaw-plugin-diagnostics",
+ "paperpaw-plugin-dictionary",
+ "paperpaw-plugin-file-manager",
+ "paperpaw-plugin-files",
+ "paperpaw-plugin-fonts-browser",
+ "paperpaw-plugin-fonts-default",
+ "paperpaw-plugin-format-epub",
+ "paperpaw-plugin-format-txt",
+ "paperpaw-plugin-format-xtc",
+ "paperpaw-plugin-help",
+ "paperpaw-plugin-home",
+ "paperpaw-plugin-hyphenation",
+ "paperpaw-plugin-joplin",
+ "paperpaw-plugin-keyboard",
+ "paperpaw-plugin-keys",
+ "paperpaw-plugin-koreader",
+ "paperpaw-plugin-kosync",
+ "paperpaw-plugin-lock",
+ "paperpaw-plugin-menu",
+ "paperpaw-plugin-menu-editor",
+ "paperpaw-plugin-news",
+ "paperpaw-plugin-opds",
+ "paperpaw-plugin-plugin-manager",
+ "paperpaw-plugin-power",
+ "paperpaw-plugin-profiles",
+ "paperpaw-plugin-reader",
+ "paperpaw-plugin-reading-goal",
+ "paperpaw-plugin-readwise",
+ "paperpaw-plugin-rules",
+ "paperpaw-plugin-settings",
+ "paperpaw-plugin-setup",
+ "paperpaw-plugin-sleep",
+ "paperpaw-plugin-stats",
+ "paperpaw-plugin-store",
+ "paperpaw-plugin-transfer",
+ "paperpaw-plugin-translate",
+ "paperpaw-plugin-update",
+ "paperpaw-plugin-vocabulary",
+ "paperpaw-plugin-wallabag",
+ "paperpaw-plugin-weather",
+ "paperpaw-plugin-widgets",
+ "paperpaw-plugin-wifi",
+ "paperpaw-plugin-wikipedia",
+]
+
+[[package]]
+name = "paperpaw-config"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+
+[[package]]
+name = "paperpaw-core"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-config",
+ "paperpaw-graphics",
+ "paperpaw-i18n",
+ "paperpaw-platform",
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-digest"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-platform",
+]
+
+[[package]]
+name = "paperpaw-document"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-platform",
+]
+
+[[package]]
+name = "paperpaw-emulator"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "chrono",
+ "getrandom 0.4.3",
+ "paperpaw-app",
+ "paperpaw-core",
+ "paperpaw-fs",
+ "paperpaw-graphics",
+ "paperpaw-platform",
+ "paperpaw-serve",
+ "png 0.17.16",
+]
+
+[[package]]
+name = "paperpaw-fs"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "libc",
+ "paperpaw-platform",
+]
+
+[[package]]
+name = "paperpaw-graphics"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-platform",
+]
+
+[[package]]
+name = "paperpaw-http"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+
+[[package]]
+name = "paperpaw-hyphen"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+
+[[package]]
+name = "paperpaw-i18n"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-config",
+]
+
+[[package]]
+name = "paperpaw-image"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "miniz_oxide 0.8.9",
+ "paperpaw-platform",
+]
+
+[[package]]
+name = "paperpaw-json"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-platform",
+]
+
+[[package]]
+name = "paperpaw-layout"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-document",
+ "paperpaw-text",
+]
+
+[[package]]
+name = "paperpaw-native"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "ed25519-compact",
+ "paperpaw-digest",
+]
+
+[[package]]
+name = "paperpaw-platform"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+
+[[package]]
+name = "paperpaw-plugin-about"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-aids"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-battery"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-browser"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-calibre"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-diagnostics"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-dictionary"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+ "paperpaw-stardict",
+]
+
+[[package]]
+name = "paperpaw-plugin-file-manager"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-files"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-fonts-browser"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-fonts-default"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+ "paperpaw-text",
+]
+
+[[package]]
+name = "paperpaw-plugin-format-epub"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "miniz_oxide 0.8.9",
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-format-txt"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-format-xtc"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-help"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-home"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-hyphenation"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-hyphen",
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-joplin"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+ "paperpaw-xml",
+]
+
+[[package]]
+name = "paperpaw-plugin-keyboard"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-keys"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-koreader"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-kosync"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-lock"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-menu"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-menu-editor"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-news"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-opds"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-plugin-manager"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-power"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-profiles"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-reader"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-reading-goal"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-readwise"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-rules"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-settings"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-setup"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-sleep"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-stats"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+ "paperpaw-sqlite",
+]
+
+[[package]]
+name = "paperpaw-plugin-store"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-transfer"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-qr",
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-translate"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-update"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-vocabulary"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-wallabag"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-weather"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-widgets"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-wifi"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-plugin-wikipedia"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-sdk",
+]
+
+[[package]]
+name = "paperpaw-qr"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+
+[[package]]
+name = "paperpaw-sdk"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-config",
+ "paperpaw-digest",
+ "paperpaw-document",
+ "paperpaw-graphics",
+ "paperpaw-hyphen",
+ "paperpaw-i18n",
+ "paperpaw-image",
+ "paperpaw-json",
+ "paperpaw-layout",
+ "paperpaw-native",
+ "paperpaw-platform",
+ "paperpaw-qr",
+ "paperpaw-text",
+ "paperpaw-update",
+ "paperpaw-xml",
+ "paperpaw-zip",
+]
+
+[[package]]
+name = "paperpaw-serve"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-core",
+ "paperpaw-http",
+]
+
+[[package]]
+name = "paperpaw-sqlite"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-platform",
+]
+
+[[package]]
+name = "paperpaw-stardict"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "miniz_oxide 0.8.9",
+ "paperpaw-platform",
+]
+
+[[package]]
+name = "paperpaw-text"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "paperpaw-graphics",
+ "paperpaw-platform",
+ "skrifa",
+]
+
+[[package]]
+name = "paperpaw-update"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "ed25519-compact",
+]
+
+[[package]]
 name = "paperpaw-workshop"
 version = "0.1.0"
 dependencies = [
+ "base64 0.22.1",
  "dirs 6.0.0",
  "keyring",
+ "paperpaw-emulator",
+ "paperpaw-platform",
+ "png 0.17.16",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
  "tempfile",
+]
+
+[[package]]
+name = "paperpaw-xml"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+
+[[package]]
+name = "paperpaw-zip"
+version = "0.4.0-dev"
+source = "git+https://github.com/hthoene/paperpaw?rev=c5f539a701b8b206b33a0b8846c2664d4c5b0969#c5f539a701b8b206b33a0b8846c2664d4c5b0969"
+dependencies = [
+ "miniz_oxide 0.8.9",
+ "paperpaw-platform",
 ]
 
 [[package]]
@@ -2293,6 +2998,19 @@ dependencies = [
  "quick-xml",
  "serde",
  "time",
+]
+
+[[package]]
+name = "png"
+version = "0.17.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "82151a2fc869e011c153adc57cf2789ccb8d9906ce52c0b39a6b5697749d7526"
+dependencies = [
+ "bitflags 1.3.2",
+ "crc32fast",
+ "fdeflate",
+ "flate2",
+ "miniz_oxide 0.8.9",
 ]
 
 [[package]]
@@ -2441,6 +3159,19 @@ name = "raw-window-handle"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "20675572f6f24e9e76ef639bc5552774ed45f1c30e2951e1e99c59888861c539"
+
+[[package]]
+name = "read-fonts"
+version = "0.45.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4edc8db0d972de88e53a085b1f01fb3fbdae7bb0cb7a0ce2b2f8285a412fe3ef"
+dependencies = [
+ "bytemuck",
+ "core_maths",
+ "font-types",
+ "once_cell",
+ "yoke",
+]
 
 [[package]]
 name = "redox_syscall"
@@ -2898,6 +3629,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "33f4fe9184a62d842c9ef383018f3306d8ba224fd9d836f56d7288308847c256"
 
 [[package]]
+name = "skrifa"
+version = "0.48.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a5213b4825bac3587046330052d61bfac7bd3bd0d203c758d7c2ef726fcea034"
+dependencies = [
+ "bytemuck",
+ "core_maths",
+ "read-fonts",
+]
+
+[[package]]
 name = "slab"
 version = "0.4.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3227,7 +3969,7 @@ dependencies = [
  "ico",
  "json-patch",
  "plist",
- "png",
+ "png 0.18.1",
  "proc-macro2",
  "quote",
  "semver",
@@ -3667,7 +4409,7 @@ dependencies = [
  "objc2-core-graphics",
  "objc2-foundation",
  "once_cell",
- "png",
+ "png 0.18.1",
  "serde",
  "thiserror 2.0.21",
  "windows-sys 0.61.2",
