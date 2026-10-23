@@ -9,6 +9,7 @@
     "dev": "vite",
     "app": "tauri dev",
     "app:build": "tauri build",
+    "app:installer": "node scripts/installer.mjs",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",

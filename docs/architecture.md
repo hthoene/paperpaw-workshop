@@ -160,7 +160,18 @@ start is the X4 Pro; the X4 and the Boox Go 7 are a click away.
 
 Where it comes from: `PAPERPAW_EMU` names a build of one's own while the
 workshop is worked on; otherwise the release's program, kept in the app's
-folder (`emulators/<version>/`). `paperpaw-dev` lies beside it.
+folder (`emulators/<version>/`); otherwise the one the installer brought,
+in `emulator/` beside the app. `paperpaw-dev` lies beside it.
+
+## The installer
+
+`npm run app:installer` ([scripts/installer.mjs](../scripts/installer.mjs))
+copies `paperpaw-emu` and `paperpaw-dev` of the build `PAPERPAW_EMU` names
+into `src-tauri/resources/emulator/` (with `version.json`: PaperPaw's
+version, its fingerprint, its compiler) and runs `tauri build`. The
+installer is NSIS, for the person alone (no administrator), and fetches
+Microsoft's WebView2 only where Windows lacks it. It is not signed yet, so
+Windows SmartScreen warns before the first start.
 
 Tests use `FakeEmulator` ([src/emulator/fake.ts](../src/emulator/fake.ts)).
 

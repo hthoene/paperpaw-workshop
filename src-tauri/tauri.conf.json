@@ -27,7 +27,39 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis"],
-    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"]
+    "targets": [
+      "nsis"
+    ],
+    "publisher": "PaperPaw",
+    "copyright": "PaperPaw contributors, Apache License 2.0",
+    "category": "Productivity",
+    "shortDescription": "Make PaperPaw plugins by saying what you want",
+    "longDescription": "Make your own plugins for your e-reader by saying what you want. The workshop makes the plugin, shows it on PaperPaw's own emulator and checks it as PaperPaw checks plugins.",
+    "homepage": "https://paperpaw.org",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": {
+      "resources/emulator/": "emulator/"
+    },
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": true
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "installerIcon": "icons/icon.ico",
+        "languages": [
+          "English"
+        ],
+        "displayLanguageSelector": false,
+        "startMenuFolder": "PaperPaw"
+      }
+    }
   }
 }

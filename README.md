@@ -92,7 +92,8 @@ and `PAPERPAW_SDK` its `crates/paperpaw-sdk` for plugins with code.
 conversation instead of asking the model.
 
 Tests: `npm test`, and `cargo test` in `src-tauri`. The key service for
-PaperPaw keys is in [`proxy/`](proxy/README.md). An installer comes from
-`npm run app:build`.
+PaperPaw keys is in [`proxy/`](proxy/README.md). The Windows installer
+comes from `npm run app:installer`, with `PAPERPAW_EMU` naming the
+PaperPaw build it brings along.
 
 Licensed under the [Apache License 2.0](LICENSE).

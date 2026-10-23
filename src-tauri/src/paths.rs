@@ -25,18 +25,22 @@ pub fn emulator_library(profile: &str) -> Result<PathBuf, String> {
 /// PaperPaw's emulator, `paperpaw-emu` (paperpaw-dev beside it for the
 /// checks): `PAPERPAW_EMU` while the workshop is worked on (a build of
 /// PaperPaw's own), else the one of the PaperPaw release chosen, kept in
-/// the app's folder (`emulators/<version>/`, see the version step).
+/// the app's folder (`emulators/<version>/`, see the version step), else
+/// the one the installer brought (`emulator/` beside the app).
 pub fn emulator_program() -> Result<PathBuf, String> {
     if let Some(program) = std::env::var_os("PAPERPAW_EMU") {
         return Ok(PathBuf::from(program));
     }
-    let program = app_data()?
-        .join("emulators")
-        .join("current")
-        .join(format!("paperpaw-emu{}", std::env::consts::EXE_SUFFIX));
-    if program.exists() {
-        Ok(program)
-    } else {
-        Err(format!("PaperPaw's emulator is not here yet ({}).", program.display()))
+    let name = format!("paperpaw-emu{}", std::env::consts::EXE_SUFFIX);
+    let chosen = app_data()?.join("emulators").join("current").join(&name);
+    if chosen.exists() {
+        return Ok(chosen);
+    }
+    let installed = std::env::current_exe()
+        .ok()
+        .and_then(|exe| Some(exe.parent()?.join("emulator").join(&name)));
+    match installed {
+        Some(program) if program.exists() => Ok(program),
+        _ => Err(format!("PaperPaw's emulator is not here yet ({}).", chosen.display())),
     }
 }

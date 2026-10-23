@@ -14,3 +14,7 @@ builder/paperpaw.tar
 # The app's Rust side
 src-tauri/target/
 src-tauri/gen/
+
+# The emulator the installer brings (scripts/installer.mjs)
+src-tauri/resources/emulator/*
+!src-tauri/resources/emulator/README.md
