@@ -38,6 +38,7 @@ pub fn run() {
             emulator::emulator_ready,
             checks::plugin_check,
             code::code_build,
+            toolchain::build_tools_install,
             send::send_wifi,
             send::send_card,
             send::save_file,

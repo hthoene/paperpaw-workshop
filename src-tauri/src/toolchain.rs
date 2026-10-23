@@ -173,8 +173,46 @@ pub fn can_link(target: &str) -> Result<(), String> {
     if found {
         Ok(())
     } else {
-        Err("Plugins with code need Microsoft's C++ build tools on Windows (Visual Studio Build Tools, the C++ workload). They are not on this computer yet.".into())
+        Err(format!("{NO_BUILD_TOOLS} on Windows (Visual Studio Build Tools, the C++ workload). They are not on this computer yet."))
     }
+}
+
+/// What the person is told when the build tools are missing; the window
+/// knows it by these words and offers to install them.
+pub const NO_BUILD_TOOLS: &str = "Plugins with code need Microsoft's C++ build tools";
+
+/// Microsoft's C++ build tools through Windows' own installer (winget),
+/// the C++ workload only, after the person chose to in the window (which
+/// says: about 3 GB, Windows asks for administrator rights, Microsoft's
+/// licence applies). Visual Studio's installer shows its own progress.
+#[tauri::command]
+pub async fn build_tools_install() -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(|| {
+        let ran = Command::new("winget")
+            .args([
+                "install",
+                "--id",
+                "Microsoft.VisualStudio.BuildTools",
+                "--exact",
+                "--source",
+                "winget",
+                "--accept-package-agreements",
+                "--accept-source-agreements",
+                "--override",
+                "--passive --wait --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended",
+            ])
+            .status()
+            .map_err(|e| format!("Windows' installer (winget) could not start: {e}"))?;
+        can_link("x86_64-pc-windows-msvc").map_err(|_| {
+            if ran.success() {
+                "The build tools were installed, but are not found yet: start the workshop again.".to_string()
+            } else {
+                "The build tools were not installed.".to_string()
+            }
+        })
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 fn download(url: &str) -> Result<Vec<u8>, String> {

@@ -46,6 +46,7 @@ export function Conversation({ desk }: { desk: Desk }) {
         {workshop?.long && !busy && (
           <button type="button" class="go fresh" onClick={() => workshop.freshConversation()}>Go on in a fresh conversation</button>
         )}
+        {desk.buildTools && <BuildTools desk={desk} />}
         {desk.lastTurn && !busy && (
           <p class="cost">
             This turn: {costText(desk.lastTurn.dollars)} with {desk.lastTurn.model}. So far: {costText(project?.usage.dollars ?? 0)}.
@@ -87,4 +88,24 @@ function Said({ line }: { line: Line }) {
 function lastLine(text: string): string {
   const last = text.trim().split("\n").filter(Boolean).pop() ?? "";
   return last.length > 140 ? `${last.slice(0, 140)}…` : last;
+}
+
+/** Microsoft's C++ build tools, offered where a plugin with code needs
+ *  them: said plainly, installed with one click, never by itself. */
+function BuildTools({ desk }: { desk: Desk }) {
+  if (desk.buildTools === "installed") {
+    return <div class="offer"><p>The build tools are installed. Ask the AI to build the plugin again.</p></div>;
+  }
+  return (
+    <div class="offer">
+      <p>
+        Plugins with code need Microsoft's C++ build tools on Windows. They take about 3 GB. Windows asks you to
+        allow the installer, and Microsoft's licence applies.
+      </p>
+      {desk.buildTools === "failed" && <p class="problem">{desk.buildToolsSaid}</p>}
+      <button type="button" class="go" disabled={desk.buildTools === "installing"} onClick={() => void desk.installBuildTools()}>
+        {desk.buildTools === "installing" ? "Installing…" : "Install the build tools"}
+      </button>
+    </div>
+  );
 }

@@ -61,6 +61,8 @@ export interface Backend extends FolderApi, PictureApi, CheckApi {
   codeBuild(project: string): Promise<BuildResult>;
   /** Calls `told` with what a build is doing, in the person's words. */
   onBuildProgress(told: (text: string) => void): Promise<() => void>;
+  /** Microsoft's C++ build tools through winget (Windows). */
+  buildToolsInstall(): Promise<void>;
 }
 
 /** A part of the screen, as PaperPaw describes it. */
@@ -115,6 +117,7 @@ export const appBackend: Backend = {
   saveFile: (path, base64) => invoke("save_file", { path, base64 }),
   codeBuild: (project) => invoke("code_build", { project }),
   onBuildProgress: async (told) => listen<string>("build-progress", (event) => told(event.payload)),
+  buildToolsInstall: () => invoke("build_tools_install"),
   projectsList: () => invoke("projects_list"),
   projectCreate: (name, meta) => invoke("project_create", { name, meta }),
   projectFiles: (project) => invoke("project_files", { project }),
@@ -181,6 +184,7 @@ export function standInBackend(): Backend {
       throw new Error("Plugins with code are built in the app.");
     },
     onBuildProgress: async () => () => {},
+    buildToolsInstall: async () => {},
     projectsList: async () => [...folders].map(([folder, f]) => ({ folder, meta: f.meta })),
     projectCreate: async (name, meta) => {
       let folder = name || "New plugin";

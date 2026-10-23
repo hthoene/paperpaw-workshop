@@ -43,6 +43,10 @@ export class Desk {
   lastTurn: TurnCost | null = null;
   /** What a build of a plugin with code is doing, while it runs. */
   building = "";
+  /** Microsoft's C++ build tools: missing (offered), being installed, or
+   *  there (nothing to say). */
+  buildTools: "missing" | "installing" | "installed" | "failed" | "" = "";
+  buildToolsSaid = "";
   private listeners = new Set<() => void>();
   private stopWorkshop: (() => void) | undefined;
 
@@ -117,7 +121,10 @@ export class Desk {
   }
 
   private async attach(project: Project): Promise<Workshop> {
-    const builder = new LocalBuilder(this.backend, () => this.workspace.project?.key, () => this.workspace.save());
+    const builder = new LocalBuilder(this.backend, () => this.workspace.project?.key, () => this.workspace.save(), () => {
+      this.buildTools = "missing";
+      this.changed();
+    });
     const workshop = new Workshop(project, this.handbook, this.provider, browserKit, this.workspace.folders.uploads(), builder, () => this.workspace.save());
     workshop.chooseModel = (p) => modelFor(savedChoice(), p, p.kind, this.may);
     const shown = this.handbook.profile(this.profile);
@@ -163,6 +170,21 @@ export class Desk {
     this.lastTurn = dollars > 0 ? { dollars, model: modelName(model) } : null;
     this.changed();
     return heard;
+  }
+
+  /** Installs the build tools, as the person chose. */
+  async installBuildTools(): Promise<void> {
+    this.buildTools = "installing";
+    this.changed();
+    try {
+      await this.backend.buildToolsInstall();
+      this.buildTools = "installed";
+      this.buildToolsSaid = "";
+    } catch (e) {
+      this.buildTools = "failed";
+      this.buildToolsSaid = e instanceof Error ? e.message : String(e);
+    }
+    this.changed();
   }
 
   stop(): void {
