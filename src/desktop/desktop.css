@@ -258,3 +258,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* What it cost: quiet, small, never red. */
 .spent { font-size: .8rem; color: var(--ink-2); white-space: nowrap; }
 .log .cost { margin: -.6rem 0 0; font-size: .76rem; color: var(--ink-2); cursor: default; }
+
+/* Publish: the same sheet as sending, its choices side by side. */
+.publish-sheet .choices-row { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; }
+.publish-sheet .problems { margin: .3rem 0 0; padding-left: 1.1rem; color: var(--ink-2); }
+.publish-sheet .file-name { font-weight: 600; overflow-wrap: anywhere; }

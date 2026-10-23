@@ -45,6 +45,9 @@ export interface Project {
   /** PaperPaw's findings the person chose to ignore (desktop/checks.ts
    *  `ignoredKey`): not counted, not given to the AI. */
   ignoredChecks?: string[];
+  /** The versions packed for the store's upload form, oldest first
+   *  (desktop/publishing.ts): a new one must be higher. */
+  published?: { version: string; packed: string }[];
   /** What each turn of the person cost (desktop/costs.ts). */
   turns?: import("../desktop/costs").Turn[];
   /** Conversations before this one, kept to read back: a conversation that

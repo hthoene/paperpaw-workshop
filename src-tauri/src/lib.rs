@@ -9,6 +9,7 @@ mod key;
 mod paths;
 mod pictures;
 mod projects;
+mod publish;
 mod send;
 mod toolchain;
 
@@ -17,6 +18,7 @@ use tauri::Manager;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             app.manage(emulator::for_app(app.handle().clone()));
             app.manage(emulator::Shown(std::sync::Mutex::new(None)));
@@ -44,6 +46,8 @@ pub fn run() {
             send::save_file,
             pictures::picture_make,
             pictures::picture_info,
+            publish::publish_save,
+            publish::publish_show,
             projects::projects_list,
             projects::project_create,
             projects::project_rename,

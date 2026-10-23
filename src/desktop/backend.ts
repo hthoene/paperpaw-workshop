@@ -56,6 +56,12 @@ export interface Backend extends FolderApi, PictureApi, CheckApi {
   /** A folder (a reader's card), asked of the person. */
   askFolder(): Promise<string | null>;
   saveFile(path: string, base64: string): Promise<void>;
+  /** Keeps a package for the store's upload form in the project's
+   *  `.workshop/publish/`; its path. */
+  publishSave(project: string, name: string, base64: string): Promise<string>;
+  /** Opens the store's upload form in the browser and shows the package
+   *  in its folder. */
+  publishShow(path: string): Promise<void>;
   /** Builds the project's plugin with code for the reader beside the
    *  conversation (Rust set up first, the first time). */
   codeBuild(project: string): Promise<BuildResult>;
@@ -115,6 +121,8 @@ export const appBackend: Backend = {
     return typeof chosen === "string" ? chosen : null;
   },
   saveFile: (path, base64) => invoke("save_file", { path, base64 }),
+  publishSave: (project, name, base64) => invoke("publish_save", { project, name, base64 }),
+  publishShow: (path) => invoke("publish_show", { path }),
   codeBuild: (project) => invoke("code_build", { project }),
   onBuildProgress: async (told) => listen<string>("build-progress", (event) => told(event.payload)),
   buildToolsInstall: () => invoke("build_tools_install"),
@@ -186,6 +194,9 @@ export function standInBackend(): Backend {
     askSave: async () => null,
     askFolder: async () => null,
     saveFile: async () => {},
+    // A plain browser keeps no package and opens no form.
+    publishSave: async (project, name) => `${project}/.workshop/publish/${name}`,
+    publishShow: async () => {},
     codeBuild: async () => {
       throw new Error("Plugins with code are built in the app.");
     },

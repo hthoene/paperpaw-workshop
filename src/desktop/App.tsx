@@ -17,6 +17,7 @@ import { CHOICES, saveChoice, savedChoice, usable, type ModelChoice } from "./mo
 import { Drawer } from "./Drawer";
 import { Projects } from "./Projects";
 import { Reader } from "./Reader";
+import { Publish } from "./Publish";
 import { exportZip, Send } from "./Send";
 import { Workspace } from "./workspace";
 
@@ -139,12 +140,14 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
   const [files, setFiles] = useState(false);
   const [settings, setSettings] = useState(false);
   const [sending, setSending] = useState(false);
+  const [publishing, setPublishing] = useState(false);
   const [notice, setNotice] = useState("");
   // One panel at a time over the reader's side.
-  const only = (which: "files" | "settings" | "send", on: boolean) => {
+  const only = (which: "files" | "settings" | "send" | "publish", on: boolean) => {
     setFiles(which === "files" && on);
     setSettings(which === "settings" && on);
     setSending(which === "send" && on);
+    setPublishing(which === "publish" && on);
   };
 
   useEffect(() => {
@@ -184,6 +187,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
           </button>
           {menu && (
             <div class="menu-list" role="menu">
+              <button type="button" role="menuitem" onClick={() => { setMenu(false); only("publish", true); }}>Publish…</button>
               <button type="button" role="menuitem" onClick={() => { setMenu(false); void exportZip(desk, backend).then(setNotice, (e: unknown) => setNotice(String(e))); }}>Export zip</button>
               <button type="button" role="menuitem" onClick={() => { setMenu(false); only("settings", true); }}>Settings</button>
               <button type="button" role="menuitem" onClick={() => { setMenu(false); onForgetKey(); }}>Remove key</button>
@@ -203,6 +207,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
           </p>
         )}
         {sending && <Send desk={desk} backend={backend} onClose={() => setSending(false)} />}
+        {publishing && <Publish desk={desk} backend={backend} onClose={() => setPublishing(false)} />}
         {settings && <Settings workspace={workspace} keyKind={keyKind} may={desk.may} onClose={() => setSettings(false)} />}
         {files && <Drawer workspace={workspace} pictures={backend} onClose={() => setFiles(false)} />}
       </div>
