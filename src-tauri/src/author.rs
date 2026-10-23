@@ -33,7 +33,6 @@ const DOMAIN: &[u8] = b"PaperPaw plugin file\0";
 const MAGIC: [u8; 4] = *b"PPNS";
 const FORMAT: u16 = 1;
 /// The trailer's length.
-#[allow(dead_code)]
 pub const TRAILER_LEN: usize = 112;
 
 /// Where the secret is kept: the keychain, or memory in tests.
@@ -121,8 +120,6 @@ pub fn fingerprint(key: &[u8; 32]) -> String {
 }
 
 /// The trailer that signs `file` (a plugin file without one) with `seed`.
-// For plugins with code, once the workshop packs them for the store.
-#[allow(dead_code)]
 pub fn sign(file: &[u8], seed: &[u8; 32]) -> [u8; TRAILER_LEN] {
     let pair = KeyPair::from_seed(Seed::new(*seed));
     let signed_len = u32::try_from(file.len()).unwrap_or(u32::MAX);

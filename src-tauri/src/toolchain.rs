@@ -55,6 +55,44 @@ impl Rust {
     }
 }
 
+impl Rust {
+    /// rustup, of the app's own Rust or the computer's.
+    fn rustup(&self) -> Command {
+        let program = match &self.homes {
+            Some((_, cargo)) => cargo.join("bin").join(exe("rustup")),
+            None => PathBuf::from(exe("rustup")),
+        };
+        let mut command = Command::new(program);
+        if let Some((rustup, cargo)) = &self.homes {
+            command.env("RUSTUP_HOME", rustup).env("CARGO_HOME", cargo);
+        }
+        quiet(&mut command);
+        command
+    }
+
+    /// Whether the toolchain can build for `target` already.
+    pub fn has_target(&self, target: &str) -> bool {
+        self.rustup()
+            .args(["target", "list", "--installed", "--toolchain", &self.version])
+            .output()
+            .is_ok_and(|o| String::from_utf8_lossy(&o.stdout).lines().any(|l| l.trim() == target))
+    }
+
+    /// Fetches what the toolchain needs to build for `target`.
+    pub fn add_target(&self, target: &str) -> Result<(), String> {
+        let ran = self
+            .rustup()
+            .args(["target", "add", target, "--toolchain", &self.version])
+            .output()
+            .map_err(|e| format!("rustup: {e}"))?;
+        if ran.status.success() {
+            Ok(())
+        } else {
+            Err(format!("The part of Rust for {target} could not be set up: {}", last_line(&ran.stderr)))
+        }
+    }
+}
+
 /// No console window beside the workshop's.
 pub fn quiet(command: &mut Command) {
     #[cfg(windows)]

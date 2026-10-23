@@ -36,6 +36,8 @@ ureq = { version = "2", default-features = false, features = ["tls"] }
 trash = "5"
 # The author key that signs plugins with code, as paperpaw-native does (author.rs).
 ed25519-compact = { version = "2.6", default-features = false, features = ["random"] }
+# The source of a plugin with code as a ZIP for the store's form (device.rs).
+zip = { version = "2", default-features = false, features = ["deflate"] }
 # Checking what is downloaded (rustup) before it runs.
 sha2 = "0.10"
 

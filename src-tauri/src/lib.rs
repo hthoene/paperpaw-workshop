@@ -4,6 +4,7 @@
 
 mod author;
 mod checks;
+mod device;
 mod code;
 mod emulator;
 mod key;
@@ -52,6 +53,9 @@ pub fn run() {
             author::author_create,
             author::author_backup,
             author::author_import,
+            device::device_readiness,
+            device::device_toolchain_install,
+            device::device_build,
             publish::publish_show,
             projects::projects_list,
             projects::project_create,
