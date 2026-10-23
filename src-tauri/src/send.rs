@@ -1,12 +1,11 @@
 //! The plugin onto a real reader: over Wi-Fi through the reader's own
-//! transfer page (its address with its key, as the reader shows it), or
-//! into the `plugins` folder of its card in this computer, or as a zip
-//! to keep or share. A reader has a data plugin as a folder,
-//! `plugins/<id>/`; the store's own files (`store/`) stay home.
+//! transfer page (its address with its key, as the reader shows it), over
+//! the USB cable (usb.rs), or into the `plugins` folder of its card in
+//! this computer, or as a zip to keep or share. A reader has a plugin as
+//! a folder, `plugins/<id>/`; the store's own files (`store/`) stay home.
 //!
-//! The transfer page never overwrites: a file or folder sent where one is
-//! gets a free name of its own ("plugin (2).ini"). So the plugin's folder
-//! there is removed first and `plugins` made only where it is missing.
+//! Over Wi-Fi and the cable the reader installs the plugin in one step
+//! (install.rs): the one there before stays until the new one is whole.
 
 use std::path::{Path, PathBuf};
 use std::time::Duration;
@@ -26,21 +25,6 @@ fn id_of(files: &[(String, Vec<u8>)]) -> Result<String, String> {
     crate::emulator::plugin_id(files).ok_or_else(|| "The plugin has no plugin.ini with an id yet.".to_string())
 }
 
-/// The folders `files` need, each after the one it is in.
-fn folders(files: &[(String, Vec<u8>)]) -> Vec<String> {
-    let mut out: Vec<String> = Vec::new();
-    for (path, _) in files {
-        let parts: Vec<&str> = path.split('/').collect();
-        for n in 1..parts.len() {
-            let folder = parts[..n].join("/");
-            if !out.contains(&folder) {
-                out.push(folder);
-            }
-        }
-    }
-    out
-}
-
 /// A reader's transfer address as it shows it, `http://<address>/?k=<key>`:
 /// where it is, and its key.
 pub fn address(text: &str) -> Result<(String, String), String> {
@@ -56,22 +40,8 @@ pub fn address(text: &str) -> Result<(String, String), String> {
     }
 }
 
-/// `text` for a URL's query.
-fn encoded(text: &str) -> String {
-    text.bytes()
-        .map(|b| match b {
-            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'.' | b'_' | b'~' | b'/' => (b as char).to_string(),
-            _ => format!("%{b:02X}"),
-        })
-        .collect()
-}
-
-/// What a reader's transfer page is asked; its answer's status and text.
-pub trait Transfer {
-    fn ask(&self, method: &str, path: &str, query: &str, body: Option<&[u8]>) -> Result<(u16, String), String>;
-}
-
-/// The transfer page of the reader at `host`, with its `key`.
+/// The transfer page of the reader at `host`, with its `key`, which goes
+/// with every request.
 pub struct Reader {
     host: String,
     key: String,
@@ -85,9 +55,10 @@ impl Reader {
     }
 }
 
-impl Transfer for Reader {
-    fn ask(&self, method: &str, path: &str, query: &str, body: Option<&[u8]>) -> Result<(u16, String), String> {
-        let url = format!("http://{}{path}?k={}{query}", self.host, self.key);
+impl crate::install::Api for Reader {
+    fn call(&mut self, method: &str, target: &str, body: Option<&[u8]>) -> Result<(u16, String), String> {
+        let joint = if target.contains('?') { '&' } else { '?' };
+        let url = format!("http://{}{target}{joint}k={}", self.host, self.key);
         let request = self.agent.request(method, &url);
         let answer = match body {
             Some(bytes) => request.send_bytes(bytes),
@@ -103,44 +74,6 @@ impl Transfer for Reader {
     }
 }
 
-/// Sends the plugin of `files` through `reader`'s transfer page into
-/// `plugins/<id>/`, the one there before replaced.
-pub fn over_wifi(reader: &dyn Transfer, files: &[(String, Vec<u8>)]) -> Result<String, String> {
-    let id = id_of(files)?;
-    let said = |what: &str, (status, text): (u16, String)| -> Result<(), String> {
-        match status {
-            200..=299 => Ok(()),
-            403 => Err("The reader did not take the key: type the address as it shows it now.".into()),
-            429 => Err("The reader waits a little after wrong keys: try again in a minute.".into()),
-            _ => Err(format!("The reader said no to {what}: {status} {}", text.trim())),
-        }
-    };
-    // Asked one by one (a listing comes in pages): `plugins`, and the
-    // plugin's own folder in it.
-    let there = |path: &str, what: &str| -> Result<bool, String> {
-        match reader.ask("GET", "/api/list", &format!("&path={}", encoded(path)), None)? {
-            (404, _) => Ok(false),
-            answer => said(what, answer).map(|()| true),
-        }
-    };
-    let folder = format!("plugins/{id}");
-    if !there("plugins", "listing its plugins")? {
-        said("making the plugins folder", reader.ask("POST", "/api/mkdir", "&path=plugins", None)?)?;
-    } else if there(&folder, "looking for the plugin")? {
-        said("removing the plugin before", reader.ask("POST", "/api/delete", &format!("&path={}", encoded(&folder)), None)?)?;
-    }
-    said("making the plugin's folder", reader.ask("POST", "/api/mkdir", &format!("&path={}", encoded(&folder)), None)?)?;
-    for folder in folders(files) {
-        let path = format!("plugins/{id}/{folder}");
-        said(&path, reader.ask("POST", "/api/mkdir", &format!("&path={}", encoded(&path)), None)?)?;
-    }
-    for (path, bytes) in files {
-        let path = format!("plugins/{id}/{path}");
-        said(&path, reader.ask("PUT", "/api/file", &format!("&path={}", encoded(&path)), Some(bytes))?)?;
-    }
-    Ok(id)
-}
-
 /// Puts the plugin of `files` into the card at `card` (its top folder),
 /// as `plugins/<id>/`, the one there before replaced.
 pub fn onto_card(card: &Path, files: &[(String, Vec<u8>)]) -> Result<PathBuf, String> {
@@ -152,17 +85,36 @@ pub fn onto_card(card: &Path, files: &[(String, Vec<u8>)]) -> Result<PathBuf, St
     Ok(card.join("plugins").join(id))
 }
 
-fn plugin(project: &str) -> Result<Vec<(String, Vec<u8>)>, String> {
-    Ok(for_reader(crate::projects::plugin_files(&crate::paths::projects()?, project)?))
+/// The project's plugin as a reader installs it (install.rs).
+pub fn reader_plugin(project: &str) -> Result<crate::install::ReaderPlugin, String> {
+    let root = crate::paths::projects()?;
+    let files = crate::projects::plugin_files(&root, project)?;
+    let builds = crate::projects::folder(&root, project)?.join(".workshop").join("publish");
+    crate::install::reader_plugin(files, &builds)
 }
 
-/// The project's plugin to the reader whose transfer address is `address`;
-/// the plugin's id.
+/// Tells the window how sending goes (`send-progress`): `asking` while
+/// the reader asks on its screen, `sending n/m`, `installing`.
+pub fn progress(app: &tauri::AppHandle) -> impl Fn(crate::install::Step) + '_ {
+    use tauri::Emitter;
+    move |step| {
+        let said = match step {
+            crate::install::Step::Asking => "asking".to_string(),
+            crate::install::Step::Sending(n, of) => format!("sending {n}/{of}"),
+            crate::install::Step::Installing => "installing".to_string(),
+        };
+        let _ = app.emit("send-progress", said);
+    }
+}
+
+/// The project's plugin installed on the reader whose transfer address is
+/// `address`.
 #[tauri::command]
-pub async fn send_wifi(project: String, address: String) -> Result<String, String> {
+pub async fn send_wifi(app: tauri::AppHandle, project: String, address: String) -> Result<crate::install::Installed, String> {
     tauri::async_runtime::spawn_blocking(move || {
         let (host, key) = self::address(&address)?;
-        over_wifi(&Reader::new(host, key), &plugin(&project)?)
+        let plugin = reader_plugin(&project)?;
+        crate::install::over_wifi(&mut Reader::new(host, key), &plugin, &progress(&app), &std::thread::sleep)
     })
     .await
     .map_err(|e| e.to_string())?
@@ -171,7 +123,11 @@ pub async fn send_wifi(project: String, address: String) -> Result<String, Strin
 /// The project's plugin onto the card at `card`; where it went.
 #[tauri::command]
 pub async fn send_card(project: String, card: String) -> Result<String, String> {
-    tauri::async_runtime::spawn_blocking(move || onto_card(Path::new(&card), &plugin(&project)?).map(|p| p.display().to_string()))
+    tauri::async_runtime::spawn_blocking(move || {
+        // As over Wi-Fi: for a plugin with code, its folder and its build.
+        let plugin = reader_plugin(&project)?;
+        onto_card(Path::new(&card), &plugin.files).map(|p| p.display().to_string())
+    })
         .await
         .map_err(|e| e.to_string())?
 }
@@ -187,32 +143,7 @@ pub async fn save_file(path: String, base64: String) -> Result<(), String> {
 
 #[cfg(test)]
 mod tests {
-    use std::cell::RefCell;
-
     use super::*;
-
-    /// A reader's transfer page as the tests want it: what is on its card,
-    /// and every request in order.
-    struct Fake {
-        plugins: Option<Vec<String>>,
-        asked: RefCell<Vec<String>>,
-    }
-
-    impl Transfer for Fake {
-        fn ask(&self, method: &str, path: &str, query: &str, body: Option<&[u8]>) -> Result<(u16, String), String> {
-            self.asked.borrow_mut().push(format!("{method} {path}{query}{}", body.map(|b| format!(" ({} bytes)", b.len())).unwrap_or_default()));
-            if path == "/api/list" {
-                let asked = query.strip_prefix("&path=").unwrap_or_default();
-                let found = match (&self.plugins, asked.strip_prefix("plugins/")) {
-                    (None, _) => false,
-                    (Some(_), None) => true,
-                    (Some(ids), Some(id)) => ids.iter().any(|i| i == id),
-                };
-                return Ok(if found { (200, "{\"entries\":[]}".into()) } else { (404, "not found".into()) });
-            }
-            Ok((200, "ok".into()))
-        }
-    }
 
     fn plugin() -> Vec<(String, Vec<u8>)> {
         vec![
@@ -227,33 +158,6 @@ mod tests {
         assert_eq!(address(" http://192.168.4.1/?k=ab12 ").unwrap(), ("192.168.4.1".into(), "ab12".into()));
         assert!(address("http://192.168.4.1/").is_err(), "no key");
         assert!(address("http://evil.example/x?y#?k=1").is_err());
-    }
-
-    #[test]
-    fn a_plugin_replaces_the_one_before_and_leaves_the_store_s_files_home() {
-        let reader = Fake { plugins: Some(vec!["calm".into(), "other".into()]), asked: RefCell::default() };
-        assert_eq!(over_wifi(&reader, &for_reader(plugin())).unwrap(), "calm");
-        assert_eq!(
-            reader.asked.into_inner(),
-            [
-                "GET /api/list&path=plugins",
-                "GET /api/list&path=plugins/calm",
-                "POST /api/delete&path=plugins/calm",
-                "POST /api/mkdir&path=plugins/calm",
-                "POST /api/mkdir&path=plugins/calm/i18n",
-                "PUT /api/file&path=plugins/calm/plugin.ini (19 bytes)",
-                "PUT /api/file&path=plugins/calm/i18n/de.ini (1 bytes)",
-            ]
-        );
-    }
-
-    #[test]
-    fn the_plugins_folder_is_made_where_it_is_missing() {
-        let reader = Fake { plugins: None, asked: RefCell::default() };
-        over_wifi(&reader, &for_reader(plugin())).unwrap();
-        let asked = reader.asked.into_inner();
-        assert_eq!(asked[1], "POST /api/mkdir&path=plugins");
-        assert!(!asked.iter().any(|a| a.contains("delete")));
     }
 
     #[test]

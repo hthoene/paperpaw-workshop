@@ -32,6 +32,13 @@ tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
 # Sending a plugin to a reader over Wi-Fi (its transfer page's API).
 ureq = { version = "2", default-features = false, features = ["tls"] }
+# Sending a plugin to a reader over the USB cable (usb.rs).
+serialport = "4.10"
+# The app's own updates (updates.rs): fetched from the workshop's GitHub
+# releases, installed only when signed with its update key; then the app
+# starts again.
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
 # Projects put in the bin, not deleted (they can be got back).
 trash = "5"
 # The author key that signs plugins with code, as paperpaw-native does (author.rs).

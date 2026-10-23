@@ -18,6 +18,7 @@ import { Drawer } from "./Drawer";
 import { Projects } from "./Projects";
 import { Reader } from "./Reader";
 import { KeySettings } from "./AuthorKey";
+import { AppUpdates } from "./Updates";
 import { Publish } from "./Publish";
 import { exportZip, Send } from "./Send";
 import { Workspace } from "./workspace";
@@ -272,6 +273,7 @@ function Settings({ workspace, backend, keyKind, may, onClose }: { workspace: Wo
       )}
       <p class="hint">What each turn cost shows in the conversation.</p>
       <KeySettings backend={backend} />
+      <AppUpdates backend={backend} />
     </aside>
   );
 }

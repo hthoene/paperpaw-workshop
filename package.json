@@ -26,6 +26,8 @@
     "@anthropic-ai/sdk": "^0.137.0",
     "@tauri-apps/api": "^2.12.4",
     "@tauri-apps/plugin-dialog": "^2.8.3",
+    "@tauri-apps/plugin-process": "^2.4.0",
+    "@tauri-apps/plugin-updater": "^2.14.0",
     "fflate": "^0.8.3",
     "idb": "^8.0.4",
     "preact": "^11.0.1",

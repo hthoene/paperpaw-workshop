@@ -4,9 +4,16 @@
 // and what they are is said beside them (version.json); then `tauri build`.
 //
 //   PAPERPAW_EMU=…/target/release/paperpaw-emu.exe npm run app:installer
+//
+// With the update key in TAURI_SIGNING_PRIVATE_KEY (its password, if any,
+// in TAURI_SIGNING_PRIVATE_KEY_PASSWORD), the installer is also signed for
+// the app's updater, and `dist-installer/` gets what a release of the
+// workshop attaches: the installer, its signature and `latest.json`,
+// which installed workshops ask for (tauri.conf.json's updater). The key
+// is never in the repository.
 
 import { spawnSync } from "node:child_process";
-import { copyFileSync, existsSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -49,5 +56,41 @@ const said = { paperpaw: ready.paperpaw, protocol: ready.protocol, fingerprint: 
 writeFileSync(join(into, "version.json"), `${JSON.stringify(said, null, 2)}\n`);
 console.log(`installer: PaperPaw ${ready.paperpaw} (${ready.fingerprint})`);
 
-const build = spawnSync("npx", ["tauri", "build"], { cwd: root, stdio: "inherit", shell: process.platform === "win32" });
-process.exit(build.status ?? 1);
+// Signed for the updater only with the key at hand.
+const signed = !!process.env.TAURI_SIGNING_PRIVATE_KEY;
+if (!signed) console.warn("installer: no TAURI_SIGNING_PRIVATE_KEY: the installer is not signed for updates, and no latest.json is made.");
+const args = ["tauri", "build"];
+if (signed) args.push("--config", JSON.stringify({ bundle: { createUpdaterArtifacts: true } }));
+const build = spawnSync("npx", args, { cwd: root, stdio: "inherit", shell: process.platform === "win32" });
+if (build.status !== 0 || !signed) process.exit(build.status ?? 1);
+
+// What a release attaches, under names without spaces (GitHub would
+// change them): the installer, its signature, and latest.json.
+const conf = JSON.parse(readFileSync(join(root, "src-tauri", "tauri.conf.json"), "utf8"));
+const version = conf.version;
+const nsis = join(root, "src-tauri", "target", "release", "bundle", "nsis");
+const setup = readdirSync(nsis).find((n) => n.includes(`_${version}_`) && n.endsWith("-setup.exe"));
+if (!setup || !existsSync(join(nsis, `${setup}.sig`))) {
+  console.error(`installer: no signed installer of ${version} in ${nsis}`);
+  process.exit(1);
+}
+const out = join(root, "dist-installer");
+rmSync(out, { recursive: true, force: true });
+mkdirSync(out);
+const name = `paperpaw-workshop-${version}-setup.exe`;
+copyFileSync(join(nsis, setup), join(out, name));
+const signature = readFileSync(join(nsis, `${setup}.sig`), "utf8").trim();
+writeFileSync(join(out, `${name}.sig`), `${signature}\n`);
+const latest = {
+  version,
+  notes: `PaperPaw Workshop ${version}`,
+  pub_date: new Date().toISOString(),
+  platforms: {
+    "windows-x86_64": {
+      signature,
+      url: `https://github.com/hthoene/paperpaw-workshop/releases/download/v${version}/${name}`,
+    },
+  },
+};
+writeFileSync(join(out, "latest.json"), `${JSON.stringify(latest, null, 2)}\n`);
+console.log(`installer: ${out}: ${name}, its signature, latest.json (attach all three to the release v${version})`);
