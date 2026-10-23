@@ -41,6 +41,19 @@ describe("driving the reader directly", () => {
     expect(late.isError).toBe(true);
     expect(text(late.content)).toContain("Not shown");
   });
+
+  it("waits without an id until the screen changes, as a reply comes", async () => {
+    const b = bench();
+    const waiting = { screen: "core.home", parts: [{ role: "text", x: 0, y: 0, width: 10, height: 10, label: "A fact comes soon." }] };
+    b.emulator.answers.describe = waiting;
+    setTimeout(() => (b.emulator.answers.describe = { ...waiting, parts: [{ ...waiting.parts[0]!, label: "Ducks swim." }] }), 600);
+    const came = await control.run({ do: "wait", timeout_ms: 5000 }, b.context);
+    expect(came.isError).toBeFalsy();
+    expect(text(came.content)).toContain("The screen changed.");
+    expect(text(came.content)).toContain('"Ducks swim."');
+    const still = await control.run({ do: "wait", timeout_ms: 500 }, b.context);
+    expect(text(still.content)).toContain("Nothing changed within 500 ms.");
+  });
 });
 
 describe("recorded answers for a plugin's requests", () => {

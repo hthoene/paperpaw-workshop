@@ -129,8 +129,9 @@ export function stepText(tool: string, input: Record<string, unknown>): string {
   if (tool === "control" && typeof input?.do === "string") {
     vars.what = input.do;
     if (typeof input.id === "string") vars.id = input.id;
-    const own = t(`step.control.${input.do}`, vars);
-    if (own !== `step.control.${input.do}`) return own;
+    const which = input.do === "wait" && typeof input.id !== "string" ? "wait.change" : input.do;
+    const own = t(`step.control.${which}`, vars);
+    if (own !== `step.control.${which}`) return own;
   }
   if (Array.isArray(input?.fixtures)) vars.n = String(input.fixtures.length);
   return t(`step.${tool}`, vars);

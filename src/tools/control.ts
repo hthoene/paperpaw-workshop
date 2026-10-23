@@ -49,6 +49,22 @@ export async function requestsSince(context: ToolContext): Promise<string> {
   return `\nThe plugin's requests since${more}:\n${said.join("\n")}`;
 }
 
+/** How often a wait for a change looks at the screen. */
+const CHANGE_MS = 400;
+
+/** Waits until what the screen shows differs from what it showed at
+ *  first, at most `timeout` ms: whether it did, and what it shows then. */
+async function changes(context: ToolContext, timeout: number): Promise<[boolean, string]> {
+  const first = described(await context.emulator.command("describe"));
+  const end = Date.now() + timeout;
+  for (;;) {
+    await new Promise((r) => setTimeout(r, Math.min(CHANGE_MS, Math.max(0, end - Date.now()))));
+    const now = described(await context.emulator.command("describe"));
+    if (now !== first) return [true, now];
+    if (Date.now() >= end) return [false, now];
+  }
+}
+
 type Do = "describe" | "screens" | "show" | "slot" | "run" | "emit" | "set" | "setting" | "actions" | "wait" | "widget";
 
 export const control: WorkshopTool<{
@@ -72,13 +88,13 @@ export const control: WorkshopTool<{
     "set (set the setting `id` to `value`, as configuration files write it: on, 14),",
     "setting (read the setting `id`),",
     "actions (the action ids there are, starting with `id` if given),",
-    "wait (until the screen is `id` or shows it in a label, at most `timeout_ms`, 10000 unless said).",
+    "wait (until the screen is `id` or shows it in a label; without `id`, until what the screen shows changes, e.g. a reply from the network arrives or something loads: at most `timeout_ms`, 10000 unless said).",
     "After show, widget, slot, run, emit and set it answers what the screen shows then, and the requests the plugin made since and how each was answered.",
   ].join(" "),
   schema: z
     .object({
       do: z.enum(["describe", "screens", "show", "slot", "run", "emit", "set", "setting", "actions", "wait", "widget"]),
-      id: z.string().max(200).optional().describe("The screen, slot, action, event or setting; for wait the screen id or a text it shows"),
+      id: z.string().max(200).optional().describe("The screen, slot, action, event or setting; for wait the screen id or a text it shows, or none to wait for a change"),
       params: z.record(z.string(), z.string().max(2000)).optional(),
       value: z.string().max(2000).optional(),
       timeout_ms: z.number().int().min(0).max(30_000).optional(),
@@ -91,11 +107,17 @@ export const control: WorkshopTool<{
     if (profile.id !== context.reader.shown().id) await context.reader.show(profile);
     const step = { key: "step.control", vars: { what: input.do, device: shortName(profile) } };
     const fail = (content: string) => ({ content, isError: true, step });
-    const needsId = !["describe", "screens", "actions"].includes(input.do);
+    const needsId = !["describe", "screens", "actions", "wait"].includes(input.do);
     if (needsId && !input.id) return fail(`"${input.do}" needs an id.`);
     if (input.id && input.do !== "wait" && !ID.safeParse(input.id).success) return fail(`"${input.id}" is no id.`);
     if (input.do === "set" && input.value === undefined) return fail(`"set" needs a value.`);
     try {
+      if (input.do === "wait" && !input.id) {
+        const [changed, now] = await changes(context, input.timeout_ms ?? 10_000);
+        const said = changed ? "The screen changed." : `Nothing changed within ${input.timeout_ms ?? 10_000} ms.`;
+        return { content: `${said}
+${now}${await requestsSince(context)}`, step };
+      }
       if (input.do === "wait") {
         await context.emulator.until(input.id!, input.timeout_ms ?? 10_000);
         const now = described(await context.emulator.command("describe"));

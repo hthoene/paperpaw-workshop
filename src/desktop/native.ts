@@ -108,7 +108,8 @@ export class NativeEmulator implements Emulator {
 
   /** The remote control's lines the tools send (tools/control.ts), as far
    *  as PaperPaw's protocol has them: describe, show, run, and a widget
-   *  shown on the home screen (the workshop's own). */
+   *  shown on the home screen (the workshop's own), and a slot by the
+   *  screen PaperPaw's own plugins bind to it. */
   async command(line: string): Promise<Record<string, unknown>> {
     const [what, id, ...rest] = line.split(" ");
     switch (what) {
@@ -120,6 +121,13 @@ export class NativeEmulator implements Emulator {
         await this.backend.emulatorOpen(id!, Object.fromEntries(rest.map(unpair)));
         await settle();
         return { ok: true };
+      case "slot": {
+        const screen = SLOT_SCREENS[id!];
+        if (!screen) throw new NotYet(`The slot "${id}"`);
+        await this.backend.emulatorOpen(screen, Object.fromEntries(rest.map(unpair)));
+        await settle();
+        return { ok: true };
+      }
       case "run":
         await this.backend.emulatorRun(id!);
         await settle();
@@ -157,6 +165,16 @@ export class NativeEmulator implements Emulator {
     });
   }
 }
+
+/** The screens PaperPaw's own plugins bind to its slots: the emulator
+ *  opens screens, not slots (their `bind_slot`). */
+const SLOT_SCREENS: Record<string, string> = {
+  "core.settings": "settings.list",
+  "core.home": "home.dashboard",
+  "core.library": "files.browser",
+  "core.reader": "reader.screen",
+  "core.menu": "menu.list",
+};
 
 /** A part as the tools describe it: its state in one word. */
 function asPart(p: Part): Record<string, unknown> {

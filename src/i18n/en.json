@@ -303,6 +303,7 @@
   "step.control.widget": "Put it on the home screen",
   "step.control.show": "Opened its screen",
   "step.control.wait": "Waited for it to show",
+  "step.control.wait.change": "Waited for the screen to change",
   "step.control.describe": "Read what the screen shows",
   "step.control.run": "Ran {id}",
   "step.control.slot": "Opened {id}",
