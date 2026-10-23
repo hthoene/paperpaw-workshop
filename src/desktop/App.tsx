@@ -4,8 +4,12 @@
 
 import { useEffect, useMemo, useState } from "preact/hooks";
 
+import { AnthropicDirect } from "../ai/anthropic";
+import { Handbook } from "../handbook/handbook";
 import type { Backend } from "./backend";
 import { Checker, summary } from "./checks";
+import { Conversation } from "./Conversation";
+import { Desk } from "./desk";
 import { CHOICES, offered, saveChoice, savedChoice, usable, type ModelChoice } from "./models";
 import { Drawer } from "./Drawer";
 import { Projects } from "./Projects";
@@ -37,7 +41,7 @@ export function App({ backend }: Props) {
   if (key === null) {
     return <FirstStart onKey={async (k) => { await backend.keySet(k); setKey(k); }} />;
   }
-  return <Window backend={backend} keyKind={keyKind(key)} onForgetKey={async () => { await backend.keyClear(); setKey(null); }} />;
+  return <Window backend={backend} apiKey={key} keyKind={keyKind(key)} onForgetKey={async () => { await backend.keyClear(); setKey(null); }} />;
 }
 
 function FirstStart({ onKey }: { onKey(key: string): Promise<void> }) {
@@ -79,28 +83,56 @@ function FirstStart({ onKey }: { onKey(key: string): Promise<void> }) {
   );
 }
 
-function Window({ backend, keyKind, onForgetKey }: { backend: Backend; keyKind: "claude" | "paperpaw" | null; onForgetKey(): void }) {
+/** Where a PaperPaw key's requests go: PaperPaw's proxy, which speaks
+ *  Anthropic's API and passes on what the key allows. */
+export const PROXY = "https://workshop.paperpaw.org";
+
+interface WindowProps {
+  backend: Backend;
+  apiKey: string;
+  keyKind: "claude" | "paperpaw" | null;
+  onForgetKey(): void;
+}
+
+/** The handbook first (the AI's prompt and docs, with the readers'
+ *  profiles), then the window. */
+function Window(props: WindowProps) {
+  const [handbook, setHandbook] = useState<Handbook | null>(null);
+  const [failed, setFailed] = useState("");
+  useEffect(() => {
+    Handbook.load(new URL("handbook/", document.baseURI).href).then(setHandbook, (e: unknown) => setFailed(String(e)));
+  }, []);
+  if (failed) return <p class="problem" role="alert">The handbook could not be read: {failed}</p>;
+  if (!handbook) return null;
+  return <Bench {...props} handbook={handbook} />;
+}
+
+function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps & { handbook: Handbook }) {
   const workspace = useMemo(() => new Workspace(backend), [backend]);
   const checker = useMemo(() => new Checker(backend), [backend]);
+  const desk = useMemo(() => {
+    const provider = keyKind === "paperpaw" ? new AnthropicDirect(apiKey, PROXY, "provider.paperpaw") : new AnthropicDirect(apiKey);
+    return new Desk(workspace, backend, checker, handbook, provider, keyKind);
+  }, [workspace, backend, checker, handbook, apiKey, keyKind]);
   const [, redraw] = useState(0);
   const [menu, setMenu] = useState(false);
   const [files, setFiles] = useState(false);
   const [settings, setSettings] = useState(false);
-  const [draft, setDraft] = useState("");
 
   useEffect(() => {
     const stops = [
       workspace.subscribe(() => redraw((n) => n + 1)),
       checker.subscribe(() => redraw((n) => n + 1)),
-      // After every change: the plugin onto the reader, then PaperPaw's
-      // checks (see checks.ts).
-      workspace.afterSave((project) => {
-        void backend.emulatorSync(project.key).catch(() => {}).then(() => checker.run(project.key));
-      }),
+      desk.subscribe(() => redraw((n) => n + 1)),
+      // After every change PaperPaw's checks (see checks.ts); the reader
+      // got the plugin already (the workshop puts it there).
+      workspace.afterSave((project) => void checker.run(project.key)),
     ];
     void workspace.refresh();
+    // The reader, before any project.
+    void desk.choose(desk.profile).catch(() => {});
     return () => stops.forEach((stop) => stop());
-  }, [workspace, checker]);
+  }, [workspace, checker, desk]);
 
   // Another project: its own results, checked once it is open.
   const open = workspace.project?.key;
@@ -130,21 +162,8 @@ function Window({ backend, keyKind, onForgetKey }: { backend: Backend; keyKind: 
         </div>
       </header>
       <div class="main">
-        <section class="talk" aria-label="Conversation">
-          <div class="log">
-            <p class="empty">What should your reader do? A look, a home screen, a tool: say it in your own words.</p>
-          </div>
-          <form class="line ask" onSubmit={(e) => { e.preventDefault(); setDraft(""); }}>
-            <input
-              aria-label="Your message"
-              placeholder="What should your reader do?"
-              value={draft}
-              onInput={(e) => setDraft(e.currentTarget.value)}
-            />
-            <button type="submit" class="go" disabled={!draft.trim()}>Send</button>
-          </form>
-        </section>
-        <Reader backend={backend} />
+        <Conversation desk={desk} />
+        <Reader backend={backend} shown={desk.shown} onChoose={(id) => void desk.choose(id)} />
         {settings && <Settings workspace={workspace} keyKind={keyKind} onClose={() => setSettings(false)} />}
         {files && <Drawer workspace={workspace} pictures={backend} onClose={() => setFiles(false)} />}
       </div>

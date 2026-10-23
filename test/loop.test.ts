@@ -4,7 +4,7 @@ import path from "node:path";
 import type Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it } from "vitest";
 
-import { CLEARING, MAX_PROMPT, runTurn, type Session } from "../src/ai/loop";
+import { CLEARING, MAX_PROMPT, runTurn, thinkingFor, type Session } from "../src/ai/loop";
 import { MODELS } from "../src/ai/pricing";
 import { ReplayProvider, type Recording } from "../src/ai/replay";
 import type { Step } from "../src/tools/tool";
@@ -27,7 +27,7 @@ function session(provider: ReplayProvider) {
     handbook: b.handbook,
     context: b.context,
     model: MODELS.data,
-    effort: "medium",
+    kind: "data",
   };
   return { ...b, session: s };
 }
@@ -107,8 +107,9 @@ describe("the AI loop, with a recorded conversation", () => {
     expect(first.model).toBe("claude-haiku-5-5");
     expect(first.system).toEqual([{ type: "text", text: handbook.prompt, cache_control: { type: "ephemeral" } }]);
     expect(first.cache_control).toEqual({ type: "ephemeral" });
-    expect(first.thinking).toEqual({ type: "adaptive", display: "summarized" });
-    expect(first.output_config).toEqual({ effort: "medium" });
+    // Haiku for data: no thinking, low effort, until the checks keep failing.
+    expect(first.thinking).toEqual({ type: "disabled" });
+    expect(first.output_config).toEqual({ effort: "low" });
     expect(first.max_tokens).toBe(32_000);
     // Old tool results are cleared on Anthropic's side, not here.
     expect(first.context_management).toEqual(CLEARING);
@@ -299,7 +300,7 @@ describe("a turn's ends", () => {
       prompt: b.handbook.promptFor("code"),
       context: { ...b.context, builder },
       model: MODELS.code,
-      effort: "high",
+      kind: "code",
     };
 
     expect(await runTurn(s, rec.user[0]!)).toBe("done");
@@ -312,5 +313,15 @@ describe("a turn's ends", () => {
     // The reader runs the second build's module.
     expect(b.emulator.modules).toEqual(["/api/v1/workshop/builds/b2/files/web.wasm"]);
     expect(provider.requests[0]!.system?.[0]).toMatchObject({ text: b.handbook.promptFor("code") });
+  });
+});
+
+describe("how much the model thinks", () => {
+  it("is as little as each model allows, more once the checks kept failing", () => {
+    expect(thinkingFor("claude-haiku-5-5", "data", false)).toEqual({ thinking: { type: "disabled" }, output_config: { effort: "low" } });
+    expect(thinkingFor("claude-sonnet-5-5", "code", false)).toEqual({ thinking: { type: "between_tools" }, output_config: { effort: "medium" } });
+    expect(thinkingFor("claude-opus-5-5", "data", false)).toEqual({ thinking: { type: "adaptive", display: "summarized" }, output_config: { effort: "low" } });
+    expect(thinkingFor("claude-sonnet-5-5", "code", true)).toEqual({ thinking: { type: "adaptive", display: "summarized" }, output_config: { effort: "high" } });
+    expect(thinkingFor("claude-haiku-5-5", "data", true).output_config).toEqual({ effort: "medium" });
   });
 });

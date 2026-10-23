@@ -27,13 +27,13 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 /* Fields and the ink button, as on the site */
 .line { display: flex; gap: .7rem; align-items: stretch; }
-.line input {
+.line input, .line textarea {
   flex: 1; min-width: 0; padding: .75rem 1.2rem; border: 0; border-radius: 999px;
   background: var(--sheet-2); color: var(--ink); box-shadow: inset 0 0 0 1px var(--field-edge);
   font: 400 1rem/1.4 var(--text);
 }
-.line input::placeholder { color: var(--ink-2); opacity: 1; }
-.line input:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--ink); }
+.line input::placeholder, .line textarea::placeholder { color: var(--ink-2); opacity: 1; }
+.line input:focus-visible, .line textarea:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--ink); }
 .go {
   /* Literata sets its letters low in the line: a little room below lifts
      them to the button's middle (measured by the capitals' ink). */
@@ -89,7 +89,22 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .talk { display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; border-right: 1px solid var(--rule); }
 .log { overflow: auto; padding: 1.6rem 2rem; display: grid; align-content: start; gap: 1.1rem; }
 .empty { margin: 18vh auto 0; max-width: 26rem; text-align: center; color: var(--ink-2); font: 400 1.15rem/1.55 var(--display); }
-.ask { padding: .9rem 1.2rem 1.1rem; min-height: 4.7rem; }
+.ask { padding: .9rem 1.2rem 1.1rem; min-height: 4.7rem; align-items: flex-end; }
+.ask textarea { resize: none; min-height: 2.75rem; max-height: 12rem; padding-top: .7rem; padding-bottom: .7rem; line-height: 1.4; border-radius: 1.4rem; field-sizing: content; }
+.ask .go { height: 2.75rem; }
+
+/* The conversation */
+.log .me, .log .ai { max-width: 40rem; white-space: pre-wrap; line-height: 1.55; }
+.log .me { justify-self: end; padding: .6rem .95rem .65rem; border-radius: 1.1rem 1.1rem .3rem 1.1rem; background: var(--sheet-2); }
+.log .ai { font: 400 1.04rem/1.6 var(--display); }
+.log .step { font-size: .86rem; color: var(--ink-2); padding-left: .9rem; border-left: 2px solid var(--rule); }
+.log .step.failed { border-left-color: var(--field-edge); }
+.log .step.busy { animation: breathe 1.6s ease-in-out infinite; }
+@keyframes breathe { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .log .step.busy { animation: none; } }
+.log .cost { margin: 0; font-size: .8rem; color: var(--ink-2); }
+.log .earlier summary { cursor: pointer; font-size: .86rem; color: var(--ink-2); }
+.log .fresh { justify-self: start; }
 
 /* The reader */
 .reader { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; justify-items: center; gap: .8rem; padding: 1rem 1rem 1.1rem; min-height: 0; }

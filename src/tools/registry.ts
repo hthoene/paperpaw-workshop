@@ -5,7 +5,7 @@ import { control, setFixtures } from "./control";
 import { lookupDocs } from "./docs";
 import { check, look, press } from "./emulator";
 import { setEntry } from "./entry";
-import { deleteFile, listFiles, readFile, writeFile } from "./files";
+import { deleteFile, editFile, listFiles, readFile, writeFile } from "./files";
 import { build } from "./build";
 import type { WorkshopTool } from "./tool";
 import { convertPicture, listUploads, placeFile, viewUpload } from "./uploads";
@@ -14,6 +14,7 @@ export const DATA_TOOLS: WorkshopTool<any>[] = [
   listFiles,
   readFile,
   writeFile,
+  editFile,
   deleteFile,
   lookupDocs,
   check,
@@ -33,6 +34,7 @@ export const CODE_TOOLS: WorkshopTool<any>[] = [
   listFiles,
   readFile,
   writeFile,
+  editFile,
   deleteFile,
   lookupDocs,
   build,

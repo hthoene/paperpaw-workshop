@@ -5,6 +5,8 @@
 // findings and fixes them without screenshots; the person sees a calm
 // "Checks: ok" or "2 to fix".
 
+import { CHECKED } from "../project/project";
+
 /** One thing to fix, as the Rust side says it. */
 export interface Found {
   check: string;
@@ -38,9 +40,9 @@ export function summary(checks: CheckState): string {
 
 /** The findings for the model, short: one line each, no pictures. */
 export function forModel(found: Found[]): string {
-  if (!found.length) return "PaperPaw's checks found nothing to fix.";
+  if (!found.length) return `${CHECKED} nothing to fix.`;
   const line = (f: Found) => `- ${f.level} ${f.check} at ${f.place}${f.seen.length ? ` (${f.seen.join(", ")})` : ""}: ${f.message}`;
-  return `PaperPaw's checks found ${found.length} to fix:\n${found.map(line).join("\n")}`;
+  return `${CHECKED} ${found.length} to fix:\n${found.map(line).join("\n")}`;
 }
 
 /** Runs the checks of one project, one run at a time: a change while one

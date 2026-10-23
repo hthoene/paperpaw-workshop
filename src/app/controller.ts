@@ -71,10 +71,13 @@ export class Workshop {
     store: UploadStore = browserUploads,
     /** Where plugins with code are built. */
     private builder: Builder = new HttpBuilder(),
+    /** Where the project is kept: the browser's storage, or (in the app)
+     *  its folder. */
+    private save: (project: Project) => Promise<void> = saveProject,
   ) {
     this.files = new Files(project, () => void this.sync());
     this.uploads = new Uploads(project, store, () => {
-      void saveProject(project);
+      void this.save(project);
       this.changed();
     });
     this.profiles = SHOWN_PROFILES.map((id) => handbook.profile(id)).filter((p): p is Profile => !!p);
@@ -82,7 +85,14 @@ export class Workshop {
   }
 
 
+  /** Whether the next turn thinks more: PaperPaw's checks kept failing. */
+  escalated = false;
+
+  /** The app's choice of model (Settings), where there is one. */
+  chooseModel: ((project: Project) => string) | undefined;
+
   get model(): string {
+    if (this.chooseModel) return this.chooseModel(this.project);
     return this.project.model ?? (this.project.kind === "code" ? MODELS.code : MODELS.data);
   }
 
@@ -139,6 +149,14 @@ export class Workshop {
     }
     this.stub = emulator.stub;
     await this.refreshFindings();
+  }
+
+  /** The app's reader (PaperPaw's own emulator), started on the device
+   *  shown. */
+  async attachEmulator(emulator: Emulator): Promise<void> {
+    this.emulator = emulator;
+    this.stub = emulator.stub;
+    await this.restart();
   }
 
   /** The plugin as readers install it: without the store's folder. */
@@ -235,7 +253,7 @@ export class Workshop {
     this.project.picturesShown = 0;
     this.long = false;
     this.error = "";
-    void saveProject(this.project);
+    void this.save(this.project);
     this.changed();
   }
 
@@ -335,7 +353,7 @@ export class Workshop {
   async useModule(url: string | null): Promise<void> {
     await this.emulator?.useModule(url);
     this.project.module = url ?? undefined;
-    void saveProject(this.project);
+    void this.save(this.project);
   }
 
   async refreshFindings(): Promise<void> {
@@ -394,8 +412,8 @@ export class Workshop {
           prompt: this.handbook.promptFor(this.project.kind),
           context: this.toolContext(),
           model: this.model,
-          // Rust against an SDK the model has not seen: more thought.
-          effort: this.code ? "high" : "medium",
+          kind: this.code ? "code" : "data",
+          escalated: this.escalated,
         },
         said,
         {
@@ -410,7 +428,7 @@ export class Workshop {
           onRound: () => {
             this.live = "";
             this.thinking = "";
-            void saveProject(this.project);
+            void this.save(this.project);
             this.changed();
           },
         },
@@ -422,7 +440,7 @@ export class Workshop {
       this.busy = false;
       this.live = "";
       this.thinking = "";
-      await saveProject(this.project);
+      await this.save(this.project);
       await this.refreshFindings();
     }
     if (end === "refusal") this.error = t("workshop.error.refusal");

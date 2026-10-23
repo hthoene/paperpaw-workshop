@@ -5,7 +5,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 
 import { t } from "../i18n";
-import { CARRIED } from "../project/project";
+import { CARRIED, CHECKED } from "../project/project";
 import { ADDED } from "../project/uploads";
 
 export type Line =
@@ -23,14 +23,14 @@ export function lines(messages: Anthropic.MessageParam[]): Line[] {
     for (const b of m.content) if (b.type === "tool_result" && b.is_error) failed.add(b.tool_use_id);
   }
   for (const m of messages) {
-    if (typeof m.content === "string") {
-      out.push({ kind: m.role === "user" ? "me" : "ai", text: m.content });
-      continue;
-    }
-    for (const block of m.content) {
+    const blocks: Anthropic.ContentBlockParam[] = typeof m.content === "string" ? [{ type: "text", text: m.content }] : m.content;
+    for (const block of blocks) {
       const added = block.type === "text" && m.role === "user" && block.text.startsWith(ADDED) ? /"(.+?)"/.exec(block.text) : null;
       if (added) {
         out.push({ kind: "added", text: added[1]! });
+      } else if (block.type === "text" && m.role === "user" && block.text.startsWith(CHECKED)) {
+        const n = /^\S+ checks found (\d+)/.exec(block.text)?.[1] ?? "0";
+        out.push({ kind: "step", text: t("workshop.checked", { n }), failed: false });
       } else if (block.type === "text" && m.role === "user" && block.text.startsWith(CARRIED)) {
         out.push({ kind: "step", text: t("workshop.carried"), failed: false });
       } else if (block.type === "text" && block.text.trim()) {

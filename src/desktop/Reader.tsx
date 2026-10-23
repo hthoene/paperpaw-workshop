@@ -33,10 +33,14 @@ const KEYS: Record<string, string> = {
 
 interface Props {
   backend: Backend;
+  /** The reader shown, by profile id. */
+  shown: string;
+  /** Another reader chosen; whoever owns the reader starts it. */
+  onChoose(id: string): void;
 }
 
-export function Reader({ backend }: Props) {
-  const [profile, setProfile] = useState(READERS[0]!.id);
+export function Reader({ backend, shown, onChoose }: Props) {
+  const profile = shown;
   const [frame, setFrame] = useState<Frame | null>(null);
   const [error, setError] = useState("");
   const screen = useRef<HTMLImageElement>(null);
@@ -50,11 +54,6 @@ export function Reader({ backend }: Props) {
     })();
     return () => stop.forEach((s) => s());
   }, [backend]);
-
-  useEffect(() => {
-    setError("");
-    backend.emulatorStart(profile).catch((e: unknown) => setError(String(e)));
-  }, [backend, profile]);
 
   const button = (event: KeyboardEvent, pressed: boolean) => {
     const name = KEYS[event.key];
@@ -91,7 +90,7 @@ export function Reader({ backend }: Props) {
             role="radio"
             aria-checked={r.id === profile}
             class={r.id === profile ? "on" : ""}
-            onClick={() => setProfile(r.id)}
+            onClick={() => { setError(""); onChoose(r.id); }}
           >
             {r.name}
           </button>

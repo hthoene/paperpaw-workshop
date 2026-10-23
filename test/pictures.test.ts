@@ -275,7 +275,7 @@ describe("a conversation with a picture", () => {
       { type: "text", text: recording.user[0]! },
     ];
     const end = await runTurn(
-      { provider, project: b.project, tools: DATA_TOOLS, handbook: b.handbook, context: b.context, model: "claude-haiku-5-5", effort: "medium" },
+      { provider, project: b.project, tools: DATA_TOOLS, handbook: b.handbook, context: b.context, model: "claude-haiku-5-5", kind: "data" },
       said,
     );
     expect(end).toBe("done");
@@ -301,7 +301,7 @@ describe("the example with a picture", () => {
     for (const name of recording.attach ?? []) await b.uploads.add(name, testPicture(1600, 1200), fakeKit.size);
     const provider = new ReplayProvider(recording);
     const end = await runTurn(
-      { provider, project: b.project, tools: DATA_TOOLS, handbook: b.handbook, context: b.context, model: "claude-haiku-5-5", effort: "medium" },
+      { provider, project: b.project, tools: DATA_TOOLS, handbook: b.handbook, context: b.context, model: "claude-haiku-5-5", kind: "data" },
       recording.user[0]!,
     );
     expect(end).toBe("done");

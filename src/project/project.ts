@@ -66,6 +66,10 @@ export interface Project {
  *  one before (the conversation shows it as such, not as the person's). */
 export const CARRIED = "This conversation continues an earlier one about the same plugin";
 
+/** How a message of PaperPaw's checks begins, sent to the AI by the
+ *  workshop after a change (the conversation shows it as such). */
+export const CHECKED = "PaperPaw's checks found";
+
 export const NO_USAGE: Usage = {
   inputTokens: 0,
   cacheWriteTokens: 0,

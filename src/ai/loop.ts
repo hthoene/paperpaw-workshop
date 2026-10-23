@@ -41,7 +41,10 @@ export interface Session {
   handbook: Handbook;
   context: ToolContext;
   model: string;
-  effort: "low" | "medium" | "high";
+  /** What is made: data (settings, texts) or code. */
+  kind: "data" | "code";
+  /** More thought, for a turn after PaperPaw's checks kept failing. */
+  escalated?: boolean;
   /** The system prompt: the handbook for the plugin's kind (data's if not
    *  given). */
   prompt?: string;
@@ -61,6 +64,29 @@ export interface TurnEvents {
 /** How a turn ended: `cut` when an answer reached its length limit with
  *  nothing more to do, so the person should know it is not finished. */
 export type TurnEnd = "done" | "stopped" | "limit" | "refusal" | "too_long" | "cut";
+
+type Effort = "low" | "medium" | "high";
+
+/** How much the model thinks: as little as each model allows, and the
+ *  effort for the kind, unless PaperPaw's checks kept failing; then
+ *  adaptive thinking (its summary shown) at more effort. Haiku 5.5 may
+ *  think not at all, Sonnet 5.5 at least `between_tools` (no thinking,
+ *  short notes between tools), Opus 5.5 always thinks: effort alone
+ *  steers it. Thinking blocks stay in the conversation whatever is
+ *  chosen (append-only; a model reads what it can). */
+export function thinkingFor(
+  model: string,
+  kind: "data" | "code",
+  escalated: boolean,
+): { thinking: Request["thinking"]; output_config: { effort: Effort } } {
+  if (escalated) {
+    return { thinking: { type: "adaptive", display: "summarized" } as Request["thinking"], output_config: { effort: kind === "code" ? "high" : "medium" } };
+  }
+  const effort: Effort = kind === "code" ? "medium" : "low";
+  if (model.startsWith("claude-haiku-")) return { thinking: { type: "disabled" }, output_config: { effort } };
+  if (model.startsWith("claude-sonnet-")) return { thinking: { type: "between_tools" } as unknown as Request["thinking"], output_config: { effort } };
+  return { thinking: { type: "adaptive", display: "summarized" } as Request["thinking"], output_config: { effort } };
+}
 
 /** The prompt's size in the last request, in tokens. */
 export function lastPrompt(project: Project): number {
@@ -103,9 +129,7 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
       messages: project.messages,
       // The conversation so far is cached too, up to its last block.
       cache_control: { type: "ephemeral" },
-      // A summary of its thinking, for the person to see it working.
-      thinking: { type: "adaptive", display: "summarized" },
-      output_config: { effort: session.effort },
+      ...thinkingFor(session.model, session.kind, session.escalated ?? false),
       context_management: CLEARING,
     };
     let message: Anthropic.Message;

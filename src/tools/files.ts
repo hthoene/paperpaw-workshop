@@ -43,7 +43,7 @@ export const readFile: WorkshopTool<{ path: string }> = {
 export const writeFile: WorkshopTool<{ path: string; content: string }> = {
   name: "write_file",
   description:
-    "Write a whole text file of the plugin being made (create or replace). Paths are inside the plugin's folder: plugin.ini, settings.ini, presets.ini, keymap.ini, i18n/en.ini, styles.css ... The reader on screen shows the change at once.",
+    "Write a whole text file of the plugin being made: a new one, or one changed throughout (for a change to part of a file, edit_file). Paths are inside the plugin's folder: plugin.ini, settings.ini, presets.ini, keymap.ini, i18n/en.ini, styles.css ... The reader on screen shows the change at once.",
   schema: z
     .object({
       path: z.string().describe("Path inside the plugin's folder"),
@@ -58,6 +58,46 @@ export const writeFile: WorkshopTool<{ path: string; content: string }> = {
     }
     await sync();
     return { content: `Wrote ${path} (${content.length} characters).`, step: { key: "step.write_file", vars: { path } } };
+  },
+};
+
+/** Changes to one file in one call, at most. */
+export const MAX_EDITS = 20;
+
+export const editFile: WorkshopTool<{ path: string; edits: { old: string; new: string }[] }> = {
+  name: "edit_file",
+  description:
+    "Change part of a text file of the plugin: each edit replaces `old` (text copied exactly from the file, found exactly once) with `new`. Prefer this to write_file for any change to a file that exists: it costs far less. All edits apply or none.",
+  schema: z
+    .object({
+      path: z.string().describe("Path inside the plugin's folder"),
+      edits: z
+        .array(z.object({ old: z.string().min(1), new: z.string() }).strict())
+        .min(1)
+        .max(MAX_EDITS)
+        .describe("In order; each `old` must occur exactly once in the file as the edits before left it"),
+    })
+    .strict(),
+  eager: true,
+  async run({ path, edits }, { files, sync }) {
+    const step = { key: "step.edit_file", vars: { path } };
+    let text = files.read(path);
+    if (text === undefined) {
+      const why = files.has(path) ? "it is not a text file" : "there is no such file (write_file makes one)";
+      return { content: `Not changed: ${why}.`, isError: true, step };
+    }
+    for (const [i, edit] of edits.entries()) {
+      const at = text.indexOf(edit.old);
+      if (at < 0) return { content: `Not changed: edit ${i + 1}'s old text is not in ${path}. read_file shows it as it is.`, isError: true, step };
+      if (text.indexOf(edit.old, at + 1) >= 0) {
+        return { content: `Not changed: edit ${i + 1}'s old text occurs more than once in ${path}; take more of the lines around it.`, isError: true, step };
+      }
+      text = text.slice(0, at) + edit.new + text.slice(at + edit.old.length);
+    }
+    const problem = files.write(path, text);
+    if (problem) return { content: `Not changed: ${problem}.`, isError: true, step };
+    await sync();
+    return { content: `Changed ${path} (${edits.length} edit${edits.length > 1 ? "s" : ""}).`, step };
   },
 };
 
