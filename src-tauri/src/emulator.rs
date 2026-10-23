@@ -32,13 +32,38 @@ pub const PROFILES: [&str; 3] = ["xteink-x4", "xteink-x4-pro", "boox-go-7"];
 /// over the screens a plugin is tried on.
 const SETTINGS: &str = "[help]\nshow = false\n";
 
-/// The readers' settings: the workshop's own, and `widget` alone on the
-/// first page of the home screen where one is shown.
-fn settings(widget: Option<&str>) -> String {
-    match widget {
-        Some(widget) => format!("{SETTINGS}[home]\npage-1 = {widget}\n"),
-        None => SETTINGS.to_string(),
+/// The readers' settings: the workshop's own, `widget` alone on the
+/// first page of the home screen where one is shown, and the plugins
+/// `off` switched off.
+fn settings(widget: Option<&str>, off: &[String]) -> String {
+    let mut text = SETTINGS.to_string();
+    if let Some(widget) = widget {
+        text += &format!("[home]\npage-1 = {widget}\n");
     }
+    if !off.is_empty() {
+        text += "[plugins]\n";
+        for id in off {
+            text += &format!("{id} = off\n");
+        }
+    }
+    text
+}
+
+/// The plugins in the reader's folder `library` other than `plugin`:
+/// those of projects open before, which the reader beside this one does
+/// not run. Switched off rather than removed, as Windows keeps a code
+/// plugin's library while the reader has it loaded.
+pub fn others(library: &Path, plugin: Option<&str>) -> Vec<String> {
+    let mut ids: Vec<String> = std::fs::read_dir(library.join("plugins"))
+        .into_iter()
+        .flatten()
+        .flatten()
+        .filter(|e| e.path().is_dir())
+        .filter_map(|e| e.file_name().into_string().ok())
+        .filter(|id| Some(id.as_str()) != plugin)
+        .collect();
+    ids.sort();
+    ids
 }
 
 /// How long an answer (`described`, `shot`, `started`) may take.
@@ -118,6 +143,9 @@ pub struct Emulator {
     /// The widget shown alone on the first page of the home screen, if
     /// one is (`show_widget`).
     home: Mutex<Option<String>>,
+    /// The open project's plugin, the one the reader runs of those in its
+    /// folder (`show_plugin`).
+    plugin: Mutex<Option<String>>,
 }
 
 impl Emulator {
@@ -134,6 +162,7 @@ impl Emulator {
             shared: Arc::new(Mutex::new(Shared::default())),
             last_start: Mutex::new(None),
             home: Mutex::new(None),
+            plugin: Mutex::new(None),
         }
     }
 
@@ -184,12 +213,11 @@ impl Emulator {
 
     /// Starts (or switches to) a reader of `profile` on its folder.
     pub fn start(&self, profile: &str, library: &Path) -> Result<(), String> {
-        let home = self.home.lock().map_err(|e| e.to_string())?.clone();
         let request = json!({
             "op": "start",
             "profile": profile,
             "library": library.to_string_lossy(),
-            "settings": settings(home.as_deref()),
+            "settings": self.settings_for(library)?,
             // Plugins with code built here run: the reader's folder is the
             // workshop's own, nothing else puts code into it.
             "trust_code": true,
@@ -203,21 +231,39 @@ impl Emulator {
     /// so, on every device shown from now on.
     pub fn show_widget(&self, widget: &str) -> Result<(), String> {
         *self.home.lock().map_err(|e| e.to_string())? = Some(widget.to_string());
+        self.reload()
+    }
+
+    /// The reader runs `plugin` (the open project's, none where it has
+    /// none yet) of the plugins in its folder, from its next start on;
+    /// whether that is another than before.
+    pub fn show_plugin(&self, plugin: Option<&str>) -> Result<bool, String> {
+        let mut shown = self.plugin.lock().map_err(|e| e.to_string())?;
+        let other = shown.as_deref() != plugin;
+        *shown = plugin.map(String::from);
+        Ok(other)
+    }
+
+    /// The settings a reader on `library` starts with now.
+    fn settings_for(&self, library: &Path) -> Result<String, String> {
+        let home = self.home.lock().map_err(|e| e.to_string())?.clone();
+        let plugin = self.plugin.lock().map_err(|e| e.to_string())?.clone();
+        Ok(settings(home.as_deref(), &others(library, plugin.as_deref())))
+    }
+
+    /// The reader started again on its folder: plugins changed there are
+    /// read anew, with the settings as they are now.
+    pub fn reload(&self) -> Result<(), String> {
         let mut request = self
             .last_start
             .lock()
             .map_err(|e| e.to_string())?
             .clone()
             .ok_or("the reader has not started yet")?;
-        request["settings"] = json!(settings(Some(widget)));
+        let library = PathBuf::from(request["library"].as_str().unwrap_or_default());
+        request["settings"] = json!(self.settings_for(&library)?);
         *self.last_start.lock().map_err(|e| e.to_string())? = Some(request.clone());
         self.ask(request, "started", "start").map(|_| ())
-    }
-
-    /// The reader started again on its folder: plugins changed there are
-    /// read anew.
-    pub fn reload(&self) -> Result<(), String> {
-        self.ask(json!({"op": "reload"}), "started", "reload").map(|_| ())
     }
 
     pub fn button(&self, name: &str, pressed: bool) -> Result<(), String> {
@@ -474,11 +520,15 @@ pub async fn emulator_sync(emulator: State<'_, Emulator>, shown: State<'_, Shown
     let root = crate::paths::projects()?;
     // A plugin with code: its folder and its last build.
     let files = crate::code::for_emulator(&crate::projects::folder(&root, &project)?, crate::projects::plugin_files(&root, &project)?);
-    let Some(id) = plugin_id(&files) else { return Ok(()) };
+    let id = plugin_id(&files);
+    // Only this project's plugin runs: those of projects open before are
+    // switched off.
+    let other = emulator.show_plugin(id.as_deref())?;
     let Some(profile) = shown.0.lock().map_err(|e| e.to_string())?.clone() else { return Ok(()) };
     let library = crate::paths::emulator_library(&profile)?;
+    let Some(id) = id else { return if other { emulator.reload() } else { Ok(()) } };
     // Unchanged, the reader stays where it is (a screen opened, asleep).
-    if same_plugin(&library.join("plugins").join(&id), &files) {
+    if !other && same_plugin(&library.join("plugins").join(&id), &files) {
         return Ok(());
     }
     place_plugin(&library, &id, &files)?;
@@ -572,6 +622,26 @@ mod tests {
         let s = shared.lock().unwrap();
         assert_eq!(s.ready.as_ref().unwrap().paperpaw, "0.4.0");
         assert_eq!(s.warnings, ["a plugin warned"]);
+    }
+
+    #[test]
+    fn only_the_open_project_s_plugin_runs() {
+        let folder = tempfile::tempdir().unwrap();
+        for id in ["minimal", "duck", "newyear"] {
+            std::fs::create_dir_all(folder.path().join("plugins").join(id)).unwrap();
+        }
+        let off = others(folder.path(), Some("duck"));
+        assert_eq!(off, ["minimal", "newyear"]);
+        assert_eq!(
+            settings(Some("duck.fact"), &off),
+            format!("{SETTINGS}[home]\npage-1 = duck.fact\n[plugins]\nminimal = off\nnewyear = off\n")
+        );
+        assert_eq!(others(folder.path(), None).len(), 3);
+        assert_eq!(settings(None, &[]), SETTINGS);
+        let emulator = Emulator::new(|| Err("none".into()), |_| {});
+        assert!(emulator.show_plugin(Some("duck")).unwrap());
+        assert!(!emulator.show_plugin(Some("duck")).unwrap());
+        assert!(emulator.show_plugin(None).unwrap());
     }
 
     #[test]
