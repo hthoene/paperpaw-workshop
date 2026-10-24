@@ -10,6 +10,7 @@ import type { Project } from "../project/project";
 import { definition, type Step, type ToolContext, type WorkshopTool } from "../tools/tool";
 import { addUsage, priced } from "./pricing";
 import type { ContextManagement, Provider, Request } from "./provider";
+import { invalidJson } from "./tool-input";
 
 /** The most rounds (requests) one turn of the person may take. */
 export const MAX_ROUNDS = 25;
@@ -271,6 +272,11 @@ async function runTool(session: Session, call: Anthropic.ToolUseBlock, cut: bool
   if (cut) {
     events.onStep?.({ key: `step.${call.name}` }, false);
     return error("Your answer was cut off before this call was complete. Do it again, in smaller parts if it is long.");
+  }
+  // Its input came as JSON that was not valid (tool-input.ts): not run.
+  if (invalidJson(call.input)) {
+    events.onStep?.({ key: `step.${call.name}` }, false);
+    return error("The input of this call was not valid JSON, so nothing was done. Make the call again with valid JSON.");
   }
   const input = tool.schema.safeParse(call.input);
   if (!input.success) {

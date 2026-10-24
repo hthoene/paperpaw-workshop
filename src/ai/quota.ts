@@ -10,6 +10,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { MessageStream } from "@anthropic-ai/sdk/lib/MessageStream";
 
 import type { Provider, Request, Stream } from "./provider";
+import { toolInputChecked } from "./tool-input";
 
 /** Why the site did not pass a request on, in its words: not accepted,
  *  the month's budget used, the quota closed, one at a time. */
@@ -47,7 +48,7 @@ export class QuotaProxy implements Provider {
       // Anthropic's, passed on as they came.
       throw Anthropic.APIError.generate(answer.status, body ?? undefined, undefined, answer.headers);
     }
-    const s = MessageStream.fromReadableStream(answer.body.pipeThrough(sseToLines()));
+    const s = MessageStream.fromReadableStream(answer.body.pipeThrough(sseToLines()).pipeThrough(toolInputChecked()));
     if (stream.onText) s.on("text", stream.onText);
     if (stream.onThinking) s.on("thinking", stream.onThinking);
     return s.finalMessage();

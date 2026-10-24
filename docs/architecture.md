@@ -121,6 +121,13 @@ A **provider** ([src/ai/provider.ts](../src/ai/provider.ts)) is who answers:
 - `ReplayProvider`: a recorded conversation (`src/ai/examples/*.json`), for
   tests and for `?example=` in `npm run dev`.
 
+Large tool inputs (`write_file`, `edit_file`) stream as the model writes
+them, and that JSON is not checked before it comes. Both providers put
+each call's input together first
+([src/ai/tool-input.ts](../src/ai/tool-input.ts)): input that is not
+valid JSON comes as `{ "INVALID_JSON": "..." }`, and the loop answers
+that call with an error instead of running it, so the answer is kept.
+
 A project is a data plugin or a plugin with code (`Project.kind`). A new
 one takes the kind its first words ask for
 ([src/desktop/kind.ts](../src/desktop/kind.ts)): one short question to

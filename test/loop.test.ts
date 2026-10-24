@@ -187,6 +187,26 @@ describe("the AI loop, with a recorded conversation", () => {
     expect(String(results(project.messages)[0]!.content)).toContain("cut off");
   });
 
+  it("never runs a call whose input was not valid JSON, and answers it", async () => {
+    const provider = new ReplayProvider({
+      title: "invalid",
+      user: ["x"],
+      answers: [
+        {
+          stop_reason: "tool_use",
+          content: [{ type: "tool_use", id: "t1", name: "write_file", input: { INVALID_JSON: '{"path":"plugin.ini","content"}' } }] as Anthropic.ContentBlock[],
+        },
+        { stop_reason: "end_turn", content: [{ type: "text", text: "again", citations: null }] },
+      ],
+    });
+    const { session: s, project, files } = session(provider);
+    expect(await runTurn(s, "x")).toBe("done");
+    expect(files.has("plugin.ini")).toBe(false);
+    const [result] = results(project.messages);
+    expect(result!.is_error).toBe(true);
+    expect(String(result!.content)).toContain("not valid JSON");
+  });
+
   it("stops at its round limit, and the next words join the last results", async () => {
     const call = { stop_reason: "tool_use" as const, content: [{ type: "tool_use", id: "t", name: "list_files", input: {} }] as Anthropic.ContentBlock[] };
     const end = { stop_reason: "end_turn" as const, content: [{ type: "text", text: "here", citations: null }] as Anthropic.ContentBlock[] };
