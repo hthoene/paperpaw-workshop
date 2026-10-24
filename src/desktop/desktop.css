@@ -308,6 +308,16 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .choice { display: flex; gap: .65rem; align-items: flex-start; padding: .45rem .5rem; margin: 0 -.5rem; border-radius: .6rem; cursor: pointer; }
 .choice:hover { background: var(--sheet-2); }
 .choice input { width: 1rem; height: 1rem; margin: .2rem 0 0; accent-color: var(--ink); }
+/* Radios drawn as the app's rings: a ring, filled with a dot when chosen. */
+.choice input[type="radio"] {
+  appearance: none; flex: none; display: grid; place-content: center;
+  width: 1.05rem; height: 1.05rem; margin: .18rem 0 0;
+  border: 1.5px solid var(--ink); border-radius: 50%; background: var(--sheet); cursor: pointer;
+}
+.choice input[type="radio"]::before { content: ""; width: .5rem; height: .5rem; border-radius: 50%; background: var(--ink); transform: scale(0); transition: transform .12s ease-out; }
+.choice input[type="radio"]:checked::before { transform: scale(1); }
+.choice input[type="radio"]:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.choice:hover input[type="radio"]:not(:checked) { background: var(--sheet-2); }
 .choice small { display: block; margin-top: .1rem; font-size: .82rem; color: var(--ink-2); }
 .own { display: grid; gap: .45rem; margin-top: 1.3rem; padding-top: 1rem; border-top: 1px solid var(--rule); font-weight: 600; }
 .own .mode { justify-self: start; font-weight: 400; }
