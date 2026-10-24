@@ -76,9 +76,10 @@ small budget, so you can try the workshop before you get a key of your own.
   Settings, to see whether a newer workshop is out. To Rust's own servers
   and crates.io, the first time you make a plugin with code. To
   paperpaw.org only through your browser, when you publish: the workshop
-  itself sends nothing there. And to addresses you name yourself: the workshop asks you before it fetches an example from
-  one, and the reader beside the conversation fetches what your plugin
-  asks for, as your reader would. No account, no tracking.
+  itself sends nothing there. And to addresses you name yourself: the
+  workshop asks you before it fetches an example from one, and the reader
+  beside the conversation fetches what your plugin asks for, as your
+  reader would. No account, no tracking.
 - **It does not spend more than it must.** With your own key you pay
   Anthropic for what you use. The workshop uses the smallest model that
   does the job, keeps the conversation short, and shows each turn's cost.
