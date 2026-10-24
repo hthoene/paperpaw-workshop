@@ -311,7 +311,7 @@ A release's installer is built by
 [.github/workflows/release.yml](../.github/workflows/release.yml) on a tag
 `v<version>`, with the `paperpaw-emu` and `paperpaw-dev` of the PaperPaw
 release that [paperpaw-release.txt](../paperpaw-release.txt) names (now
-0.5.0-beta.1), fetched from that release and taken only where its checksum
+0.5.0-beta.4), fetched from that release and taken only where its checksum
 and PaperPaw's signature hold. Windows only for now.
 
 Tests use `FakeEmulator` ([src/emulator/fake.ts](../src/emulator/fake.ts)).

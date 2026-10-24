@@ -1,6 +1,6 @@
 [package]
 name = "paperpaw-workshop"
-version = "0.1.0-beta.6"
+version = "0.1.0-beta.7"
 description = "Make PaperPaw plugins with AI, on your own computer"
 license = "Apache-2.0"
 edition = "2021"

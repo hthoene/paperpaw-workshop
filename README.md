@@ -14,7 +14,7 @@ reader. It works with [PaperPaw](https://paperpaw.org), first on the
 Xteink X4 and X4 Pro.
 
 > **This is a beta (0.1.0-beta.1), for testers and developers.** It works
-> with PaperPaw 0.5.0-beta.1, which is a beta too. Expect bugs, and expect
+> with PaperPaw 0.5.0-beta.4, which is a beta too. Expect bugs, and expect
 > things to change before the first release. Keep a copy of your plugins
 > (*Export project…* in the menu). When something goes wrong, please open
 > an [issue](https://github.com/hthoene/paperpaw-workshop/issues) and say
