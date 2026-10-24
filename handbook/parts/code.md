@@ -27,7 +27,7 @@ version = "0.1.0"
 plugin = "MyPlugin"
 
 [dependencies]
-paperpaw-sdk = "0.4"
+paperpaw-sdk = "0.5"
 ```
 
 `plugin` names the type in `src/lib.rs` that implements `Plugin`. The SDK

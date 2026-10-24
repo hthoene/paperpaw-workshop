@@ -1,7 +1,7 @@
 ### Publishing a code plugin
 
 The plugin library (paperpaw.org) lists a code plugin with its folder
-and a build per reader (`x4`, `x4-pro`, `x4-classic`), each a signed
+and a build per reader (`x4`, `x4-pro`), each a signed
 `.ppn` with the fingerprint it was built for, the author's key, and its
 source, which the library rebuilds to compare. The sample's `build.sh`
 builds, packs and signs both files, and its CI job

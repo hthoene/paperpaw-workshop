@@ -9,12 +9,12 @@ any button closes the note, and it does not come again for that screen;
 *No more hints* and the settings switch them all off.
 
 ```rust
-use paperpaw_sdk::help::{self, Hint, Zone};
+use paperpaw_sdk::help::{self, HelpHint, Zone};
 
 help::add(r, SCREEN.as_str(), &[
-    Hint::touch("hello.help.tap").zone(Zone::new(0, 0, 1000, 120)),
-    Hint::buttons("hello.help.confirm"),
-    Hint::any("hello.help.back"),
+    HelpHint::touch("hello.help.tap").zone(Zone::new(0, 0, 1000, 120)),
+    HelpHint::buttons("hello.help.confirm"),
+    HelpHint::any("hello.help.back"),
 ])?;
 ```
 

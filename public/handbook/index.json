@@ -4,70 +4,70 @@
   "title": "The sample plugin",
   "file": "docs--the-sample-plugin.md",
   "summary": "[`samples/hello-plugin`](../samples/hello-plugin/src/lib.rs) is a small\nplugin to start from.",
-  "tokens": 5281
+  "tokens": 6008
  },
  {
   "id": "docs/the-plugin",
   "title": "The plugin",
   "file": "docs--the-plugin.md",
   "summary": "A plugin is a type implementing [`Plugin`]: a manifest and a `register`\nfunction.",
-  "tokens": 399
+  "tokens": 400
  },
  {
   "id": "docs/reading-and-changing-env-and-commands",
   "title": "Reading and changing: `Env` and commands",
   "file": "docs--reading-and-changing-env-and-commands.md",
   "summary": "Plugins never change the kernel's state directly.",
-  "tokens": 186
+  "tokens": 271
  },
  {
   "id": "docs/screens",
   "title": "Screens",
   "file": "docs--screens.md",
   "summary": "A screen implements [`Screen`].",
-  "tokens": 1182
+  "tokens": 1521
  },
  {
   "id": "docs/which-building-block-for-what",
   "title": "Which building block for what",
   "file": "docs--which-building-block-for-what.md",
   "summary": "A plugin's screens are drawn with the SDK's `ui` module, so they look\nlike PaperPaw's own, follow the reader's text size and the look chosen\n(a theme paints swi",
-  "tokens": 1224
+  "tokens": 1344
  },
  {
   "id": "docs/settings",
   "title": "Settings",
   "file": "docs--settings.md",
-  "summary": "A setting is a constant with its id and the type of its value\n(`Setting<bool>`, `Setting<i64>` or `Setting<Text>` for choices,\nlanguages, lists and text):\n\n```r",
-  "tokens": 801
+  "summary": "A setting is a constant with its id and the type of its value\n(`Setting<bool>`, `Setting<i64>` or `Setting<Text>` for choices,\nlanguages, lists and text).",
+  "tokens": 869
  },
  {
   "id": "docs/events",
   "title": "Events",
   "file": "docs--events.md",
   "summary": "```rust\nr.on(events::BOOK_OPENED, move |env, reading, out| {\n    opened.set(opened.get() + 1);\n    // reading.path, reading.title, reading.progress, reading.at(",
-  "tokens": 733
+  "tokens": 772
  },
  {
   "id": "docs/translations",
   "title": "Translations",
   "file": "docs--translations.md",
   "summary": "```ini\n[meta]\nlanguage = en\nname = English\nplural = one-other\n\n[messages]\nhello.title = Hello\n# {name} is the name set, {count} the books opened since the start",
-  "tokens": 439
+  "tokens": 481
  },
  {
   "id": "docs/testing",
   "title": "Testing",
   "file": "docs--testing.md",
-  "summary": "Plugins are tested with the real kernel and an in-memory storage, as the\nsample's [test](../samples/hello-plugin/tests/hello.rs) does: build a\nkernel with the p",
-  "tokens": 184
+  "summary": "Plugins are tested with the real kernel and an in-memory storage, as the\nsample's [test](../samples/hello-plugin/tests/hello.rs) does.",
+  "tokens": 216
  },
  {
   "id": "docs/checking-your-plugin",
   "title": "Checking your plugin",
   "file": "docs--checking-your-plugin.md",
   "summary": "`paperpaw-dev` ([`tools/dev`](../tools/dev/src/lib.rs)) looks at a\nplugin the way its users will meet it, before it is published.",
-  "tokens": 2689
+  "tokens": 2871
  },
  {
   "id": "docs/variants",
@@ -81,14 +81,14 @@
   "title": "The commands",
   "file": "docs--the-commands.md",
   "summary": "| Command | What it does |\n|---|---|\n| `gallery` | Contact sheets: every screen the plugin adds and every widget in every size it can take, in every variant, as",
-  "tokens": 1071
+  "tokens": 1189
  },
  {
   "id": "docs/flows",
   "title": "Flows",
   "file": "docs--flows.md",
   "summary": "A flow is a text file of steps and of what should be true after them, run\non every device it fits:\n\n```text\n# Night mode from the menu, with buttons alone.",
-  "tokens": 651
+  "tokens": 723
  },
  {
   "id": "docs/in-a-plugin-s-own-repository",
@@ -102,14 +102,14 @@
   "title": "What plugins contribute",
   "file": "docs--what-plugins-contribute.md",
   "summary": "| Contribution | Registrar | What it is |\n|---|---|---|\n| Actions | `add_action` | Something to do, bound to buttons and gestures, listed in menus |\n| Screens |",
-  "tokens": 11621
+  "tokens": 12201
  },
  {
   "id": "docs/what-a-slot-s-screen-does",
   "title": "What a slot's screen does",
   "file": "docs--what-a-slot-s-screen-does.md",
   "summary": "A screen bound to a standard slot takes the parameters the others open\nit with and answers as they expect, so that every plugin works with it:\n\n| Slot | Opened ",
-  "tokens": 706
+  "tokens": 707
  },
  {
   "id": "docs/which-one-wins",
@@ -130,7 +130,7 @@
   "title": "What every reader offers",
   "file": "docs--what-every-reader-offers.md",
   "summary": "A plugin that works with books never names the reader plugin: it uses\nwhat `builtin` defines for every reader, so a reader of one's own (bound\nto `core.reader`)",
-  "tokens": 909
+  "tokens": 908
  },
  {
   "id": "docs/what-the-other-slots-promise",
@@ -144,14 +144,14 @@
   "title": "What every library offers",
   "file": "docs--what-every-library-offers.md",
   "summary": "A view of the library of one's own (bound to `core.library`) is as\nfast as the shipped one, on the X4 too, as both ask the same service\nand read the same catalo",
-  "tokens": 1000
+  "tokens": 1014
  },
  {
   "id": "docs/services-and-points-of-your-own",
   "title": "Services and points of your own",
   "file": "docs--services-and-points-of-your-own.md",
   "summary": "A plugin can offer others more than the kernel knows of.",
-  "tokens": 294
+  "tokens": 381
  },
  {
   "id": "docs/marks-in-the-text",
@@ -165,69 +165,69 @@
   "title": "Drawing on the page",
   "file": "docs--drawing-on-the-page.md",
   "summary": "A page layer (`layers::PageLayerSpec`) draws on every page a reader\nshows: side notes, a reading ruler, change bars.",
-  "tokens": 463
+  "tokens": 464
  },
  {
   "id": "docs/pictures-over-what-is-drawn",
   "title": "Pictures over what is drawn",
   "file": "docs--pictures-over-what-is-drawn.md",
   "summary": "Any screen, widget, theme or overlay draws a picture over what is drawn\nalready: a PNG or GIF keeps its transparency (an alpha channel, a\npalette's or a colour ",
-  "tokens": 581
+  "tokens": 587
  },
  {
   "id": "docs/widgets",
   "title": "Widgets",
   "file": "docs--widgets.md",
-  "summary": "A widget is a [`Widget`] a screen makes and keeps\n(`env.widgets.make`): it reads what it shows in `update`, which the\nscreen calls when it shows the widget, abo",
-  "tokens": 353
+  "summary": "A widget is a [`Widget`] a screen makes and keeps\n(`env.widgets().make`): it reads what it shows in `update`, which the\nscreen calls when it shows the widget, a",
+  "tokens": 419
  },
  {
   "id": "docs/widgets-with-settings",
   "title": "Widgets with settings",
   "file": "docs--widgets-with-settings.md",
   "summary": "A widget may have settings of its own, such as where its text sits.",
-  "tokens": 867
+  "tokens": 871
  },
  {
   "id": "docs/presets",
   "title": "Presets",
   "file": "docs--presets.md",
   "summary": "A preset is a ready-made set of setting values chosen as a whole\n(`paperpaw_sdk::presets`).",
-  "tokens": 514
+  "tokens": 524
  },
  {
   "id": "docs/hints-for-a-screen",
   "title": "Hints for a screen",
   "file": "docs--hints-for-a-screen.md",
   "summary": "The first time a screen opens, a short note over it says what its\ncontrols do: the hints its plugin gives with `help::add`, each a text\nand, where it is about a",
-  "tokens": 351
+  "tokens": 356
  },
  {
   "id": "docs/passwords-and-keys",
   "title": "Passwords and keys",
   "file": "docs--passwords-and-keys.md",
-  "summary": "Plugins keep passwords, API keys and tokens with\n`Command::SetSecret(SecretChange::keep(id, label, value))` and read them\nwith `env.secrets.get(id)`.",
-  "tokens": 235
+  "summary": "Plugins keep passwords, API keys and tokens with\n`Command::set_secret(SecretChange::keep(id, label, value))` and read them\nwith `env.secrets().get(id)`.",
+  "tokens": 243
  },
  {
   "id": "docs/the-network",
   "title": "The network",
   "file": "docs--the-network.md",
-  "summary": "`Command::Http(HttpRequest::get(url, &FETCHED))` makes a request where\nthe device has a network (`env.caps.network`); the answer comes as the\nrequest's reply ev",
-  "tokens": 347
+  "summary": "`Command::http(HttpRequest::get(url, &FETCHED))` makes a request where\nthe device has a network (`env.caps().network`); the answer comes as the\nrequest's reply ",
+  "tokens": 351
  },
  {
   "id": "docs/work-in-the-background",
   "title": "Work in the background",
   "file": "docs--work-in-the-background.md",
   "summary": "What a plugin does on its own, not because the reader just asked for\nit, it declares as work (`paperpaw_sdk::work`, ADR 0025), and the\nkernel runs it at the mom",
-  "tokens": 767
+  "tokens": 794
  },
  {
   "id": "docs/firmware-updates",
   "title": "Firmware updates",
   "file": "docs--firmware-updates.md",
-  "summary": "Where PaperPaw is the device's firmware (the X4s), `env.firmware` says\nwhich version runs and how an install goes; elsewhere it is `None`.",
+  "summary": "Where PaperPaw is the device's firmware (the X4s), `env.firmware()` says\nwhich version runs and how an install goes; elsewhere it is `None`.",
   "tokens": 223
  },
  {
@@ -235,35 +235,35 @@
   "title": "Memory",
   "file": "docs--memory.md",
   "summary": "PaperPaw's code guidelines ([CONTRIBUTING.md](../CONTRIBUTING.md#code-guidelines)) hold for plugins too: length limits, errors on user data, memory, comments.",
-  "tokens": 248
+  "tokens": 276
  },
  {
   "id": "docs/plugins-as-files",
   "title": "Plugins as files",
   "file": "docs--plugins-as-files.md",
-  "summary": "A code plugin can also be a file, `code.ppn`, in a plugin's folder on\nthe card, which the X4, the X4 Pro and the X4 Classic load at their\nstart (ADR 0024): from",
-  "tokens": 2168
+  "summary": "A code plugin can also be a file, `code.ppn`, in a plugin's folder on\nthe card, which the X4 and the X4 Pro load at their\nstart (ADR 0024): from the plugin stor",
+  "tokens": 2665
  },
  {
   "id": "docs/the-crate",
   "title": "The crate",
   "file": "docs--the-crate.md",
   "summary": "The plugin stays a library crate, tried in the emulator and tested as\nany other.",
-  "tokens": 287
+  "tokens": 444
  },
  {
   "id": "docs/which-build-fits",
   "title": "Which build fits",
   "file": "docs--which-build-fits.md",
-  "summary": "Until PaperPaw 1.0 a plugin file runs only on the PaperPaw it was built\nfor: the same compiler for the same chip from the same SDK with the same\nfeatures (but `",
-  "tokens": 187
+  "summary": "A plugin file runs on every PaperPaw of the plugin interface it was\nbuilt for ([ADR 0026](adr/0026-plugin-interface-version.md)),\nwhichever release made it: its",
+  "tokens": 353
  },
  {
   "id": "docs/the-file-in-the-emulator",
   "title": "The file in the emulator",
   "file": "docs--the-file-in-the-emulator.md",
   "summary": "The desktop emulator loads a plugin's code built for the computer it runs\non, as Android loads `code.so`: a `cdylib` crate with the same\n`plugin!` line, built w",
-  "tokens": 242
+  "tokens": 271
  },
  {
   "id": "docs/packing-and-signing",
@@ -277,42 +277,42 @@
   "title": "Trying it on a device",
   "file": "docs--trying-it-on-a-device.md",
   "summary": "A code plugin is a folder like a data plugin's, with its code beside its\n`plugin.ini`:\n\n```text\nplugins/my-plugin/\n  plugin.ini     [plugin] id, name, descripti",
-  "tokens": 381
+  "tokens": 493
  },
  {
   "id": "docs/keeping-it-small",
   "title": "Keeping it small",
   "file": "docs--keeping-it-small.md",
   "summary": "On the X4 every plugin's file takes room in flash.",
-  "tokens": 252
+  "tokens": 272
  },
  {
   "id": "docs/publishing-a-code-plugin",
   "title": "Publishing a code plugin",
   "file": "docs--publishing-a-code-plugin.md",
-  "summary": "The plugin library (paperpaw.org) lists a code plugin with its folder\nand a build per reader (`x4`, `x4-pro`, `x4-classic`), each a signed\n`.ppn` with the finge",
-  "tokens": 156
+  "summary": "The plugin library (paperpaw.org) lists a code plugin with its folder\nand a build per reader (`x4`, `x4-pro`), each a signed\n`.ppn` with the fingerprint it was ",
+  "tokens": 152
  },
  {
   "id": "docs/plugins-without-code",
   "title": "Plugins without code",
   "file": "docs--plugins-without-code.md",
   "summary": "A data plugin is a folder:\n\n```text\nplugins/large-print/\n  plugin.ini     [plugin] id, name, description, version, formats\n  i18n/*.ini     translation catalogs",
-  "tokens": 1915
+  "tokens": 2234
  },
  {
   "id": "docs/publishing",
   "title": "Publishing",
   "file": "docs--publishing.md",
   "summary": "The plugin library on paperpaw.org is what the website lists and every\nreader's store (*More plugins*) installs from (ADR 0023).",
-  "tokens": 1606
+  "tokens": 1641
  },
  {
   "id": "docs/what-is-uploaded",
   "title": "What is uploaded",
   "file": "docs--what-is-uploaded.md",
   "summary": "The plugin's folder as a ZIP, `plugin.ini` at its top (or inside one\nfolder at its top), its `id` and `version` the ones published.",
-  "tokens": 414
+  "tokens": 409
  },
  {
   "id": "docs/the-author-s-key",
@@ -326,21 +326,21 @@
   "title": "Builds that match their source",
   "file": "docs--builds-that-match-their-source.md",
   "summary": "The site keeps each code plugin's source, shows it file by file, and\nrebuilds each build in a container with the toolchain its fingerprint\nnames, with the sampl",
-  "tokens": 674
+  "tokens": 715
  },
  {
   "id": "docs/customisation",
   "title": "Customisation at a glance (paperpaw.ini)",
   "file": "docs--customisation.md",
   "summary": "A plain text file (`paperpaw.ini`) on the device changes behaviour without\nany programming:\n\n```ini\n[core]\nlanguage = de\nfull-refresh-interval = 8\n\n[slots]\n# Re",
-  "tokens": 246
+  "tokens": 249
  },
  {
   "id": "keymap/default",
   "title": "The default key map",
   "file": "keymap--default.md",
   "summary": "```ini\n# Default key bindings of the PaperPaw kernel.",
-  "tokens": 580
+  "tokens": 608
  },
  {
   "id": "samples/airy-theme",
@@ -389,7 +389,7 @@
   "title": "Recipe: A widget's own settings (text, choice, switch, number), in the widget's settings group",
   "file": "recipes--settings.md",
   "summary": "`src/lib.rs`:\n\n```rust\n//! A widget's settings: a motto, typed in (`text`), shown plain or in\n//! quotes (`choice`), in capitals or not (`switch`), on at most s",
-  "tokens": 1885
+  "tokens": 1856
  },
  {
   "id": "widgets",
@@ -403,7 +403,7 @@
   "title": "Actions for key maps",
   "file": "actions.md",
   "summary": "| Action id | Name |\n|---|---|\n| `about.open` | About PaperPaw |\n| `battery.open` | Battery |\n| `calibre.open` | Calibre |\n| `core.apps` | Apps |\n| `core.back` ",
-  "tokens": 1021
+  "tokens": 1058
  },
  {
   "id": "devices",
@@ -416,29 +416,29 @@
   "id": "sdk/root",
   "title": "The SDK's top level (paperpaw_sdk::...)",
   "file": "sdk--root.md",
-  "summary": "```rust\npub trait paperpaw_sdk::EventData: core::marker::Sized + 'static\npub trait paperpaw_sdk::Plugin\npub fn paperpaw_sdk::Plugin::manifest(&self) -> paperpaw",
-  "tokens": 22978
+  "summary": "```rust\npub trait paperpaw_sdk::EventData: core::clone::Clone + core::marker::Sized + 'static\npub trait paperpaw_sdk::Plugin\npub fn paperpaw_sdk::Plugin::manife",
+  "tokens": 22023
  },
  {
   "id": "sdk/annotations",
   "title": "The SDK's module annotations",
   "file": "sdk--annotations.md",
   "summary": "```rust\npub struct paperpaw_sdk::annotations::Annotation\npub paperpaw_sdk::annotations::Annotation::created: i64\npub paperpaw_sdk::annotations::Annotation::mark",
-  "tokens": 702
+  "tokens": 928
  },
  {
   "id": "sdk/ask",
   "title": "The SDK's module ask",
   "file": "sdk--ask.md",
   "summary": "```rust\npub struct paperpaw_sdk::ask::ChoiceQuestion\npub fn paperpaw_sdk::ask::ChoiceQuestion::about(self, impl core::convert::Into<alloc::string::String>) -> S",
-  "tokens": 818
+  "tokens": 838
  },
  {
   "id": "sdk/builtin",
   "title": "The SDK's module builtin",
   "file": "sdk--builtin.md",
   "summary": "```rust\npub struct paperpaw_sdk::builtin::events::AnnotationsChanged\npub paperpaw_sdk::builtin::events::AnnotationsChanged::path: alloc::string::String\npub fn p",
-  "tokens": 15478
+  "tokens": 18060
  },
  {
   "id": "sdk/chrome",
@@ -465,8 +465,8 @@
   "id": "sdk/contribution",
   "title": "The SDK's module contribution",
   "file": "sdk--contribution.md",
-  "summary": "```rust\npub struct paperpaw_sdk::contribution::Registrar\npub fn paperpaw_sdk::contribution::Registrar::add(&mut self, paperpaw_sdk::contribution::Contribution) ",
-  "tokens": 9720
+  "summary": "```rust\npub struct paperpaw_sdk::contribution::Registrar\npub fn paperpaw_sdk::contribution::Registrar::add_action(&mut self, paperpaw_sdk::ActionSpec) -> core::",
+  "tokens": 7047
  },
  {
   "id": "sdk/data",
@@ -480,7 +480,7 @@
   "title": "The SDK's module decorations",
   "file": "sdk--decorations.md",
   "summary": "```rust\npub struct paperpaw_sdk::decorations::Decorated\npub paperpaw_sdk::decorations::Decorated::end: paperpaw_document::Locator\npub paperpaw_sdk::decorations:",
-  "tokens": 2613
+  "tokens": 2706
  },
  {
   "id": "sdk/device_name",
@@ -493,8 +493,8 @@
   "id": "sdk/digest",
   "title": "The SDK's module digest",
   "file": "sdk--digest.md",
-  "summary": "```rust\npub use paperpaw_sdk::digest::fnv1a64\npub use paperpaw_sdk::digest::hex\npub use paperpaw_sdk::digest::md5\npub use paperpaw_sdk::digest::sha1\npub use pap",
-  "tokens": 53
+  "summary": "```rust\npub use paperpaw_sdk::digest::Fnv1a64\npub use paperpaw_sdk::digest::fnv1a64\npub use paperpaw_sdk::digest::hex\npub use paperpaw_sdk::digest::md5\npub use ",
+  "tokens": 63
  },
  {
   "id": "sdk/document",
@@ -507,71 +507,71 @@
   "id": "sdk/event",
   "title": "The SDK's module event",
   "file": "sdk--event.md",
-  "summary": "```rust\npub trait paperpaw_sdk::event::EventData: core::marker::Sized + 'static\npub trait paperpaw_sdk::event::ParamValue: core::marker::Sized\npub type paperpaw",
-  "tokens": 707
+  "summary": "```rust\npub trait paperpaw_sdk::event::EventData: core::clone::Clone + core::marker::Sized + 'static\npub trait paperpaw_sdk::event::ParamValue: core::marker::Si",
+  "tokens": 764
  },
  {
   "id": "sdk/reading",
   "title": "The SDK's module reading",
   "file": "sdk--reading.md",
   "summary": "```rust\npub struct paperpaw_sdk::reading::DroppedRuns\npub fn paperpaw_sdk::reading::DroppedRuns::clear(&self)\npub fn paperpaw_sdk::reading::DroppedRuns::new() -",
-  "tokens": 2070
+  "tokens": 2139
  },
  {
   "id": "sdk/replies",
   "title": "The SDK's module replies",
   "file": "sdk--replies.md",
-  "summary": "```rust\npub struct paperpaw_sdk::replies::Chosen\npub fn paperpaw_sdk::replies::Chosen::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>\npub fn p",
-  "tokens": 2664
+  "summary": "```rust\npub struct paperpaw_sdk::replies::Confirmed\npub fn paperpaw_sdk::replies::Confirmed::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>\npu",
+  "tokens": 3992
  },
  {
   "id": "sdk/ui",
   "title": "The SDK's module ui",
   "file": "sdk--ui.md",
-  "summary": "```rust\npub struct paperpaw_sdk::ui::Chips\npub fn paperpaw_sdk::ui::Chips::cell(&self, usize) -> core::option::Option<paperpaw_platform::geometry::Rect>\npub fn ",
-  "tokens": 22627
+  "summary": "```rust\npub struct paperpaw_sdk::ui::CellGrid\npub fn paperpaw_sdk::ui::CellGrid::cell(&self, usize) -> paperpaw_platform::geometry::Rect\npub fn paperpaw_sdk::ui",
+  "tokens": 22643
  },
  {
   "id": "sdk/work",
   "title": "The SDK's module work",
   "file": "sdk--work.md",
   "summary": "```rust\npub struct paperpaw_sdk::work::Moments(_)\npub const paperpaw_sdk::work::Moments::ALL: paperpaw_sdk::work::Moments\npub const paperpaw_sdk::work::Moments:",
-  "tokens": 2475
+  "tokens": 2598
  },
  {
   "id": "sdk/wifi",
   "title": "The SDK's module wifi",
   "file": "sdk--wifi.md",
   "summary": "```rust\npub struct paperpaw_sdk::wifi::Wifi\npub paperpaw_sdk::wifi::Wifi::busy: bool\npub paperpaw_sdk::wifi::Wifi::networks: alloc::vec::Vec<paperpaw_sdk::wifi:",
-  "tokens": 1016
+  "tokens": 1047
  },
  {
   "id": "sdk/files",
   "title": "The SDK's module files",
   "file": "sdk--files.md",
   "summary": "```rust\npub struct paperpaw_sdk::files::Entry\npub paperpaw_sdk::files::Entry::is_dir: bool\npub paperpaw_sdk::files::Entry::name: alloc::string::String\npub paper",
-  "tokens": 876
+  "tokens": 906
  },
  {
   "id": "sdk/filters",
   "title": "The SDK's module filters",
   "file": "sdk--filters.md",
   "summary": "```rust\npub struct paperpaw_sdk::filters::InputFilterSpec\npub paperpaw_sdk::filters::InputFilterSpec::filter: paperpaw_sdk::filters::InputFilterFn\npub paperpaw_",
-  "tokens": 1839
+  "tokens": 1829
  },
  {
   "id": "sdk/firmware",
   "title": "The SDK's module firmware",
   "file": "sdk--firmware.md",
   "summary": "```rust\npub struct paperpaw_sdk::firmware::Firmware\npub paperpaw_sdk::firmware::Firmware::chip: u16\npub paperpaw_sdk::firmware::Firmware::keys: alloc::vec::Vec<",
-  "tokens": 1145
+  "tokens": 991
  },
  {
   "id": "sdk/help",
   "title": "The SDK's module help",
   "file": "sdk--help.md",
-  "summary": "```rust\npub struct paperpaw_sdk::help::Hint\npub paperpaw_sdk::help::Hint::input: paperpaw_sdk::help::Input\npub paperpaw_sdk::help::Hint::text: alloc::string::St",
-  "tokens": 548
+  "summary": "```rust\npub struct paperpaw_sdk::help::HelpHint\npub paperpaw_sdk::help::HelpHint::input: paperpaw_sdk::help::Input\npub paperpaw_sdk::help::HelpHint::text: alloc",
+  "tokens": 562
  },
  {
   "id": "sdk/host",
@@ -579,13 +579,6 @@
   "file": "sdk--host.md",
   "summary": "```rust\npub struct paperpaw_sdk::host::ScreenHost\npub fn paperpaw_sdk::host::ScreenHost::area(&self) -> core::option::Option<paperpaw_platform::geometry::Rect>\n",
   "tokens": 508
- },
- {
-  "id": "sdk/http_params",
-  "title": "The SDK's module http_params",
-  "file": "sdk--http_params.md",
-  "summary": "```rust\npub const paperpaw_sdk::http_params::BODY: &str\npub const paperpaw_sdk::http_params::CONTENT_TYPE: &str\npub const paperpaw_sdk::http_params::ETAG: &str\n",
-  "tokens": 88
  },
  {
   "id": "sdk/hyphen",
@@ -599,7 +592,7 @@
   "title": "The SDK's module icons",
   "file": "sdk--icons.md",
   "summary": "```rust\npub const paperpaw_sdk::icons::BACK: &str\npub const paperpaw_sdk::icons::BUSY: &str\npub const paperpaw_sdk::icons::DELETE: &str\npub const paperpaw_sdk::",
-  "tokens": 169
+  "tokens": 180
  },
  {
   "id": "sdk/image",
@@ -613,7 +606,7 @@
   "title": "The SDK's module install",
   "file": "sdk--install.md",
   "summary": "```rust\npub struct paperpaw_sdk::install::Installer\npub fn paperpaw_sdk::install::Installer::cancel(&self, &dyn paperpaw_platform::storage::Storage)\npub fn pape",
-  "tokens": 999
+  "tokens": 1319
  },
  {
   "id": "sdk/json",
@@ -627,21 +620,21 @@
   "title": "The SDK's module keys",
   "file": "sdk--keys.md",
   "summary": "```rust\npub trait paperpaw_sdk::keys::GestureRecognizer\npub fn paperpaw_sdk::keys::GestureRecognizer::next_tick(&self) -> core::option::Option<paperpaw_platform",
-  "tokens": 936
+  "tokens": 961
  },
  {
   "id": "sdk/layers",
   "title": "The SDK's module layers",
   "file": "sdk--layers.md",
   "summary": "```rust\npub struct paperpaw_sdk::layers::LineBox\npub paperpaw_sdk::layers::LineBox::area: paperpaw_platform::geometry::Rect\npub paperpaw_sdk::layers::LineBox::e",
-  "tokens": 1904
+  "tokens": 1896
  },
  {
   "id": "sdk/library",
   "title": "The SDK's module library",
   "file": "sdk--library.md",
   "summary": "```rust\npub trait paperpaw_sdk::library::Library\npub fn paperpaw_sdk::library::Library::book(&self, &paperpaw_sdk::Env<'_>, &str) -> core::option::Option<paperp",
-  "tokens": 10880
+  "tokens": 11245
  },
  {
   "id": "sdk/logo",
@@ -658,11 +651,18 @@
   "tokens": 1052
  },
  {
+  "id": "sdk/memory",
+  "title": "The SDK's module memory",
+  "file": "sdk--memory.md",
+  "summary": "```rust\npub struct paperpaw_sdk::memory::Memory\npub const paperpaw_sdk::memory::Memory::NONE: Self\npub const fn paperpaw_sdk::memory::Memory::new(fn() -> core::",
+  "tokens": 441
+ },
+ {
   "id": "sdk/native",
   "title": "The SDK's module native",
   "file": "sdk--native.md",
   "summary": "```rust\npub struct paperpaw_sdk::native::CodeRoom\npub paperpaw_sdk::native::CodeRoom::granule: u32\npub paperpaw_sdk::native::CodeRoom::max_plugins: core::option",
-  "tokens": 1584
+  "tokens": 1330
  },
  {
   "id": "sdk/numbers",
@@ -683,14 +683,14 @@
   "title": "The SDK's module positions",
   "file": "sdk--positions.md",
   "summary": "```rust\npub struct paperpaw_sdk::positions::Position\npub paperpaw_sdk::positions::Position::at: paperpaw_document::Locator\npub paperpaw_sdk::positions::Position",
-  "tokens": 390
+  "tokens": 563
  },
  {
   "id": "sdk/power",
   "title": "The SDK's module power",
   "file": "sdk--power.md",
   "summary": "```rust\npub struct paperpaw_sdk::power::Power\npub paperpaw_sdk::power::Power::automatic: bool\npub paperpaw_sdk::power::Power::level: paperpaw_sdk::power::PowerL",
-  "tokens": 453
+  "tokens": 506
  },
  {
   "id": "sdk/presets",
@@ -725,42 +725,35 @@
   "title": "The SDK's module secrets",
   "file": "sdk--secrets.md",
   "summary": "```rust\npub trait paperpaw_sdk::secrets::Running\npub fn paperpaw_sdk::secrets::Running::runs(&self, &str) -> bool\npub struct paperpaw_sdk::secrets::Anyone\npub f",
-  "tokens": 768
+  "tokens": 788
  },
  {
   "id": "sdk/semantics",
   "title": "The SDK's module semantics",
   "file": "sdk--semantics.md",
-  "summary": "```rust\npub struct paperpaw_sdk::semantics::Part\npub paperpaw_sdk::semantics::Part::area: paperpaw_platform::geometry::Rect\npub paperpaw_sdk::semantics::Part::f",
-  "tokens": 269
+  "summary": "```rust\npub struct paperpaw_sdk::semantics::Part\npub paperpaw_sdk::semantics::Part::area: paperpaw_platform::geometry::Rect\npub paperpaw_sdk::semantics::Part::d",
+  "tokens": 349
  },
  {
   "id": "sdk/served",
   "title": "The SDK's module served",
   "file": "sdk--served.md",
   "summary": "```rust\npub struct paperpaw_sdk::served::Guard\npub fn paperpaw_sdk::served::Guard::check(&mut self, core::option::Option<&str>, paperpaw_platform::input::Instan",
-  "tokens": 274
- },
- {
-  "id": "sdk/server_params",
-  "title": "The SDK's module server_params",
-  "file": "sdk--server_params.md",
-  "summary": "```rust\npub const paperpaw_sdk::server_params::ADDRESS: &str\npub const paperpaw_sdk::server_params::BODY_FILE: &str\npub const paperpaw_sdk::server_params::FAILE",
-  "tokens": 149
+  "tokens": 288
  },
  {
   "id": "sdk/services",
   "title": "The SDK's module services",
   "file": "sdk--services.md",
-  "summary": "```rust\npub trait paperpaw_sdk::services::ServiceType: core::any::Any\npub struct paperpaw_sdk::services::EventSpec\npub paperpaw_sdk::services::EventSpec::id: pa",
-  "tokens": 833
+  "summary": "```rust\npub unsafe trait paperpaw_sdk::services::ServiceType: core::any::Any\npub struct paperpaw_sdk::services::EventSpec\npub paperpaw_sdk::services::EventSpec:",
+  "tokens": 714
  },
  {
   "id": "sdk/setting",
   "title": "The SDK's module setting",
   "file": "sdk--setting.md",
   "summary": "```rust\npub trait paperpaw_sdk::setting::SettingType: 'static\npub enum paperpaw_sdk::setting::Text\npub type paperpaw_sdk::setting::Text::Input = alloc::borrow::",
-  "tokens": 919
+  "tokens": 954
  },
  {
   "id": "sdk/setup",
@@ -770,25 +763,11 @@
   "tokens": 442
  },
  {
-  "id": "sdk/socket_params",
-  "title": "The SDK's module socket_params",
-  "file": "sdk--socket_params.md",
-  "summary": "```rust\npub const paperpaw_sdk::socket_params::ANSWER: &str\npub const paperpaw_sdk::socket_params::CLOSED: &str\npub const paperpaw_sdk::socket_params::CONNECTED",
-  "tokens": 175
- },
- {
-  "id": "sdk/speech_params",
-  "title": "The SDK's module speech_params",
-  "file": "sdk--speech_params.md",
-  "summary": "```rust\npub const paperpaw_sdk::speech_params::FAILED: &str\n```",
-  "tokens": 18
- },
- {
   "id": "sdk/status",
   "title": "The SDK's module status",
   "file": "sdk--status.md",
   "summary": "```rust\npub struct paperpaw_sdk::status::Place\npub paperpaw_sdk::status::Place::id: paperpaw_sdk::Id\npub paperpaw_sdk::status::Place::line: core::option::Option",
-  "tokens": 3458
+  "tokens": 3433
  },
  {
   "id": "sdk/text",
@@ -801,36 +780,36 @@
   "id": "sdk/time",
   "title": "The SDK's module time",
   "file": "sdk--time.md",
-  "summary": "```rust\npub struct paperpaw_sdk::time::LocalTime\npub paperpaw_sdk::time::LocalTime::day: u8\npub paperpaw_sdk::time::LocalTime::hour: u8\npub paperpaw_sdk::time::",
-  "tokens": 738
+  "summary": "```rust\npub struct paperpaw_sdk::time::Clock\npub const paperpaw_sdk::time::Clock::NONE: Self\npub fn paperpaw_sdk::time::Clock::micros(&self) -> core::option::Op",
+  "tokens": 1332
  },
  {
   "id": "sdk/usage",
   "title": "The SDK's module usage",
   "file": "sdk--usage.md",
   "summary": "```rust\npub struct paperpaw_sdk::usage::PluginUsage\npub paperpaw_sdk::usage::PluginUsage::busy_us: u64\npub paperpaw_sdk::usage::PluginUsage::calls: u32\npub pape",
-  "tokens": 270
+  "tokens": 389
  },
  {
   "id": "sdk/voices",
   "title": "The SDK's module voices",
   "file": "sdk--voices.md",
   "summary": "```rust\npub struct paperpaw_sdk::voices::VoiceSpec\npub paperpaw_sdk::voices::VoiceSpec::id: paperpaw_sdk::Id\npub paperpaw_sdk::voices::VoiceSpec::languages: all",
-  "tokens": 496
+  "tokens": 478
  },
  {
   "id": "sdk/web",
   "title": "The SDK's module web",
   "file": "sdk--web.md",
   "summary": "```rust\npub const paperpaw_sdk::web::USER_AGENT: &str\npub fn paperpaw_sdk::web::base64(&[u8]) -> alloc::string::String\npub fn paperpaw_sdk::web::base_url(&str) ",
-  "tokens": 233
+  "tokens": 245
  },
  {
   "id": "sdk/widgets",
   "title": "The SDK's module widgets",
   "file": "sdk--widgets.md",
   "summary": "```rust\npub trait paperpaw_sdk::widgets::Widget\npub fn paperpaw_sdk::widgets::Widget::context(&mut self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::widgets::WidgetC",
-  "tokens": 9713
+  "tokens": 7777
  },
  {
   "id": "sdk/words",
@@ -850,8 +829,8 @@
   "id": "settings/core",
   "title": "Settings of core",
   "file": "settings--core.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] developer` | Developer options | `true`, `false` | `false` | Settings and n",
-  "tokens": 7311
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] developer` | Developer options | `true`, `false` | `false` | For developers",
+  "tokens": 6379
  },
  {
   "id": "settings/dictionary",
@@ -865,7 +844,7 @@
   "title": "Settings of reader",
   "file": "settings--reader.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[reader] status.size` | Text size | 5 to 16 | `6` | The size of the text in the st",
-  "tokens": 977
+  "tokens": 827
  },
  {
   "id": "settings/files",
@@ -878,8 +857,8 @@
   "id": "settings/home",
   "title": "Settings of home",
   "file": "settings--home.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[home] page-1` | Home page 1 | text | `home.clock, home.continue, home.recent` | W",
-  "tokens": 2205
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[home] page-1` | Home page 1 | text | `home.clock, home.continue, home.recent` | T",
+  "tokens": 1899
  },
  {
   "id": "settings/menu",
@@ -893,49 +872,49 @@
   "title": "Settings of kosync",
   "file": "settings--kosync.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[kosync] user` | Account | text | `` | Sign in to continue reading on other device",
-  "tokens": 154
+  "tokens": 126
  },
  {
   "id": "settings/calibre",
   "title": "Settings of calibre",
   "file": "settings--calibre.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[calibre] address` | Calibre's address | text | `` | Only if Calibre is not found ",
-  "tokens": 66
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[calibre] address` | Calibre's address | text | `` | Only if Calibre is not found:",
+  "tokens": 53
  },
  {
   "id": "settings/stats",
   "title": "Settings of stats",
   "file": "settings--stats.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[stats] goal` | Daily reading goal | `stats.goal.off`, `stats.goal.10`, `stats.goa",
-  "tokens": 3489
+  "tokens": 3281
  },
  {
   "id": "settings/reading-goal",
   "title": "Settings of reading-goal",
   "file": "settings--reading-goal.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[reading-goal] content` | Content from | 5 to 95 | `50` | From which share of the ",
-  "tokens": 335
+  "tokens": 297
  },
  {
   "id": "settings/battery",
   "title": "Settings of battery",
   "file": "settings--battery.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[battery] enabled` | Record battery use | `true`, `false` | `true` | Notes the bat",
-  "tokens": 128
+  "tokens": 97
  },
  {
   "id": "settings/wifi",
   "title": "Settings of wifi",
   "file": "settings--wifi.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[wifi] on-demand` | Connect when needed | `true`, `false` | `true` | Switches Wi-F",
-  "tokens": 189
+  "tokens": 165
  },
  {
   "id": "settings/power",
   "title": "Settings of power",
   "file": "settings--power.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[power] mode` | Power mode | `power.mode.auto`, `power.mode.normal`, `power.mode.s",
-  "tokens": 226
+  "tokens": 196
  },
  {
   "id": "settings/file-manager",
@@ -949,7 +928,7 @@
   "title": "Settings of opds",
   "file": "settings--opds.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[opds] covers` | Covers | `true`, `false` | `true` | Pictures of the books in the ",
-  "tokens": 102
+  "tokens": 90
  },
  {
   "id": "settings/fonts-browser",
@@ -970,7 +949,7 @@
   "title": "Settings of lock",
   "file": "settings--lock.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[lock] kind` | Screen lock | `lock.kind.off`, `lock.kind.pin`, `lock.kind.pattern`",
-  "tokens": 228
+  "tokens": 145
  },
  {
   "id": "settings/aids",
@@ -983,15 +962,15 @@
   "id": "settings/vocabulary",
   "title": "Settings of vocabulary",
   "file": "settings--vocabulary.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[vocabulary] collect` | Keep words looked up | `true`, `false` | `true` | Each wor",
-  "tokens": 2017
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[vocabulary] collect` | Keep words looked up | `true`, `false` | `true` | Words yo",
+  "tokens": 1888
  },
  {
   "id": "settings/sleep",
   "title": "Settings of sleep",
   "file": "settings--sleep.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[sleep] show` | While asleep, show | `sleep.show.cat`, `sleep.show.cover`, `sleep.",
-  "tokens": 532
+  "tokens": 501
  },
  {
   "id": "settings/translate",
@@ -1005,28 +984,28 @@
   "title": "Settings of news",
   "file": "settings--news.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[news] articles` | News articles a feed | 5 to 200 | `30` | How many of a feed's n",
-  "tokens": 529
+  "tokens": 505
  },
  {
   "id": "settings/weather",
   "title": "Settings of weather",
   "file": "settings--weather.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[weather] place` | Place | text | `` | Found by its name.",
-  "tokens": 1832
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[weather] place` | Place | text | `` | Search by name.",
+  "tokens": 1773
  },
  {
   "id": "settings/widgets",
   "title": "Settings of widgets",
   "file": "settings--widgets.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] analogue-clock.align` | Alignment | `core.align.left`, `core.align.cente",
-  "tokens": 12340
+  "tokens": 11592
  },
  {
   "id": "settings/keyboard",
   "title": "Settings of keyboard",
   "file": "settings--keyboard.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[keyboard] layouts` | Keyboard layouts | list | `keyboard.layout.auto` | The layou",
-  "tokens": 121
+  "tokens": 217
  },
  {
   "id": "settings/settings",
@@ -1047,7 +1026,7 @@
   "title": "Settings of update",
   "file": "settings--update.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[update] server` | Update server | text | `https://paperpaw.org` | Where PaperPaw ",
-  "tokens": 78
+  "tokens": 91
  },
  {
   "id": "settings/help",
@@ -1060,36 +1039,36 @@
   "id": "settings-group/core.group.system",
   "title": "Settings in the group core.group.system",
   "file": "settings-group--core.group.system.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] developer` | Developer options | `true`, `false` | `false` | Settings and n",
-  "tokens": 1108
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] developer` | Developer options | `true`, `false` | `false` | For developers",
+  "tokens": 1063
  },
  {
   "id": "settings-group/core.group.display",
   "title": "Settings in the group core.group.display",
   "file": "settings-group--core.group.display.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] night-mode` | Night mode | `true`, `false` | `false` | White text on black.",
-  "tokens": 1026
+  "tokens": 926
  },
  {
   "id": "settings-group/core.group.controls",
   "title": "Settings in the group core.group.controls",
   "file": "settings-group--core.group.controls.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] edge-ends` | Edges for swipes: top and bottom | 0 to 25 | `10` | How far in",
-  "tokens": 639
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] edge-ends` | Edges for swipes: top and bottom | 0 to 25 | `10` | How far fr",
+  "tokens": 475
  },
  {
   "id": "settings-group/core.group.library",
   "title": "Settings in the group core.group.library",
   "file": "settings-group--core.group.library.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] library-folder` | Library folder | text | `books` | The folder with your bo",
-  "tokens": 333
+  "tokens": 307
  },
  {
   "id": "settings-group/core.group.look",
   "title": "Settings in the group core.group.look",
   "file": "settings-group--core.group.look.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] ui-size` | Menu text size | 7 to 24 | `9` | Size of menus, lists and the st",
-  "tokens": 1777
+  "tokens": 1465
  },
  {
   "id": "settings-group/core.space",
@@ -1103,356 +1082,356 @@
   "title": "Settings in the group core.group.status",
   "file": "settings-group--core.group.status.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] status-font` | Font | `core.status-font.ui`, `core.status-font.book`, `Lite",
-  "tokens": 636
+  "tokens": 514
  },
  {
   "id": "settings-group/core.group.reading",
   "title": "Settings in the group core.group.reading",
   "file": "settings-group--core.group.reading.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] reading-font` | Font | `core.font.default`, `Literata`, `Source Sans 3` | `",
-  "tokens": 1848
+  "tokens": 1639
  },
  {
   "id": "settings-group/core.group.marks",
   "title": "Settings in the group core.group.marks",
   "file": "settings-group--core.group.marks.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] highlight.background` | Background | `core.tone.none`, `core.tone.light-gra",
-  "tokens": 2318
+  "tokens": 2263
  },
  {
   "id": "settings-group/home.status",
   "title": "Settings in the group home.status",
   "file": "settings-group--home.status.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[home] status.line` | Line | list | `` | What the status line shows: the items cho",
-  "tokens": 288
+  "tokens": 261
  },
  {
   "id": "settings-group/home.date",
   "title": "Settings in the group home.date",
   "file": "settings-group--home.date.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[home] date.align` | Alignment | `core.align.left`, `core.align.center`, `core.ali",
-  "tokens": 270
+  "tokens": 246
  },
  {
   "id": "settings-group/home.clock",
   "title": "Settings in the group home.clock",
   "file": "settings-group--home.clock.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[home] clock.align` | Alignment | `core.align.left`, `core.align.center`, `core.al",
-  "tokens": 320
+  "tokens": 296
  },
  {
   "id": "settings-group/home.continue",
   "title": "Settings in the group home.continue",
   "file": "settings-group--home.continue.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[home] continue.align` | Alignment | `core.align.left`, `core.align.center`, `core",
-  "tokens": 313
+  "tokens": 290
  },
  {
   "id": "settings-group/home.recent",
   "title": "Settings in the group home.recent",
   "file": "settings-group--home.recent.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[home] recent.align` | Alignment | `core.align.left`, `core.align.center`, `core.a",
-  "tokens": 347
+  "tokens": 323
  },
  {
   "id": "settings-group/kosync.group",
   "title": "Settings in the group kosync.group",
   "file": "settings-group--kosync.group.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[kosync] user` | Account | text | `` | Sign in to continue reading on other device",
-  "tokens": 154
+  "tokens": 126
  },
  {
   "id": "settings-group/stats.group",
   "title": "Settings in the group stats.group",
   "file": "settings-group--stats.group.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[stats] goal` | Daily reading goal | `stats.goal.off`, `stats.goal.10`, `stats.goa",
-  "tokens": 326
+  "tokens": 284
  },
  {
   "id": "settings-group/stats.widget.today",
   "title": "Settings in the group stats.widget.today",
   "file": "settings-group--stats.widget.today.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[stats] widget.today.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.",
-  "tokens": 471
+  "tokens": 447
  },
  {
   "id": "settings-group/stats.widget.week",
   "title": "Settings in the group stats.widget.week",
   "file": "settings-group--stats.widget.week.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[stats] widget.week.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.f",
-  "tokens": 513
+  "tokens": 489
  },
  {
   "id": "settings-group/stats.widget.goal",
   "title": "Settings in the group stats.widget.goal",
   "file": "settings-group--stats.widget.goal.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[stats] widget.goal.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.f",
-  "tokens": 507
+  "tokens": 476
  },
  {
   "id": "settings-group/stats.widget.calendar",
   "title": "Settings in the group stats.widget.calendar",
   "file": "settings-group--stats.widget.calendar.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[stats] widget.calendar.frame` | Frame | `core.frame.none`, `core.frame.line`, `co",
-  "tokens": 620
+  "tokens": 591
  },
  {
   "id": "settings-group/stats.widget.year",
   "title": "Settings in the group stats.widget.year",
   "file": "settings-group--stats.widget.year.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[stats] widget.year.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.f",
-  "tokens": 553
+  "tokens": 530
  },
  {
   "id": "settings-group/stats.widget.streak",
   "title": "Settings in the group stats.widget.streak",
   "file": "settings-group--stats.widget.streak.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[stats] widget.streak.frame` | Frame | `core.frame.none`, `core.frame.line`, `core",
-  "tokens": 623
+  "tokens": 588
  },
  {
   "id": "settings-group/reading-goal.widget",
   "title": "Settings in the group reading-goal.widget",
   "file": "settings-group--reading-goal.widget.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[reading-goal] widget.frame` | Frame | `core.frame.none`, `core.frame.line`, `core",
-  "tokens": 213
+  "tokens": 189
  },
  {
   "id": "settings-group/core.group.developer",
   "title": "Settings in the group core.group.developer",
   "file": "settings-group--core.group.developer.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[battery] by-plugin` | Battery: what each plugin took | `true`, `false` | `true` |",
-  "tokens": 230
+  "tokens": 196
  },
  {
   "id": "settings-group/wifi.group",
   "title": "Settings in the group wifi.group",
   "file": "settings-group--wifi.group.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[wifi] on-demand` | Connect when needed | `true`, `false` | `true` | Switches Wi-F",
-  "tokens": 189
+  "tokens": 165
  },
  {
   "id": "settings-group/power.group",
   "title": "Settings in the group power.group",
   "file": "settings-group--power.group.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[power] mode` | Power mode | `power.mode.auto`, `power.mode.normal`, `power.mode.s",
-  "tokens": 226
+  "tokens": 196
  },
  {
   "id": "settings-group/vocabulary.widget.word",
   "title": "Settings in the group vocabulary.widget.word",
   "file": "settings-group--vocabulary.widget.word.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[vocabulary] widget.word.frame` | Frame | `core.frame.none`, `core.frame.line`, `c",
-  "tokens": 483
+  "tokens": 460
  },
  {
   "id": "settings-group/vocabulary.widget.saved",
   "title": "Settings in the group vocabulary.widget.saved",
   "file": "settings-group--vocabulary.widget.saved.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[vocabulary] widget.saved.frame` | Frame | `core.frame.none`, `core.frame.line`, `",
-  "tokens": 485
+  "tokens": 461
  },
  {
   "id": "settings-group/vocabulary.widget.due",
   "title": "Settings in the group vocabulary.widget.due",
   "file": "settings-group--vocabulary.widget.due.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[vocabulary] widget.due.frame` | Frame | `core.frame.none`, `core.frame.line`, `co",
-  "tokens": 334
+  "tokens": 310
  },
  {
   "id": "settings-group/news.widget.headlines",
   "title": "Settings in the group news.widget.headlines",
   "file": "settings-group--news.widget.headlines.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[news] widget.headlines.frame` | Frame | `core.frame.none`, `core.frame.line`, `co",
-  "tokens": 496
+  "tokens": 472
  },
  {
   "id": "settings-group/weather.group",
   "title": "Settings in the group weather.group",
   "file": "settings-group--weather.group.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[weather] place` | Place | text | `` | Found by its name.",
-  "tokens": 247
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[weather] place` | Place | text | `` | Search by name.",
+  "tokens": 234
  },
  {
   "id": "settings-group/weather.now",
   "title": "Settings in the group weather.now",
   "file": "settings-group--weather.now.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[weather] now.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.frame.c",
-  "tokens": 851
+  "tokens": 827
  },
  {
   "id": "settings-group/weather.forecast",
   "title": "Settings in the group weather.forecast",
   "file": "settings-group--weather.forecast.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[weather] forecast.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.fr",
-  "tokens": 776
+  "tokens": 753
  },
  {
   "id": "settings-group/widgets.analogue-clock",
   "title": "Settings in the group widgets.analogue-clock",
   "file": "settings-group--widgets.analogue-clock.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] analogue-clock.align` | Alignment | `core.align.left`, `core.align.cente",
-  "tokens": 597
+  "tokens": 561
  },
  {
   "id": "settings-group/widgets.word-clock",
   "title": "Settings in the group widgets.word-clock",
   "file": "settings-group--widgets.word-clock.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] word-clock.align` | Alignment | `core.align.left`, `core.align.center`, ",
-  "tokens": 576
+  "tokens": 547
  },
  {
   "id": "settings-group/widgets.tile-clock",
   "title": "Settings in the group widgets.tile-clock",
   "file": "settings-group--widgets.tile-clock.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] tile-clock.align` | Alignment | `core.align.left`, `core.align.center`, ",
-  "tokens": 548
+  "tokens": 512
  },
  {
   "id": "settings-group/widgets.world-clock",
   "title": "Settings in the group widgets.world-clock",
   "file": "settings-group--widgets.world-clock.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] world-clock.align` | Alignment | `core.align.left`, `core.align.center`,",
-  "tokens": 885
+  "tokens": 861
  },
  {
   "id": "settings-group/widgets.calendar",
   "title": "Settings in the group widgets.calendar",
   "file": "settings-group--widgets.calendar.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] calendar.align` | Alignment | `core.align.left`, `core.align.center`, `c",
-  "tokens": 723
+  "tokens": 699
  },
  {
   "id": "settings-group/widgets.year-progress",
   "title": "Settings in the group widgets.year-progress",
   "file": "settings-group--widgets.year-progress.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] year-progress.align` | Alignment | `core.align.left`, `core.align.center",
-  "tokens": 517
+  "tokens": 491
  },
  {
   "id": "settings-group/widgets.countdown",
   "title": "Settings in the group widgets.countdown",
   "file": "settings-group--widgets.countdown.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] countdown.align` | Alignment | `core.align.left`, `core.align.center`, `",
-  "tokens": 583
+  "tokens": 548
  },
  {
   "id": "settings-group/widgets.moon",
   "title": "Settings in the group widgets.moon",
   "file": "settings-group--widgets.moon.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] moon.align` | Alignment | `core.align.left`, `core.align.center`, `core.",
-  "tokens": 533
+  "tokens": 498
  },
  {
   "id": "settings-group/widgets.day",
   "title": "Settings in the group widgets.day",
   "file": "settings-group--widgets.day.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] day.align` | Alignment | `core.align.left`, `core.align.center`, `core.a",
-  "tokens": 506
+  "tokens": 470
  },
  {
   "id": "settings-group/widgets.quote",
   "title": "Settings in the group widgets.quote",
   "file": "settings-group--widgets.quote.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] quote.source` | Quotes | `widgets.quote.source.shipped`, `widgets.quote.",
-  "tokens": 662
+  "tokens": 597
  },
  {
   "id": "settings-group/widgets.picture",
   "title": "Settings in the group widgets.picture",
   "file": "settings-group--widgets.picture.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] picture.folder` | Folder | text | `Pictures` | The folder on the card wi",
-  "tokens": 436
+  "tokens": 383
  },
  {
   "id": "settings-group/widgets.note",
   "title": "Settings in the group widgets.note",
   "file": "settings-group--widgets.note.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] note.text` | Note | text | `` | What the note says, e.g.",
-  "tokens": 376
+  "tokens": 353
  },
  {
   "id": "settings-group/widgets.todo",
   "title": "Settings in the group widgets.todo",
   "file": "settings-group--widgets.todo.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] todo.count` | Items shown | 1 to 12 | `5` | How many to-dos show at most",
-  "tokens": 449
+  "tokens": 413
  },
  {
   "id": "settings-group/widgets.greeting",
   "title": "Settings in the group widgets.greeting",
   "file": "settings-group--widgets.greeting.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] greeting.name` | Your name | text | `` | Greeted by it: Good evening, An",
-  "tokens": 444
+  "tokens": 420
  },
  {
   "id": "settings-group/widgets.logo",
   "title": "Settings in the group widgets.logo",
   "file": "settings-group--widgets.logo.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] logo.name` | The name beside it | `true`, `false` | `false` | Whether th",
-  "tokens": 366
+  "tokens": 343
  },
  {
   "id": "settings-group/widgets.progress",
   "title": "Settings in the group widgets.progress",
   "file": "settings-group--widgets.progress.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] progress.align` | Alignment | `core.align.left`, `core.align.center`, `c",
-  "tokens": 577
+  "tokens": 542
  },
  {
   "id": "settings-group/widgets.reading",
   "title": "Settings in the group widgets.reading",
   "file": "settings-group--widgets.reading.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] reading.align` | Alignment | `core.align.left`, `core.align.center`, `co",
-  "tokens": 643
+  "tokens": 620
  },
  {
   "id": "settings-group/widgets.next",
   "title": "Settings in the group widgets.next",
   "file": "settings-group--widgets.next.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] next.align` | Alignment | `core.align.left`, `core.align.center`, `core.",
-  "tokens": 510
+  "tokens": 476
  },
  {
   "id": "settings-group/widgets.series",
   "title": "Settings in the group widgets.series",
   "file": "settings-group--widgets.series.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] series.align` | Alignment | `core.align.left`, `core.align.center`, `cor",
-  "tokens": 642
+  "tokens": 606
  },
  {
   "id": "settings-group/widgets.favourites",
   "title": "Settings in the group widgets.favourites",
   "file": "settings-group--widgets.favourites.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] favourites.align` | Alignment | `core.align.left`, `core.align.center`, ",
-  "tokens": 559
+  "tokens": 535
  },
  {
   "id": "settings-group/widgets.highlight",
   "title": "Settings in the group widgets.highlight",
   "file": "settings-group--widgets.highlight.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] highlight.align` | Alignment | `core.align.left`, `core.align.center`, `",
-  "tokens": 635
+  "tokens": 592
  },
  {
   "id": "settings-group/widgets.library",
   "title": "Settings in the group widgets.library",
   "file": "settings-group--widgets.library.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] library.align` | Alignment | `core.align.left`, `core.align.center`, `co",
-  "tokens": 549
+  "tokens": 526
  },
  {
   "id": "settings-group/widgets.battery",
   "title": "Settings in the group widgets.battery",
   "file": "settings-group--widgets.battery.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] battery.align` | Alignment | `core.align.left`, `core.align.center`, `co",
-  "tokens": 477
+  "tokens": 453
  },
  {
   "id": "settings-group/core.group.network",
   "title": "Settings in the group core.group.network",
   "file": "settings-group--core.group.network.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] network.kosync` | Network | `true`, `false` | `true` | Off, this plugin use",
-  "tokens": 2036
+  "tokens": 1701
  }
 ]

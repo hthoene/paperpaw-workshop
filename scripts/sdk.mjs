@@ -1,5 +1,5 @@
 // The SDK of a PaperPaw in work, for the installer: the emulator of a
-// PaperPaw in work (`0.4.0-dev`) loads only code built against its very
+// PaperPaw in work (`0.5.0-dev`) loads only code built against its very
 // source, which crates.io does not have. So the installer brings it:
 // `crates/paperpaw-sdk` of the checkout the emulator was built from, the
 // PaperPaw crates it needs (by Cargo's metadata, unchanged: a PaperPaw in

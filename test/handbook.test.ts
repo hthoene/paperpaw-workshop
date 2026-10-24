@@ -38,11 +38,11 @@ describe("the generated handbook", () => {
   });
 
   it("finds the SDK's items by name and by words, with their documentation", async () => {
-    const [button] = await book.items("draw_button");
-    expect(button).toMatchObject({ path: "ui::draw_button", kind: "fn" });
+    const [button] = await book.items("Ui::button");
+    expect(button).toMatchObject({ path: "ui::Ui::button", kind: "fn" });
     expect(button!.doc).toContain("A button");
-    expect((await book.items("paperpaw_sdk::ui::draw_button"))[0]?.path).toBe("ui::draw_button");
-    expect((await book.items("button")).map((i) => i.path)).toContain("ui::draw_button");
+    expect((await book.items("paperpaw_sdk::ui::Ui::button"))[0]?.path).toBe("ui::Ui::button");
+    expect((await book.items("button")).map((i) => i.path)).toContain("ui::Ui::button");
     // The methods of what the SDK passes on, from crates without api.txt.
     expect((await book.items("Canvas::fill"))[0]).toMatchObject({ path: "Canvas::fill", kind: "fn" });
     expect((await book.items("canvas rect")).map((i) => i.path)).toContain("Canvas::fill_rect");
@@ -72,8 +72,9 @@ describe("the generated handbook", () => {
     expect(text).toMatch(/Fields:[\s\S]*pub category: Cow<'static, str>/);
     expect(text).toMatch(/Made with:[\s\S]*pub fn new\(Id, impl Into<Cow<'static, str>>, impl Fn\(&Env<'_>\) -> Box<dyn Widget>/);
     const reply = await book.lookup("HttpReply");
-    expect(reply).toContain("pub body: String");
+    expect(reply).toContain("pub body: Vec<u8>");
     expect(reply).toContain("pub fn ok(&self) -> bool");
+    expect(reply).toContain("pub fn text(&self)");
   });
 
   it("lists a long module's types and functions whole, their members by a lookup of the type", async () => {
@@ -91,11 +92,11 @@ describe("the generated handbook", () => {
 
   it("answers lookup_docs with the items when no topic is called so", async () => {
     const { context } = bench();
-    const answer = await lookupDocs.run({ topic: "draw button" }, context);
-    expect(answer.content).toContain("pub fn paperpaw_sdk::ui::draw_button(");
+    const answer = await lookupDocs.run({ topic: "ui button" }, context);
+    expect(answer.content).toContain("pub fn paperpaw_sdk::ui::Ui<'c>::button(");
     expect(answer.content).toContain("A button");
     const module = await lookupDocs.run({ topic: "sdk/ui" }, context);
-    expect(module.content).toContain("draw_button");
+    expect(module.content).toContain("pub fn paperpaw_sdk::ui::");
   });
 });
 

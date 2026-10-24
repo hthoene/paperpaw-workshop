@@ -12,7 +12,8 @@ there:
 - reads files a piece at a time (`Storage::read_at`), never whole books;
 - writes downloads straight to storage (`HttpRequest::save_to`);
 - reserves large buffers with `try_reserve` and copes when that fails;
-- checks `env.device.memory` (`MemoryClass::Small`) to do less there.
+- checks `env.device().memory` (`MemoryClass::Small`) to do less there.
 
-The emulator's X4 profile enforces the budget, and `--heap-report` shows
-where memory goes.
+The emulator's X4 profile enforces the budget. After a run with
+`--headless`, `--heap-report` shows where memory goes.
+`--trace-alloc <bytes>` prints each allocation of at least that size.

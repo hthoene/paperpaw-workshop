@@ -20,6 +20,11 @@ pub paperpaw_sdk::power::PowerLevel::Offline
 pub paperpaw_sdk::power::PowerLevel::Saving
 pub const fn paperpaw_sdk::power::PowerLevel::as_str(self) -> &'static str
 pub fn paperpaw_sdk::power::PowerLevel::parse(&str) -> core::option::Option<Self>
+pub enum paperpaw_sdk::power::Start
+pub paperpaw_sdk::power::Start::PowerOn
+pub paperpaw_sdk::power::Start::Restart
+pub paperpaw_sdk::power::Start::Unknown
+pub paperpaw_sdk::power::Start::Wake
 pub const paperpaw_sdk::power::AUTOMATIC: &str
 pub const paperpaw_sdk::power::LEVEL: paperpaw_sdk::Id
 pub const paperpaw_sdk::power::MODE_KIND: paperpaw_sdk::Id

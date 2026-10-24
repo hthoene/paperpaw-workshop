@@ -3,6 +3,7 @@ pub struct paperpaw_sdk::files::Entry
 pub paperpaw_sdk::files::Entry::is_dir: bool
 pub paperpaw_sdk::files::Entry::name: alloc::string::String
 pub paperpaw_sdk::files::Entry::size: u64
+pub fn paperpaw_sdk::files::Entry::new(impl core::convert::Into<alloc::string::String>, bool, u64) -> Self
 pub const paperpaw_sdk::files::MAX_LINE: usize
 pub fn paperpaw_sdk::files::copy(&dyn paperpaw_platform::storage::Storage, &str, &str) -> core::result::Result<(), paperpaw_platform::storage::StorageError>
 pub fn paperpaw_sdk::files::delete(&dyn paperpaw_platform::storage::Storage, &str) -> core::result::Result<(), paperpaw_platform::storage::StorageError>

@@ -7,6 +7,7 @@ pub enum paperpaw_sdk::served::Access
 pub paperpaw_sdk::served::Access::Denied
 pub paperpaw_sdk::served::Access::Granted
 pub paperpaw_sdk::served::Access::Locked
+pub const paperpaw_sdk::served::CABLE_PORT: u16
 pub const paperpaw_sdk::served::KEY_LETTERS: usize
 pub const paperpaw_sdk::served::LOCKED_FOR: u64
 pub const paperpaw_sdk::served::WRONG_KEYS: u32

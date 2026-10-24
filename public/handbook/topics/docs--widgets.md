@@ -1,7 +1,7 @@
 ### Widgets
 
 A widget is a [`Widget`] a screen makes and keeps
-(`env.widgets.make`): it reads what it shows in `update`, which the
+(`env.widgets().make`): it reads what it shows in `update`, which the
 screen calls when it shows the widget, about each minute and after
 events, and only draws in `draw` (which runs for every band of a
 frame). The screen tells it where it goes (`place`) before drawing it
@@ -20,3 +20,8 @@ and tools in a grid as the home screen does, edited in place
 (`.category(widgets::categories::TIME)`, or `BOOKS`, `READING`, `WORDS`,
 `PERSONAL`, `WORLD`, `DEVICE`): the home screen offers widgets by their
 kind, each drawn as it would show.
+
+A widget may also react. `targets` names the places in it that do
+something. `on_input` gets taps, swipes and the buttons there, and
+`context` tells it its placement and the screen it is on. `draw_focus`
+draws the focus its own way.

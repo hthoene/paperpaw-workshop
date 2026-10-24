@@ -3,6 +3,7 @@ pub struct paperpaw_sdk::decorations::Decorated
 pub paperpaw_sdk::decorations::Decorated::end: paperpaw_document::Locator
 pub paperpaw_sdk::decorations::Decorated::role: paperpaw_sdk::Id
 pub paperpaw_sdk::decorations::Decorated::start: paperpaw_document::Locator
+pub fn paperpaw_sdk::decorations::Decorated::new(paperpaw_document::Locator, paperpaw_document::Locator, paperpaw_sdk::Id) -> Self
 pub fn paperpaw_sdk::decorations::Decorated::words(&[paperpaw_sdk::decorations::PageWord<'_>], &paperpaw_sdk::Id) -> core::option::Option<paperpaw_sdk::decorations::Decorated>
 pub struct paperpaw_sdk::decorations::Decoration
 pub paperpaw_sdk::decorations::Decoration::background: core::option::Option<paperpaw_sdk::decorations::Tone>
@@ -42,7 +43,6 @@ pub struct paperpaw_sdk::decorations::Decorators
 pub fn paperpaw_sdk::decorations::Decorators::decorate(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::decorations::PageText<'_>) -> alloc::vec::Vec<paperpaw_sdk::decorations::Mark>
 pub fn paperpaw_sdk::decorations::Decorators::get(&self, &paperpaw_sdk::Id) -> core::option::Option<&paperpaw_sdk::decorations::DecoratorSpec>
 pub fn paperpaw_sdk::decorations::Decorators::is_empty(&self) -> bool
-pub fn paperpaw_sdk::decorations::Decorators::new() -> Self
 pub fn paperpaw_sdk::decorations::Decorators::signature(&self, &paperpaw_sdk::Env<'_>) -> u64
 pub struct paperpaw_sdk::decorations::Mark
 pub paperpaw_sdk::decorations::Mark::decorator: paperpaw_sdk::Id
@@ -55,14 +55,6 @@ pub struct paperpaw_sdk::decorations::MarkRules
 pub paperpaw_sdk::decorations::MarkRules::decorator: paperpaw_sdk::decorations::PatternDecorator
 pub paperpaw_sdk::decorations::MarkRules::roles: alloc::vec::Vec<(paperpaw_sdk::Id, alloc::string::String, paperpaw_sdk::decorations::Decoration)>
 pub fn paperpaw_sdk::decorations::MarkRules::parse(&paperpaw_sdk::Id, &str) -> core::result::Result<paperpaw_sdk::decorations::MarkRules, paperpaw_sdk::RegisterError>
-pub struct paperpaw_sdk::decorations::PageText<'a>
-pub paperpaw_sdk::decorations::PageText::language: &'a str
-pub paperpaw_sdk::decorations::PageText::path: &'a str
-pub paperpaw_sdk::decorations::PageText::words: &'a [paperpaw_sdk::decorations::PageWord<'a>]
-pub struct paperpaw_sdk::decorations::PageWord<'a>
-pub paperpaw_sdk::decorations::PageWord::end: paperpaw_document::Locator
-pub paperpaw_sdk::decorations::PageWord::start: paperpaw_document::Locator
-pub paperpaw_sdk::decorations::PageWord::text: &'a str
 pub struct paperpaw_sdk::decorations::PatternDecorator
 pub fn paperpaw_sdk::decorations::PatternDecorator::decorate(&self, &paperpaw_sdk::decorations::PageText<'_>) -> alloc::vec::Vec<paperpaw_sdk::decorations::Decorated>
 pub fn paperpaw_sdk::decorations::PatternDecorator::into_spec(self, paperpaw_sdk::Id, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> paperpaw_sdk::decorations::DecoratorSpec
@@ -96,6 +88,16 @@ pub fn paperpaw_sdk::decorations::Tone::from_id(&str) -> core::option::Option<pa
 pub const fn paperpaw_sdk::decorations::Tone::id(self) -> &'static str
 pub type paperpaw_sdk::decorations::DecorateFn = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::decorations::PageText<'_>) -> alloc::vec::Vec<paperpaw_sdk::decorations::Decorated>>
 pub type paperpaw_sdk::decorations::DecoratorSignatureFn = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>) -> u64>
+pub struct paperpaw_sdk::decorations::PageText<'a>
+pub const fn paperpaw_sdk::decorations::PageText<'a>::new(&'a str, &'a str, &'a [paperpaw_sdk::decorations::PageWord<'a>]) -> Self
+pub paperpaw_sdk::decorations::PageText::language: &'a str
+pub paperpaw_sdk::decorations::PageText::path: &'a str
+pub paperpaw_sdk::decorations::PageText::words: &'a [paperpaw_sdk::decorations::PageWord<'a>]
+pub struct paperpaw_sdk::decorations::PageWord<'a>
+pub const fn paperpaw_sdk::decorations::PageWord<'a>::new(&'a str, paperpaw_document::Locator, paperpaw_document::Locator) -> Self
+pub paperpaw_sdk::decorations::PageWord::end: paperpaw_document::Locator
+pub paperpaw_sdk::decorations::PageWord::start: paperpaw_document::Locator
+pub paperpaw_sdk::decorations::PageWord::text: &'a str
 pub const paperpaw_sdk::decorations::AS_IS: &str
 pub const paperpaw_sdk::decorations::NONE: &str
 pub const paperpaw_sdk::decorations::THICKNESS: u8

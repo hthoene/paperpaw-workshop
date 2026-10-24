@@ -9,8 +9,8 @@
 //!   settings group (`widgets::settings_group`, each setting's group the
 //!   widget's id), which the home screen's widget editor opens and the
 //!   Settings list leaves out;
-//! - the request (`Command::Http`) when PaperPaw starts and wakes, and
-//!   again later as set (`Command::Work`, only while there is a network);
+//! - the request (`Command::http`) when PaperPaw starts and wakes, and
+//!   again later as set (`Command::work`, only while there is a network);
 //! - the reply, an event of the plugin's own (`Event<HttpReply>`): its
 //!   JSON read (`json::object`, `json::text`), kept, and the widget told
 //!   (`widgets::changed`);
@@ -33,11 +33,11 @@ use paperpaw_sdk::event::Event;
 use paperpaw_sdk::replies::HttpReply;
 use paperpaw_sdk::setting::{Setting, Text};
 use paperpaw_sdk::ui::UiStyle;
-use paperpaw_sdk::widgets::{self, Align, Frame, Padding, Size, Widget, WidgetSpec, Wrapped};
+use paperpaw_sdk::widgets::{self, Align, Frame, Padding, TextSize, Widget, WidgetSpec, Wrapped};
 use paperpaw_sdk::work::{Moments, Work};
 use paperpaw_sdk::{
-    Canvas, Command, Env, HttpRequest, Id, Manifest, Plugin, Rect, RegisterError, Registrar,
-    SettingSpec, Version, json,
+    Canvas, Command, Commands, Env, HttpRequest, Id, Manifest, Plugin, Rect, RegisterError,
+    Registrar, SettingSpec, Version, json,
 };
 
 /// Ids start with the plugin's id: `quote.…`.
@@ -60,18 +60,18 @@ const EVERY_CHOICES: [&str; 3] = ["quote.every.hour", "quote.every.six-hours", "
 /// frame, its room, its text size and alignment, `<widget>.frame` …, read
 /// by `draw_frame`).
 static SETTINGS: [SettingSpec; 5] = [
-    SettingSpec::fixed_choice("quote.today.every", "quote.setting.every", &EVERY_CHOICES, EVERY_CHOICES[0], WIDGET)
-        .described("quote.setting.every.help"),
+    SettingSpec::choice(EVERY.static_str(), "quote.setting.every", &EVERY_CHOICES, EVERY_CHOICES[0], WIDGET)
+        .description("quote.setting.every.help"),
     widgets::frame_spec("quote.today.frame", WIDGET, Frame::None),
     widgets::padding_spec("quote.today.padding", WIDGET, Padding::Auto),
-    widgets::size_spec("quote.today.size", WIDGET, Size::Medium, false),
+    widgets::size_spec("quote.today.size", WIDGET, TextSize::Medium, false),
     widgets::align_spec("quote.today.align", WIDGET, Align::Center),
 ];
 
 /// How long until it fetches again, as its setting says; none when it
 /// fetches only as the reader wakes.
 fn every(env: &Env<'_>) -> Option<Duration> {
-    match env.settings.read(&EVERY) {
+    match env.settings().read(&EVERY) {
         "quote.every.wake" => None,
         "quote.every.six-hours" => Some(Duration::from_secs(6 * 60 * 60)),
         _ => Some(Duration::from_secs(60 * 60)),
@@ -83,14 +83,14 @@ type Shared = Rc<RefCell<Option<String>>>;
 
 /// Asks for the text, and for the next time as set: later, and only
 /// while there is a network (nothing wakes the device or the radio for it).
-fn fetch(env: &Env<'_>, out: &mut alloc::vec::Vec<Command>) {
-    out.push(Command::Http(HttpRequest::new("GET", URL, FETCHED)));
+fn fetch(env: &Env<'_>, out: &mut Commands) {
+    out.push(Command::http(HttpRequest::get(URL, FETCHED)));
     if let Some(after) = every(env) {
         let next = Work::network(DUE.id().clone())
             .optional()
             .after(after)
             .at_moments(Moments::WAKE | Moments::ONLINE);
-        out.push(Command::Work(next));
+        out.push(Command::work(next));
     }
 }
 
@@ -122,7 +122,7 @@ impl Plugin for Quote {
             if !reply.ok() {
                 return;
             }
-            let members = json::object(&reply.body);
+            let members = json::object(&reply.text());
             let Some(quote) = json::text(&members, "quote") else {
                 return;
             };
@@ -161,7 +161,7 @@ const LINES: u16 = 4;
 /// leaves of a tall area, taken from it.
 fn frame_room(env: &Env<'_>, width: u16) -> u16 {
     let tall = Rect::new(0, 0, width, 1000);
-    tall.height - widgets::look::look(env, WIDGET.as_str(), tall).area.height
+    tall.height - widgets::widget_look(env, WIDGET.as_str(), tall).area.height
 }
 
 /// The widget: what it shows, read in `update`, drawn in `draw`.
@@ -175,7 +175,7 @@ impl Today {
     fn shown<'a>(&'a self, env: &'a Env<'_>) -> &'a str {
         match &self.text {
             Some(text) => text,
-            None => env.i18n.tr("quote.waiting"),
+            None => env.i18n().tr("quote.waiting"),
         }
     }
 

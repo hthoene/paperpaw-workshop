@@ -19,7 +19,7 @@ impl Plugin for Hello {
     }
 
     fn register(&self, r: &mut Registrar) -> Result<(), RegisterError> {
-        r.add_action(ActionSpec::new(OPEN, "hello.title").handler(|_, out| {
+        r.add_action(ActionSpec::new(OPEN, "hello.title").handler(|_, _, out| {
             out.push(Command::OpenScreen(SCREEN, Params::new()));
         }))?;
         r.add_menu_entry(MenuEntry::new(menus::TOOLS, OPEN).order(90))?;

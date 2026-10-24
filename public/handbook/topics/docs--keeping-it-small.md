@@ -13,6 +13,7 @@ though the plugin itself is a screen, an action and a setting.
 - Keep translations and other text in the folder's files rather than in
   the code, where they are needed once.
 
-Services between plugins are found by their type's name too, so a plugin
-built apart finds those of the firmware's plugins (see [Services and
+Services between plugins are found by their type's name too where the
+type is the SDK's, so a plugin built apart finds those of the firmware's
+plugins; one of a plugin's own type needs a contract (see [Services and
 points of your own](#services-and-points-of-your-own)).

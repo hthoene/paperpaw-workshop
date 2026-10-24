@@ -218,6 +218,9 @@ const sampleCode = exists("samples/hello-plugin/src/lib.rs")
       "# The sample plugin, complete\n\nPaperPaw's own sample (`samples/hello-plugin`), which a new project starts from.",
       "`src/lib.rs`:\n\n```rust\n" + read("samples/hello-plugin/src/lib.rs").trim() + "\n```",
       "`i18n/en.ini`:\n\n```ini\n" + read("samples/hello-plugin/i18n/en.ini").trim() + "\n```",
+      ...(exists("samples/hello-plugin/how/en.txt")
+        ? ["`how/en.txt`:\n\n```\n" + read("samples/hello-plugin/how/en.txt").trim() + "\n```"]
+        : []),
     ]
   : [];
 // The recipes (handbook/recipes/): complete plugins for common tasks,

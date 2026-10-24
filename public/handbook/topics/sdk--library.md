@@ -67,8 +67,10 @@ pub paperpaw_sdk::library::BookBadge::id: paperpaw_sdk::Id
 pub paperpaw_sdk::library::BookBadge::title: alloc::borrow::Cow<'static, str>
 pub struct paperpaw_sdk::library::BookData
 pub paperpaw_sdk::library::BookData::folder: alloc::borrow::Cow<'static, str>
+pub paperpaw_sdk::library::BookData::kind: paperpaw_sdk::library::BookDataKind
 pub paperpaw_sdk::library::BookData::prefix: alloc::borrow::Cow<'static, str>
 pub fn paperpaw_sdk::library::BookData::key_of<'n>(&self, &'n str) -> core::option::Option<(&'n str, &'n str)>
+pub fn paperpaw_sdk::library::BookData::new(impl core::convert::Into<alloc::borrow::Cow<'static, str>>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>, paperpaw_sdk::library::BookDataKind) -> Self
 pub struct paperpaw_sdk::library::BookField
 pub paperpaw_sdk::library::BookField::id: paperpaw_sdk::Id
 pub paperpaw_sdk::library::BookField::in_catalog: bool
@@ -77,6 +79,12 @@ pub struct paperpaw_sdk::library::Deleted
 pub paperpaw_sdk::library::Deleted::commands: alloc::vec::Vec<paperpaw_sdk::Command>
 pub paperpaw_sdk::library::Deleted::failed: alloc::vec::Vec<(alloc::string::String, paperpaw_platform::storage::StorageError)>
 pub paperpaw_sdk::library::Deleted::refused: alloc::vec::Vec<alloc::string::String>
+pub struct paperpaw_sdk::library::Fingerprint
+pub paperpaw_sdk::library::Fingerprint::md5: alloc::string::String
+pub paperpaw_sdk::library::Fingerprint::size: u64
+pub fn paperpaw_sdk::library::Fingerprint::of(&dyn paperpaw_platform::storage::Storage, &str) -> core::option::Option<paperpaw_sdk::library::Fingerprint>
+pub fn paperpaw_sdk::library::Fingerprint::parse(&str) -> core::option::Option<paperpaw_sdk::library::Fingerprint>
+pub fn paperpaw_sdk::library::Fingerprint::text(&self) -> alloc::string::String
 pub struct paperpaw_sdk::library::Provided
 pub paperpaw_sdk::library::Provided::author: core::option::Option<alloc::string::String>
 pub paperpaw_sdk::library::Provided::series: core::option::Option<alloc::string::String>
@@ -148,7 +156,6 @@ pub fn paperpaw_sdk::library::index::Index::next_in_series(&self, bool) -> alloc
 pub fn paperpaw_sdk::library::index::Index::order(&self, paperpaw_sdk::library::catalog::Show, bool) -> alloc::vec::Vec<u16>
 pub fn paperpaw_sdk::library::index::Index::record(&self, &dyn paperpaw_platform::storage::Storage, usize) -> core::option::Option<paperpaw_sdk::library::catalog::Record>
 pub fn paperpaw_sdk::library::index::Index::refresh(&mut self, &dyn paperpaw_platform::storage::Storage)
-pub fn paperpaw_sdk::library::index::Index::save(&self, &dyn paperpaw_platform::storage::Storage, &str, &str) -> bool
 pub fn paperpaw_sdk::library::index::Index::set_progress(&mut self, u32, core::option::Option<u8>)
 pub fn paperpaw_sdk::library::index::Index::stacked(&self, &[u16]) -> (alloc::vec::Vec<u16>, alloc::vec::Vec<u16>)
 pub struct paperpaw_sdk::library::index::Item
@@ -240,9 +247,16 @@ pub fn paperpaw_sdk::library::service::Kept::refresh(&self, &paperpaw_sdk::Env<'
 pub fn paperpaw_sdk::library::service::Kept::set_favourite(&self, &paperpaw_sdk::Env<'_>, &str, bool) -> paperpaw_sdk::Command
 pub fn paperpaw_sdk::library::service::Kept::set_finished(&self, &paperpaw_sdk::Env<'_>, &str, bool) -> paperpaw_sdk::Command
 pub fn paperpaw_sdk::library::service::Kept::version(&self, &paperpaw_sdk::Env<'_>) -> core::option::Option<u64>
+pub struct paperpaw_sdk::library::service::LibraryService(pub alloc::boxed::Box<dyn paperpaw_sdk::library::service::Library>)
+pub fn paperpaw_sdk::library::service::LibraryService::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+pub const paperpaw_sdk::library::service::LibraryService::KEY: &'static str
+pub const paperpaw_sdk::library::service::LibraryService::KEY: &'static str
 pub enum paperpaw_sdk::library::Badge
 pub paperpaw_sdk::library::Badge::Icon(&'static str)
 pub paperpaw_sdk::library::Badge::Text(alloc::string::String)
+pub enum paperpaw_sdk::library::BookDataKind
+pub paperpaw_sdk::library::BookDataKind::Cache
+pub paperpaw_sdk::library::BookDataKind::UserData
 pub enum paperpaw_sdk::library::catalog::Reading
 pub paperpaw_sdk::library::catalog::Reading::Begun
 pub paperpaw_sdk::library::catalog::Reading::Finished
@@ -296,6 +310,7 @@ pub const paperpaw_sdk::library::index::OPENED: u8
 pub const paperpaw_sdk::library::index::REMOVED: u8
 pub const paperpaw_sdk::library::listing::UNRANKED: u32
 pub const paperpaw_sdk::library::service::SERVICE: &str
+pub const paperpaw_sdk::library::service::VERSION: paperpaw_sdk::Version
 pub const paperpaw_sdk::library::what::COVER: u32
 pub const paperpaw_sdk::library::what::DETAILS: u32
 pub const paperpaw_sdk::library::what::FAVOURITE: u32
@@ -319,7 +334,6 @@ pub fn paperpaw_sdk::library::catalog::search(&dyn paperpaw_platform::storage::S
 pub fn paperpaw_sdk::library::catalog::search_after(&dyn paperpaw_platform::storage::Storage, &str, core::option::Option<&paperpaw_sdk::library::catalog::Record>, usize) -> alloc::vec::Vec<paperpaw_sdk::library::catalog::Record>
 pub fn paperpaw_sdk::library::catalog::series_order(&str) -> u32
 pub fn paperpaw_sdk::library::catalog::state(&dyn paperpaw_platform::storage::Storage) -> paperpaw_sdk::library::catalog::State
-pub fn paperpaw_sdk::library::catalog::write(&dyn paperpaw_platform::storage::Storage, &[paperpaw_sdk::library::catalog::Record])
 pub fn paperpaw_sdk::library::index::cap(paperpaw_platform::MemoryClass) -> usize
 pub fn paperpaw_sdk::library::index::catalog_version(&dyn paperpaw_platform::storage::Storage) -> core::option::Option<u64>
 pub fn paperpaw_sdk::library::index::hash(&str) -> u32
@@ -340,7 +354,7 @@ pub fn paperpaw_sdk::library::books_in(&dyn paperpaw_platform::storage::Storage,
 pub fn paperpaw_sdk::library::changed() -> paperpaw_sdk::Command
 pub fn paperpaw_sdk::library::changed_book(&str, u32) -> paperpaw_sdk::Command
 pub fn paperpaw_sdk::library::clean_up(&dyn paperpaw_platform::storage::Storage, &[paperpaw_sdk::library::BookData], &dyn core::ops::function::Fn(&str) -> bool) -> u32
-pub fn paperpaw_sdk::library::clean_up_unused(&dyn paperpaw_platform::storage::Storage, &[paperpaw_sdk::library::BookData], &str) -> core::result::Result<u32, paperpaw_platform::storage::StorageError>
+pub fn paperpaw_sdk::library::clean_up_unused(&dyn paperpaw_platform::storage::Storage, &[paperpaw_sdk::library::BookData], &str, paperpaw_sdk::library::BookDataKind) -> core::result::Result<u32, paperpaw_platform::storage::StorageError>
 pub fn paperpaw_sdk::library::cover(&dyn paperpaw_platform::storage::Storage, &str, &paperpaw_sdk::library::Book, u16, u16, paperpaw_platform::pixel::PixelFormat) -> core::option::Option<paperpaw_sdk::ui::Thumbnail>
 pub fn paperpaw_sdk::library::cover_variant(&dyn paperpaw_platform::storage::Storage, &str, &paperpaw_sdk::library::Book, u16, u16, paperpaw_platform::pixel::PixelFormat, &str) -> core::option::Option<paperpaw_sdk::ui::Thumbnail>
 pub fn paperpaw_sdk::library::favourites(&dyn paperpaw_platform::storage::Storage) -> alloc::vec::Vec<alloc::string::String>
@@ -361,13 +375,13 @@ pub fn paperpaw_sdk::library::remove_data(&dyn paperpaw_platform::storage::Stora
 pub fn paperpaw_sdk::library::removed(&dyn paperpaw_platform::storage::Storage, &str)
 pub fn paperpaw_sdk::library::request_catalog() -> paperpaw_sdk::Command
 pub fn paperpaw_sdk::library::request_catalog_anew() -> paperpaw_sdk::Command
-pub fn paperpaw_sdk::library::save(&dyn paperpaw_platform::storage::Storage, &str, &paperpaw_sdk::library::Book) -> bool
 pub fn paperpaw_sdk::library::service<'e>(&paperpaw_sdk::Env<'e>) -> &'e dyn paperpaw_sdk::library::service::Library
 pub fn paperpaw_sdk::library::set_favourite(&dyn paperpaw_platform::storage::Storage, &str, bool)
 pub fn paperpaw_sdk::library::set_field(&dyn paperpaw_platform::storage::Storage, &str, &str, &str)
 pub fn paperpaw_sdk::library::set_finished(&dyn paperpaw_platform::storage::Storage, &str, bool)
 pub fn paperpaw_sdk::library::take_over_old(&dyn paperpaw_platform::storage::Storage)
 pub fn paperpaw_sdk::library::today(&paperpaw_sdk::Env<'_>) -> core::option::Option<u32>
+pub fn paperpaw_sdk::library::unused_books(&dyn paperpaw_platform::storage::Storage, &[paperpaw_sdk::library::BookData], &str, paperpaw_sdk::library::BookDataKind) -> core::result::Result<u32, paperpaw_platform::storage::StorageError>
 pub mod paperpaw_sdk::library::catalog
 pub mod paperpaw_sdk::library::index
 pub mod paperpaw_sdk::library::listing

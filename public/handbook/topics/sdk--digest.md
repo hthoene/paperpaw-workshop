@@ -1,4 +1,5 @@
 ```rust
+pub use paperpaw_sdk::digest::Fnv1a64
 pub use paperpaw_sdk::digest::fnv1a64
 pub use paperpaw_sdk::digest::hex
 pub use paperpaw_sdk::digest::md5

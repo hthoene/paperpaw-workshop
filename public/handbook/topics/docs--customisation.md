@@ -9,8 +9,8 @@ language = de
 full-refresh-interval = 8
 
 [slots]
-# Replace the home screen with any screen a plugin provides.
-core.home = diagnostics.screen
+# Replace the home screen with any screen a plugin provides, here the library.
+core.home = files.browser
 
 [keymap.global]
 # Bind any input to any action; `none` removes a binding.

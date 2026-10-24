@@ -13,6 +13,7 @@ pub fn paperpaw_sdk::reading::PageIndex::open(&dyn paperpaw_platform::storage::S
 pub fn paperpaw_sdk::reading::PageIndex::pages(&self) -> u32
 pub struct paperpaw_sdk::reading::PageWords
 pub fn paperpaw_sdk::reading::PageWords::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::reading::PageWords::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::reading::PageWords::to_params(&self) -> paperpaw_sdk::Params
 pub paperpaw_sdk::reading::PageWords::end: paperpaw_document::Locator
 pub paperpaw_sdk::reading::PageWords::language: alloc::string::String
@@ -23,8 +24,10 @@ pub fn paperpaw_sdk::reading::PageWords::new(impl core::convert::Into<alloc::str
 pub fn paperpaw_sdk::reading::PageWords::text(&self) -> alloc::string::String
 pub fn paperpaw_sdk::reading::PageWords::words(self, alloc::vec::Vec<paperpaw_sdk::reading::Word>) -> Self
 pub fn paperpaw_sdk::reading::PageWords::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::reading::PageWords::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::reading::PageWords::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::reading::PageWords::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::reading::PageWords::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::reading::PageWords::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::reading::Word
 pub paperpaw_sdk::reading::Word::end: paperpaw_document::Locator

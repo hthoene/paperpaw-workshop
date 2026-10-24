@@ -2,9 +2,9 @@
 
 `paperpaw-dev` ([`tools/dev`](../tools/dev/src/lib.rs)) looks at a
 plugin the way its users will meet it, before it is published. It runs
-PaperPaw's standard app with the plugin added on emulated devices (the
-emulator's profiles: the X4, X4 Pro, X4 Classic and the Boox by
-default), draws everything the plugin adds and checks it. It finds what
+PaperPaw's standard app with the plugin added on emulated devices (by default
+the X4, X4 Pro and Boox profiles), draws everything the plugin adds and
+checks it. It finds what
 is easy to miss on one's own device: a label that fits in English but not
 in German, a widget that spills out of its cell at 1x1, a screen that
 cannot be left with the X4's buttons, a frame that reads the card in
@@ -48,8 +48,8 @@ the default look. `--set <id>=<value>` sets a setting for every run.
 | Command | What it does |
 |---|---|
 | `gallery` | Contact sheets: every screen the plugin adds and every widget in every size it can take, in every variant, as HTML pages (`gallery/index.html`) and one PNG sheet a plugin and device. |
-| `visual` | What is drawn, checked: text cut at its box or the screen (`visual.text-cut`), shortened (`visual.ellipsis`) or broken where it should not be (`visual.wrap`); ink outside a widget's cell (`visual.outside-cell`) or the screen (`visual.off-screen`); parts over each other (`visual.overlap`); margins off the interface's (`visual.margin`) and rows out of line (`visual.align`); labels and icons off centre by their ink (`visual.ink-centre`); touch targets under 7 mm (`visual.touch-target`); a focus that does not show with buttons (`visual.focus`); text that dithers away on black and white or is too light on grays (`visual.contrast`). |
-| `lint` | Texts and ids: translations missing or left over, placeholders and plural forms; keys shown as they are because English has no text for them (`lint.missing-key`); settings without help (`lint.setting-help`); plugins with code that say nothing or little of how they work (`lint.how-it-works`); ids outside the plugin's namespace; dashes (`lint.dash`); and in the pseudo-language, text that fits in English but not once it is longer (`lint.pseudo-overflow`) and text drawn without going through the catalogs (`lint.hardcoded`). |
+| `visual` | What is drawn, checked: text cut at its box or the screen (`visual.text-cut`), shortened (`visual.ellipsis`), an explanation of several lines cut short (`visual.explanation-cut`, an error) or broken where it should not be (`visual.wrap`); ink outside a widget's cell (`visual.outside-cell`) or the screen (`visual.off-screen`); parts over each other (`visual.overlap`); margins off the interface's (`visual.margin`) and rows out of line (`visual.align`); labels and icons off centre by their ink (`visual.ink-centre`); touch targets under 7 mm (`visual.touch-target`); buttons without the room around them (`visual.button-room`); a focus that does not show with buttons (`visual.focus`); text that dithers away on black and white or is too light on grays (`visual.contrast`). |
+| `lint` | Texts and ids: translations missing or left over, placeholders and plural forms; keys shown as they are because English has no text for them (`lint.missing-key`); settings without help (`lint.setting-help`), and descriptions longer than the two lines of their row on the X4 (`lint.help-cut`); setting groups without an order or an icon (`settings.group-order`, `settings.group-icon`), and a widget's settings in a group of the main page rather than the widget's own (`settings.widget-group`); plugins with code that say nothing or little of how they work (`lint.how-it-works`); ids outside the plugin's namespace; dashes (`lint.dash`); and in the pseudo-language, text that fits in English but not once it is longer (`lint.pseudo-overflow`) and text drawn without going through the catalogs (`lint.hardcoded`). |
 | `reach` | With buttons alone: every screen the plugin adds can be reached from the home screen (`reach.unreachable`) and closed with *Back* (`reach.no-close`), the focus visits every row and button (`reach.focus-skips`) and does not get stuck (`reach.focus-trap`); a screen whose focus moves but which tells nothing of its rows (`reach.undescribed`). |
 | `explore` | A cheap baseline beside the flows: every target of every screen the plugin adds (at most 20 a screen, 200 a device) used once, each from a fresh start, by touch or with the buttons; then the home screen must be reached again. A panic, an allocation the device would refuse or no way back home is an error (`explore.failed`). |
 | `perf` | Budgets on the X4: storage read while drawing (`perf.draw-io`, the rule of `crates/paperpaw-app/tests/draw.rs`), the heap a screen takes against what the X4 has free (`perf.heap`), heap kept after it closes (`perf.leak`), frames estimated slow on an X4 (`perf.frame-time`), many reads before the first frame (`perf.open-io`); the top costs in `perf/index.html`. |
@@ -69,7 +69,7 @@ on every device it fits:
 
 ```text
 # Night mode from the menu, with buttons alone.
-profiles: xteink-x4, xteink-x4-classic
+profiles: xteink-x4, xteink-x4-pro
 
 long:confirm
 expect screen menu.list
@@ -86,11 +86,15 @@ expect stack 1
 expect no warnings
 ```
 
-Steps are those of the emulator's scripts (a button's name, `long:`,
-`tap:x:y`, `tap-on:<text>`, `swipe:`, `wait:<ms>`, `run:<action>`,
-`open:<screen>`); assertions are `expect screen`, `stack`, `text`,
-`no text`, `focus`, `on`, `off`, `setting`, `no warnings` and
-`picture <name>` (compared with a snapshot). `paperpaw-emu --record
+Steps are those of the emulator's scripts: a button's name, `long:`,
+`tap:x:y`, `tap-on:<text>`, `long-tap:x:y`, `swipe:`, `down:`, `move:`,
+`up:`, `wait:<ms>`, `run:<action>`, `open:<screen>`, `type:<text>`
+into the keyboard shown, `type-enter:` to confirm it, `redraw` and
+`shot:<file>`. Lines before the first step may say `profiles: a, b`
+and `set: <id> = <value>`, a setting before the app starts. Assertions
+are `expect screen`, `stack`, `text`, `no text`, `focus`, `on`, `off`,
+`setting`, `no warnings` and `picture <name>`, which compares the
+screen with a snapshot. `paperpaw-emu --record
 my.flow` writes what one does in the emulator's window as a flow, to be
 replayed with `paperpaw-dev flows --flow my.flow`; the `expect` lines are
 added after.

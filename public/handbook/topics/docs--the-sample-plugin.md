@@ -33,7 +33,7 @@ impl Plugin for Hello {
     }
 
     fn register(&self, r: &mut Registrar) -> Result<(), RegisterError> {
-        r.add_action(ActionSpec::new(OPEN, "hello.title").handler(|_, out| {
+        r.add_action(ActionSpec::new(OPEN, "hello.title").handler(|_, _, out| {
             out.push(Command::OpenScreen(SCREEN, Params::new()));
         }))?;
         r.add_menu_entry(MenuEntry::new(menus::TOOLS, OPEN).order(90))?;
@@ -62,6 +62,12 @@ emit an event, run an action, show a short message, make an HTTP
 request, keep a password, and so on. The kernel runs the commands after
 the plugin's code returns.
 
+A handler queues its commands in the `Commands` it is handed (`out` in
+the examples): `out.push(..)`, `out.extend(..)`, `out.emit(..)`. It
+reads as the slice of what is queued so far. Its fields are private, so
+that it can grow: what PaperPaw adds to it later reaches every handler
+without a new signature.
+
 This keeps plugins simple to test and the API message-based. It does
 not confine them: a plugin runs as native code without a sandbox (see
 [Plugins as files](#plugins-as-files)).
@@ -75,8 +81,9 @@ long presses and swipes; `on_event` to events while it is open:
 ```rust
 impl Screen for HelloScreen {
     fn draw(&mut self, canvas: &mut Canvas<'_>, env: &Env<'_>) {
-        let title = env.i18n.tr("hello.title");
-        self.header.draw(canvas, env, &self.style, title, None, None);
+        // What the screen draws with: canvas, environment and style.
+        let mut ui = ui::Ui::new(canvas, env, &self.style);
+        self.header.draw(&mut ui, env.i18n().tr("hello.title"), None, None);
         // … the greeting, centred below
     }
 
@@ -99,12 +106,27 @@ Screens are made by a factory each time they open
 `Handled::No` for what a screen does not handle: the kernel then runs
 the action's own handler (e.g. the menu button opens the menu).
 
+An action can be run with params: `Command::RunAction(id, params)`, or
+`Command::run(id)` without. Its handler gets them as its second argument
+(`.handler(|env, params, out| ..)`), and a screen reads them with
+`cx.params()` in `on_action`. From a button or a gesture there are none.
+
+A screen that needs time to pass asks for it with `cx.wake_at(when)`,
+and `on_timer` comes then. Long work goes in steps, each asking for the
+next wake. `on_close_request` may keep a screen open, for example to
+ask first. `on_pointer` takes a finger whole, for drawing or moving
+rows.
+
 Some rules every screen should follow:
 
 - **Touch and buttons alike.** Some devices have only buttons (the
   Xteink X4), some mostly touch (the Boox). Everything must be easy with
   either: buttons move a focus and confirm, taps act at once. Show the
-  focus only once buttons are used (`ListView::focus_on_keys`).
+  focus only once buttons are used (`ui::focus_shown`,
+  `ListView::focus_on_keys`). The building blocks that take the buttons'
+  actions and gestures (`on_action`, `on_gesture`) answer with a
+  `ui::Response`: not theirs (`Ignored`), taken (`Same`), changed and to
+  be drawn again (`Changed`), or done with a result (`Done`).
 - **`draw` only draws.** On small devices a frame is drawn in bands
   (the X4 draws five), so `draw` runs several times for one frame, and
   again for every frame after it: whatever it reads or works out, it
@@ -134,17 +156,22 @@ Some rules every screen should follow:
   switches, numbers with − and +, messages, icons. They follow the user's
   appearance settings and line up with the rest of PaperPaw. What a
   screen draws itself takes its look from `UiStyle`: the focus with
-  `ui::draw_focus`, what is on a focused row in `style.focus_ink(focused)`
+  `ui.focus(..)` (a `ui::Ui`), what is on a focused row in `style.focus_ink(focused)`
   (white on the dark bar, black on a frame or a light bar), small shapes
   with `style.radius(height)` (pills where corners are round), boxes and
-  cards with `style.corner`, lines between rows with `ui::draw_separator`.
+  cards with `style.corner()`, lines between rows with `ui.separator(..)`.
+  The style's sizes are read with its methods (`style.margin()`,
+  `style.gap()`, `style.row()` in pixels, `style.text()` and
+  `style.small()` for text).
 
 Screens say what they show, for reading the interface aloud,
 automation and tests: the `ui` helpers (list rows, buttons, switches,
 headers, labels) tell what they draw by themselves. A screen that draws
-in its own way tells it with `canvas.describe(role, text, area,
-focused, on)`, with the role of what it is (`Row`, `Button`, `Switch`,
-`Check`, `Radio`, `Field`, `Image`, `Link`, `Dialog`, `Progress` …). A
+in its own way tells it with `canvas.describe(role, text, area)`, with
+the role of what it is (`Row`, `Button`, `Switch`, `Check`, `Radio`,
+`Field`, `Image`, `Link`, `Dialog`, `Progress` …), and says more where
+it is so: `.focused(true)`, `.on(Some(true))`, `.disabled(true)` for
+what does nothing now. Nothing is kept where nobody asks. A
 screen reader of one's own hears where the focus of the buttons goes
 (`events::FOCUS_CHANGED`: its role, label and area).
 
@@ -166,27 +193,30 @@ shortened.
 
 | For | Use |
 |---|---|
-| The bar at the top, a title and a note (a page count) | `ui::draw_header`, `ui::Header` (with its arrows) |
+| The bar at the top, a title and a note (a page count) | `ui.header(..)`, `ui::Header` (with its arrows) |
 | Parts one below the other, from the top and the bottom | `ui::Stack` (`take`, `take_bottom`, `rest`) |
 | Equal columns side by side, e.g. two buttons | `ui::columns(area, count, gap)` |
 | A list that pages and holds the focus | `ui::ListView`, `ui::list_step` |
-| Rows of a list or of settings | `ui::draw_value_row`, `ui::draw_noted_row`, `ui::draw_switch_row`, `ui::draw_setting_row`, `ui::draw_stepper`, `ui::Slider` |
-| Sections with headings | `ui::Sections`, `ui::draw_heading` |
-| A grid of cells (covers, tiles) | `ui::Grid` (`cell`, `hit`, `step`) |
-| A group on a card or in a frame | `ui::draw_card(canvas, &style, area, Frame::Card)` returns where its parts go |
-| A button, on, focused, faint, with an icon | `ui::draw_button`, `ui::draw_faint_button`, `ui::draw_icon_button` |
+| What a screen draws with | `ui::Ui` (`Ui::new(canvas, env, &style)`; the parts below are its methods: `ui.button(..)`, `ui.message(..)` …) |
+| Text, on a line or wrapped | `ui::Label` (`Label::new(text).role(TextRole::Small).align(..).wrap()`) |
+| Rows of a list | `ui::Row` (`Row::value`, `Row::switch`, `Row::number`, with `.note(..)`; `height`, `draw`, `hit`) |
+| Rows of settings | `ui::draw_setting_row`, `ui::draw_stepper`, `ui::slider::Slider` |
+| Sections with headings | `ui::sections::Sections`, `ui.heading(..)` |
+| A grid of cells (covers, tiles) | `ui::CellGrid` (`cell`, `hit`, `step`) |
+| A group on a card or in a frame | `ui.card(area, Frame::Card)` returns where its parts go |
+| A button, on, focused, faint, with an icon | `ui.button(..)`, `ui.faint_button(..)`, `ui.icon_button(..)` |
 | A few options to pick at a glance, or tabs | `ui::Segments` |
 | Filters or tags in a row, each as wide as its word | `ui::Chips` (the height of their rows: `Chips::height_for`) |
-| A one-line text in a row, typed on the keyboard | `ui::draw_text_field` (its row: `text_field_height`), `ui::edit_text` |
+| A one-line text in a row, typed on the keyboard | `ui.text_field(..)` (its row: `ui::text_field_height`), `ui::edit_text` |
 | A list where several may be ticked | `ui::draw_check_row` (its row: `check_row_height`; the box alone: `ui::draw_check`) |
 | Text longer than its room, scrolled by buttons and touch | `ui::TextView` |
 | A date or a time | `ui::DatePicker`, `ui::TimePicker` |
 | A box over the screen with a title, text and buttons | `ui::Dialog` |
 | Asking for text, a folder, one of several options or yes or no | `ask::text`, `ask::folder`, `ask::choice`, `ask::confirm` (screens of their own) |
-| A message where content would be, an empty list | `ui::draw_message`, `ui::draw_empty` |
-| Progress | `ui::draw_progress` |
+| A message where content would be, an empty list | `ui.message(..)`, `ui.empty(..)` (their heights: `ui::message_height`, `ui::empty_height`) |
+| Progress | `ui.progress(..)` |
 | An address to open on a phone, with its QR code | `ui::draw_address`, `ui::draw_qr` |
-| Offering to go online where something needs the network | `ui::OfflineOffer` |
+| Offering to go online where something needs the network | `ui::offline::OfflineOffer` |
 | What the buttons do, at the bottom | the screen's `hint` (the kernel draws the row) |
 | First-time hints over a screen | `help::add` (see [Hints for a screen](#hints-for-a-screen)) |
 | A widget's frame | `widgets::draw_frame` |
@@ -197,19 +227,23 @@ Two buttons side by side, a margin from the screen's sides and bottom:
 use paperpaw_sdk::ui::{self, Stack, UiStyle};
 
 let style = UiStyle::new(env);
-let margin = style.margin as u16;
+let margin = style.margin();
 let screen = Rect::new(margin, 0, display.width - 2 * margin, display.height - margin);
 let row = Stack::new(screen, margin).take_bottom(ui::Segments::height(&style));
 let [ok, cancel] = ui::columns(row, 2, margin)[..] else { return };
-ui::draw_button(canvas, env, &style, ok, "OK", false, focus == 0);
-ui::draw_button(canvas, env, &style, cancel, "Cancel", false, focus == 1);
+let mut ui = ui::Ui::new(canvas, env, &style);
+let shown = ui::focus_shown(env);
+ui.button(ok, "OK", false, shown && focus == 0);
+ui.button(cancel, "Cancel", false, shown && focus == 1);
 ```
 
 Tabs over a page, the chosen one on, moved with left and right:
 
 ```rust
-let tabs = ui::Segments::new(&style, Rect::new(margin, top, width, ui::Segments::height(&style)), 3);
-tabs.draw(canvas, env, &style, &["Books", "Shelves", "Notes"], self.tab, self.focus_on_tabs.then_some(self.tab));
+// Made with the layout; it keeps its words.
+let area = Rect::new(margin, top, width, ui::Segments::height(&style));
+let tabs = ui::Segments::new(&style, area, ["hello.books", "hello.shelves", "hello.notes"]);
+tabs.draw(&mut ui, self.tab, self.focus_on_tabs.then_some(self.tab));
 // on_action: if let Some(tab) = tabs.step(self.tab, action) { self.tab = tab; }
 // on_gesture: if let Some(tab) = tabs.hit(gesture.start) { self.tab = tab; }
 ```
@@ -219,63 +253,63 @@ A dialog in the middle of the screen:
 ```rust
 let mut dialog = ui::Dialog::new(env, &style, "Delete the book?", &["It goes for good."], &["Delete", "Keep"]);
 dialog.place((display.height - dialog.height()) / 2);
-dialog.draw(canvas, env, &style, Some(self.focus));
+dialog.draw(&mut ui, Some(self.focus));
 ```
 
 ### Settings
 
 A setting is a constant with its id and the type of its value
 (`Setting<bool>`, `Setting<i64>` or `Setting<Text>` for choices,
-languages, lists and text):
+languages, lists and text). Its spec is declared in a `static` list,
+which the plugin registers once. On the X4 the list stays in flash and
+takes next to no memory:
 
 ```rust
 pub const NAME: Setting<Text> = Setting::new("hello.name");
+pub const DATE: Setting<bool> = Setting::new("hello.clock.date");
+const GROUP: Id = Id::new_static("hello.clock");
 
-r.add_setting(
-    SettingSpec::text(&NAME, "hello.setting.name", "")
-        .group(groups::OTHER)
+static SETTINGS: [SettingSpec; 3] = [
+    SettingSpec::text(NAME.static_str(), "hello.setting.name", "", GROUP)
         .description("hello.setting.name.help"),
-)?;
+    SettingSpec::switch(DATE.static_str(), "hello.setting.date", true, GROUP),
+    SettingSpec::choice("hello.clock.face", "hello.setting.face",
+        &["hello.face.plain", "hello.face.ticks"], "hello.face.ticks", GROUP)
+        .description("hello.setting.face.help"),
+];
 
-let name: &str = env.settings.read(&NAME);
+r.add_settings(&SETTINGS)?;
+
+let name: &str = env.settings().read(&NAME);
 out.push(Command::set(&NAME, "Ada".into()));
 ```
 
 `SettingSpec::switch`, `number`, `choice`, `language`, `list` and
-`text` make the others, their defaults of the setting's type. The
-settings screens list every setting by its group, with its description
-below it; the kernel saves changes to `paperpaw.ini`. Settings can be
-numbers with units and steps, switches, choices, languages or text;
-`advanced()` hides rarely needed ones, `scoped()` lets one be set per
-book, `editor(screen)` opens a screen of your own instead. Settings
-known only at run time (one per widget, say) are read by their ids,
-`env.settings.text("…")` and so on. Passwords and keys do not belong in
-settings: see [Passwords and keys](#passwords-and-keys).
+`text` make them, each with its id, title, default and group;
+`SettingSpec::new` takes any kind and an `Id`, for a spec whose id is
+known only at run time (registered with `add_setting`). Every builder is
+`const`. The settings screens list every setting by its group, with its
+description below it; the kernel saves changes to `paperpaw.ini`.
+`advanced()` hides rarely needed ones, and `scoped()` lets one be set per
+book. Settings known only at run time (one per widget, say) are read by
+their ids, `env.settings().text("…")` and so on. Passwords and keys do
+not belong in settings: see [Passwords and keys](#passwords-and-keys).
 
-Each setting built this way takes about 200 bytes while the device
-runs. A plugin with many settings keeps them in the program instead, in
-a `static` list (on the X4 it stays in flash, next to no memory):
+What few settings need goes into a `static SettingExtra`, which a
+setting takes with `with_extra(&EXTRA)`: a unit, a step, a section, a
+slider, an editor screen of your own, or being a secret.
 
 ```rust
-const GROUP: Id = Id::new_static("hello.clock");
-static SETTINGS: [SettingSpec; 2] = [
-    SettingSpec::fixed_switch("hello.clock.date", "hello.setting.date", true, GROUP),
-    SettingSpec::fixed_choice("hello.clock.face", "hello.setting.face",
-        &["hello.face.plain", "hello.face.ticks"], "hello.face.ticks", GROUP)
-        .described("hello.setting.face.help"),
+static WHILE_SYNCING: SettingExtra = SettingExtra::new().shown_if(Id::new_static("hello.sync"), "on");
+static SERVER: [SettingSpec; 1] = [
+    SettingSpec::text("hello.server", "hello.setting.server", "", GROUP).with_extra(&WHILE_SYNCING),
 ];
-
-r.add_settings(&SETTINGS)?;
 ```
 
-Such settings are read like any other; those that need a unit, a step,
-a section or an editor screen are made as above.
-
-A setting may show only while another has a value
-(`SettingExtra::shown_if("hello.sync", "on")`, the server's address
-while syncing is on), and check a value before it is set
-(`SettingExtra::check(fn)`): a value it refuses is not set, and the
-reader is told the translation of the key it returns. Screens of your
+`shown_if` shows a setting only while another has a value. Here the
+server's address shows while syncing is on. `check(fn)` checks a value
+before it is set. A value it refuses is not set, and the reader sees
+the translation of the key it returns. Screens of your
 own that list settings open them as the settings pages do with
 `ui::setting_opens` (its editor, the keyboard for text, the list of a
 choice's values); text typed there comes back to the kernel as
@@ -315,12 +349,14 @@ strings (`Params`): events known only at run time are heard by id with
 
 Answers come as events too, typed in `replies`: a plugin names the
 event it wants, e.g. `const FETCHED: Event<HttpReply> =
-Event::new("news.fetched")`, and passes it with the request. To ask
-the reader, `ask::text("Server", &ENTERED).initial(url).command()`
-opens the keyboard and brings back a `Typed`, `ask::folder` a
-`Chosen`, and `choice::open` a `Picked`. What the plugin added
-(`.with(key, value)`) comes back as the answer's `context`, to tell
-its questions apart.
+Event::new("news.fetched")`, and passes it with the request.
+
+To ask the reader, `ask::text("Server", &ENTERED).initial(url).command()`
+opens the keyboard and brings back a `Typed`. `ask::folder` brings back
+a `FolderChosen`, `ask::choice` a `Picked` and `ask::confirm` a `Confirmed`.
+A value passed with `.with(key, value)` comes back in the answer's
+`context`, so a plugin tells its questions apart. A `Picked` has no
+`context`: on `ask::choice`, `.about(text)` comes back as its `path`.
 
 What is known of books is a service, not a screen's: `library` has a
 book's details (title, author, series, tags, cover, progress, and
@@ -378,8 +414,10 @@ static HOW: [(&str, &str); 2] = [
 // In `manifest`: Manifest::new(…).description(…).how(&HOW)
 ```
 
-The same text is the `description` of the plugin's entry in the store
-(see [Publishing](#publishing)), shown on its page there. A data plugin
+The store shows the same text on the plugin's page and in the readers'
+store: put the files into the folder you upload as well (`how/en.txt`,
+`how/de.txt`), as PaperPaw's own plugins in the store have them, or say
+it in the entry's `description` (see [Publishing](#publishing)). A data plugin
 gives it as `<id>.plugin.how` in its catalogs, quoted, paragraphs apart
 by `\n\n`. `paperpaw-dev` warns where a plugin with code has none or a
 short one.
@@ -387,14 +425,15 @@ short one.
 ### Testing
 
 Plugins are tested with the real kernel and an in-memory storage, as the
-sample's [test](../samples/hello-plugin/tests/hello.rs) does: build a
-kernel with the plugin, send it input, look at the open screen, the
-settings, the files, the HTTP requests it makes (`Kernel::take_io`)
-and answer them (`Kernel::http_response`). The emulator then shows how it
+sample's [test](../samples/hello-plugin/tests/hello.rs) does. The kernel
+comes from the crate `paperpaw-core`, a dev-dependency. Build a kernel
+with the plugin and send it input. Then look at the open screen, the
+settings, the files and the HTTP requests it makes (`Kernel::take_io`).
+Answer them with `Kernel::http_response`. The emulator then shows how it
 looks and how much memory it needs on each device:
 
 ```sh
-cargo run -p paperpaw-emulator -- --profile xteink-x4 --headless --script "confirm" --screenshot out.png
+cargo run -p paperpaw-emulator --features hello -- --profile xteink-x4 --headless --script "run:hello.open" --screenshot out.png --heap-report
 ```
 
 Before a plugin is published, `paperpaw-dev` checks all of it on every

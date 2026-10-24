@@ -6,9 +6,11 @@ on, as Android loads `code.so`: a `cdylib` crate with the same
 the `outline` feature (`paperpaw-sdk = { version = "0.4", features =
 ["outline"] }`), is `code-host.dll`, `code-host.so` or `code-host.dylib`
 in the plugin's folder (`plugins/<id>/` of the emulator's library,
-beside its `plugin.ini`). As on a device, only code installed runs:
-`--trust-code` installs every such file in the library, and at every
-start a file changed since is refused until it is installed again.
+beside its `plugin.ini`). The emulator runs such code only when it is started
+with `--trust-code`, which installs every such file in the library first
+(as on a device, only code installed runs); without it, none, whatever
+the library says is installed: a library copied from elsewhere runs no
+code of its own.
 
 ```sh
 paperpaw-emu --library my-library --trust-code

@@ -30,6 +30,8 @@ const files = {
   "src/lib.rs": { text: show("samples/hello-plugin/src/lib.rs") },
   "i18n/en.ini": { text: show("samples/hello-plugin/i18n/en.ini") },
   "i18n/de.ini": { text: show("samples/hello-plugin/i18n/de.ini") },
+  "how/en.txt": { text: show("samples/hello-plugin/how/en.txt") },
+  "how/de.txt": { text: show("samples/hello-plugin/how/de.txt") },
   "plugin/plugin.ini": { text: show("samples/hello-native/plugin/plugin.ini") },
 };
 fs.writeFileSync(path.join(out, "sample.json"), JSON.stringify(files, null, 2) + "\n");

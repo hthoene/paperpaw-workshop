@@ -16,7 +16,7 @@ const ID: Id = Id::new_static("my.card");
 static SETTINGS: [SettingSpec; 4] = [
     widgets::align_spec("my.card.align", ID, Align::Left),
     widgets::frame_spec("my.card.frame", ID, Frame::None), // none, line, light or dark card
-    widgets::size_spec("my.card.size", ID, Size::Medium, true), // true: also "as large as it fits"
+    widgets::size_spec("my.card.size", ID, TextSize::Medium, true), // true: also "as large as it fits"
     widgets::part_spec("my.card.author", ID, "my.show-author", true),
 ];
 r.add_setting_group(widgets::settings_group(&ID, "my.card"))?;
@@ -37,16 +37,16 @@ values of the widget's settings: the home screen places a clock as
 `widgets.clock@1` and `widgets.clock@2`, whose frames are the settings
 `widgets.clock@1.frame` and `widgets.clock@2.frame` (saved like any
 other, the widget's own `widgets.clock.frame` where one sets none).
-`env.widgets.make` gives a placement's widget, which reads its settings
+`env.widgets().make` gives a placement's widget, which reads its settings
 by their usual ids and gets that placement's values
 (`Settings::with_placement`); a widget need do nothing for it. Screens
 of their own that place widgets use `Id::placement` and forget a
 placement's values when it goes (`Settings::placement_values`).
 
 `widgets::shows(env, id, "author")` reads a part's switch,
-`widgets::choice` makes other choices of the widget's own, and
+`widgets::choice_setting` makes other choices of the widget's own, and
 `widgets::draw_message` says kindly what is not there yet. A widget's
-`height` counts its frame (`widgets::look::look` gives the area inside
+`height` counts its frame (`widgets::widget_look` gives the area inside
 it without drawing). For round things there are `Canvas::fill_circle`,
 `stroke_circle`, `fill_ring` (arcs, e.g. a progress ring) and
 `draw_hand`, with angles as on a clock face (`paperpaw_sdk::round`);

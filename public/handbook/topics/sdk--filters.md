@@ -42,7 +42,7 @@ pub struct paperpaw_sdk::filters::TextFilters
 pub fn paperpaw_sdk::filters::TextFilters::apply(&self, &paperpaw_sdk::Env<'_>, &mut paperpaw_document::Block)
 pub fn paperpaw_sdk::filters::TextFilters::apply_in(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::filters::FilterContext<'_>, &mut paperpaw_document::Block) -> paperpaw_sdk::filters::Verdict
 pub fn paperpaw_sdk::filters::TextFilters::new() -> Self
-pub fn paperpaw_sdk::filters::TextFilters::signature(&self, &paperpaw_sdk::Env<'_>) -> alloc::string::String
+pub fn paperpaw_sdk::filters::TextFilters::signature(&self, &paperpaw_sdk::Env<'_>) -> u64
 pub enum paperpaw_sdk::filters::InputVerdict
 pub paperpaw_sdk::filters::InputVerdict::Cancel
 pub paperpaw_sdk::filters::InputVerdict::Pass
@@ -67,7 +67,7 @@ pub type paperpaw_sdk::filters::BlockFilterFn = alloc::boxed::Box<dyn core::ops:
 pub type paperpaw_sdk::filters::InputFilterFn = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>, &paperpaw_platform::input::InputEvent) -> paperpaw_sdk::filters::InputVerdict>
 pub type paperpaw_sdk::filters::RefreshFilterFn = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::filters::Refresh) -> paperpaw_sdk::filters::RefreshVerdict>
 pub type paperpaw_sdk::filters::TextFilterFn = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>, &mut paperpaw_document::Block)>
-pub type paperpaw_sdk::filters::TextFilterSignatureFn = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>) -> alloc::string::String>
+pub type paperpaw_sdk::filters::TextFilterSignatureFn = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>) -> u64>
 pub struct paperpaw_sdk::filters::FilterContext<'a>
 pub fn paperpaw_sdk::filters::FilterContext<'a>::new(&'a str, &'a str, paperpaw_document::Locator) -> Self
 pub paperpaw_sdk::filters::FilterContext::at: paperpaw_document::Locator

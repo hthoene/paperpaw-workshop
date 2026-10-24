@@ -22,6 +22,7 @@ pub fn paperpaw_sdk::setting::Setting<T>::value(&self, <T as paperpaw_sdk::setti
 pub fn paperpaw_sdk::setting::Setting<T>::clone(&self) -> Self
 pub fn paperpaw_sdk::setting::Setting<T>::eq(&self, &Self) -> bool
 pub fn paperpaw_sdk::setting::Setting<T>::eq(&self, &paperpaw_sdk::Id) -> bool
+pub fn paperpaw_sdk::setting::Setting<T>::as_ref(&self) -> &str
 pub fn paperpaw_sdk::setting::Setting<T>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub fn paperpaw_sdk::setting::Setting<T>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub fn paperpaw_sdk::setting::Setting<T>::eq(&self, &paperpaw_sdk::Id) -> bool
@@ -33,6 +34,7 @@ pub fn paperpaw_sdk::setting::Setting<T>::value(&self, <T as paperpaw_sdk::setti
 pub fn paperpaw_sdk::setting::Setting<T>::clone(&self) -> Self
 pub fn paperpaw_sdk::setting::Setting<T>::eq(&self, &Self) -> bool
 pub fn paperpaw_sdk::setting::Setting<T>::eq(&self, &paperpaw_sdk::Id) -> bool
+pub fn paperpaw_sdk::setting::Setting<T>::as_ref(&self) -> &str
 pub fn paperpaw_sdk::setting::Setting<T>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub fn paperpaw_sdk::setting::Setting<T>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub fn paperpaw_sdk::setting::SettingType::read(core::option::Option<&paperpaw_sdk::SettingValue>) -> Self::Value

@@ -54,7 +54,7 @@ It is PaperPaw's INI: a comment is a line of its own, never after a
 value.
 
 A code plugin adds one signed `.ppn` per reader (the form's fields
-`build-x4`, `build-x4-pro`, `build-x4-classic`) and the exact source of
+`build-x4`, `build-x4-pro`) and the exact source of
 those builds: `[source]` names a public repository on `github.com`,
 `codeberg.org` or `gitlab.com` and the tag or commit built (with `path`
 and `bin` when the crate is not at the top or the binary not named as
@@ -90,20 +90,22 @@ source*, *Not rebuilt* or *Rebuilt, but does not match its source*.
 Paths end up in a build (in its panic messages), so the sample's
 `build.sh` and the rebuild write them as the same everywhere, with
 `--remap-path-prefix` added to the flags of `.cargo/config.toml`
-(through `cargo --config`): the source's top as `/plugin`, Cargo's home
-as `/cargo`, and the X4 Pro's toolchain, whose `core` and `alloc` are
-built with the plugin, as `/rust`. So:
+(through `cargo --config`): the source's top as `/plugin` and Cargo's
+home as `/cargo`. The core libraries come built, the same for everyone:
+rustup's for the X4, the release's for the X4 Pro, which the rebuild
+installs as authors do (see [The crate](#the-crate)). So:
 
-- build with `build.sh`, or the sample's CI job
-  (`samples/hello-native/.github/workflows/build.yml`) that runs it, from
-  a pushed tag, in any folder, on Linux or macOS (on Windows, paths
-  inside the source keep their `\`, and such a build matches only builds
-  on Windows);
+- build with `build.sh`, or with the sample's CI job that runs it
+  (`samples/hello-native/.github/workflows/build.yml`). Build from a
+  pushed tag, in any folder, on Linux or macOS. On Windows, paths inside
+  the source keep their `\`, and such a build matches only builds on
+  Windows;
 - commit `Cargo.lock`;
 - keep the release's compilers pinned (`rust-toolchain.toml`, the job's
-  `RUST_X4`, `RUST_X4_PRO`, `ESP_GCC`) and its SDK
-  (`paperpaw-sdk = "0.4"`), and build again for every release until 1.0
-  (see [Which build fits](#which-build-fits));
+  `RUST_X4`, `RUST_X4_PRO`, `ESP_GCC`), its SDK
+  (`paperpaw-sdk = "0.4"`) and, for the X4 Pro, its core libraries
+  installed, and build again for every release until 1.0 (see
+  [Which build fits](#which-build-fits));
 - never set `RUSTFLAGS`, which would replace the flags that link the
   plugin, and never publish a build made without the remapped paths;
 - put nothing of the moment or the computer into the code (a build

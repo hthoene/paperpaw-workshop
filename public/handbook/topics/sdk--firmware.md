@@ -8,17 +8,12 @@ pub paperpaw_sdk::firmware::Firmware::room: u64
 pub paperpaw_sdk::firmware::Firmware::state: paperpaw_sdk::firmware::FirmwareState
 pub paperpaw_sdk::firmware::Firmware::undone: bool
 pub paperpaw_sdk::firmware::Firmware::version: alloc::string::String
-pub struct paperpaw_sdk::firmware::Update
-pub paperpaw_sdk::firmware::Update::info: paperpaw_update::AppInfo
-pub paperpaw_sdk::firmware::Update::path: alloc::string::String
-pub paperpaw_sdk::firmware::Update::plugins: core::option::Option<paperpaw_update::plugins::Plugins>
-pub paperpaw_sdk::firmware::Update::trailer: paperpaw_update::Trailer
-pub fn paperpaw_sdk::firmware::Update::fits(&self, &paperpaw_sdk::firmware::Firmware) -> core::result::Result<(), paperpaw_sdk::firmware::InstallFailure>
-pub fn paperpaw_sdk::firmware::Update::is_newer(&self, &paperpaw_sdk::firmware::Firmware) -> bool
-pub fn paperpaw_sdk::firmware::Update::leaves_out<'a>(&'a self, &'a paperpaw_sdk::firmware::Firmware) -> alloc::vec::Vec<&'a str>
-pub fn paperpaw_sdk::firmware::Update::may_install(&self, &paperpaw_sdk::firmware::Firmware, core::option::Option<&[u8; 32]>, bool) -> core::result::Result<(), paperpaw_sdk::firmware::InstallFailure>
-pub fn paperpaw_sdk::firmware::Update::read(&dyn paperpaw_platform::storage::Storage, &str) -> core::result::Result<Self, paperpaw_sdk::firmware::InstallFailure>
-pub fn paperpaw_sdk::firmware::Update::signer(&self, &paperpaw_sdk::firmware::Firmware) -> paperpaw_sdk::firmware::Signer
+pub fn paperpaw_sdk::firmware::Firmware::keys(self, alloc::vec::Vec<[u8; 32]>) -> Self
+pub fn paperpaw_sdk::firmware::Firmware::new(impl core::convert::Into<alloc::string::String>, impl core::convert::Into<alloc::string::String>, u16) -> Self
+pub fn paperpaw_sdk::firmware::Firmware::plugins(self, paperpaw_update::plugins::Plugins) -> Self
+pub fn paperpaw_sdk::firmware::Firmware::room(self, u64) -> Self
+pub fn paperpaw_sdk::firmware::Firmware::state(self, paperpaw_sdk::firmware::FirmwareState) -> Self
+pub fn paperpaw_sdk::firmware::Firmware::undone(self, bool) -> Self
 pub enum paperpaw_sdk::firmware::FirmwareCommand
 pub paperpaw_sdk::firmware::FirmwareCommand::Install
 pub paperpaw_sdk::firmware::FirmwareCommand::Install::key: core::option::Option<[u8; 32]>
@@ -59,6 +54,7 @@ pub use paperpaw_sdk::firmware::Problem
 pub use paperpaw_sdk::firmware::TRAILER_LEN
 pub use paperpaw_sdk::firmware::Trailer
 pub const paperpaw_sdk::firmware::UPDATE_DIR: &str
+pub fn paperpaw_sdk::firmware::beta(&str) -> core::option::Option<(&str, &str)>
 pub fn paperpaw_sdk::firmware::compare_versions(&str, &str) -> core::cmp::Ordering
 pub use paperpaw_sdk::firmware::fingerprint
 pub use paperpaw_sdk::firmware::key_hex

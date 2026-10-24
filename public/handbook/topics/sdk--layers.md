@@ -34,7 +34,6 @@ pub fn paperpaw_sdk::layers::PageLayers::has_frames(&self) -> bool
 pub fn paperpaw_sdk::layers::PageLayers::is_empty(&self) -> bool
 pub fn paperpaw_sdk::layers::PageLayers::is_idle(&self) -> bool
 pub fn paperpaw_sdk::layers::PageLayers::key(&self, &paperpaw_sdk::Env<'_>, paperpaw_platform::geometry::Rect) -> alloc::string::String
-pub fn paperpaw_sdk::layers::PageLayers::new() -> Self
 pub fn paperpaw_sdk::layers::PageLayers::on<'s>(&'s self, &'s paperpaw_sdk::Env<'_>) -> impl core::iter::traits::iterator::Iterator<Item = &'s paperpaw_sdk::layers::PageLayerSpec>
 pub fn paperpaw_sdk::layers::PageLayers::rooms(&self, &paperpaw_sdk::Env<'_>, paperpaw_platform::geometry::Rect) -> (alloc::vec::Vec<(paperpaw_sdk::Id, paperpaw_platform::geometry::Rect)>, paperpaw_platform::geometry::Rect)
 pub fn paperpaw_sdk::layers::PageLayers::tapped<'s>(&'s self, &paperpaw_sdk::Env<'_>, &[(paperpaw_sdk::Id, paperpaw_platform::geometry::Rect)], i32, i32) -> core::option::Option<&'s paperpaw_sdk::Id>
@@ -49,7 +48,7 @@ pub type paperpaw_sdk::layers::ReserveFn = alloc::boxed::Box<dyn core::ops::func
 pub struct paperpaw_sdk::layers::PageView<'a>
 pub fn paperpaw_sdk::layers::PageView<'a>::columns(self, &'a [paperpaw_platform::geometry::Rect]) -> Self
 pub fn paperpaw_sdk::layers::PageView<'a>::language(self, &'a str) -> Self
-pub fn paperpaw_sdk::layers::PageView<'a>::line_at(&self, i32, i32) -> core::option::Option<&paperpaw_sdk::layers::LineBox>
+pub fn paperpaw_sdk::layers::PageView<'a>::line_at(&self, paperpaw_platform::geometry::Point) -> core::option::Option<&paperpaw_sdk::layers::LineBox>
 pub fn paperpaw_sdk::layers::PageView<'a>::lines(self, &'a [paperpaw_sdk::layers::LineBox]) -> Self
 pub fn paperpaw_sdk::layers::PageView<'a>::new(&'a str, paperpaw_document::Locator, paperpaw_document::Locator, paperpaw_platform::geometry::Rect) -> Self
 pub fn paperpaw_sdk::layers::PageView<'a>::room(self, core::option::Option<paperpaw_platform::geometry::Rect>) -> Self

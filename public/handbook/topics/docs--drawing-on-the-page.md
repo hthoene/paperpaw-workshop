@@ -16,7 +16,7 @@ r.add_page_layer(
             canvas.fill_rect(room.x.into(), line.area.y.into(), 4, line.area.height.into(), Color::BLACK);
         }
     })
-    .reserve(|env| Some((Side::Right, env.metrics.mm(8) as u16)))
+    .reserve(|env| Some((Side::Right, env.metrics().mm(8) as u16)))
     .taps(),
 )?;
 ```

@@ -32,6 +32,7 @@ pub enum paperpaw_sdk::keys::InputMode
 pub paperpaw_sdk::keys::InputMode::Buttons
 pub paperpaw_sdk::keys::InputMode::Pen
 pub paperpaw_sdk::keys::InputMode::Touch
+pub fn paperpaw_sdk::keys::InputMode::at_start(&paperpaw_platform::input::InputCaps) -> Self
 pub enum paperpaw_sdk::keys::PointerVerdict
 pub paperpaw_sdk::keys::PointerVerdict::Capture
 pub paperpaw_sdk::keys::PointerVerdict::Observe

@@ -56,7 +56,7 @@ export interface Topic {
 
 /** A public item a plugin reaches through the SDK (sdk-items.json). */
 export interface SdkItem {
-  /** After `paperpaw_sdk::`, e.g. `ui::draw_button`, `Canvas::fill`. */
+  /** After `paperpaw_sdk::`, e.g. `ui::Ui::button`, `Canvas::fill`. */
   path: string;
   kind: string;
   signature: string;
@@ -213,14 +213,14 @@ export class Handbook {
   }
 
   /** The SDK's items that `query` names or describes, best first: by
-   *  their name (`draw_button`, `Canvas::fill`), else by the words of
+   *  their name (`Ui::button`, `Canvas::fill`), else by the words of
    *  their path and documentation (`button`, `canvas text`). */
   async items(query: string): Promise<SdkItem[]> {
     const all = await (this.sdk ??= this.fetchItems().catch(() => []));
     const q = query.trim().replace(/^paperpaw_sdk::/, "").toLowerCase();
     if (!q) return [];
     const words = q.split(/[^a-z0-9_:]+/).filter((w) => w.length > 1);
-    // "draw button" may mean draw_button.
+    // "fill rect" may mean fill_rect.
     const joined = words.join("_");
     const scored = all
       .map((item) => {

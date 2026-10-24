@@ -25,12 +25,14 @@ strings (`Params`): events known only at run time are heard by id with
 
 Answers come as events too, typed in `replies`: a plugin names the
 event it wants, e.g. `const FETCHED: Event<HttpReply> =
-Event::new("news.fetched")`, and passes it with the request. To ask
-the reader, `ask::text("Server", &ENTERED).initial(url).command()`
-opens the keyboard and brings back a `Typed`, `ask::folder` a
-`Chosen`, and `choice::open` a `Picked`. What the plugin added
-(`.with(key, value)`) comes back as the answer's `context`, to tell
-its questions apart.
+Event::new("news.fetched")`, and passes it with the request.
+
+To ask the reader, `ask::text("Server", &ENTERED).initial(url).command()`
+opens the keyboard and brings back a `Typed`. `ask::folder` brings back
+a `FolderChosen`, `ask::choice` a `Picked` and `ask::confirm` a `Confirmed`.
+A value passed with `.with(key, value)` comes back in the answer's
+`context`, so a plugin tells its questions apart. A `Picked` has no
+`context`: on `ask::choice`, `.about(text)` comes back as its `path`.
 
 What is known of books is a service, not a screen's: `library` has a
 book's details (title, author, series, tags, cover, progress, and

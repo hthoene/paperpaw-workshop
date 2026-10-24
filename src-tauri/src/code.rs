@@ -436,7 +436,7 @@ pub async fn code_build(app: tauri::AppHandle, emulator: tauri::State<'_, crate:
 mod tests {
     use super::*;
 
-    const MANIFEST: &str = "[package]\nname = \"my-clock\"\nversion = \"0.2.0\"\n\n[package.metadata.paperpaw]\nplugin = \"MyClock\"\n\n[dependencies]\npaperpaw-sdk = \"0.4\"\n";
+    const MANIFEST: &str = "[package]\nname = \"my-clock\"\nversion = \"0.2.0\"\n\n[package.metadata.paperpaw]\nplugin = \"MyClock\"\n\n[dependencies]\npaperpaw-sdk = \"0.5\"\n";
 
     fn project() -> Vec<(String, Vec<u8>)> {
         vec![
@@ -566,8 +566,9 @@ struct Here(UiStyle);
 
 impl Screen for Here {
     fn draw(&mut self, canvas: &mut Canvas<'_>, env: &Env<'_>) {
-        let d = env.device.display;
-        ui::draw_message(canvas, env, &self.0, Rect::new(0, 0, d.width, d.height), "Calm code here");
+        let d = env.device().display;
+        let mut ui = ui::Ui::new(canvas, env, &self.0);
+        ui.message(Rect::new(0, 0, d.width, d.height), "Calm code here");
     }
 
     fn on_action(&mut self, _: &Id, _: &mut Cx<'_, '_>) -> Handled {

@@ -519,7 +519,7 @@ mod tests {
         };
         let samples = PathBuf::from(&sdk).join("../../samples/hello-plugin");
         let read = |p: &str| std::fs::read(samples.join(p)).unwrap();
-        let manifest = "[package]\nname = \"hello\"\nversion = \"1.0.0\"\n\n[package.metadata.paperpaw]\nplugin = \"Hello\"\n\n[dependencies]\npaperpaw-sdk = \"0.4\"\n";
+        let manifest = "[package]\nname = \"hello\"\nversion = \"1.0.0\"\n\n[package.metadata.paperpaw]\nplugin = \"Hello\"\n\n[dependencies]\npaperpaw-sdk = \"0.5\"\n";
         let lib = String::from_utf8(read("src/lib.rs")).unwrap();
         let files: Vec<(String, Vec<u8>)> = vec![
             ("Cargo.toml".into(), manifest.as_bytes().to_vec()),

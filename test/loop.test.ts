@@ -283,7 +283,7 @@ describe("a turn's ends", () => {
           seconds: 1,
           problems: [],
           diagnostics: wrong
-            ? [{ level: "error", file: "src/lib.rs", line: 63, column: 53, message: "no field `day_of_year` on type `LocalTime`", rendered: "error[E0609]: no field `day_of_year` on type `LocalTime`" }]
+            ? [{ level: "error", file: "src/lib.rs", line: 70, column: 53, message: "no field `day_of_year` on type `LocalTime`", rendered: "error[E0609]: no field `day_of_year` on type `LocalTime`" }]
             : [],
           files: wrong ? [] : [{ target: "web", name: "web.wasm", size: 1, url: "/api/v1/workshop/builds/b2/files/web.wasm" }],
           log_tail: "",

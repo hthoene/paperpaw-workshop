@@ -21,6 +21,7 @@ pub fn paperpaw_sdk::work::Moments::bitor(self, paperpaw_sdk::work::Moments) -> 
 pub struct paperpaw_sdk::work::Note
 pub paperpaw_sdk::work::Note::at: paperpaw_platform::input::Instant
 pub paperpaw_sdk::work::Note::text: alloc::string::String
+pub fn paperpaw_sdk::work::Note::new(paperpaw_platform::input::Instant, impl core::convert::Into<alloc::string::String>) -> Self
 pub struct paperpaw_sdk::work::Progress
 pub paperpaw_sdk::work::Progress::done: u32
 pub paperpaw_sdk::work::Progress::of: u32
@@ -59,18 +60,22 @@ pub fn paperpaw_sdk::work::Work::with(self, paperpaw_sdk::Params) -> Self
 pub fn paperpaw_sdk::work::Work::within(self, core::time::Duration) -> Self
 pub struct paperpaw_sdk::work::WorkRefused
 pub fn paperpaw_sdk::work::WorkRefused::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::work::WorkRefused::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::work::WorkRefused::to_params(&self) -> paperpaw_sdk::Params
 pub paperpaw_sdk::work::WorkRefused::refusal: paperpaw_sdk::work::Refusal
 pub paperpaw_sdk::work::WorkRefused::work: paperpaw_sdk::Id
+pub fn paperpaw_sdk::work::WorkRefused::new(paperpaw_sdk::Id, paperpaw_sdk::work::Refusal) -> Self
 pub fn paperpaw_sdk::work::WorkRefused::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::work::WorkRefused::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::work::WorkRefused::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::work::WorkRefused::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::work::WorkRefused::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::work::WorkRefused::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::work::WorkSpec
 pub paperpaw_sdk::work::WorkSpec::id: paperpaw_sdk::Id
 pub paperpaw_sdk::work::WorkSpec::step: paperpaw_sdk::work::StepFn
 pub paperpaw_sdk::work::WorkSpec::title: alloc::borrow::Cow<'static, str>
-pub fn paperpaw_sdk::work::WorkSpec::new(impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>, impl core::ops::function::Fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params, &mut alloc::vec::Vec<paperpaw_sdk::Command>) -> paperpaw_sdk::work::Step + 'static) -> Self
+pub fn paperpaw_sdk::work::WorkSpec::new(impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>, impl core::ops::function::Fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params, &mut paperpaw_sdk::Commands) -> paperpaw_sdk::work::Step + 'static) -> Self
 pub fn paperpaw_sdk::work::WorkSpec::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub struct paperpaw_sdk::work::WorkStates
 pub fn paperpaw_sdk::work::WorkStates::get(&self, &paperpaw_sdk::Id) -> core::option::Option<&paperpaw_sdk::work::WorkState>
@@ -116,7 +121,7 @@ pub paperpaw_sdk::work::WorkState::Running
 pub paperpaw_sdk::work::WorkState::Running::progress: core::option::Option<paperpaw_sdk::work::Progress>
 pub paperpaw_sdk::work::WorkState::Waiting
 pub paperpaw_sdk::work::WorkState::Waiting::due: core::option::Option<paperpaw_platform::input::Instant>
-pub type paperpaw_sdk::work::StepFn = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params, &mut alloc::vec::Vec<paperpaw_sdk::Command>) -> paperpaw_sdk::work::Step>
+pub type paperpaw_sdk::work::StepFn = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params, &mut paperpaw_sdk::Commands) -> paperpaw_sdk::work::Step>
 pub const paperpaw_sdk::work::RETRY_FIRST: core::time::Duration
 pub const paperpaw_sdk::work::RETRY_MOST: core::time::Duration
 pub const paperpaw_sdk::work::params::REFUSED: &str

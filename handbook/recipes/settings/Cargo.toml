@@ -6,4 +6,4 @@ version = "0.1.0"
 plugin = "Motto"
 
 [dependencies]
-paperpaw-sdk = "0.4"
+paperpaw-sdk = "0.5"

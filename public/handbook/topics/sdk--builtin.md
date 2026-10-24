@@ -3,68 +3,89 @@ pub struct paperpaw_sdk::builtin::events::AnnotationsChanged
 pub paperpaw_sdk::builtin::events::AnnotationsChanged::path: alloc::string::String
 pub fn paperpaw_sdk::builtin::events::AnnotationsChanged::new(alloc::string::String) -> Self
 pub fn paperpaw_sdk::builtin::events::AnnotationsChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::AnnotationsChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::AnnotationsChanged::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::AnnotationsChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::AnnotationsChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::AnnotationsChanged::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::AnnotationsChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::AnnotationsChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::AnnotationsChanged::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::BookAdded
 pub paperpaw_sdk::builtin::events::BookAdded::path: alloc::string::String
 pub paperpaw_sdk::builtin::events::BookAdded::source: alloc::string::String
 pub fn paperpaw_sdk::builtin::events::BookAdded::new(alloc::string::String, alloc::string::String) -> Self
 pub fn paperpaw_sdk::builtin::events::BookAdded::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::BookAdded::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookAdded::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookAdded::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::BookAdded::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookAdded::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookAdded::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::BookAdded::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookAdded::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::BookChanged
 pub paperpaw_sdk::builtin::events::BookChanged::path: alloc::string::String
 pub paperpaw_sdk::builtin::events::BookChanged::what: u32
 pub fn paperpaw_sdk::builtin::events::BookChanged::new(alloc::string::String, u32) -> Self
 pub fn paperpaw_sdk::builtin::events::BookChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::BookChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookChanged::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::BookChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookChanged::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::BookChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookChanged::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::BookChosen
 pub paperpaw_sdk::builtin::events::BookChosen::action: paperpaw_sdk::Id
 pub paperpaw_sdk::builtin::events::BookChosen::path: alloc::string::String
 pub fn paperpaw_sdk::builtin::events::BookChosen::new(paperpaw_sdk::Id, alloc::string::String) -> Self
 pub fn paperpaw_sdk::builtin::events::BookChosen::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::BookChosen::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookChosen::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookChosen::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::BookChosen::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookChosen::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookChosen::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::BookChosen::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookChosen::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::BookMoved
 pub paperpaw_sdk::builtin::events::BookMoved::from: alloc::string::String
 pub paperpaw_sdk::builtin::events::BookMoved::path: alloc::string::String
 pub fn paperpaw_sdk::builtin::events::BookMoved::new(alloc::string::String, alloc::string::String) -> Self
 pub fn paperpaw_sdk::builtin::events::BookMoved::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::BookMoved::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookMoved::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookMoved::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::BookMoved::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookMoved::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookMoved::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::BookMoved::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookMoved::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::BookRemoved
 pub paperpaw_sdk::builtin::events::BookRemoved::path: alloc::string::String
 pub fn paperpaw_sdk::builtin::events::BookRemoved::new(alloc::string::String) -> Self
 pub fn paperpaw_sdk::builtin::events::BookRemoved::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::BookRemoved::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookRemoved::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookRemoved::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::BookRemoved::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookRemoved::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookRemoved::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::BookRemoved::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::BookRemoved::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::CatalogWanted
 pub paperpaw_sdk::builtin::events::CatalogWanted::anew: bool
 pub fn paperpaw_sdk::builtin::events::CatalogWanted::new(bool) -> Self
 pub fn paperpaw_sdk::builtin::events::CatalogWanted::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::CatalogWanted::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::CatalogWanted::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::CatalogWanted::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::CatalogWanted::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::CatalogWanted::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::CatalogWanted::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::CatalogWanted::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::CatalogWanted::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::DecorationTapped
 pub paperpaw_sdk::builtin::events::DecorationTapped::decorator: paperpaw_sdk::Id
@@ -79,19 +100,25 @@ pub fn paperpaw_sdk::builtin::events::DecorationTapped::end(&self) -> paperpaw_d
 pub fn paperpaw_sdk::builtin::events::DecorationTapped::start(&self) -> paperpaw_document::Locator
 pub fn paperpaw_sdk::builtin::events::DecorationTapped::new(paperpaw_sdk::Id, paperpaw_sdk::Id, alloc::string::String, alloc::string::String, u32, u32, u32, u32) -> Self
 pub fn paperpaw_sdk::builtin::events::DecorationTapped::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::DecorationTapped::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::DecorationTapped::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::DecorationTapped::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::DecorationTapped::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::DecorationTapped::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::DecorationTapped::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::DecorationTapped::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::DecorationTapped::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::DocumentReady
 pub paperpaw_sdk::builtin::events::DocumentReady::path: alloc::string::String
 pub fn paperpaw_sdk::builtin::events::DocumentReady::new(alloc::string::String) -> Self
 pub fn paperpaw_sdk::builtin::events::DocumentReady::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::DocumentReady::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::DocumentReady::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::DocumentReady::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::DocumentReady::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::DocumentReady::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::DocumentReady::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::DocumentReady::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::DocumentReady::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::FocusChanged
 pub paperpaw_sdk::builtin::events::FocusChanged::height: u16
@@ -104,20 +131,26 @@ pub paperpaw_sdk::builtin::events::FocusChanged::y: u16
 pub fn paperpaw_sdk::builtin::events::FocusChanged::new(alloc::string::String, alloc::string::String, u16, u16, u16, u16) -> Self
 pub fn paperpaw_sdk::builtin::events::FocusChanged::on(self, impl core::convert::Into<core::option::Option<bool>>) -> Self
 pub fn paperpaw_sdk::builtin::events::FocusChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::FocusChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::FocusChanged::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::FocusChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::FocusChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::FocusChanged::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::FocusChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::FocusChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::FocusChanged::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::FollowLink
 pub paperpaw_sdk::builtin::events::FollowLink::href: alloc::string::String
 pub paperpaw_sdk::builtin::events::FollowLink::path: alloc::string::String
 pub fn paperpaw_sdk::builtin::events::FollowLink::new(alloc::string::String, alloc::string::String) -> Self
 pub fn paperpaw_sdk::builtin::events::FollowLink::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::FollowLink::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::FollowLink::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::FollowLink::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::FollowLink::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::FollowLink::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::FollowLink::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::FollowLink::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::FollowLink::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::Goto
 pub paperpaw_sdk::builtin::events::Goto::end_offset: core::option::Option<u32>
@@ -133,10 +166,13 @@ pub fn paperpaw_sdk::builtin::events::Goto::end_offset(self, impl core::convert:
 pub fn paperpaw_sdk::builtin::events::Goto::end_section(self, impl core::convert::Into<core::option::Option<u32>>) -> Self
 pub fn paperpaw_sdk::builtin::events::Goto::new(alloc::string::String, u32, u32) -> Self
 pub fn paperpaw_sdk::builtin::events::Goto::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::Goto::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Goto::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Goto::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::Goto::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Goto::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Goto::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::Goto::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Goto::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::LookupAnswered
 pub paperpaw_sdk::builtin::events::LookupAnswered::more: core::option::Option<paperpaw_sdk::Id>
@@ -147,29 +183,38 @@ pub paperpaw_sdk::builtin::events::LookupAnswered::word: alloc::string::String
 pub fn paperpaw_sdk::builtin::events::LookupAnswered::more(self, impl core::convert::Into<core::option::Option<paperpaw_sdk::Id>>) -> Self
 pub fn paperpaw_sdk::builtin::events::LookupAnswered::new(paperpaw_sdk::Id, alloc::string::String, alloc::string::String, alloc::string::String) -> Self
 pub fn paperpaw_sdk::builtin::events::LookupAnswered::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::LookupAnswered::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::LookupAnswered::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::LookupAnswered::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::LookupAnswered::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::LookupAnswered::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::LookupAnswered::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::LookupAnswered::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::LookupAnswered::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::MenuChanged
 pub paperpaw_sdk::builtin::events::MenuChanged::id: paperpaw_sdk::Id
 pub fn paperpaw_sdk::builtin::events::MenuChanged::new(paperpaw_sdk::Id) -> Self
 pub fn paperpaw_sdk::builtin::events::MenuChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::MenuChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::MenuChanged::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::MenuChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::MenuChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::MenuChanged::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::MenuChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::MenuChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::MenuChanged::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::NotesExported
 pub paperpaw_sdk::builtin::events::NotesExported::path: alloc::string::String
 pub paperpaw_sdk::builtin::events::NotesExported::title: alloc::string::String
 pub fn paperpaw_sdk::builtin::events::NotesExported::new(alloc::string::String, alloc::string::String) -> Self
 pub fn paperpaw_sdk::builtin::events::NotesExported::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::NotesExported::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::NotesExported::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::NotesExported::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::NotesExported::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::NotesExported::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::NotesExported::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::NotesExported::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::NotesExported::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::PageLayerTapped
 pub paperpaw_sdk::builtin::events::PageLayerTapped::layer: paperpaw_sdk::Id
@@ -183,29 +228,38 @@ pub fn paperpaw_sdk::builtin::events::PageLayerTapped::new(paperpaw_sdk::Id, all
 pub fn paperpaw_sdk::builtin::events::PageLayerTapped::offset(self, impl core::convert::Into<core::option::Option<u32>>) -> Self
 pub fn paperpaw_sdk::builtin::events::PageLayerTapped::section(self, impl core::convert::Into<core::option::Option<u32>>) -> Self
 pub fn paperpaw_sdk::builtin::events::PageLayerTapped::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::PageLayerTapped::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::PageLayerTapped::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::PageLayerTapped::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::PageLayerTapped::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::PageLayerTapped::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::PageLayerTapped::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::PageLayerTapped::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::PageLayerTapped::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::PageWordsWanted
 pub paperpaw_sdk::builtin::events::PageWordsWanted::reply: paperpaw_sdk::Id
 pub fn paperpaw_sdk::builtin::events::PageWordsWanted::new(paperpaw_sdk::Id) -> Self
 pub fn paperpaw_sdk::builtin::events::PageWordsWanted::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::PageWordsWanted::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::PageWordsWanted::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::PageWordsWanted::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::PageWordsWanted::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::PageWordsWanted::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::PageWordsWanted::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::PageWordsWanted::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::PageWordsWanted::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::ReadToday
 pub paperpaw_sdk::builtin::events::ReadToday::day: i32
 pub paperpaw_sdk::builtin::events::ReadToday::seconds: u32
 pub fn paperpaw_sdk::builtin::events::ReadToday::new(i32, u32) -> Self
 pub fn paperpaw_sdk::builtin::events::ReadToday::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::ReadToday::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::ReadToday::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::ReadToday::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::ReadToday::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::ReadToday::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::ReadToday::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::ReadToday::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::ReadToday::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::Reading
 pub paperpaw_sdk::builtin::events::Reading::chapter: alloc::string::String
@@ -225,10 +279,13 @@ pub fn paperpaw_sdk::builtin::events::Reading::page(self, impl core::convert::In
 pub fn paperpaw_sdk::builtin::events::Reading::pages(self, impl core::convert::Into<core::option::Option<u32>>) -> Self
 pub fn paperpaw_sdk::builtin::events::Reading::xpointer(self, impl core::convert::Into<core::option::Option<alloc::string::String>>) -> Self
 pub fn paperpaw_sdk::builtin::events::Reading::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::Reading::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Reading::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Reading::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::Reading::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Reading::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Reading::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::Reading::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Reading::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::ReadingAppWanted
 pub paperpaw_sdk::builtin::events::ReadingAppWanted::folder: bool
@@ -237,10 +294,13 @@ pub paperpaw_sdk::builtin::events::ReadingAppWanted::path: alloc::string::String
 pub fn paperpaw_sdk::builtin::events::ReadingAppWanted::new(alloc::string::String, bool) -> Self
 pub fn paperpaw_sdk::builtin::events::ReadingAppWanted::once(self, impl core::convert::Into<core::option::Option<bool>>) -> Self
 pub fn paperpaw_sdk::builtin::events::ReadingAppWanted::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::ReadingAppWanted::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::ReadingAppWanted::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::ReadingAppWanted::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::ReadingAppWanted::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::ReadingAppWanted::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::ReadingAppWanted::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::ReadingAppWanted::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::ReadingAppWanted::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::ScreenShown
 pub paperpaw_sdk::builtin::events::ScreenShown::screen: paperpaw_sdk::Id
@@ -248,10 +308,13 @@ pub paperpaw_sdk::builtin::events::ScreenShown::slot: core::option::Option<paper
 pub fn paperpaw_sdk::builtin::events::ScreenShown::new(paperpaw_sdk::Id) -> Self
 pub fn paperpaw_sdk::builtin::events::ScreenShown::slot(self, impl core::convert::Into<core::option::Option<paperpaw_sdk::Id>>) -> Self
 pub fn paperpaw_sdk::builtin::events::ScreenShown::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::ScreenShown::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::ScreenShown::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::ScreenShown::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::ScreenShown::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::ScreenShown::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::ScreenShown::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::ScreenShown::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::ScreenShown::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::SettingChanged
 pub paperpaw_sdk::builtin::events::SettingChanged::id: paperpaw_sdk::Id
@@ -259,20 +322,26 @@ pub paperpaw_sdk::builtin::events::SettingChanged::old: core::option::Option<all
 pub fn paperpaw_sdk::builtin::events::SettingChanged::new(paperpaw_sdk::Id) -> Self
 pub fn paperpaw_sdk::builtin::events::SettingChanged::old(self, impl core::convert::Into<core::option::Option<alloc::string::String>>) -> Self
 pub fn paperpaw_sdk::builtin::events::SettingChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::SettingChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::SettingChanged::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::SettingChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::SettingChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::SettingChanged::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::SettingChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::SettingChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::SettingChanged::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::Skim
 pub paperpaw_sdk::builtin::events::Skim::path: alloc::string::String
 pub paperpaw_sdk::builtin::events::Skim::to: alloc::string::String
 pub fn paperpaw_sdk::builtin::events::Skim::new(alloc::string::String, alloc::string::String) -> Self
 pub fn paperpaw_sdk::builtin::events::Skim::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::Skim::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Skim::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Skim::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::Skim::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Skim::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Skim::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::Skim::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Skim::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::Skimmed
 pub paperpaw_sdk::builtin::events::Skimmed::chapter: alloc::string::String
@@ -283,10 +352,13 @@ pub paperpaw_sdk::builtin::events::Skimmed::permille: u32
 pub fn paperpaw_sdk::builtin::events::Skimmed::marks(self, impl core::convert::Into<core::option::Option<alloc::string::String>>) -> Self
 pub fn paperpaw_sdk::builtin::events::Skimmed::new(alloc::string::String, alloc::string::String, alloc::string::String, u32) -> Self
 pub fn paperpaw_sdk::builtin::events::Skimmed::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::Skimmed::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Skimmed::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Skimmed::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::Skimmed::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Skimmed::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Skimmed::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::Skimmed::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Skimmed::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::TextChosen
 pub paperpaw_sdk::builtin::events::TextChosen::action: paperpaw_sdk::Id
@@ -301,29 +373,52 @@ pub fn paperpaw_sdk::builtin::events::TextChosen::end(&self) -> paperpaw_documen
 pub fn paperpaw_sdk::builtin::events::TextChosen::start(&self) -> paperpaw_document::Locator
 pub fn paperpaw_sdk::builtin::events::TextChosen::new(paperpaw_sdk::Id, alloc::string::String, alloc::string::String, alloc::string::String, u32, u32, u32, u32) -> Self
 pub fn paperpaw_sdk::builtin::events::TextChosen::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::TextChosen::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::TextChosen::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::TextChosen::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::TextChosen::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::TextChosen::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::TextChosen::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::TextChosen::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::TextChosen::to_params(&self) -> paperpaw_sdk::Params
+pub struct paperpaw_sdk::builtin::events::TypeText
+pub paperpaw_sdk::builtin::events::TypeText::done: core::option::Option<bool>
+pub paperpaw_sdk::builtin::events::TypeText::text: alloc::string::String
+pub fn paperpaw_sdk::builtin::events::TypeText::done(self, impl core::convert::Into<core::option::Option<bool>>) -> Self
+pub fn paperpaw_sdk::builtin::events::TypeText::new(alloc::string::String) -> Self
+pub fn paperpaw_sdk::builtin::events::TypeText::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::TypeText::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::TypeText::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::TypeText::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::TypeText::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::TypeText::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::TypeText::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::TypeText::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::TypeText::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::WidgetChanged
 pub paperpaw_sdk::builtin::events::WidgetChanged::id: paperpaw_sdk::Id
 pub fn paperpaw_sdk::builtin::events::WidgetChanged::new(paperpaw_sdk::Id) -> Self
 pub fn paperpaw_sdk::builtin::events::WidgetChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::WidgetChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::WidgetChanged::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::WidgetChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::WidgetChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::WidgetChanged::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::WidgetChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::WidgetChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::WidgetChanged::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::WifiFailed
 pub paperpaw_sdk::builtin::events::WifiFailed::reason: paperpaw_sdk::wifi::JoinFailure
 pub paperpaw_sdk::builtin::events::WifiFailed::ssid: alloc::string::String
 pub fn paperpaw_sdk::builtin::events::WifiFailed::new(alloc::string::String, paperpaw_sdk::wifi::JoinFailure) -> Self
 pub fn paperpaw_sdk::builtin::events::WifiFailed::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::WifiFailed::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::WifiFailed::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::WifiFailed::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::WifiFailed::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::WifiFailed::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::WifiFailed::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::WifiFailed::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::WifiFailed::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::WordLookedUp
 pub paperpaw_sdk::builtin::events::WordLookedUp::language: alloc::string::String
@@ -335,10 +430,13 @@ pub paperpaw_sdk::builtin::events::WordLookedUp::title: alloc::string::String
 pub paperpaw_sdk::builtin::events::WordLookedUp::word: alloc::string::String
 pub fn paperpaw_sdk::builtin::events::WordLookedUp::new(alloc::string::String, alloc::string::String, alloc::string::String, alloc::string::String, alloc::string::String, u32, u32) -> Self
 pub fn paperpaw_sdk::builtin::events::WordLookedUp::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::WordLookedUp::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::WordLookedUp::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::WordLookedUp::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::WordLookedUp::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::WordLookedUp::to_params(&self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::WordLookedUp::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::WordLookedUp::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::WordLookedUp::to_params(&self) -> paperpaw_sdk::Params
 pub const paperpaw_sdk::builtin::CONFIG_FILE: &str
 pub const paperpaw_sdk::builtin::CORE_PLUGIN: paperpaw_sdk::Id
@@ -411,6 +509,7 @@ pub const paperpaw_sdk::builtin::events::STATUS_CHANGED: paperpaw_sdk::event::Ev
 pub const paperpaw_sdk::builtin::events::STOPPING: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::SUSPEND: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::TEXT_CHOSEN: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::TextChosen>
+pub const paperpaw_sdk::builtin::events::TYPE_TEXT: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::TypeText>
 pub const paperpaw_sdk::builtin::events::WIDGET_CHANGED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::WidgetChanged>
 pub const paperpaw_sdk::builtin::events::WIFI_CHANGED: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::WIFI_FAILED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::WifiFailed>
@@ -426,6 +525,11 @@ pub const paperpaw_sdk::builtin::fonts::READING_BOLD_ITALIC: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::fonts::READING_ITALIC: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::fonts::STATUS: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::fonts::UI: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::group_sections::ALOUD: &str
+pub const paperpaw_sdk::builtin::group_sections::BEHAVIOUR: &str
+pub const paperpaw_sdk::builtin::group_sections::FONT: &str
+pub const paperpaw_sdk::builtin::group_sections::ORDER: &[&str]
+pub const paperpaw_sdk::builtin::group_sections::PAGE: &str
 pub const paperpaw_sdk::builtin::groups::CONTROLS: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::groups::DEVELOPER: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::groups::DISPLAY: paperpaw_sdk::Id
@@ -440,6 +544,9 @@ pub const paperpaw_sdk::builtin::keymap_presets::LEFT_HANDED: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::keymap_presets::STANDARD: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::keymap_presets::STANDARD_NAME: &str
 pub const paperpaw_sdk::builtin::keymap_presets::TWO_BUTTONS: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::menu_sections::READING: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::menu_sections::SYSTEM: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::menu_sections::TOOLS: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::menus::APPS: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::menus::BOOK: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::menus::MAIN: paperpaw_sdk::Id
@@ -485,14 +592,6 @@ pub const paperpaw_sdk::builtin::screens::PLACEHOLDER: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::screens::STATUS_ITEMS: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::screens::STATUS_LINES: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::screens::WIDGET_LIST: paperpaw_sdk::Id
-pub const paperpaw_sdk::builtin::sections::READING: paperpaw_sdk::Id
-pub const paperpaw_sdk::builtin::sections::SYSTEM: paperpaw_sdk::Id
-pub const paperpaw_sdk::builtin::sections::TOOLS: paperpaw_sdk::Id
-pub const paperpaw_sdk::builtin::setting_sections::ALOUD: &str
-pub const paperpaw_sdk::builtin::setting_sections::BEHAVIOUR: &str
-pub const paperpaw_sdk::builtin::setting_sections::FONT: &str
-pub const paperpaw_sdk::builtin::setting_sections::ORDER: &[&str]
-pub const paperpaw_sdk::builtin::setting_sections::PAGE: &str
 pub const paperpaw_sdk::builtin::settings::BATTERY_LOW: paperpaw_sdk::setting::Setting<i64>
 pub const paperpaw_sdk::builtin::settings::BUTTON_HINTS: paperpaw_sdk::setting::Setting<bool>
 pub const paperpaw_sdk::builtin::settings::CLOCK_FORMAT: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
@@ -587,12 +686,13 @@ pub const paperpaw_sdk::builtin::settings::WEEK_START: paperpaw_sdk::setting::Se
 pub const paperpaw_sdk::builtin::settings::WIDGET_FRAME: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
 pub const paperpaw_sdk::builtin::settings::WIDOWS: paperpaw_sdk::setting::Setting<i64>
 pub const paperpaw_sdk::builtin::settings::WORD_SPACING: paperpaw_sdk::setting::Setting<i64>
-pub const paperpaw_sdk::builtin::settings_sections::CUSTOMISE: paperpaw_sdk::Id
-pub const paperpaw_sdk::builtin::settings_sections::DEVICE: paperpaw_sdk::Id
-pub const paperpaw_sdk::builtin::settings_sections::READING: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::settings_page::CUSTOMISE: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::settings_page::DEVICE: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::settings_page::READING: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::slots::ANNOTATIONS: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::slots::BOOK_INFO: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::slots::BROWSER: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::slots::CABLE: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::slots::CHOICE: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::slots::CHOOSE_FOLDER: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::slots::CHOOSE_VALUE: paperpaw_sdk::Id
@@ -627,16 +727,16 @@ pub fn paperpaw_sdk::builtin::settings::rgb(&str) -> core::option::Option<[u8; 3
 pub mod paperpaw_sdk::builtin::actions
 pub mod paperpaw_sdk::builtin::events
 pub mod paperpaw_sdk::builtin::fonts
+pub mod paperpaw_sdk::builtin::group_sections
 pub mod paperpaw_sdk::builtin::groups
 pub mod paperpaw_sdk::builtin::keymap_presets
+pub mod paperpaw_sdk::builtin::menu_sections
 pub mod paperpaw_sdk::builtin::menus
 pub mod paperpaw_sdk::builtin::params
 pub mod paperpaw_sdk::builtin::roles
 pub mod paperpaw_sdk::builtin::screens
-pub mod paperpaw_sdk::builtin::sections
-pub mod paperpaw_sdk::builtin::setting_sections
 pub mod paperpaw_sdk::builtin::settings
-pub mod paperpaw_sdk::builtin::settings_sections
+pub mod paperpaw_sdk::builtin::settings_page
 pub mod paperpaw_sdk::builtin::slots
 pub mod paperpaw_sdk::builtin::status_items
 pub mod paperpaw_sdk::builtin::status_lines

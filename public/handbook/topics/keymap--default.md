@@ -32,6 +32,8 @@ button.power = core.sleep
 long.back = core.home
 long.confirm = core.long-confirm
 long.menu = core.toggle-night-mode
+# The quick panel by the buttons, as down from the top edge by touch.
+long.right = core.quick-panel
 
 tap.top-left = core.prev-page
 tap.left = core.prev-page

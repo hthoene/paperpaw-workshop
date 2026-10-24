@@ -13,8 +13,8 @@ of its size. Pictures made larger than they are decoded are
 interpolated, not blocky.
 
 ```rust
-match image::picture_with_alpha(env.storage, "plugins/owls/owl.png", &cache, Fit::side(200)) {
-    Ok(image) => ui::draw_image_over(canvas, env.storage, &image, area, 192), // a quarter see-through
+match image::picture_with_alpha(env.storage(), "plugins/owls/owl.png", &cache, Fit::side(200)) {
+    Ok(image) => ui::draw_image_over(canvas, env.storage(), &image, area, 192), // a quarter see-through
     Err(why) => { /* e.g. "unsupported image: interlaced PNG" */ }
 }
 ```
@@ -24,16 +24,16 @@ what shows through it (`Screen::shows_through`): every screen below it,
 menus too (`ShowsThrough::All`), or the topmost full screen alone, a
 menu left open over it not drawn (`ShowsThrough::FullScreen`); what
 shows is drawn first under all of it. A screen guarding the device is
-marked in `env.stack` (`StackEntry::guards`), so that nothing shows what
+marked in `env.stack()` (`StackEntry::guards`), so that nothing shows what
 is below it. The sleep screen's *The page with a picture* shows the
 full screen through: a picture or a widget over the page being read;
 pictures for it are offered as presets (below).
 
 A setting's choices are open to other plugins: `Registrar::add_choice`
 offers a value of one's own among them (in one's namespace, the
-translation key of its name), after the setting's own. The sleep screen
-takes a screen of another plugin as a mode so (the flash card due and
-the reading cat are such modes):
+translation key of its name), after the setting's own. This is how the
+sleep screen shows a screen of another plugin as one of its modes. The
+flash card due and the reading cat are such modes:
 
 ```rust
 r.add_screen(ScreenSpec::new(Id::new_static("aquarium.sleep"), "aquarium.sleep", factory))?;

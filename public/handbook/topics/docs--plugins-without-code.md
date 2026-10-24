@@ -24,6 +24,10 @@ plugins/large-print/
   setup.ini      steps of the first-run setup (formats 3)
 ```
 
+[Files on the card](data-files.md#a-data-plugins-files) lists each of them
+with its format, what reads it and an example, and how a `settings.ini`
+brings a home screen of its own.
+
 `plugin.ini` may also bind fonts to roles (formats 3):
 
 ```ini
@@ -31,30 +35,46 @@ plugins/large-print/
 core.font-ui-strong = my.semibold
 ```
 
-An action of `actions.ini` runs its steps in order, at most 16:
+An action of `actions.ini` runs its steps in order, a step a `run`
+line (commas and all), at most 16:
 `<setting>=<value>` sets a setting (a value not of its kind is passed
 over, and a setting that keeps the device safe, such as the lock's, is
-never set), `open:<slot>` opens a slot, `notify:<text>` says something,
+never set), `open:<slot>` opens a slot, `notify:<key>` says the text of
+a key of the plugin's translations in the reader's language,
 `emit:<event>` emits an event of the plugin's own (`<plugin>.<name>`),
-and an action's id runs that action (not one of the same file). `menus.ini` adds to any menu, places an entry
-after another and takes entries out; `title` and `entries` make a menu
-of one's own, which other menus list by its id:
+and an action's id runs that action (not one of the same file). A
+section names the action. Without the plugin's id in front, it gets
+it: `[night]` in the plugin `my` is `my.night`.
+
+`menus.ini` adds to another plugin's menu, a section `[menu <id>]`,
+places an entry after another and takes entries out; any other
+section is a menu of one's own, with `title` and `entries`, which
+other menus list by its id. A list is a key a line
+([data-files.md](data-files.md#lists)):
 
 ```ini
 # actions.ini
 [night]
 title = Night reading
 icon = moon
-run = core.night-mode=on, core.font-size=14, notify:Good night
+run = core.night-mode=on
+run = core.font-size=14
+run = notify:my.good-night
+
+# i18n/en.ini, [messages]
+my.good-night = Good night, sleep well
 
 # menus.ini
-[core.reader-menu]
-add = my.night after reader.toc
+[menu core.reader-menu]
+add = my.night after core.toc
+
+[menu core.reader-more]
 hide = stats.open
 
-[my.tools]
+[tools]
 title = My tools
-entries = my.night, core.library
+entries = my.night
+entries = core.library
 
 # setup.ini
 [size]
@@ -73,12 +93,13 @@ left out, and PaperPaw says so.
 A plugin's files take at most 96 KiB together besides its translations
 (512 KiB of their own), those of formats 3 at
 most 24 KiB of it, and its points at most 64 lines; what goes past is
-left out and told. A default (`settings.ini`) or a preset does not
+left out and told. Each file takes at most 64 KiB, and `plugin.ini` at
+most 4 KiB. `points/` holds at most 16 files. A default (`settings.ini`) or a preset does not
 change a setting that keeps the device safe, such as the lock's.
 
-Packs for other scripts (`tools/script-pack.py` builds Cyrillic and
-Greek for Literata) are read a glyph at a time, so devices with little
-memory can use them ([ADR 0018](adr/0018-font-packs-for-other-scripts.md)).
+Packs for other scripts are read a glyph at a time, so devices with
+little memory can use them ([ADR 0018](adr/0018-font-packs-for-other-scripts.md)).
+`tools/script-pack.py` builds Cyrillic and Greek for Literata.
 Icon packs are such packs for the icon font: `tools/icons/pack.py` builds
 one with the Tabler icons named
 (`[extends] icons.ppfp = fonts-default.icons`).
@@ -103,8 +124,9 @@ the About page and the logo widget): a picture in the folder, named in
 logo = plugins/my-brand/logo.png
 ```
 
-A theme is a `settings.ini` with new defaults for the appearance
-settings (*Settings > Customise > Appearance*, most of them with
+A theme can also be a `settings.ini` with new defaults. It is then not
+chosen under *Theme*; it is on while the plugin is on. Its defaults are
+for the appearance settings (*Settings > Customise > Appearance*, most of them with
 advanced settings): the header (`core.header.plain`, `.light`, `.dark`),
 the corners (`core.corners.square`, `.small`, `.round`, `.soft`; round
 and soft ones make buttons and switches pills), the highlight
@@ -136,7 +158,12 @@ after another into `plugins/.<id>.part`, checks each by its size and
 digest (SHA-1 or SHA-256), then has the kernel install it
 (`Command::InstallPlugin`) in place of
 every version of it before, what was chosen from it still chosen; the
-job is kept on the storage, so it goes on with no screen open.
+job is kept on the storage, so it goes on with no screen open. Where a
+plugin came from is kept once it is in place (`install::origin`): the
+store updates only those it installed, and one put in place otherwise
+(the Wi-Fi transfer, the USB cable, a card) is local, which the plugin
+manager says. `install::local::Staging` installs a plugin sent file by
+file, with the same checks.
 
 Copy it into the `plugins` folder of a device (or of the emulator's
 library) and restart, or have a plugin load it at once

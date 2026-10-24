@@ -9,7 +9,7 @@ import type { WorkshopTool } from "./tool";
 export const lookupDocs: WorkshopTool<{ topic: string }> = {
   name: "lookup_docs",
   description:
-    "Look up a topic of PaperPaw's documentation for this release: a section of the plugin docs (e.g. 'docs/widgets', 'docs/presets-and-home-screen-layouts'), the settings of a plugin ('settings/home', 'settings/reader', 'settings/widgets') or of a group ('settings-group/core.group.look'), 'widgets', 'actions', 'keymap/default', 'devices', a sample ('samples/theme-paw'), a module of the SDK ('sdk/ui'). Or the SDK's functions, types and methods by name or words ('draw_button', 'Canvas::fill', 'button', 'canvas text'): the answer gives each one's exact signature and documentation, and the closest topics.",
+    "Look up a topic of PaperPaw's documentation for this release: a section of the plugin docs (e.g. 'docs/widgets', 'docs/presets'), the settings of a plugin ('settings/home', 'settings/reader', 'settings/widgets') or of a group ('settings-group/core.group.look'), 'widgets', 'actions', 'keymap/default', 'devices', a sample ('samples/theme-paw'), a module of the SDK ('sdk/ui'). Or the SDK's functions, types and methods by name or words ('Ui::button', 'Canvas::fill', 'button', 'canvas text'): the answer gives each one's exact signature and documentation, and the closest topics.",
   schema: z.object({ topic: z.string().describe("A topic id or a few words") }).strict(),
   async run({ topic }, { handbook }) {
     const { topic: found, candidates } = handbook.find(topic);

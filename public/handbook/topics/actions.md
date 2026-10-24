@@ -32,6 +32,7 @@
 | `core.toggle-night-mode` | Night mode |
 | `core.tools` | Tools |
 | `core.up` | Up |
+| `diagnostics.open-check` | Device check |
 | `diagnostics.reset` | Reset diagnostics screen |
 | `file-manager.open` | Files |
 | `files.by-author` | By author |
@@ -47,6 +48,7 @@
 | `keys.open` | Buttons and gestures |
 | `kosync.sync-now` | Sync progress |
 | `lock.now` | Lock now |
+| `lock.touch-hint` | How to unlock touch |
 | `lock.touch-toggle` | Lock or unlock touch |
 | `menu-editor.open` | Customise menus |
 | `news.fetch` | Fetch the news |
@@ -91,6 +93,7 @@
 | `settings.secrets.open` | Passwords and keys |
 | `setup.open` | Set up PaperPaw |
 | `stats.open` | Reading statistics |
+| `store.discover-fonts` | Discover fonts |
 | `store.open` | More plugins |
 | `transfer.open` | Wi-Fi transfer |
 | `update.check` | Search online |

@@ -13,8 +13,8 @@ pub enum paperpaw_sdk::data::Error
 pub paperpaw_sdk::data::Error::Newer(u32)
 pub paperpaw_sdk::data::Error::Storage(paperpaw_platform::storage::StorageError)
 pub paperpaw_sdk::data::Error::Unreadable
+pub fn paperpaw_sdk::data::Error::from(paperpaw_platform::storage::StorageError) -> Self
 pub type paperpaw_sdk::data::Upgrade = fn(&str) -> alloc::string::String
 pub const paperpaw_sdk::data::DIR: &str
 pub const paperpaw_sdk::data::MARK: &str
-pub fn paperpaw_sdk::data::take_over_old_name(&dyn paperpaw_platform::storage::Storage)
 ```

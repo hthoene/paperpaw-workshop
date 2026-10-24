@@ -19,15 +19,15 @@ pub paperpaw_sdk::secrets::SecretChange::changeable: bool
 pub paperpaw_sdk::secrets::SecretChange::id: alloc::string::String
 pub paperpaw_sdk::secrets::SecretChange::label: alloc::string::String
 pub paperpaw_sdk::secrets::SecretChange::value: core::option::Option<alloc::string::String>
+pub fn paperpaw_sdk::secrets::SecretChange::changeable(self, bool) -> Self
 pub fn paperpaw_sdk::secrets::SecretChange::keep(&str, &str, &str) -> Self
 pub fn paperpaw_sdk::secrets::SecretChange::remove(&str) -> Self
 pub fn paperpaw_sdk::secrets::SecretChange::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub struct paperpaw_sdk::secrets::Secrets
-pub fn paperpaw_sdk::secrets::Secrets::decode(&str) -> Self
-pub fn paperpaw_sdk::secrets::Secrets::encode(&self) -> alloc::string::String
 pub fn paperpaw_sdk::secrets::Secrets::get(&self, &str) -> core::option::Option<&str>
 pub fn paperpaw_sdk::secrets::Secrets::is_empty(&self) -> bool
 pub fn paperpaw_sdk::secrets::Secrets::iter(&self) -> impl core::iter::traits::iterator::Iterator<Item = &paperpaw_sdk::secrets::Secret>
+pub fn paperpaw_sdk::secrets::Secrets::saved(&self, &str) -> bool
 pub struct paperpaw_sdk::secrets::Visible<'a>
 pub fn paperpaw_sdk::secrets::Visible<'a>::get(&self, &str) -> core::option::Option<&'a str>
 pub fn paperpaw_sdk::secrets::Visible<'a>::has(&self, &str) -> bool
@@ -35,6 +35,7 @@ pub fn paperpaw_sdk::secrets::Visible<'a>::is_empty(&self) -> bool
 pub fn paperpaw_sdk::secrets::Visible<'a>::iter(&self) -> impl core::iter::traits::iterator::Iterator<Item = &'a paperpaw_sdk::secrets::Secret> + '_
 pub fn paperpaw_sdk::secrets::Visible<'a>::listed(&self) -> impl core::iter::traits::iterator::Iterator<Item = paperpaw_sdk::secrets::Listed<'a>> + 'a
 pub fn paperpaw_sdk::secrets::Visible<'a>::new(&'a paperpaw_sdk::secrets::Secrets, &'a dyn paperpaw_sdk::secrets::Running) -> Self
+pub fn paperpaw_sdk::secrets::Visible<'a>::saved(&self, &str) -> bool
 pub fn paperpaw_sdk::secrets::Visible<'_>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub const paperpaw_sdk::secrets::FILE: &str
 ```

@@ -35,8 +35,10 @@ static HOW: [(&str, &str); 2] = [
 // In `manifest`: Manifest::new(…).description(…).how(&HOW)
 ```
 
-The same text is the `description` of the plugin's entry in the store
-(see [Publishing](#publishing)), shown on its page there. A data plugin
+The store shows the same text on the plugin's page and in the readers'
+store: put the files into the folder you upload as well (`how/en.txt`,
+`how/de.txt`), as PaperPaw's own plugins in the store have them, or say
+it in the entry's `description` (see [Publishing](#publishing)). A data plugin
 gives it as `<id>.plugin.how` in its catalogs, quoted, paragraphs apart
 by `\n\n`. `paperpaw-dev` warns where a plugin with code has none or a
 short one.

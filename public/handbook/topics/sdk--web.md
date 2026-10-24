@@ -7,8 +7,8 @@ pub fn paperpaw_sdk::web::clean_name(&str, usize) -> core::option::Option<alloc:
 pub fn paperpaw_sdk::web::encode(&str) -> alloc::string::String
 pub fn paperpaw_sdk::web::file_name(&str) -> alloc::string::String
 pub fn paperpaw_sdk::web::host(&str) -> &str
-pub fn paperpaw_sdk::web::http_date(&str) -> core::option::Option<i64>
 pub fn paperpaw_sdk::web::join_url(&str, &str) -> alloc::string::String
 pub fn paperpaw_sdk::web::percent_decode(&str) -> alloc::string::String
 pub fn paperpaw_sdk::web::user_agent() -> (alloc::string::String, alloc::string::String)
+pub fn paperpaw_sdk::web::user_agent_of(&paperpaw_sdk::Env<'_>) -> (alloc::string::String, alloc::string::String)
 ```

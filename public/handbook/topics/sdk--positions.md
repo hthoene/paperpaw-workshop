@@ -12,7 +12,10 @@ pub fn paperpaw_sdk::positions::Position::text(&self) -> alloc::string::String
 pub fn paperpaw_sdk::positions::Position::updated(self, i64) -> Self
 pub fn paperpaw_sdk::positions::Position::xpointer(self, impl core::convert::Into<core::option::Option<alloc::string::String>>) -> Self
 pub const paperpaw_sdk::positions::DIR: &str
+pub fn paperpaw_sdk::positions::book(&dyn paperpaw_platform::storage::Storage, &str) -> core::option::Option<paperpaw_sdk::library::Fingerprint>
 pub fn paperpaw_sdk::positions::file(&str) -> alloc::string::String
 pub fn paperpaw_sdk::positions::load(&dyn paperpaw_platform::storage::Storage, &str) -> core::option::Option<paperpaw_sdk::positions::Position>
+pub fn paperpaw_sdk::positions::load_for_update(&dyn paperpaw_platform::storage::Storage, &str) -> core::result::Result<core::option::Option<paperpaw_sdk::positions::Position>, paperpaw_platform::storage::StorageError>
 pub fn paperpaw_sdk::positions::save(&dyn paperpaw_platform::storage::Storage, &str, &paperpaw_sdk::positions::Position) -> core::result::Result<(), paperpaw_platform::storage::StorageError>
+pub fn paperpaw_sdk::positions::save_with_book(&dyn paperpaw_platform::storage::Storage, &str, &paperpaw_sdk::positions::Position, core::option::Option<&paperpaw_sdk::library::Fingerprint>) -> core::result::Result<(), paperpaw_platform::storage::StorageError>
 ```

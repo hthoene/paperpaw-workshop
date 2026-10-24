@@ -7,13 +7,14 @@
 //! settings group (`widgets::settings_group`, the group's id the
 //! widget's), which the home screen's widget editor opens and the
 //! Settings list leaves out. The kernel keeps the values;
-//! `env.settings.read` reads them; a widget is read anew (`update`) when
+//! `env.settings().read` reads them; a widget is read anew (`update`) when
 //! a setting changes.
 //!
 //! Only what applies to the whole plugin goes on a page in Settings: a
 //! group of its own with an icon, under Customise by its order (201 and
-//! up), e.g. `r.add_setting_group(SettingGroupSpec::new(GROUP,
-//! "my.title").order(210))?; r.add_icon(GROUP, Cow::Borrowed("star"))?;`.
+//! up), e.g. `static PAGE: SettingGroupSpec = SettingGroupSpec::new(GROUP,
+//! "my.title").order(210);` with `r.add_setting_group(&PAGE)?;
+//! r.add_icon(GROUP, Cow::Borrowed("star"))?;`.
 
 #![no_std]
 
@@ -26,10 +27,9 @@ use alloc::string::String;
 
 use paperpaw_sdk::setting::{Setting, Text};
 use paperpaw_sdk::ui::UiStyle;
-use paperpaw_sdk::widgets::{self, Align, Frame, Padding, Size, Widget, WidgetSpec, Wrapped};
+use paperpaw_sdk::widgets::{self, Align, Frame, Padding, TextSize, Widget, WidgetSpec, Wrapped};
 use paperpaw_sdk::{
-    Canvas, Choices, Env, Id, Manifest, Plugin, Rect, RegisterError, Registrar, SettingSpec,
-    Version,
+    Canvas, Env, Id, Manifest, Plugin, Rect, RegisterError, Registrar, SettingSpec, Version,
 };
 
 /// Ids start with the plugin's id: `motto.…`.
@@ -45,11 +45,18 @@ pub const LINES: Setting<i64> = Setting::new("motto.widget.lines");
 /// The choices of `STYLE`, each the translation key of its name.
 static STYLES: [&str; 2] = ["motto.style.plain", "motto.style.quoted"];
 
-/// The widget's look, as every widget has it.
-static LOOK: [SettingSpec; 4] = [
+/// The widget's settings, all in its group (the last argument): each by
+/// its id, its title and its default; its help is a translation key too.
+/// Then its look, as every widget has it.
+static SETTINGS: [SettingSpec; 8] = [
+    SettingSpec::text(TEXT.static_str(), "motto.setting.text", "Read a little every day", WIDGET)
+        .description("motto.setting.text.help"),
+    SettingSpec::choice(STYLE.static_str(), "motto.setting.style", &STYLES, STYLES[0], WIDGET),
+    SettingSpec::switch(CAPITALS.static_str(), "motto.setting.capitals", false, WIDGET),
+    SettingSpec::number(LINES.static_str(), "motto.setting.lines", 1, 6, 3, WIDGET),
     widgets::frame_spec("motto.widget.frame", WIDGET, Frame::None),
     widgets::padding_spec("motto.widget.padding", WIDGET, Padding::Auto),
-    widgets::size_spec("motto.widget.size", WIDGET, Size::Medium, false),
+    widgets::size_spec("motto.widget.size", WIDGET, TextSize::Medium, false),
     widgets::align_spec("motto.widget.align", WIDGET, Align::Center),
 ];
 
@@ -69,22 +76,9 @@ impl Plugin for Motto {
     }
 
     fn register(&self, r: &mut Registrar) -> Result<(), RegisterError> {
-        // The widget's settings group, then each setting in it: its title
-        // and help are translation keys; the last values are the defaults.
+        // The widget's settings group, then its settings in it.
         r.add_setting_group(widgets::settings_group(&WIDGET, "motto.widget"))?;
-        r.add_setting(
-            SettingSpec::text(&TEXT, "motto.setting.text", "Read a little every day")
-                .group(WIDGET)
-                .description("motto.setting.text.help"),
-        )?;
-        r.add_setting(
-            SettingSpec::choice(&STYLE, "motto.setting.style", Choices::from(&STYLES[..]), STYLES[0])
-                .group(WIDGET),
-        )?;
-        r.add_setting(SettingSpec::switch(&CAPITALS, "motto.setting.capitals", false).group(WIDGET))?;
-        r.add_setting(SettingSpec::number(&LINES, "motto.setting.lines", 1, 6, 3).group(WIDGET))?;
-        // Its look, as every widget has it, in the same group.
-        r.add_settings(&LOOK)?;
+        r.add_settings(&SETTINGS)?;
         r.add_widget(
             WidgetSpec::new(WIDGET, "motto.widget", |_| Box::new(Shown::default()))
                 .category(widgets::categories::PERSONAL),
@@ -96,13 +90,13 @@ impl Plugin for Motto {
 
 /// The motto as the settings say it now.
 fn motto(env: &Env<'_>) -> String {
-    let text = env.settings.read(&TEXT).trim();
-    let text = if env.settings.read(&STYLE) == STYLES[1] {
+    let text = env.settings().read(&TEXT).trim();
+    let text = if env.settings().read(&STYLE) == STYLES[1] {
         format!("“{text}”")
     } else {
         String::from(text)
     };
-    if env.settings.read(&CAPITALS) {
+    if env.settings().read(&CAPITALS) {
         text.to_uppercase()
     } else {
         text
@@ -122,7 +116,7 @@ impl Shown {
 
     /// At most as many lines as its setting says.
     fn most(env: &Env<'_>) -> u16 {
-        let lines = env.settings.read(&LINES).clamp(1, 6) as u16;
+        let lines = env.settings().read(&LINES).clamp(1, 6) as u16;
         widgets::line_height(env, Self::size(env)) * lines
     }
 }
@@ -142,7 +136,7 @@ impl Widget for Shown {
     /// Its text wrapped inside its frame, and the frame.
     fn height(&self, env: &Env<'_>, width: u16) -> u16 {
         let tall = Rect::new(0, 0, width, 1000);
-        let inside = widgets::look::look(env, WIDGET.as_str(), tall).area;
+        let inside = widgets::widget_look(env, WIDGET.as_str(), tall).area;
         let text = Wrapped::new(env, &motto(env), Self::size(env), inside.width, Self::most(env));
         text.height(env) + (tall.height - inside.height)
     }
@@ -168,7 +162,7 @@ version = "0.1.0"
 plugin = "Motto"
 
 [dependencies]
-paperpaw-sdk = "0.4"
+paperpaw-sdk = "0.5"
 ```
 
 `plugin/plugin.ini`:

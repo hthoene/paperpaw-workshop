@@ -33,7 +33,7 @@ It is PaperPaw's INI: a comment is a line of its own, never after a
 value.
 
 A code plugin adds one signed `.ppn` per reader (the form's fields
-`build-x4`, `build-x4-pro`, `build-x4-classic`) and the exact source of
+`build-x4`, `build-x4-pro`) and the exact source of
 those builds: `[source]` names a public repository on `github.com`,
 `codeberg.org` or `gitlab.com` and the tag or commit built (with `path`
 and `bin` when the crate is not at the top or the binary not named as

@@ -131,8 +131,8 @@ photo of people or someone else's logo, ask whether they may share it.
 | A home screen of their own | `settings.ini`: the widgets of each page in order, `[home] page-1 = home.clock, home.continue` (pages 1 to 8), and the widgets' own settings (`settings/home`) |
 | A theme to choose in Settings | `presets.ini`: presets of the kind `core.theme` (see Presets below) |
 | Buttons, taps or swipes doing something else | `keymap.ini`: bindings in layers (`[keymap.global]`, `[keymap.core.reader]` ...) to action ids |
-| One press doing several things (ten pages on, night mode and a bigger font) | `actions.ini` (formats 3): an action of up to 16 steps, bound in `keymap.ini` |
-| Different menus, a menu of its own | `menus.ini` (formats 3): entries added, placed or taken out of any menu, menus of its own |
+| One press doing several things (ten pages on, night mode and a bigger font) | `actions.ini` (formats 3): an action of up to 16 steps, a `run` line each (`notify:` takes a key of `i18n/<lang>.ini`), bound in `keymap.ini` |
+| Different menus, a menu of its own | `menus.ini` (formats 3): entries added, placed or taken out of another plugin's menu (`[menu core.reader-menu]`), menus of its own (a section of its own name, `title`, an `entries` line each) |
 | Texts in another language, or other words | `i18n/<lang>.ini` |
 | Its own logo | a `.png` and `[core] logo = plugins/<id>/logo.png` in `settings.ini` |
 | A picture while the reader sleeps | pictures in a folder of the plugin (`sleep/1.png` ...) and in `settings.ini` `[sleep] show = sleep.show.picture`, `folder = plugins/<id>/sleep` |
@@ -215,7 +215,7 @@ It is PaperPaw's INI: a comment is a line of its own, never after a
 value.
 
 A code plugin adds one signed `.ppn` per reader (the form's fields
-`build-x4`, `build-x4-pro`, `build-x4-classic`) and the exact source of
+`build-x4`, `build-x4-pro`) and the exact source of
 those builds: `[source]` names a public repository on `github.com`,
 `codeberg.org` or `gitlab.com` and the tag or commit built (with `path`
 and `bin` when the crate is not at the top or the binary not named as
@@ -247,6 +247,10 @@ plugins/large-print/
   setup.ini      steps of the first-run setup (formats 3)
 ```
 
+[Files on the card](data-files.md#a-data-plugins-files) lists each of them
+with its format, what reads it and an example, and how a `settings.ini`
+brings a home screen of its own.
+
 `plugin.ini` may also bind fonts to roles (formats 3):
 
 ```ini
@@ -254,30 +258,46 @@ plugins/large-print/
 core.font-ui-strong = my.semibold
 ```
 
-An action of `actions.ini` runs its steps in order, at most 16:
+An action of `actions.ini` runs its steps in order, a step a `run`
+line (commas and all), at most 16:
 `<setting>=<value>` sets a setting (a value not of its kind is passed
 over, and a setting that keeps the device safe, such as the lock's, is
-never set), `open:<slot>` opens a slot, `notify:<text>` says something,
+never set), `open:<slot>` opens a slot, `notify:<key>` says the text of
+a key of the plugin's translations in the reader's language,
 `emit:<event>` emits an event of the plugin's own (`<plugin>.<name>`),
-and an action's id runs that action (not one of the same file). `menus.ini` adds to any menu, places an entry
-after another and takes entries out; `title` and `entries` make a menu
-of one's own, which other menus list by its id:
+and an action's id runs that action (not one of the same file). A
+section names the action. Without the plugin's id in front, it gets
+it: `[night]` in the plugin `my` is `my.night`.
+
+`menus.ini` adds to another plugin's menu, a section `[menu <id>]`,
+places an entry after another and takes entries out; any other
+section is a menu of one's own, with `title` and `entries`, which
+other menus list by its id. A list is a key a line
+([data-files.md](data-files.md#lists)):
 
 ```ini
 # actions.ini
 [night]
 title = Night reading
 icon = moon
-run = core.night-mode=on, core.font-size=14, notify:Good night
+run = core.night-mode=on
+run = core.font-size=14
+run = notify:my.good-night
+
+# i18n/en.ini, [messages]
+my.good-night = Good night, sleep well
 
 # menus.ini
-[core.reader-menu]
-add = my.night after reader.toc
+[menu core.reader-menu]
+add = my.night after core.toc
+
+[menu core.reader-more]
 hide = stats.open
 
-[my.tools]
+[tools]
 title = My tools
-entries = my.night, core.library
+entries = my.night
+entries = core.library
 
 # setup.ini
 [size]
@@ -296,12 +316,13 @@ left out, and PaperPaw says so.
 A plugin's files take at most 96 KiB together besides its translations
 (512 KiB of their own), those of formats 3 at
 most 24 KiB of it, and its points at most 64 lines; what goes past is
-left out and told. A default (`settings.ini`) or a preset does not
+left out and told. Each file takes at most 64 KiB, and `plugin.ini` at
+most 4 KiB. `points/` holds at most 16 files. A default (`settings.ini`) or a preset does not
 change a setting that keeps the device safe, such as the lock's.
 
-Packs for other scripts (`tools/script-pack.py` builds Cyrillic and
-Greek for Literata) are read a glyph at a time, so devices with little
-memory can use them ([ADR 0018](adr/0018-font-packs-for-other-scripts.md)).
+Packs for other scripts are read a glyph at a time, so devices with
+little memory can use them ([ADR 0018](adr/0018-font-packs-for-other-scripts.md)).
+`tools/script-pack.py` builds Cyrillic and Greek for Literata.
 Icon packs are such packs for the icon font: `tools/icons/pack.py` builds
 one with the Tabler icons named
 (`[extends] icons.ppfp = fonts-default.icons`).
@@ -326,8 +347,9 @@ the About page and the logo widget): a picture in the folder, named in
 logo = plugins/my-brand/logo.png
 ```
 
-A theme is a `settings.ini` with new defaults for the appearance
-settings (*Settings > Customise > Appearance*, most of them with
+A theme can also be a `settings.ini` with new defaults. It is then not
+chosen under *Theme*; it is on while the plugin is on. Its defaults are
+for the appearance settings (*Settings > Customise > Appearance*, most of them with
 advanced settings): the header (`core.header.plain`, `.light`, `.dark`),
 the corners (`core.corners.square`, `.small`, `.round`, `.soft`; round
 and soft ones make buttons and switches pills), the highlight
@@ -359,7 +381,12 @@ after another into `plugins/.<id>.part`, checks each by its size and
 digest (SHA-1 or SHA-256), then has the kernel install it
 (`Command::InstallPlugin`) in place of
 every version of it before, what was chosen from it still chosen; the
-job is kept on the storage, so it goes on with no screen open.
+job is kept on the storage, so it goes on with no screen open. Where a
+plugin came from is kept once it is in place (`install::origin`): the
+store updates only those it installed, and one put in place otherwise
+(the Wi-Fi transfer, the USB cable, a card) is local, which the plugin
+manager says. `install::local::Staging` installs a plugin sent file by
+file, with the same checks.
 
 Copy it into the `plugins` folder of a device (or of the emulator's
 library) and restart, or have a plugin load it at once
@@ -394,18 +421,20 @@ three themes (airy, paw, calm ink) and a home screen (reading nook).
 
 A preset is a ready-made set of setting values chosen as a whole
 (`paperpaw_sdk::presets`). It has a kind, named by the plugin that
-offers such presets: that plugin lists those of its kind
-(`env.settings.presets().of_kind(kind)`), works out what one changes
-(`Preset::changes` with the settings it covers), shows it
-(`Command::PreviewSettings`: the values show on every screen without
-being kept, until the screen that asked closes) and keeps it
-(`presets::commands`); the settings of its kind that a preset leaves
-out go back to their defaults. The kinds PaperPaw's own plugins offer
-are themes (`core.theme`, below), pictures over the page for the sleep
-screen (`sleep.overlay`, see [Plugins without code](#plugins-without-code))
-and the power modes (`core.power-mode`, which the kernel wears). Add
-presets kept in the program with `Registrar::add_presets` (a `static`
-list of `Preset::fixed`), for your own kind or another plugin's:
+offers such presets. That plugin lists those of its kind with
+`env.settings().presets().of_kind(kind)`. It works out what one changes
+with `Preset::changes` and the settings it covers. It shows it with
+`Command::PreviewSettings`: the values show on every screen without
+being kept, until the screen that asked closes. It keeps it with
+`presets::commands`. The settings of its kind that a preset leaves out
+go back to their defaults.
+
+The kinds PaperPaw's own plugins offer are themes (`core.theme`,
+below) and the power modes, `core.power-mode`, which the kernel offers.
+The sleep screen offers pictures over the page as `sleep.overlay`, see
+[Plugins without code](#plugins-without-code). Add presets kept in the
+program with `Registrar::add_presets`, a `static` list of
+`Preset::fixed`. They may be of your own kind or another plugin's:
 
 ```rust
 static THEMES: [Preset; 1] = [Preset::fixed(
@@ -448,8 +477,8 @@ language = de
 full-refresh-interval = 8
 
 [slots]
-# Replace the home screen with any screen a plugin provides.
-core.home = diagnostics.screen
+# Replace the home screen with any screen a plugin provides, here the library.
+core.home = files.browser
 
 [keymap.global]
 # Bind any input to any action; `none` removes a binding.
@@ -508,6 +537,8 @@ button.power = core.sleep
 long.back = core.home
 long.confirm = core.long-confirm
 long.menu = core.toggle-night-mode
+# The quick panel by the buttons, as down from the top edge by touch.
+long.right = core.quick-panel
 
 tap.top-left = core.prev-page
 tap.left = core.prev-page
@@ -725,37 +756,37 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
 | `[core] ui-size` | Menu text size | 7 to 24 | `9` | Size of menus, lists and the status line. |
-| `[core] ui-contrast` | Contrast | `core.contrast.normal`, `core.contrast.strong` | `core.contrast.normal` | Strong draws gray hints and notes in black, easier to read on screens with few grays. |
-| `[core] ui-header` | Headers | `core.header.plain`, `core.header.light`, `core.header.dark` | `core.header.plain` | The top of menus and lists: the title on the page, black on white with a line below, or white on black. |
-| `[core] widgets.frame` | Frames of widgets | `core.frame.own`, `core.frame.none`, `core.frame.line`, `core.frame.card`, `core.frame.dark` | `core.frame.own` | One frame for every widget whose own is not chosen in its settings: a line, a card, a dark card or none. |
-| `[core] ui-corners` | Corners | `core.corners.square`, `core.corners.small`, `core.corners.round`, `core.corners.soft` | `core.corners.soft` | Of highlighted rows, buttons and boxes; round and soft ones make buttons and switches pills. |
-| `[core] ui-focus` | Highlight | `core.focus.fill`, `core.focus.ring`, `core.focus.soft` | `core.focus.fill` | How the chosen row is shown: a dark bar, a frame, or a light bar (a frame on screens of black and white alone). |
+| `[core] ui-contrast` | Contrast | `core.contrast.normal`, `core.contrast.strong` | `core.contrast.normal` | Strong draws gray hints and notes in black. |
+| `[core] ui-header` | Headers | `core.header.plain`, `core.header.light`, `core.header.dark` | `core.header.plain` | How the title at the top of menus and lists looks. |
+| `[core] widgets.frame` | Frames of widgets | `core.frame.own`, `core.frame.none`, `core.frame.line`, `core.frame.card`, `core.frame.dark` | `core.frame.own` | A frame for every widget that has none chosen in its own settings. |
+| `[core] ui-corners` | Corners | `core.corners.square`, `core.corners.small`, `core.corners.round`, `core.corners.soft` | `core.corners.soft` | Of highlighted rows, buttons and boxes. |
+| `[core] ui-focus` | Highlight | `core.focus.fill`, `core.focus.ring`, `core.focus.soft` | `core.focus.fill` | How the chosen row is shown. |
 | `[core] ui-separators` | Lines between rows | `core.separators.inset`, `core.separators.line`, `core.separators.none` | `core.separators.inset` | Light lines, fainter lines from where the text starts, or none. |
 | `[core] ui-groups` | Groups | `core.groups.plain`, `core.groups.cards` | `core.groups.plain` | The sections of lists as they are or on rounded cards. |
 | `[core] ui-title` | Title size | 100 to 200 | `115` | Size of the titles at the top of menus and lists, in percent of the text's. |
 | `[core] ui-margin` | Margins of menus | 0 to 15 | `4` | Space at the left and right of menus and lists. |
 | `[core] ui-row` | Row height | 120 to 300 | `160` | Height of the rows of menus and lists, relative to their text. |
 | `[core] ui-lines` | Lines | 1 to 10 | `3` | How thick lines and frames are drawn. |
-| `[core] logo` | Logo picture | text | `` | A picture (JPEG, PNG) shown in place of PaperPaw's logo, e.g. plugins/mine/logo.png. Empty for PaperPaw's own. |
-| `[core] ui-palette` | Grays | text | `` | The grays of the interface by what they are for, e.g. muted=60 line=170 (0 black, 255 white). Empty for the usual ones. |
-| `[core] text-color` | Text colour | `core.color.black`, `core.color.dark-gray`, `core.color.gray`, `core.color.brown`, `core.color.dark-blue`, `core.color.dark-green`, `core.color.burgundy`, `core.color.violet`, `core.color.own` | `core.color.black` | Softer than black on white, easier on the eyes on bright screens. Pictures take the colours too; night mode swaps them. |
+| `[core] logo` | Logo picture | text | `` | Path of a JPEG or PNG shown instead of PaperPaw's logo; empty: the usual one. |
+| `[core] ui-palette` | Grays | text | `` | Grays by purpose, e.g. muted=60 line=170 (0 black, 255 white). |
+| `[core] text-color` | Text colour | `core.color.black`, `core.color.dark-gray`, `core.color.gray`, `core.color.brown`, `core.color.dark-blue`, `core.color.dark-green`, `core.color.burgundy`, `core.color.violet`, `core.color.own` | `core.color.black` | Softer than black on white, easier on the eyes; night mode swaps them. |
 | `[core] text-color-own` | Own text colour | text | `#5b4636` | A colour code such as #5b4636 (red, green, blue), used when the colour above is "Own colour". |
-| `[core] paper-color` | Paper colour | `core.paper.white`, `core.paper.cream`, `core.paper.sepia`, `core.paper.sand`, `core.paper.light-gray`, `core.paper.mint`, `core.paper.light-blue`, `core.paper.rose`, `core.paper.own` | `core.paper.white` | Softer than black on white, easier on the eyes on bright screens. Pictures take the colours too; night mode swaps them. |
+| `[core] paper-color` | Paper colour | `core.paper.white`, `core.paper.cream`, `core.paper.sepia`, `core.paper.sand`, `core.paper.light-gray`, `core.paper.mint`, `core.paper.light-blue`, `core.paper.rose`, `core.paper.own` | `core.paper.white` | Softer than black on white, easier on the eyes; night mode swaps them. |
 | `[core] paper-color-own` | Own paper colour | text | `#f4ecd8` | A colour code such as #5b4636 (red, green, blue), used when the colour above is "Own colour". |
-| `[home] page-1` | Home page 1 | text | `home.clock, home.continue, home.recent` | What the page shows, item by item with its place in the grid. Change it on the home screen: the pencil below the page or a long press on it. |
-| `[home] page-2` | Home page 2 | text | `home.tools` | What the page shows, item by item with its place in the grid. Change it on the home screen: the pencil below the page or a long press on it. |
-| `[home] page-3` | Home page 3 | text | `` | What the page shows, item by item with its place in the grid. Change it on the home screen: the pencil below the page or a long press on it. |
-| `[home] page-4` | Home page 4 | text | `` | What the page shows, item by item with its place in the grid. Change it on the home screen: the pencil below the page or a long press on it. |
-| `[home] page-5` | Home page 5 | text | `` | What the page shows, item by item with its place in the grid. Change it on the home screen: the pencil below the page or a long press on it. |
-| `[home] page-6` | Home page 6 | text | `` | What the page shows, item by item with its place in the grid. Change it on the home screen: the pencil below the page or a long press on it. |
-| `[home] page-7` | Home page 7 | text | `` | What the page shows, item by item with its place in the grid. Change it on the home screen: the pencil below the page or a long press on it. |
-| `[home] page-8` | Home page 8 | text | `` | What the page shows, item by item with its place in the grid. Change it on the home screen: the pencil below the page or a long press on it. |
+| `[home] page-1` | Home page 1 | text | `home.clock, home.continue, home.recent` | The items on this page and their places. Change them on the home screen. |
+| `[home] page-2` | Home page 2 | text | `home.tools` | The items on this page and their places. Change them on the home screen. |
+| `[home] page-3` | Home page 3 | text | `` | The items on this page and their places. Change them on the home screen. |
+| `[home] page-4` | Home page 4 | text | `` | The items on this page and their places. Change them on the home screen. |
+| `[home] page-5` | Home page 5 | text | `` | The items on this page and their places. Change them on the home screen. |
+| `[home] page-6` | Home page 6 | text | `` | The items on this page and their places. Change them on the home screen. |
+| `[home] page-7` | Home page 7 | text | `` | The items on this page and their places. Change them on the home screen. |
+| `[home] page-8` | Home page 8 | text | `` | The items on this page and their places. Change them on the home screen. |
 | `[home] columns` | Columns | 2 to 6 | `3` | How many cells the home screen has across. |
 | `[home] rows` | Rows | 0 to 12 | `0` | How many cells it has down; 0: as many as make the cells about square. |
 | `[home] tool-labels` | Names under the tools | `true`, `false` | `true` | The tools on the home screen with their names, or only their icons. |
-| `[home] focus-at-once` | Show the focus at once | `true`, `false` | `false` | Whether the frame showing what the buttons choose is there as soon as the home screen shows, or only after the first press. |
-| `[home] status-bar` | The status line at the top | `true`, `false` | `true` | The time, the battery and what else is chosen in the status line widget's settings, above the home screen. |
-| `[home] footer.pencil` | Pencil below the page | `true`, `false` | `true` | Without it, a long press on the home screen or Edit home screen in the menu edits it. |
+| `[home] focus-at-once` | Show the focus at once | `true`, `false` | `false` | The selection frame shows at once, not only after the first button press. |
+| `[home] status-bar` | The status line at the top | `true`, `false` | `true` | The time, the battery and more, above the home screen. |
+| `[home] footer.pencil` | Pencil below the page | `true`, `false` | `true` | Without it, edit the home screen by a long press or from the menu. |
 | `[home] footer.dots` | Dots for the pages | `true`, `false` | `true` | Where one is among the pages, below them. |
 | `[home] footer.items` | More below the page | list | `` | Status items beside the dots, e.g. the battery. |
 | `[menu] style` | Menus | `menu.style.list`, `menu.style.tiles` | `menu.style.list` | Menus as a list, or as tiles with their icons at the top of the screen. |
@@ -764,26 +795,26 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
-| `[core] reading-font` | Font | `core.font.default`, `Literata`, `Source Sans 3` | `core.font.default` | The book's font is Literata, or the fonts a book brings on devices that draw them (not the X4 and X4 Pro). Any other font is used for all text. |
-| `[core] font-size` | Font size | 6 to 40 | `9` | Size of the book text. |
-| `[core] line-spacing` | Line spacing | 80 to 250 | `135` | Distance between lines, relative to the font size. Below 100 % lines come closer than the font sets them, for fonts with much room between lines. |
+| `[core] reading-font` | Font | `core.font.default`, `Literata`, `Source Sans 3` | `core.font.default` | “Book's font” is Literata, or the book's own where the device draws them. |
+| `[core] font-size` | Font size | 6 to 16 | `9` | Size of the book text. |
+| `[core] line-spacing` | Line spacing | 80 to 250 | `135` | Space between lines, relative to the font size. |
 | `[core] font-weight` | Font weight | 0 to 4 | `0` | Darker, bolder text with any font; helps on light screens. |
 | `[core] word-spacing` | Word spacing | 50 to 200 | `100` | Space between words; at 100 % as the font has it. |
-| `[core] margin` | Margins | 0 to 30 | `4` | Space between the text and the edges of the screen; at the top and bottom too, unless those have margins of their own. |
+| `[core] margin` | Margins | 0 to 30 | `4` | Space between the text and the edges of the screen. |
 | `[core] margin-ends` | Margins at the top and bottom | 0 to 30 | `4` | Space above and below the text. As the margins at the sides until it is changed. |
 | `[core] justify` | Justify text | `true`, `false` | `true` | Align paragraphs on both sides. |
 | `[core] hyphenate` | Hyphenate words | `true`, `false` | `true` | Break long words at the end of lines, in the book's language. |
-| `[core] publisher-styles` | Publisher's formatting | `true`, `false` | `true` | Use the book's own layout (alignment, emphasis set in styles). Off shows the text plainly; emphasis in the text and headings stay. |
+| `[core] publisher-styles` | Publisher's formatting | `true`, `false` | `true` | Use the book's own layout; off shows the text plainly. |
 | `[core] indent` | Indent paragraphs | `true`, `false` | `true` | Indent the first line of each paragraph. |
 | `[core] paragraph-spacing` | Space between paragraphs | `true`, `false` | `false` | Leave some space between paragraphs, with or without indented first lines. |
-| `[core] widows` | Lines kept at the top | 1 to 4 | `1` | The fewest lines of a paragraph alone at the top of a page: more go on with them. |
-| `[core] orphans` | Lines kept at the bottom | 1 to 4 | `1` | The fewest lines of a paragraph alone at the bottom of a page: with fewer, the paragraph begins on the next page. |
-| `[core] reading-app` | Reading app | `core.reading-app.default` | `core.reading-app.default` | The app books open in; each format may have its own, and a book or a folder too (Open with). |
+| `[core] widows` | Lines kept at the top | 1 to 4 | `1` | The fewest lines of a paragraph carried to the top of a page. |
+| `[core] orphans` | Lines kept at the bottom | 1 to 4 | `1` | The fewest lines of a paragraph left at the bottom of a page. |
+| `[core] reading-app` | Reading app | `core.reading-app.default` | `core.reading-app.default` | The app books open in; formats, books and folders can have their own. |
 | `[core] footnotes` | Footnotes | `core.footnotes.popup`, `core.footnotes.jump` | `core.footnotes.popup` | A tapped note mark (1, [2], *) shows its note over the page, or goes to it. |
-| `[core] page-frame` | Page frame | `core.page-frame.single` | `core.page-frame.single` | How the text is set on the page: in one column, or as a plugin frames it (two columns, two pages side by side). |
-| `[core] scope-only` | Only this book | `true`, `false` | `false` | Changes to font and layout apply to this book only (marked •). Off: the book uses the general settings again. |
+| `[core] page-frame` | Page frame | `core.page-frame.single` | `core.page-frame.single` | How the text stands on the page; plugins can add other frames. |
+| `[core] scope-only` | Only this book | `true`, `false` | `false` | Changes to font and layout apply to this book only (marked •). |
 | `[dictionary] folder` | Dictionary folder | text | `dictionaries` | Where your StarDict dictionaries are (also in subfolders). |
-| `[reader] smooth-text` | Smooth text | `true`, `false` | `false` | Letters with soft gray edges on screens without grays; pages turn slower and use more battery. |
+| `[reader] smooth-text` | Smooth text | `true`, `false` | `false` | Letters with soft gray edges; pages turn slower and use more battery. |
 | `[reader] open-last` | Reopen the last book at start | `true`, `false` | `true` | Start with the last book instead of the home screen. |
 | `[reader] auto-turn-seconds` | Turn pages automatically every | 5 to 600 | `30` | For “Turn pages automatically” in the reader’s menu. |
 | `[reader] aloud-speed` | Speed | 50 to 300 | `100` | How fast books are read aloud. |
@@ -792,14 +823,14 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `[reader] aloud-timer` | Stop after | `reader.aloud-timer.off`, `reader.aloud-timer.15`, `reader.aloud-timer.30`, `reader.aloud-timer.60`, `reader.aloud-timer.90` | `reader.aloud-timer.off` | Reading aloud stops by itself after this long, e.g. at bedtime. |
 | `[reading-goal] content` | Content from | 5 to 95 | `50` | From which share of the goal the cat is content rather than meh. |
 | `[reading-goal] happy` | Happy from | 50 to 200 | `100` | From which share of the goal the cat is happy. 100 % is the goal itself. |
-| `[reading-goal] pictures` | Own pictures | text | `` | A folder with pictures named sad, meh, content and happy (PNG or JPEG) to show instead of the cats. Empty: the cats. |
+| `[reading-goal] pictures` | Own pictures | text | `` | Pictures named sad, meh, content and happy, in place of the cats. |
 | `[aids] bold-beginnings` | Bold word beginnings | `true`, `false` | `false` | The first half of every word in bold, which some find easier to follow. |
 | `[aids] replace` | Replace words | text | `` | Pairs like “colour = color; Mr. = Mister”, for whole words in every book. |
-| `[vocabulary] collect` | Keep words looked up | `true`, `false` | `true` | Each word you look up goes into Vocabulary in the tools, with its sentence. |
-| `[vocabulary] mark` | Mark vocabulary | `true`, `false` | `false` | The words in Vocabulary are marked where they occur in books of their language; choosing one looks it up again. |
-| `[vocabulary] new-per-day` | New cards a day | 0 to 200 | `20` | How many cards not seen before a review shows each day at most, besides those due again. |
-| `[vocabulary] retention` | Retention wanted | 70 to 97 | `90` | How likely you should still remember a card when it comes again. Higher means more reviews. |
-| `[vocabulary] cards-from-lookups` | Words looked up become cards | `true`, `false` | `false` | Each word you look up becomes a flash card in the deck Looked up, its sentence as the example. Add its meaning with your phone. |
+| `[vocabulary] collect` | Keep words looked up | `true`, `false` | `true` | Words you look up go into Vocabulary. It keeps the newest 2,000 words. |
+| `[vocabulary] mark` | Mark vocabulary | `true`, `false` | `false` | Marks the words in Vocabulary in books; choosing one looks it up again. |
+| `[vocabulary] new-per-day` | New cards a day | 0 to 200 | `20` | The most new cards a day, besides those due again. |
+| `[vocabulary] retention` | Retention wanted | 70 to 97 | `90` | The chance you still know a card when due. Higher means more reviews. |
+| `[vocabulary] cards-from-lookups` | Words looked up become cards | `true`, `false` | `false` | Each word you look up becomes a card in the deck Looked up. |
 | `[vocabulary] review-on-wake` | Review on waking | `true`, `false` | `false` | The review opens as the device wakes, where flash cards are due. |
 | `[translate] to` | Translate into | `translate.to.auto`, `translate.to.ar`, `translate.to.bg`, `translate.to.cs`, `translate.to.da`, `translate.to.de`, `translate.to.el`, `translate.to.en-gb`, `translate.to.en-us`, `translate.to.es`, `translate.to.et`, `translate.to.fi`, `translate.to.fr`, `translate.to.hu`, `translate.to.id`, `translate.to.it`, `translate.to.ja`, `translate.to.ko`, `translate.to.lt`, `translate.to.lv`, `translate.to.nb`, `translate.to.nl`, `translate.to.pl`, `translate.to.pt-br`, `translate.to.pt-pt`, `translate.to.ro`, `translate.to.ru`, `translate.to.sk`, `translate.to.sl`, `translate.to.sv`, `translate.to.tr`, `translate.to.uk`, `translate.to.zh-hans` | `translate.to.auto` | The language selected text is translated into. |
 
@@ -887,6 +918,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `core.toggle-night-mode` | Night mode |
 | `core.tools` | Tools |
 | `core.up` | Up |
+| `diagnostics.open-check` | Device check |
 | `diagnostics.reset` | Reset diagnostics screen |
 | `file-manager.open` | Files |
 | `files.by-author` | By author |
@@ -902,6 +934,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `keys.open` | Buttons and gestures |
 | `kosync.sync-now` | Sync progress |
 | `lock.now` | Lock now |
+| `lock.touch-hint` | How to unlock touch |
 | `lock.touch-toggle` | Lock or unlock touch |
 | `menu-editor.open` | Customise menus |
 | `news.fetch` | Fetch the news |
@@ -946,6 +979,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `settings.secrets.open` | Passwords and keys |
 | `setup.open` | Set up PaperPaw |
 | `stats.open` | Reading statistics |
+| `store.discover-fonts` | Discover fonts |
 | `store.open` | More plugins |
 | `transfer.open` | Wi-Fi transfer |
 | `update.check` | Search online |

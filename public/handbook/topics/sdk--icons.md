@@ -4,6 +4,7 @@ pub const paperpaw_sdk::icons::BUSY: &str
 pub const paperpaw_sdk::icons::DELETE: &str
 pub const paperpaw_sdk::icons::HOLD: &str
 pub const paperpaw_sdk::icons::NEXT: &str
+pub const paperpaw_sdk::icons::PAW: &str
 pub const paperpaw_sdk::icons::PREV: &str
 pub const paperpaw_sdk::icons::SHIFT: &str
 pub const paperpaw_sdk::icons::SPACE: &str

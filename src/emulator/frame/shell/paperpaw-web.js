@@ -240,10 +240,11 @@ export class PaperPawDevice {
         .map(([name, value]) => `${name}: ${value}`)
         .join("\n");
       const body = fixture.body ?? "";
-      const bytes =
-        typeof body === "string" || body instanceof Uint8Array || body instanceof ArrayBuffer
-          ? body
-          : JSON.stringify(body);
+      let bytes;
+      if (typeof body === "string" || body instanceof ArrayBuffer) bytes = body;
+      else if (ArrayBuffer.isView(body)) bytes = new Uint8Array(body.buffer, body.byteOffset, body.byteLength);
+      else if (body instanceof Blob) throw new TypeError("a fixture's body as a Blob: read it first (await blob.arrayBuffer())");
+      else bytes = JSON.stringify(body);
       const args = [fixture.method ?? "", fixture.url, headers, bytes];
       this.#check(
         this.#with(args, (m, ml, u, ul, h, hl, b, bl) =>
@@ -274,10 +275,13 @@ export class PaperPawDevice {
   }
 
   /// The answer to the request `id` the page fetched (`status` 0: failed,
-  /// the reason as the body), `headers` as `name: value` lines, at `now`.
-  fetched(id, status, headers, body, now) {
+  /// the reason as the body), `headers` as `name: value` lines, `url` the
+  /// address it came from after redirects (empty: the one asked), at `now`.
+  fetched(id, status, headers, body, url, now) {
     needsTime(now);
-    this.#check(this.#with([headers, body], (h, hl, b, bl) => this.exports.pp_fetched(id, status, h, hl, b, bl, now)));
+    this.#check(
+      this.#with([headers, body, url], (h, hl, b, bl, u, ul) => this.exports.pp_fetched(id, status, h, hl, b, bl, u, ul, now)),
+    );
   }
 
   /// paperpaw-dev's report of the data plugins on the card (`commands`:

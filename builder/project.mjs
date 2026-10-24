@@ -9,6 +9,7 @@ const KINDS = [
   { pattern: /^Cargo\.toml$/, max: 16 * 1024 },
   { pattern: /^src\/[a-z0-9_/]+\.rs$/, max: 256 * 1024 },
   { pattern: /^i18n\/[a-z]{2,3}(-[A-Za-z]+)?\.ini$/, max: 128 * 1024 },
+  { pattern: /^how\/[a-z]{2,3}(-[A-Za-z]+)?\.txt$/, max: 64 * 1024 },
   { pattern: /^plugin\/[A-Za-z0-9._/-]+$/, max: 8 * 1024 * 1024 },
   { pattern: /^(README|LICENCE|LICENSE)(\.md|\.txt)?$/, max: 64 * 1024 },
 ];
@@ -34,7 +35,7 @@ export function problems(files) {
       continue;
     }
     const kind = KINDS.find((k) => k.pattern.test(path));
-    if (!kind) out.push(`${path}: a project holds Cargo.toml, src/*.rs, i18n/<lang>.ini, the plugin's folder plugin/ and a README.`);
+    if (!kind) out.push(`${path}: a project holds Cargo.toml, src/*.rs, i18n/<lang>.ini, how/<lang>.txt, the plugin's folder plugin/ and a README.`);
     else if (size > kind.max) out.push(`${path}: larger than ${kind.max / 1024} KB.`);
   }
   if (total > MAX_BYTES) out.push(`The project is larger than ${MAX_BYTES / 1024 / 1024} MB.`);

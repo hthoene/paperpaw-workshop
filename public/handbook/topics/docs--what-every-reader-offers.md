@@ -31,7 +31,7 @@ that their choices go along; a shell opens a book with
 | A book opened as the reader opens it | `reading::open_options`, `reading::conversion` | its places fit the reader's (a search, contents, an XPointer) |
 | Pages that go right to left | `Metadata::direction` (`PageProgression`), `Screen::mirrored` | readers mirror taps and swipes (an EPUB's `page-progression-direction`) |
 | Status lines' settings | `groups::STATUS_LINES` | the group readers put them in |
-| Reading aloud's settings | `setting_sections::ALOUD` | the section readers and shells put them in |
+| Reading aloud's settings | `group_sections::ALOUD` | the section readers and shells put them in |
 | Key bindings while reading | the layer `[keymap.core.reader]` | the slot's layer, whichever screen fills it |
 
 A reader in turn sends the reading events (`BOOK_OPENED`, `PAGE_TURNED`,

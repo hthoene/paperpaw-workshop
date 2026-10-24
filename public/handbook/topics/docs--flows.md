@@ -5,7 +5,7 @@ on every device it fits:
 
 ```text
 # Night mode from the menu, with buttons alone.
-profiles: xteink-x4, xteink-x4-classic
+profiles: xteink-x4, xteink-x4-pro
 
 long:confirm
 expect screen menu.list
@@ -22,11 +22,15 @@ expect stack 1
 expect no warnings
 ```
 
-Steps are those of the emulator's scripts (a button's name, `long:`,
-`tap:x:y`, `tap-on:<text>`, `swipe:`, `wait:<ms>`, `run:<action>`,
-`open:<screen>`); assertions are `expect screen`, `stack`, `text`,
-`no text`, `focus`, `on`, `off`, `setting`, `no warnings` and
-`picture <name>` (compared with a snapshot). `paperpaw-emu --record
+Steps are those of the emulator's scripts: a button's name, `long:`,
+`tap:x:y`, `tap-on:<text>`, `long-tap:x:y`, `swipe:`, `down:`, `move:`,
+`up:`, `wait:<ms>`, `run:<action>`, `open:<screen>`, `type:<text>`
+into the keyboard shown, `type-enter:` to confirm it, `redraw` and
+`shot:<file>`. Lines before the first step may say `profiles: a, b`
+and `set: <id> = <value>`, a setting before the app starts. Assertions
+are `expect screen`, `stack`, `text`, `no text`, `focus`, `on`, `off`,
+`setting`, `no warnings` and `picture <name>`, which compares the
+screen with a snapshot. `paperpaw-emu --record
 my.flow` writes what one does in the emulator's window as a flow, to be
 replayed with `paperpaw-dev flows --flow my.flow`; the `expect` lines are
 added after.

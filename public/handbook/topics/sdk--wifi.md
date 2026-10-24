@@ -10,6 +10,7 @@ pub paperpaw_sdk::wifi::WifiNetwork::secured: bool
 pub paperpaw_sdk::wifi::WifiNetwork::signal: i8
 pub paperpaw_sdk::wifi::WifiNetwork::ssid: alloc::string::String
 pub fn paperpaw_sdk::wifi::WifiNetwork::bars(&self) -> u8
+pub fn paperpaw_sdk::wifi::WifiNetwork::new(impl core::convert::Into<alloc::string::String>, i8, bool) -> Self
 pub enum paperpaw_sdk::wifi::JoinFailure
 pub fn paperpaw_sdk::wifi::JoinFailure::from_param(&str) -> core::option::Option<Self>
 pub fn paperpaw_sdk::wifi::JoinFailure::missing() -> core::option::Option<Self>

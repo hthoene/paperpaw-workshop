@@ -9,7 +9,7 @@ pub fn paperpaw_sdk::status::Place::draw(&self, &mut paperpaw_graphics::canvas::
 pub fn paperpaw_sdk::status::Place::line<'e>(&self, &paperpaw_sdk::Env<'e>, paperpaw_platform::geometry::Rect, f32, paperpaw_platform::pixel::Color) -> paperpaw_sdk::status::StatusLine<'e>
 pub fn paperpaw_sdk::status::Place::lists<'e>(&self, &paperpaw_sdk::Env<'e>) -> [&'e str; 3]
 pub const fn paperpaw_sdk::status::Place::new(paperpaw_sdk::Id, &'static str, [paperpaw_sdk::Id; 3]) -> Self
-pub fn paperpaw_sdk::status::Place::signature(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params) -> alloc::string::String
+pub fn paperpaw_sdk::status::Place::signature(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params) -> u64
 pub fn paperpaw_sdk::status::Place::targets(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::status::StatusFrame<'_>) -> alloc::vec::Vec<paperpaw_sdk::status::StatusTarget>
 pub const fn paperpaw_sdk::status::Place::with_line(self, paperpaw_sdk::Id) -> Self
 pub struct paperpaw_sdk::status::StatusItemSpec
@@ -33,7 +33,7 @@ pub struct paperpaw_sdk::status::StatusItems
 pub fn paperpaw_sdk::status::StatusItems::canonical<'a>(&'a self, &'a str) -> &'a str
 pub fn paperpaw_sdk::status::StatusItems::draw_line(&self, &str, &mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::status::StatusFrame<'_>) -> bool
 pub fn paperpaw_sdk::status::StatusItems::iter(&self) -> impl core::iter::traits::iterator::Iterator<Item = (&paperpaw_sdk::Id, &str)>
-pub fn paperpaw_sdk::status::StatusItems::line_signature(&self, &str, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params) -> alloc::string::String
+pub fn paperpaw_sdk::status::StatusItems::line_signature(&self, &str, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params) -> u64
 pub fn paperpaw_sdk::status::StatusItems::line_targets(&self, &str, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::status::StatusFrame<'_>) -> alloc::vec::Vec<paperpaw_sdk::status::StatusTarget>
 pub fn paperpaw_sdk::status::StatusItems::lines(&self) -> impl core::iter::traits::iterator::Iterator<Item = (&paperpaw_sdk::Id, &str)>
 pub fn paperpaw_sdk::status::StatusItems::new() -> Self
@@ -46,7 +46,7 @@ pub fn paperpaw_sdk::status::StatusItems::value(&self, &str, &paperpaw_sdk::Env<
 pub fn paperpaw_sdk::status::StatusItems::canonical<'a>(&'a self, &'a str) -> &'a str
 pub fn paperpaw_sdk::status::StatusItems::draw_line(&self, &str, &mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::status::StatusFrame<'_>) -> bool
 pub fn paperpaw_sdk::status::StatusItems::iter(&self) -> impl core::iter::traits::iterator::Iterator<Item = (&paperpaw_sdk::Id, &str)>
-pub fn paperpaw_sdk::status::StatusItems::line_signature(&self, &str, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params) -> alloc::string::String
+pub fn paperpaw_sdk::status::StatusItems::line_signature(&self, &str, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params) -> u64
 pub fn paperpaw_sdk::status::StatusItems::line_targets(&self, &str, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::status::StatusFrame<'_>) -> alloc::vec::Vec<paperpaw_sdk::status::StatusTarget>
 pub fn paperpaw_sdk::status::StatusItems::lines(&self) -> impl core::iter::traits::iterator::Iterator<Item = (&paperpaw_sdk::Id, &str)>
 pub fn paperpaw_sdk::status::StatusItems::new() -> Self
@@ -90,7 +90,7 @@ pub paperpaw_sdk::status::StatusValue::Level::percent: u8
 pub paperpaw_sdk::status::StatusValue::Text(alloc::string::String)
 pub type paperpaw_sdk::status::StatusFn = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params) -> core::option::Option<paperpaw_sdk::status::StatusValue>>
 pub type paperpaw_sdk::status::StatusLineFn = alloc::boxed::Box<dyn core::ops::function::Fn(&mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::status::StatusFrame<'_>)>
-pub type paperpaw_sdk::status::StatusSignatureFn = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params) -> alloc::string::String>
+pub type paperpaw_sdk::status::StatusSignatureFn = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params) -> u64>
 pub type paperpaw_sdk::status::StatusTargetsFn = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::status::StatusFrame<'_>) -> alloc::vec::Vec<paperpaw_sdk::status::StatusTarget>>
 pub struct paperpaw_sdk::status::StatusFrame<'a>
 pub fn paperpaw_sdk::status::StatusFrame<'a>::font(self, &'a str) -> Self
@@ -125,6 +125,6 @@ pub const paperpaw_sdk::status::context::CHAPTER: &str
 pub const paperpaw_sdk::status::context::CHAPTERS: &str
 pub const paperpaw_sdk::status::context::PAGE: &str
 pub fn paperpaw_sdk::status::item_ids(&str) -> impl core::iter::traits::iterator::Iterator<Item = &str>
-pub fn paperpaw_sdk::status::signature(&paperpaw_sdk::Env<'_>, &[&str], &paperpaw_sdk::Params) -> alloc::string::String
+pub fn paperpaw_sdk::status::signature(&paperpaw_sdk::Env<'_>, &[&str], &paperpaw_sdk::Params) -> u64
 pub mod paperpaw_sdk::status::context
 ```
