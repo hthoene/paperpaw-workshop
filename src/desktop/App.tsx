@@ -19,7 +19,7 @@ import { Drawer } from "./Drawer";
 import { Projects } from "./Projects";
 import { Reader } from "./Reader";
 import { KeySettings } from "./AuthorKey";
-import { AppUpdates } from "./Updates";
+import { AppUpdates, UpdateNotice } from "./Updates";
 import { Publish } from "./Publish";
 import { exportZip, Send } from "./Send";
 import { Workspace } from "./workspace";
@@ -226,6 +226,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
             </button>
           </p>
         )}
+        {!notice && <UpdateNotice backend={backend} />}
         {sending && <Send desk={desk} backend={backend} onClose={() => setSending(false)} />}
         {publishing && <Publish desk={desk} backend={backend} onClose={() => setPublishing(false)} />}
         {settings && <Settings workspace={workspace} backend={backend} keyKind={keyKind} may={desk.may} onClose={() => setSettings(false)} />}

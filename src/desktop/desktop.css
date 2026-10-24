@@ -304,6 +304,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 }
 .notice .close svg { stroke: var(--sheet); }
 .notice .close:hover { background: #3a3631; }
+.notice .link { color: var(--sheet); }
 
 /* An offer in the conversation (the build tools): calm, one button. */
 .log .offer { max-width: 34rem; padding: .9rem 1rem; border-radius: .8rem; background: var(--sheet-2); }
