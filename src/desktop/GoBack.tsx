@@ -54,13 +54,13 @@ export function Versions({ desk, onLook }: { desk: Desk; onLook(): void }) {
   const versions = packedVersions(desk.history);
   if (!versions.length) return null;
   return (
-    <section class="versions" aria-label="Published versions">
-      <h3>Published versions</h3>
+    <section class="versions" aria-label="Packed for the store">
+      <h3>Packed for the store</h3>
       <ul>
         {versions.map((v) => (
           <li key={`${v.version}-${v.id}`}>
             <span>
-              {v.version}, published {shownDate(v.date)}
+              {v.version}, packed {shownDate(v.date)}
             </span>
             {!isNow(desk, v.id) && (
               <button type="button" class="link quiet" disabled={!!desk.workshop?.busy} onClick={() => { onLook(); void desk.preview(v.id); }}>

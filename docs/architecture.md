@@ -238,7 +238,7 @@ start is the X4 Pro; the X4 and the Boox Go 7 are a click away.
 
 Where it comes from: `PAPERPAW_EMU` names a build of one's own while the
 workshop is worked on; otherwise the release's program, kept in the app's
-folder (`emulators/<version>/`); otherwise the one the installer brought,
+folder (`emulators/current/`); otherwise the one the installer brought,
 in `emulator/` beside the app. `paperpaw-dev` lies beside it.
 
 ## The installer
@@ -247,16 +247,23 @@ in `emulator/` beside the app. `paperpaw-dev` lies beside it.
 copies `paperpaw-emu` and `paperpaw-dev` of the build `PAPERPAW_EMU` names
 into `src-tauri/resources/emulator/` (with `version.json`: PaperPaw's
 version, its fingerprint, its compiler) and runs `tauri build`. For a
-PaperPaw in work (`0.4.0-dev`), whose SDK is not on crates.io, it also
+PaperPaw in work (`0.5.0-dev`), whose SDK is not on crates.io, it also
 brings that SDK ([scripts/sdk.mjs](../scripts/sdk.mjs)): the SDK's crates
 and those they need, of the checkout the emulator was built in
-(`PAPERPAW_SRC`, else two folders above it), unchanged, as the
-fingerprint of a PaperPaw in work hashes their very files; and the
+(`PAPERPAW_SRC`, else two folders above it), unchanged, as the emulator
+of a PaperPaw in work loads only code built against its own source; and the
 workspace's Cargo.toml with them as its only members. It lies in `sdk/`
 beside the app, with `version.txt`. The
 installer is NSIS, for the person alone (no administrator), and fetches
-Microsoft's WebView2 only where Windows lacks it. It is not signed yet, so
-Windows SmartScreen warns before the first start.
+Microsoft's WebView2 only where Windows lacks it. It is not signed with a
+certificate yet, so Windows SmartScreen warns before the first start.
+
+A release's installer is built by
+[.github/workflows/release.yml](../.github/workflows/release.yml) on a tag
+`v<version>`, with the `paperpaw-emu` and `paperpaw-dev` of the PaperPaw
+release that [paperpaw-release.txt](../paperpaw-release.txt) names (now
+0.5.0-beta.1), fetched from that release and taken only where its checksum
+and PaperPaw's signature hold. Windows only for now.
 
 Tests use `FakeEmulator` ([src/emulator/fake.ts](../src/emulator/fake.ts)).
 

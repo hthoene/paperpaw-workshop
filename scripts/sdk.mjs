@@ -1,9 +1,9 @@
 // The SDK of a PaperPaw in work, for the installer: the emulator of a
-// PaperPaw in work (`0.5.0-dev`) loads only code built against its very
-// source, which crates.io does not have. So the installer brings it:
+// PaperPaw in work (`0.5.0-dev`) loads only code built against its own
+// source (its plugin interface and the layouts of the types that cross),
+// which crates.io does not have. So the installer brings it:
 // `crates/paperpaw-sdk` of the checkout the emulator was built from, the
-// PaperPaw crates it needs (by Cargo's metadata, unchanged: a PaperPaw in
-// work fingerprints their very files), and the workspace's Cargo.toml
+// PaperPaw crates it needs (by Cargo's metadata, unchanged), and the workspace's Cargo.toml
 // with those as its only members, so that what they take from the
 // workspace (`version.workspace = true`) resolves. `version.txt` says
 // which PaperPaw it is; the app takes it only for that one

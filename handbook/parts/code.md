@@ -30,9 +30,11 @@ plugin = "MyPlugin"
 paperpaw-sdk = "0.5"
 ```
 
-`plugin` names the type in `src/lib.rs` that implements `Plugin`. The SDK
-is the only crate there is: no `std`, no other crates. `alloc` is there
-(`extern crate alloc;`) for `Box`, `Vec`, `String`, `Rc`, `format!`.
+`plugin` names the type in `src/lib.rs` that implements `Plugin`. The
+workshop builds against the SDK of the PaperPaw beside the conversation,
+whatever version the line names. The SDK is the only crate there is: no
+`std`, no other crates. `alloc` is there (`extern crate alloc;`) for `Box`,
+`Vec`, `String`, `Rc`, `format!`.
 
 ## How you work
 

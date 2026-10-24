@@ -13,10 +13,19 @@ it on a reader right in the window. When you like it, it goes onto your
 reader. It works with [PaperPaw](https://paperpaw.org), first on the
 Xteink X4 and X4 Pro.
 
+> **This is a beta (0.1.0-beta.1), for testers and developers.** It works
+> with PaperPaw 0.5.0-beta.1, which is a beta too. Expect bugs, and expect
+> things to change before the first release. Keep a copy of your plugins
+> (*Export project…* in the menu). When something goes wrong, please open
+> an [issue](https://github.com/hthoene/paperpaw-workshop/issues) and say
+> what you did.
+
 ## In three steps
 
-1. **Download** the workshop for your computer from the
-   [releases](https://github.com/hthoene/paperpaw-workshop/releases).
+1. **Download** the installer from the
+   [releases](https://github.com/hthoene/paperpaw-workshop/releases) and
+   run it. It is not signed with a certificate yet, so Windows may ask
+   whether you trust it.
 2. **Paste your Claude key** when it starts. You get one in the
    [Claude Console](https://console.anthropic.com/).
 3. **Describe your plugin** in your own words: "A calm dark look for
@@ -30,6 +39,9 @@ When it looks right, **Send to reader**: over Wi-Fi (open Transfer on the
 reader and type the address it shows), over the USB cable, or onto its
 card. The reader asks before it takes a plugin with code, or anything
 over the cable. Or keep it as a zip with **Export zip** in the menu.
+**Publish…** in the menu packs the plugin for the plugin store at
+paperpaw.org and opens its upload form in your browser. You upload it
+there yourself.
 
 When a newer workshop is out, Settings says so, and it updates when you
 say so. Your projects stay as they are.
@@ -44,7 +56,8 @@ small budget, so you can try the workshop before you get a key of your own.
 ## What it does
 
 - Makes **looks, home screens, buttons and texts**: plugins of a few text
-  files. And **plugins with code**, such as new screens and tools.
+  files. And **plugins with code**, such as new screens and tools. For
+  now these are built for the X4 only; the X4 Pro's come later.
 - Shows the plugin on an **X4 Pro, an X4 and a Boox Go 7**, drawn by
   PaperPaw itself. Tap the screen or use the arrow keys.
 - **Checks** the plugin as PaperPaw checks plugins, on every reader and in
@@ -62,8 +75,8 @@ small budget, so you can try the workshop before you get a key of your own.
   PaperPaw's key service with a PaperPaw key. To GitHub, when you open
   Settings, to see whether a newer workshop is out. To Rust's own servers
   and crates.io, the first time you make a plugin with code. To
-  paperpaw.org, when you publish a plugin there. And to addresses you
-  name yourself: the workshop asks you before it fetches an example from
+  paperpaw.org only through your browser, when you publish: the workshop
+  itself sends nothing there. And to addresses you name yourself: the workshop asks you before it fetches an example from
   one, and the reader beside the conversation fetches what your plugin
   asks for, as your reader would. No account, no tracking.
 - **It does not spend more than it must.** With your own key you pay
@@ -76,9 +89,10 @@ small budget, so you can try the workshop before you get a key of your own.
 - Windows 10 or 11. There is no build for macOS or Linux yet; they are
   planned for later.
 - A Claude key, or a PaperPaw key.
-- For plugins with code: about 1 GB of room. The workshop sets up Rust by
-  itself the first time. On Windows it also needs Microsoft's C++ build
-  tools.
+- For plugins with code: about 1 GB of room for Rust and the builds. The
+  workshop sets up Rust by itself the first time. On Windows it also needs
+  Microsoft's C++ build tools (about 3 GB); if they are missing, the
+  workshop offers to install them.
 
 ## For developers
 

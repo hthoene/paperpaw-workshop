@@ -1,5 +1,11 @@
 # The store's API for the workshop
 
+> This describes how the web workshop (`src/app/`, `src/publish/`) sent
+> plugins to the store. The desktop app does not use it: its **Publish…**
+> packs the plugin and opens paperpaw.org's upload form in the browser, and
+> nothing is uploaded from the app. Whether paperpaw.org still answers these
+> requests is paperpaw.org's to say.
+
 The workshop sends plugins to the store on paperpaw.org the way its form
 at `/submit` does, as the signed-in author. These are the requests it
 makes ([src/publish/store.ts](../src/publish/store.ts)) and the answers

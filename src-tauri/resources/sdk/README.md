@@ -1,6 +1,6 @@
 # The SDK the installer brings
 
-For a PaperPaw in work (`0.4.0-dev`), whose SDK is not on crates.io,
+For a PaperPaw in work (`0.5.0-dev`), whose SDK is not on crates.io,
 `npm run app:installer` copies the SDK of the checkout its emulator was
 built in here (see `scripts/sdk.mjs`): `crates/` with `paperpaw-sdk` and
 the PaperPaw crates it needs, the workspace's `Cargo.toml` with those as

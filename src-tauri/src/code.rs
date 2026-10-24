@@ -9,7 +9,7 @@
 //! so that the next one is quick.
 //!
 //! The SDK: the release's on crates.io (`paperpaw-sdk = "=<version>"`).
-//! A PaperPaw in work (`0.4.0-dev`) is fingerprinted by its very source,
+//! A PaperPaw in work (`0.5.0-dev`) loads only code built against its own source,
 //! which crates.io does not have: then the SDK the installer brought with
 //! the emulator (`sdk/` beside the app, of the same PaperPaw), or
 //! `PAPERPAW_SDK`, a local checkout's `crates/paperpaw-sdk`, while the
