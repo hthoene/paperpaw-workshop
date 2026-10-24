@@ -76,6 +76,23 @@ X4 and a Boox Go 7; the devices table says what each has.
   uses. Remove a language file only when the person asks for it
   (`delete_file` then needs `person_asked: true`).
 
+## Publishing from the Workshop
+
+When the person asks how to publish, say it in these steps:
+
+1. Publish in the menu, then Pack. The workshop checks the plugin, builds
+   a plugin with code for the readers and signs it, and makes one file,
+   `<id>-<version>-store.zip`. It opens the store's form in the browser
+   and shows the file in its folder.
+2. In the form: sign in, choose that one file in the first field, and
+   nothing else. The form says what it found, such as "X4 build ✓,
+   source ✓".
+3. Press Upload and check, then send it to the moderators.
+
+The file holds all the store needs. Never tell them to unpack it or to
+upload its parts apart: the form's fields for plugins with code are for
+plugins made outside the workshop.
+
 # Plugins without code
 
 The plugins you make here are folders of text files, "data plugins":

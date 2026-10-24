@@ -1,23 +1,25 @@
 // "Publish…": the plugin checked as PaperPaw checks it, its version
-// higher than the last one packed for the store, packed as the store's
-// upload form takes it, then the form opened in the browser and the
-// package shown in its folder. The person uploads it and sends it to the
+// higher than the last one packed for the store, packed into one file for
+// the store's upload form (`<id>-<version>-store.zip`), then the form
+// opened in the browser and the file shown in its folder. The person
+// chooses that one file in the form's first field and sends it to the
 // moderators; nothing is uploaded from here.
 //
 // A plugin with code also needs its build for each reader, signed with
-// the author's key (whose backup is saved first), and its source: the
-// X4's is made here (its part of Rust fetched once, its size said first);
-// the X4 Pro's comes once a PaperPaw release brings what it needs.
+// the author's key (whose backup is saved first), and its source, both
+// inside the store file: the X4's is made here (its part of Rust fetched
+// once, its size said first); the X4 Pro's comes once a PaperPaw release
+// brings what it needs.
 
 import { useEffect, useState } from "preact/hooks";
 
 import { identity } from "../project/project";
 import { KeyGate } from "./AuthorKey";
-import type { AuthorStatus, Backend, DeviceBuilt, DeviceReadiness } from "./backend";
+import type { AuthorStatus, Backend, DeviceBuilt, DeviceReadiness, StoreFile } from "./backend";
 import { forModel, shown, type CheckState } from "./checks";
 import type { Desk } from "./desk";
 import { toBase64 } from "./folders";
-import { raised, recordPublished, uploadPackage, versionState, withCrateVersion, withVersion } from "./publishing";
+import { holds, raised, recordPublished, uploadPackage, versionState, withCrateVersion, withVersion } from "./publishing";
 
 interface Props {
   desk: Desk;
@@ -25,22 +27,12 @@ interface Props {
   onClose(): void;
 }
 
-/** A file made for the store's form: which field takes it. */
-interface Made {
-  path: string;
-  name: string;
-  field: string;
-}
-
 type Step =
   | { at: "checking" }
   | { at: "ready" }
   | { at: "building" }
   | { at: "problems"; problems: string[] }
-  | { at: "packed"; made: Made[] };
-
-/** The file's name in `path` (either separator). */
-const nameOf = (path: string) => path.split(/[\\/]/).pop() ?? path;
+  | { at: "packed"; file: StoreFile };
 
 /** Why a build failed, as the person and the AI read it. */
 function whyFailed(built: DeviceBuilt): string[] {
@@ -137,22 +129,19 @@ export function Publish({ desk, backend, onClose }: Props) {
     const packed = uploadPackage(project);
     if (!packed.ok) return setStep({ at: "problems", problems: packed.problems });
     try {
-      const made: Made[] = [];
       if (code) {
         setStep({ at: "building" });
         const built = await backend.deviceBuild(project.key, packed.id, packed.version);
         if (built.state !== "done" || !built.ppn || !built.source) return setStep({ at: "problems", problems: whyFailed(built) });
-        made.push({ path: built.ppn, name: nameOf(built.ppn), field: "the X4's build" });
-        made.push({ path: built.source, name: nameOf(built.source), field: "the source (as a ZIP)" });
       }
-      const path = await backend.publishSave(project.key, packed.name, toBase64(packed.zip));
-      made.unshift({ path, name: packed.name, field: "the package" });
+      // One file for the store: the package, and the build and the source just made.
+      const file = await backend.publishPack(project.key, packed.id, packed.version, toBase64(packed.zip), !!code);
       recordPublished(project, packed.version);
       await desk.workspace.save();
       // The state packed, marked in the history to go back to.
       await desk.markPublished(packed.version);
-      setStep({ at: "packed", made });
-      await backend.publishShow(path);
+      setStep({ at: "packed", file });
+      await backend.publishShow(file.path);
     } catch (e) {
       setStep({ at: "ready" });
       setSaid(e instanceof Error ? e.message : String(e));
@@ -164,22 +153,18 @@ export function Publish({ desk, backend, onClose }: Props) {
       {head}
       {step.at === "packed" ? (
         <>
-          <section class="way">
-            <h3>{step.made.length > 1 ? "Upload these files" : "Upload this file"}</h3>
-            <ul class="made">
-              {step.made.map((m) => (
-                <li key={m.path}>
-                  <span class="file-name">{m.name}</span>
-                  {step.made.length > 1 && <small>as {m.field}</small>}
-                </li>
-              ))}
-            </ul>
-            <p>
-              The store's upload form opened in your browser, and the folder beside it. Sign in, choose{" "}
-              {step.made.length > 1 ? "each file in its field" : "this file as the package"}, read the checks, and send it
-              to the moderators.
+          <section class="way packed">
+            <h3>Upload this one file</h3>
+            <p class="store-file">
+              <span class="file-name">{step.file.name}</span>
+              <small>It holds {holds(step.file.parts)}.</small>
             </p>
-            <button type="button" class="link" onClick={() => void backend.publishShow(step.made[0]!.path).catch((e: unknown) => setSaid(String(e)))}>
+            <ol class="steps">
+              <li>The store's form opened in your browser. Sign in there.</li>
+              <li>Choose this file in the first field. Nothing else.</li>
+              <li>Press Upload and check, then send it to the moderators.</li>
+            </ol>
+            <button type="button" class="link" onClick={() => void backend.publishShow(step.file.path).catch((e: unknown) => setSaid(String(e)))}>
               Open the form and the folder again
             </button>
           </section>
@@ -254,8 +239,8 @@ export function Publish({ desk, backend, onClose }: Props) {
             <h3>Pack it for the store</h3>
             <p>
               {code
-                ? "The workshop makes what the store's upload form takes: the plugin's folder, its build for the X4 signed with your key, and its source. Then it opens the form in your browser. You upload them there yourself."
-                : "The workshop makes the file the store's upload form takes, then opens the form in your browser. You upload it there yourself."}
+                ? "The workshop makes one file for the store: the plugin, its build for the X4 signed with your key, and its source. Then it opens the store's form in your browser. You upload the file there yourself."
+                : "The workshop makes one file for the store, then opens the store's form in your browser. You upload the file there yourself."}
             </p>
             <button type="button" class="go" disabled={step.at === "checking" || step.at === "building" || held} onClick={() => void pack()}>
               Pack {version.ok || version.version ? `version ${version.ok ? version.version : version.version}` : "it"}

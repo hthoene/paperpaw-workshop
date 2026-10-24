@@ -243,7 +243,7 @@ pub struct DeviceBuilt {
     pub diagnostics: Vec<crate::code::Diagnostic>,
     pub log_tail: String,
     /// The signed plugin file, the source ZIP, kept in the project's
-    /// `.workshop/publish/`.
+    /// `.workshop/publish/parts/` for its store file.
     pub ppn: Option<String>,
     pub source: Option<String>,
     /// As `paperpaw-sign plugin` reads the file.
@@ -623,7 +623,8 @@ pub async fn device_toolchain_install(emulator: tauri::State<'_, crate::emulator
 
 /// Builds the project's plugin with code for the X4, signed with the
 /// author's key (which must have been backed up), with its source as a
-/// ZIP, into the project's `.workshop/publish/`.
+/// ZIP, into the project's `.workshop/publish/parts/`, where
+/// `publish_pack` takes them into the store file.
 #[tauri::command]
 pub async fn device_build(
     app: tauri::AppHandle,
@@ -656,7 +657,7 @@ pub async fn device_build(
         let files = crate::projects::plugin_files(&root, &project)?;
         let dir = crate::paths::app_data()?.join("builds").join(&project).join("x4");
         std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
-        let out = crate::projects::folder(&root, &project)?.join(".workshop").join("publish");
+        let out = crate::publish::parts(&root, &project)?;
         let sign = sign_program(&crate::paths::emulator_program()?);
         told("Building for the X4…");
         Ok(build_x4(&dir, &files, &rust, &crate::code::device_sdk(&ready.paperpaw), &sign, &seed, &out, &id, &version))

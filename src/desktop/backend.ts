@@ -90,6 +90,14 @@ export interface DeviceBuilt {
   size: number;
 }
 
+/** The one file for the store's form and what it holds: `package`, each
+ *  reader built for (`x4`), `source` (src-tauri's publish.rs). */
+export interface StoreFile {
+  path: string;
+  name: string;
+  parts: string[];
+}
+
 /** The author key as the window knows it (src-tauri's author.rs). */
 export interface AuthorStatus {
   public: string | null;
@@ -151,18 +159,20 @@ export interface Backend extends FolderApi, PictureApi, CheckApi, HistoryApi {
   /** A folder (a reader's card), asked of the person. */
   askFolder(): Promise<string | null>;
   saveFile(path: string, base64: string): Promise<void>;
-  /** Keeps a package for the store's upload form in the project's
-   *  `.workshop/publish/`; its path. */
-  publishSave(project: string, name: string, base64: string): Promise<string>;
-  /** Opens the store's upload form in the browser and shows the package
-   *  in its folder. */
+  /** Packs the one file for the store's upload form,
+   *  `<id>-<version>-store.zip`, in the project's `.workshop/publish/`:
+   *  the package (in base64) and, for a plugin with code, what
+   *  `deviceBuild` made. */
+  publishPack(project: string, id: string, version: string, base64: string, code: boolean): Promise<StoreFile>;
+  /** Opens the store's upload form in the browser and shows the store
+   *  file in its folder. */
   publishShow(path: string): Promise<void>;
   /** What building a plugin with code for the readers needs, and has. */
   deviceReadiness(): Promise<DeviceReadiness>;
   /** Fetches the X4's part of Rust (about `x4_mb` MB). */
   deviceToolchainInstall(): Promise<void>;
   /** Builds the project's plugin with code for the X4, signed, with its
-   *  source as a ZIP, into the project's `.workshop/publish/`. */
+   *  source as a ZIP, into the project's `.workshop/publish/parts/`. */
   deviceBuild(project: string, id: string, version: string): Promise<DeviceBuilt>;
   /** The author key that signs plugins with code: never its secret. */
   authorStatus(): Promise<AuthorStatus>;
@@ -270,7 +280,7 @@ export const appBackend: Backend = {
     return typeof chosen === "string" ? chosen : null;
   },
   saveFile: (path, base64) => invoke("save_file", { path, base64 }),
-  publishSave: (project, name, base64) => invoke("publish_save", { project, name, base64 }),
+  publishPack: (project, id, version, base64, code) => invoke("publish_pack", { project, id, version, base64, code }),
   publishShow: (path) => invoke("publish_show", { path }),
   deviceReadiness: () => invoke("device_readiness"),
   deviceToolchainInstall: () => invoke("device_toolchain_install"),
@@ -378,8 +388,12 @@ export function standInBackend(): Backend {
     askSave: async () => null,
     askFolder: async () => null,
     saveFile: async () => {},
-    // A plain browser keeps no package and opens no form.
-    publishSave: async (project, name) => `${project}/.workshop/publish/${name}`,
+    // A plain browser keeps no file and opens no form.
+    publishPack: async (project, id, version, _base64, code) => ({
+      path: `${project}/.workshop/publish/${id}-${version}-store.zip`,
+      name: `${id}-${version}-store.zip`,
+      parts: code ? ["package", "x4", "source"] : ["package"],
+    }),
     publishShow: async () => {},
     // No builds for the readers in a plain browser.
     deviceReadiness: async () => ({ x4: false, x4_mb: 62, x4_pro: false, sign: false }),

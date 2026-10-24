@@ -60,7 +60,7 @@ pub fn run() {
             usb::send_usb,
             pictures::picture_make,
             pictures::picture_info,
-            publish::publish_save,
+            publish::publish_pack,
             author::author_status,
             author::author_create,
             author::author_backup,

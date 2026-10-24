@@ -2,7 +2,7 @@ import { unzipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 
 import { newProject } from "../project/project";
-import { higher, raised, recordPublished, uploadPackage, versionState, withCrateVersion, withVersion } from "./publishing";
+import { higher, holds, raised, recordPublished, uploadPackage, versionState, withCrateVersion, withVersion } from "./publishing";
 
 const INI = "[plugin]\nid = night-owl\nname = Night owl\nversion = 1.0.0\nformats = 1\n";
 
@@ -78,5 +78,13 @@ describe("publishing a plugin", () => {
     expect(withCrateVersion("[package]\nname = \"a\"\nversion = \"1.0.0\"\n\n[dependencies]\nx = { version = \"1.0.0\" }\n", "1.0.1")).toBe(
       "[package]\nname = \"a\"\nversion = \"1.0.1\"\n\n[dependencies]\nx = { version = \"1.0.0\" }\n",
     );
+  });
+});
+
+describe("the store file", () => {
+  it("says what it holds in plain words", () => {
+    expect(holds(["package"])).toBe("the plugin");
+    expect(holds(["package", "x4", "source"])).toBe("the plugin, its build for the X4 and its source");
+    expect(holds(["package", "x4", "x4-pro", "source"])).toBe("the plugin, its build for the X4, its build for the X4 Pro and its source");
   });
 });

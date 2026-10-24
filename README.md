@@ -39,9 +39,11 @@ When it looks right, **Send to reader**: over Wi-Fi (open Transfer on the
 reader and type the address it shows), over the USB cable, or onto its
 card. The reader asks before it takes a plugin with code, or anything
 over the cable. Or keep it as a zip with **Export zip** in the menu.
-**Publish…** in the menu packs the plugin for the plugin store at
-paperpaw.org and opens its upload form in your browser. You upload it
-there yourself.
+**Publish…** in the menu packs the plugin into one file for the plugin
+store at paperpaw.org and opens its upload form in your browser. There
+you sign in, choose that one file in the first field and upload it
+yourself. A plugin with code is built for the X4 and signed with your
+author key first; its build and its source are inside the same file.
 
 When a newer workshop is out, Settings says so, and it updates when you
 say so. Your projects stay as they are.

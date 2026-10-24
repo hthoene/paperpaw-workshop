@@ -3,7 +3,8 @@
 // form takes it, and opens the form; the person uploads it and sends it
 // to the moderators. Nothing is uploaded from here.
 //
-// The package is the form's `package`: the plugin's folder as a ZIP, the
+// The package is one part of the store file the form takes (made in
+// src-tauri's publish.rs): the plugin's folder as a ZIP, the
 // folder named as the plugin's id, `store/` (the store's page and
 // screenshots) inside it, within the site's limits. Its files go in name
 // order with fixed times, so the same plugin packs to the same bytes.
@@ -147,4 +148,15 @@ export function recordPublished(project: Project, version: string, at = new Date
   const list = (project.published ??= []);
   if (list.at(-1)?.version === version) list[list.length - 1] = { version, packed: at.toISOString() };
   else list.push({ version, packed: at.toISOString() });
+}
+
+/** What a store file holds (its parts as the workshop names them:
+ *  `package`, each reader built for, `source`), in words: "the plugin,
+ *  its build for the X4 and its source". */
+export function holds(parts: string[]): string {
+  const said = parts.map((part) =>
+    part === "package" ? "the plugin" : part === "source" ? "its source" : `its build for the ${part === "x4-pro" ? "X4 Pro" : part.toUpperCase()}`,
+  );
+  if (said.length < 2) return said[0] ?? "";
+  return `${said.slice(0, -1).join(", ")} and ${said.at(-1)}`;
 }
