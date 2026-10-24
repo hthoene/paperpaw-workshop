@@ -295,11 +295,17 @@ pub fn build_x4(
         built.problems.push(format!("PaperPaw's paperpaw-sign is not here ({}): it packs the file for the readers.", sign.display()));
         return built;
     }
-    // The crate anew, the lock file and the build's target kept.
+    // The crate anew, the lock file and the build's target kept; the lock
+    // file only while the manifest it was made for is the same.
     for gone in ["src", "i18n", "how", "plugin", "device"] {
         let _ = std::fs::remove_dir_all(dir.join(gone));
     }
-    for (path, bytes) in publish_crate(files, &krate, sdk, &rust.version) {
+    let crate_files = publish_crate(files, &krate, sdk, &rust.version);
+    let manifest_now = crate_files.iter().find(|(p, _)| p == "Cargo.toml").map(|(_, b)| b.as_slice());
+    if std::fs::read(dir.join("Cargo.toml")).ok().as_deref() != manifest_now {
+        let _ = std::fs::remove_file(dir.join("Cargo.lock"));
+    }
+    for (path, bytes) in crate_files {
         let to = dir.join(&path);
         if let Some(parent) = to.parent() {
             let _ = std::fs::create_dir_all(parent);
@@ -653,7 +659,7 @@ pub async fn device_build(
         let out = crate::projects::folder(&root, &project)?.join(".workshop").join("publish");
         let sign = sign_program(&crate::paths::emulator_program()?);
         told("Building for the X4…");
-        Ok(build_x4(&dir, &files, &rust, &crate::code::sdk(&ready.paperpaw), &sign, &seed, &out, &id, &version))
+        Ok(build_x4(&dir, &files, &rust, &crate::code::device_sdk(&ready.paperpaw), &sign, &seed, &out, &id, &version))
     })
     .await
     .map_err(|e| e.to_string())?

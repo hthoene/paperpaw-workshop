@@ -193,12 +193,24 @@ pub fn bundled_sdk(dir: &Path, paperpaw: &str) -> Option<PathBuf> {
     (version.trim() == paperpaw && krate.join("Cargo.toml").is_file()).then_some(krate)
 }
 
-/// How Cargo.toml names the SDK: the one on this computer (see
-/// `local_sdk`), or the release's.
+/// How Cargo.toml names the SDK for the emulator: the one on this
+/// computer (see `local_sdk`), or the release's, with the outline fonts
+/// the emulator draws with.
 pub fn sdk(paperpaw: &str) -> String {
+    sdk_with(paperpaw, ", features = [\"outline\"]")
+}
+
+/// How Cargo.toml names the SDK for a reader: without the outline fonts,
+/// which its firmware has itself (and whose crates need atomics the X4's
+/// chip does not have).
+pub fn device_sdk(paperpaw: &str) -> String {
+    sdk_with(paperpaw, "")
+}
+
+fn sdk_with(paperpaw: &str, features: &str) -> String {
     match local_sdk(paperpaw) {
-        Some(path) => format!("{{ path = {:?}, features = [\"outline\"] }}", path.to_string_lossy().replace('\\', "/")),
-        None => format!("{{ version = \"={paperpaw}\", features = [\"outline\"] }}"),
+        Some(path) => format!("{{ path = {:?}{features} }}", path.to_string_lossy().replace('\\', "/")),
+        None => format!("{{ version = \"={paperpaw}\"{features} }}"),
     }
 }
 
@@ -436,6 +448,14 @@ mod tests {
     use super::*;
 
     const MANIFEST: &str = "[package]\nname = \"my-clock\"\nversion = \"0.2.0\"\n\n[package.metadata.paperpaw]\nplugin = \"MyClock\"\n\n[dependencies]\npaperpaw-sdk = \"0.5\"\n";
+
+    /// The emulator's build draws outline fonts; a reader's leaves them
+    /// out, since their crates need atomics the X4 does not have.
+    #[test]
+    fn only_the_emulator_builds_with_outline_fonts() {
+        assert_eq!(sdk("0.5.0"), "{ version = \"=0.5.0\", features = [\"outline\"] }");
+        assert_eq!(device_sdk("0.5.0"), "{ version = \"=0.5.0\" }");
+    }
 
     fn project() -> Vec<(String, Vec<u8>)> {
         vec![
