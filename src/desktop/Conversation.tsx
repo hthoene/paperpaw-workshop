@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { lines, type Line } from "../app/conversation";
 import type { Project } from "../project/project";
 import { about, details, unusual, type Turn } from "./costs";
+import { Markdown } from "./Markdown";
 import type { Desk } from "./desk";
 import { afterAnswers } from "./history";
 import { BackHere, PreviewBar } from "./GoBack";
@@ -129,6 +130,7 @@ function Said({ line }: { line: Line }) {
     );
   }
   if (line.kind === "added") return <div class="step">Added {line.text}</div>;
+  if (line.kind === "ai") return <div class="ai md"><Markdown text={line.text} /></div>;
   return <div class={line.kind}>{line.text}</div>;
 }
 

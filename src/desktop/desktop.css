@@ -198,6 +198,16 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 /* The conversation */
 .log .me, .log .ai { max-width: 40rem; white-space: pre-wrap; line-height: 1.55; }
+/* The AI's Markdown: its blocks keep the log's spacing, its lines their breaks. */
+.log .ai.md { white-space: normal; }
+.log .ai.md > :first-child { margin-top: 0; }
+.log .ai.md > :last-child { margin-bottom: 0; }
+.log .ai.md p { margin: 0 0 .8em; white-space: pre-wrap; }
+.log .ai.md .md-h { font-weight: 600; margin-top: 1em; }
+.log .ai.md ul, .log .ai.md ol { margin: 0 0 .8em; padding-left: 1.4em; }
+.log .ai.md li { margin: .2em 0; }
+.log .ai.md code { font: .9em/1 ui-monospace, monospace; padding: .1em .3em; border-radius: .3em; background: var(--sheet-2); }
+.log .ai.md .md-code { margin: 0 0 .8em; padding: .5rem .7rem; border-radius: .5rem; background: var(--sheet-2); font-size: .82rem; white-space: pre-wrap; overflow-wrap: anywhere; }
 .log .me { justify-self: end; padding: .6rem .95rem .65rem; border-radius: 1.1rem 1.1rem .3rem 1.1rem; background: var(--sheet-2); }
 .log .ai { font: 400 1.04rem/1.6 var(--display); }
 .log .step { font-size: .86rem; color: var(--ink-2); padding-left: .9rem; border-left: 2px solid var(--rule); }
