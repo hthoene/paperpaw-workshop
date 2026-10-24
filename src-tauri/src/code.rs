@@ -322,9 +322,11 @@ pub fn build(dir: &Path, files: &[(String, Vec<u8>)], rust: &crate::toolchain::R
         files: Vec::new(),
         log_tail: String::new(),
     };
-    if paperpaw.contains('-') && local_sdk(paperpaw).is_none() {
+    // A version in work (`-dev`) has no SDK on crates.io; a beta or a
+    // release candidate (`-beta.1`, `-rc.1`) has, like a release.
+    if paperpaw.contains("-dev") && local_sdk(paperpaw).is_none() {
         built.problems.push(format!(
-            "PaperPaw {paperpaw} is a version in work: its SDK is not published, so plugins with code cannot be built for it. Say so to the person: plugins with code are built for released PaperPaw versions."
+            "PaperPaw {paperpaw} is a version in work: its SDK is not published, so plugins with code cannot be built for it. Say so to the person: plugins with code are built for released PaperPaw versions, betas included."
         ));
     }
     if !built.problems.is_empty() {
