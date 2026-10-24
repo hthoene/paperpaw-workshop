@@ -10,7 +10,7 @@ import { validId } from "./rules";
 export const ENTRY_PATH = "store/store.ini";
 
 /** Where a plugin belongs in the store. */
-export const GROUPS = ["look", "home", "reading", "library", "formats", "sync", "system"] as const;
+export const GROUPS = ["look", "home", "reading", "library", "formats", "sync", "notes", "learning", "news", "tools", "games", "system"] as const;
 export type Group = (typeof GROUPS)[number];
 
 /** The licences offered in one click, most open first. Any SPDX id is

@@ -19,7 +19,41 @@ import type { AuthorStatus, Backend, DeviceBuilt, DeviceReadiness, StoreFile } f
 import { forModel, shown, type CheckState } from "./checks";
 import type { Desk } from "./desk";
 import { toBase64 } from "./folders";
-import { holds, raised, recordPublished, uploadPackage, versionState, withCrateVersion, withVersion } from "./publishing";
+import release from "../../paperpaw-release.txt?raw";
+import {
+  GROUPS,
+  LICENCES,
+  holds,
+  raised,
+  recordPublished,
+  sdkOf,
+  storeEntry,
+  storeIniPath,
+  uploadPackage,
+  versionState,
+  withCrateVersion,
+  withStore,
+  withVersion,
+} from "./publishing";
+
+/** The licence chosen last, for the next plugin: asked once. */
+const LICENCE = "workshop.licence";
+
+function rememberedLicence(): string | null {
+  try {
+    return localStorage.getItem(LICENCE);
+  } catch {
+    return null;
+  }
+}
+
+function rememberLicence(licence: string): void {
+  try {
+    localStorage.setItem(LICENCE, licence);
+  } catch {
+    // Not kept: asked again next time.
+  }
+}
 
 interface Props {
   desk: Desk;
@@ -55,6 +89,11 @@ export function Publish({ desk, backend, onClose }: Props) {
   const [fetching, setFetching] = useState(false);
   const id = project ? identity(project).id : undefined;
   const code = project?.kind === "code";
+  const entry = project ? storeEntry(project) : {};
+  const remembered = rememberedLicence();
+  const [licence, setLicence] = useState(entry.licence ?? remembered ?? LICENCES[0]!.id);
+  const [choosingLicence, setChoosingLicence] = useState(!entry.licence && !remembered);
+  const [group, setGroup] = useState(entry.group ?? "");
 
   // Checked afresh: what is sent is what was checked.
   useEffect(() => {
@@ -92,7 +131,37 @@ export function Publish({ desk, backend, onClose }: Props) {
   const held =
     (errors.length > 0 && !anyway) ||
     (!version.ok && !(version.why === "not-higher" && version.again && again)) ||
-    (code && (!key || !readiness?.x4 || !readiness.sign));
+    (code && (!key || !readiness?.x4 || !readiness.sign)) ||
+    !group;
+
+  /** The store entry as the store needs it: the group, the licence and
+   *  the SDK of the PaperPaw this workshop builds with, written into the
+   *  project's store.ini where they are missing or were chosen here. */
+  const completeEntry = async (): Promise<string | null> => {
+    const ready = await backend.emulatorReady().catch(() => null);
+    const values: Record<string, string> = {};
+    if (group !== entry.group) values.group = group;
+    if (licence !== entry.licence) values.licence = licence;
+    if (!entry.sdk) values.sdk = sdkOf(ready?.paperpaw ?? release);
+    rememberLicence(licence);
+    if (!Object.keys(values).length) return null;
+    const path = storeIniPath(project);
+    const old = project.files[path];
+    const text = withStore(typeof old === "string" ? old : "", values);
+    const problem = desk.workshop ? desk.workshop.files.write(path, text) : ((project.files[path] = text), null);
+    if (problem) return problem;
+    await desk.workspace.save();
+    return null;
+  };
+
+  /** The AI chooses the group from what the plugin is. */
+  const askGroup = () => {
+    onClose();
+    void desk.send(
+      `Choose this plugin's group in the store and write it as group in the [store] section of ${storeIniPath(project)} ` +
+        `(make the file if there is none), one of: ${GROUPS.map((g) => `${g.id} (${g.what})`).join(", ")}. Change nothing else.`,
+    );
+  };
 
   const raise = async () => {
     if (version.ok || !version.version) return;
@@ -126,6 +195,8 @@ export function Publish({ desk, backend, onClose }: Props) {
 
   const pack = async () => {
     setSaid("");
+    const incomplete = await completeEntry();
+    if (incomplete) return setSaid(incomplete);
     const packed = uploadPackage(project);
     if (!packed.ok) return setStep({ at: "problems", problems: packed.problems });
     try {
@@ -233,6 +304,41 @@ export function Publish({ desk, backend, onClose }: Props) {
             <div class="before">
               <p>The store's form would refuse it:</p>
               <ul class="problems">{step.problems.map((p) => <li key={p}>{p}</li>)}</ul>
+            </div>
+          )}
+          {(!entry.group || !entry.licence) && (
+            <div class="before store-entry">
+              {!entry.group && (
+                <>
+                  <label for="store-group">Its group in the store</label>
+                  <div class="choices-row">
+                    <select id="store-group" class="mode" value={group} onChange={(e) => setGroup(e.currentTarget.value)}>
+                      <option value="">Choose…</option>
+                      {GROUPS.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+                    </select>
+                    {!group && (
+                      <button type="button" class="link" disabled={!!desk.workshop?.busy} onClick={askGroup}>
+                        Let the AI choose
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+              {!entry.licence &&
+                (choosingLicence ? (
+                  <>
+                    <label for="store-licence">Licence</label>
+                    <select id="store-licence" class="mode" value={licence} onChange={(e) => setLicence(e.currentTarget.value)}>
+                      {LICENCES.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
+                    </select>
+                    <p class="hint">Kept for your next plugins.</p>
+                  </>
+                ) : (
+                  <p>
+                    Licence: {licence}{" "}
+                    <button type="button" class="link quiet" onClick={() => setChoosingLicence(true)}>Change</button>
+                  </p>
+                ))}
             </div>
           )}
           <section class="way">

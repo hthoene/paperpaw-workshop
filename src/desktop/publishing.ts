@@ -12,6 +12,7 @@
 import { zipSync } from "fflate";
 
 import { MAX_SCREENSHOT_BYTES } from "../project/entry";
+import { iniValue, parseIni } from "../project/ini";
 import { identity, type Project } from "../project/project";
 import { MAX_BYTES, MAX_FILES, pathProblem, validId, validVersion } from "../project/rules";
 
@@ -114,9 +115,13 @@ export function uploadPackage(project: Project): Packed {
   let installed = 0;
   let total = 0;
   const encoder = new TextEncoder();
+  // A plugin with code says how it works in how/<lang>.txt beside its
+  // crate (its manifest includes them); the store reads them in the
+  // folder, so they go there too, unless the folder has its own.
+  const shared = (whole: string) => !!folder && whole.startsWith("how/") && project.files[`${folder}${whole}`] === undefined;
   for (const whole of Object.keys(project.files).sort()) {
-    if (!whole.startsWith(folder)) continue;
-    const path = whole.slice(folder.length);
+    if (!whole.startsWith(folder) && !shared(whole)) continue;
+    const path = shared(whole) ? whole : whole.slice(folder.length);
     if (folder && path === "code.ppn") continue;
     const content = project.files[whole]!;
     const bytes = typeof content === "string" ? encoder.encode(content) : content;
@@ -159,4 +164,83 @@ export function holds(parts: string[]): string {
   );
   if (said.length < 2) return said[0] ?? "";
   return `${said.slice(0, -1).join(", ")} and ${said.at(-1)}`;
+}
+
+/** The store's groups, in its order (paperpaw.org's `catalogue.rs`,
+ *  PaperPaw's store plugin), each with a short name and what goes there. */
+export const GROUPS: readonly { id: string; name: string; what: string }[] = [
+  { id: "reading", name: "Reading", what: "while reading a book: looking up, reading aids, statistics" },
+  { id: "formats", name: "Formats", what: "opening a kind of book file" },
+  { id: "library", name: "Library", what: "finding, fetching and keeping books" },
+  { id: "sync", name: "Sync", what: "keeping progress and books in step with other apps" },
+  { id: "home", name: "Home and menus", what: "the home screen, its widgets, buttons and menus" },
+  { id: "look", name: "Look", what: "fonts, colours and the look of screens" },
+  { id: "notes", name: "Notes", what: "notes, highlights and their export, journals" },
+  { id: "learning", name: "Learning", what: "vocabulary, languages, flash cards" },
+  { id: "news", name: "News", what: "news, feeds, articles, reading the web" },
+  { id: "tools", name: "Tools", what: "calculators, timers and other small helpers" },
+  { id: "games", name: "Games", what: "games and puzzles" },
+  { id: "system", name: "System", what: "the device itself: power, Wi-Fi, updates, settings" },
+];
+
+/** Licences to choose from, as SPDX identifiers; the first is the default. */
+export const LICENCES: readonly { id: string; name: string }[] = [
+  { id: "MIT", name: "MIT: anyone may use and change it, naming you" },
+  { id: "Apache-2.0", name: "Apache 2.0: as MIT, with a patent grant" },
+  { id: "GPL-3.0-or-later", name: "GPL 3.0: changed versions stay open too" },
+  { id: "CC0-1.0", name: "CC0: no rights kept" },
+];
+
+/** Where a project keeps its store entry: in the plugin's folder, under
+ *  `store/` (a plugin with code has its folder in `plugin/`). */
+export function storeIniPath(project: Pick<Project, "kind">): string {
+  return project.kind === "code" ? "plugin/store/store.ini" : "store/store.ini";
+}
+
+/** What the project's store entry says in `[store]`. */
+export function storeEntry(project: Pick<Project, "kind" | "files">): { licence?: string; group?: string; sdk?: string } {
+  const text = project.files[storeIniPath(project)];
+  if (typeof text !== "string") return {};
+  const ini = parseIni(text);
+  const said = (key: string) => iniValue(ini, "store", key)?.trim() || undefined;
+  const group = said("group");
+  return { licence: said("licence"), group: GROUPS.some((g) => g.id === group) ? group : undefined, sdk: said("sdk") };
+}
+
+/** `ini` (a store.ini, perhaps empty) with `values` in `[store]`: a key
+ *  there is changed, one missing added at the section's end; the section
+ *  is added when there is none. */
+export function withStore(ini: string, values: Record<string, string>): string {
+  const lines = ini.length ? ini.replace(/\n$/, "").split("\n") : [];
+  const left = new Map(Object.entries(values));
+  let section = "";
+  let end = -1;
+  lines.forEach((line, i) => {
+    const head = /^\s*\[([^\]]+)\]\s*$/.exec(line);
+    if (head) {
+      section = head[1]!.trim();
+      return;
+    }
+    if (section !== "store") return;
+    if (line.trim()) end = i;
+    const key = /^\s*([A-Za-z0-9_.-]+)\s*=/.exec(line)?.[1];
+    if (key && left.has(key)) {
+      lines[i] = `${key} = ${left.get(key)}`;
+      left.delete(key);
+    }
+  });
+  const added = [...left].map(([key, value]) => `${key} = ${value}`);
+  if (added.length) {
+    if (end >= 0) lines.splice(end + 1, 0, ...added);
+    else if (lines.some((l) => /^\s*\[store\]\s*$/.test(l))) lines.splice(lines.findIndex((l) => /^\s*\[store\]\s*$/.test(l)) + 1, 0, ...added);
+    else lines.unshift("[store]", ...added, ...(lines.length ? [""] : []));
+  }
+  return `${lines.join("\n")}\n`;
+}
+
+/** The SDK a PaperPaw version names, as the store wants it: 0.5.0-beta.4
+ *  is 0.5. */
+export function sdkOf(paperpaw: string): string {
+  const [major, minor] = paperpaw.trim().split(/[.-]/);
+  return `${major ?? "0"}.${minor ?? "0"}`;
 }

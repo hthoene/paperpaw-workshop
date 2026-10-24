@@ -1,8 +1,23 @@
 import { unzipSync } from "fflate";
 import { describe, expect, it } from "vitest";
 
+import { GROUPS as ENTRY_GROUPS } from "../project/entry";
 import { newProject } from "../project/project";
-import { higher, holds, raised, recordPublished, uploadPackage, versionState, withCrateVersion, withVersion } from "./publishing";
+import {
+  GROUPS,
+  higher,
+  holds,
+  raised,
+  recordPublished,
+  sdkOf,
+  storeEntry,
+  storeIniPath,
+  uploadPackage,
+  versionState,
+  withCrateVersion,
+  withStore,
+  withVersion,
+} from "./publishing";
 
 const INI = "[plugin]\nid = night-owl\nname = Night owl\nversion = 1.0.0\nformats = 1\n";
 
@@ -86,5 +101,52 @@ describe("the store file", () => {
     expect(holds(["package"])).toBe("the plugin");
     expect(holds(["package", "x4", "source"])).toBe("the plugin, its build for the X4 and its source");
     expect(holds(["package", "x4", "x4-pro", "source"])).toBe("the plugin, its build for the X4, its build for the X4 Pro and its source");
+  });
+});
+
+describe("the store entry", () => {
+  it("takes how it works into a plugin with code's folder, where the store reads it", () => {
+    const project = newProject("code", {
+      "Cargo.toml": "[package]\nname = \"snake\"\n",
+      "src/lib.rs": "#![no_std]",
+      "how/en.txt": "Steer the snake with the buttons.",
+      "how/de.txt": "Steuere die Schlange mit den Tasten.",
+      "plugin/plugin.ini": "[plugin]\nid = snake\nname = Snake\nversion = 0.1.1\n",
+    });
+    const packed = uploadPackage(project);
+    if (!packed.ok) throw new Error(packed.problems.join("; "));
+    const files = unzipSync(packed.zip);
+    expect(Object.keys(files)).toEqual(["snake/how/de.txt", "snake/how/en.txt", "snake/plugin.ini"]);
+    expect(new TextDecoder().decode(files["snake/how/en.txt"])).toBe("Steer the snake with the buttons.");
+    // The folder's own how/ wins.
+    project.files["plugin/how/en.txt"] = "Its own.";
+    const own = uploadPackage(project);
+    if (!own.ok) throw new Error(own.problems.join("; "));
+    expect(new TextDecoder().decode(unzipSync(own.zip)["snake/how/en.txt"])).toBe("Its own.");
+  });
+
+  it("is read and completed in store.ini, in the plugin's folder", () => {
+    const code = newProject("code", { "plugin/store/store.ini": "# For the store.\n[store]\nsummary = A game.\ngroup = games\n" });
+    expect(storeIniPath(code)).toBe("plugin/store/store.ini");
+    expect(storeEntry(code)).toEqual({ licence: undefined, group: "games", sdk: undefined });
+    expect(storeEntry(newProject("data", { "store/store.ini": "[store]\ngroup = fun\n" })).group).toBeUndefined();
+    expect(withStore(code.files["plugin/store/store.ini"] as string, { licence: "MIT", sdk: "0.5", group: "tools" })).toBe(
+      "# For the store.\n[store]\nsummary = A game.\ngroup = tools\nlicence = MIT\nsdk = 0.5\n",
+    );
+    expect(withStore("", { group: "games" })).toBe("[store]\ngroup = games\n");
+    expect(withStore("[screenshots]\nhome.png = The board\n", { licence: "MIT" })).toBe(
+      "[store]\nlicence = MIT\n\n[screenshots]\nhome.png = The board\n",
+    );
+    expect(withStore("[store]\n\n[i18n.de]\nname = Schlange\n", { sdk: "0.5" })).toBe("[store]\nsdk = 0.5\n\n[i18n.de]\nname = Schlange\n");
+  });
+
+  it("names the SDK as the store wants it, and the store's groups", () => {
+    expect(sdkOf("0.5.0-beta.4")).toBe("0.5");
+    expect(sdkOf("1.2.3\n")).toBe("1.2");
+    expect(GROUPS.map((g) => g.id)).toEqual([
+      "reading", "formats", "library", "sync", "home", "look", "notes", "learning", "news", "tools", "games", "system",
+    ]);
+    // The same as the store entry the AI drafts knows.
+    expect(GROUPS.map((g) => g.id).sort()).toEqual([...ENTRY_GROUPS].sort());
   });
 });

@@ -360,6 +360,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .send-sheet .before .link { font-size: .86rem; }
 .publish-sheet .problems { margin: .3rem 0 0; padding-left: 1.1rem; color: var(--ink-2); }
 .publish-sheet .file-name { font-weight: 600; overflow-wrap: anywhere; }
+/* The store entry the store needs: the group, the licence. */
+.publish-sheet .store-entry label { display: block; margin: 0 0 .35rem; font-weight: 600; }
+.publish-sheet .store-entry label:not(:first-child) { margin-top: .8rem; }
+.publish-sheet .store-entry .choices-row { align-items: center; }
 
 /* The author key in Settings, and the backup before the first package. */
 .author-key, .app-update { margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid var(--rule); }

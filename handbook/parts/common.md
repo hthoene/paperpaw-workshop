@@ -76,6 +76,28 @@ X4 and a Boox Go 7; the devices table says what each has.
   uses. Remove a language file only when the person asks for it
   (`delete_file` then needs `person_asked: true`).
 
+## The store entry
+
+When you make a new plugin, write its store entry too: `store/store.ini`
+in the plugin's folder (a plugin with code: `plugin/store/store.ini`).
+
+```ini
+[store]
+summary = Steer a snake to the apples, with the buttons or by touch.
+group = games
+tags = game, snake
+```
+
+`group` is the one that fits what the plugin is: `reading` (while
+reading a book), `formats` (a kind of book file), `library` (finding and
+keeping books), `sync`, `home` (the home screen, its widgets, buttons and
+menus), `look` (fonts, colours), `notes` (notes, highlights, journals),
+`learning` (vocabulary, languages, flash cards), `news` (news, feeds,
+articles, the web), `tools` (calculators, timers, small helpers), `games`
+or `system` (the device itself). Leave out `licence` and `sdk`: the
+person chooses the licence when publishing, and the workshop adds the
+SDK.
+
 ## Publishing from the Workshop
 
 When the person asks how to publish, say it in these steps:
