@@ -262,7 +262,7 @@ pub fn diagnostics(output: &str, root: &str) -> Vec<Diagnostic> {
         if level == "warning" && !own {
             continue;
         }
-        let rendered = m["rendered"].as_str().or(m["message"].as_str()).unwrap_or_default().replace('\\', "/").replace(&format!("{root}/plugin/"), "").replace(&format!("{root}/"), "");
+        let rendered = strip_ansi(m["rendered"].as_str().or(m["message"].as_str()).unwrap_or_default()).replace('\\', "/").replace(&format!("{root}/plugin/"), "").replace(&format!("{root}/"), "");
         if out.iter().any(|d| d.rendered == rendered) {
             continue;
         }
@@ -353,9 +353,6 @@ pub fn build(dir: &Path, files: &[(String, Vec<u8>)], rust: &crate::toolchain::R
     built.seconds = Some(started.elapsed().as_secs());
     let stdout = String::from_utf8_lossy(&ran.stdout);
     built.diagnostics = diagnostics(&stdout, &dir.to_string_lossy());
-    for d in &mut built.diagnostics {
-        d.rendered = strip_ansi(&d.rendered);
-    }
     let stderr = String::from_utf8_lossy(&ran.stderr);
     built.log_tail = stderr.lines().rev().take(20).collect::<Vec<_>>().into_iter().rev().collect::<Vec<_>>().join("\n");
     let library = host.join("target").join("release").join(format!("{}code_host{}", std::env::consts::DLL_PREFIX, std::env::consts::DLL_SUFFIX));
