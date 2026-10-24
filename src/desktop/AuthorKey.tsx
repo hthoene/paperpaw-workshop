@@ -61,6 +61,9 @@ export function KeySettings({ backend }: { backend: Backend }) {
       ) : (
         <>
           <p>
+            {/* Named, so that no one copies it as the key: the key itself is only in the backup. */}
+            <small>Public fingerprint, safe to share. Not your key: that is only in the backup.</small>
+            <br />
             <span class="fingerprint">{status.fingerprint}</span>
             <br />
             <small>{status.backed_up ? `Backed up on ${when(status.backed_up)}.` : "Not backed up yet."}</small>
