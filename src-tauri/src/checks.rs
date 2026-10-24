@@ -15,7 +15,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use base64::Engine;
-use image::{GenericImageView, Rgba};
+use image::Rgba;
 use serde::Serialize;
 use serde_json::Value;
 
