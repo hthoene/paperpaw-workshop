@@ -67,7 +67,7 @@ export function Conversation({ desk }: { desk: Desk }) {
         {(project?.earlier ?? []).map((earlier, n) => (
           <details class="earlier" key={`earlier-${n}`}>
             <summary>The conversation before</summary>
-            {lines(earlier).map((line, i) => <Said key={i} line={line} />)}
+            <div class="earlier-lines">{lines(earlier).map((line, i) => <Said key={i} line={line} />)}</div>
           </details>
         ))}
         {said.length > 0 && <BackHere desk={desk} snapshot={states.get(0)} label="Back to how it began" />}
