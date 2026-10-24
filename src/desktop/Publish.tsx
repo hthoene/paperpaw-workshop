@@ -44,7 +44,8 @@ const nameOf = (path: string) => path.split(/[\\/]/).pop() ?? path;
 
 /** Why a build failed, as the person and the AI read it. */
 function whyFailed(built: DeviceBuilt): string[] {
-  const errors = built.diagnostics.filter((d) => d.level === "error").map((d) => d.rendered.split("\n")[0] ?? d.message);
+  // Each error once: the same one from several places reads as one.
+  const errors = [...new Set(built.diagnostics.filter((d) => d.level === "error").map((d) => d.rendered.split("\n")[0] ?? d.message))];
   const said = [...built.problems, ...errors];
   return said.length ? said : [built.log_tail || "The build failed."];
 }
