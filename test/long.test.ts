@@ -123,15 +123,17 @@ describe("old tool results trimmed", () => {
     const s = session(provider, { length: LENGTHS.short });
     expect(await runTurn(s, "Make a clock")).toBe("done");
 
-    // Past 25,000 tokens the oldest results go, at least 8,000 at a time,
-    // the last 6 tool uses and the small lists never.
+    // Past 25,000 tokens the oldest results go, with the files written
+    // in them, at least 12,000 at a time, the last 6 tool uses and the
+    // small lists never.
     for (const r of provider.requests) {
       expect(r.context_management).toEqual(clearing(LENGTHS.short));
       expect(r.context_management!.edits[0]).toMatchObject({
         trigger: { type: "input_tokens", value: 25_000 },
         keep: { type: "tool_uses", value: 6 },
-        clear_at_least: { type: "input_tokens", value: 8_000 },
+        clear_at_least: { type: "input_tokens", value: 12_000 },
         exclude_tools: ["list_files", "list_uploads"],
+        clear_tool_inputs: ["write_file", "edit_file"],
       });
       paired(r.messages);
     }
@@ -297,6 +299,7 @@ describe("the setting Conversation length", () => {
     const points = (["short", "normal", "long"] as const).map((c) => lengthRules(c, MODELS.code));
     for (const p of points) expect(p.trimAt + p.clearAtLeast).toBeLessThanOrEqual(p.summariseAt);
     expect(points.map((p) => p.summariseAt)).toEqual([50_000, 90_000, 160_000]);
+    expect(points.map((p) => p.clearAtLeast)).toEqual([12_000, 20_000, 30_000]);
     // Haiku stays below its higher price past 100,000 tokens.
     expect(lengthRules("normal", MODELS.data)).toEqual(LENGTHS.normal);
     const long = lengthRules("long", MODELS.data);

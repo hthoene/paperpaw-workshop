@@ -1,8 +1,10 @@
 // How long a conversation grows before it is made shorter ("Conversation
 // length" in Settings). Two steps, both at a point in prompt tokens: old
 // tool results are cleared on Anthropic's side (context editing, in steps
-// of at least `clearAtLeast`, so the prompt cache holds between them), and
-// later the conversation is summarised and goes on in a fresh one. Every
+// of at least `clearAtLeast`, so the prompt cache holds between them; set
+// high, as Anthropic counts what a clearing takes away far above what the
+// prompt then loses), and later the conversation is summarised and goes
+// on in a fresh one. Every
 // round reads the whole prompt again (from the cache), so a longer
 // conversation costs more a round: Short is cheapest, Long remembers more
 // word for word.
@@ -24,9 +26,9 @@ export interface LengthRules {
 }
 
 export const LENGTHS: Record<LengthChoice, LengthRules> = {
-  short: { trimAt: 25_000, keep: 6, clearAtLeast: 8_000, summariseAt: 50_000 },
-  normal: { trimAt: 40_000, keep: 10, clearAtLeast: 10_000, summariseAt: 90_000 },
-  long: { trimAt: 70_000, keep: 15, clearAtLeast: 15_000, summariseAt: 160_000 },
+  short: { trimAt: 25_000, keep: 6, clearAtLeast: 12_000, summariseAt: 50_000 },
+  normal: { trimAt: 40_000, keep: 10, clearAtLeast: 20_000, summariseAt: 90_000 },
+  long: { trimAt: 70_000, keep: 15, clearAtLeast: 30_000, summariseAt: 160_000 },
 };
 
 /** Below a model's higher price for long prompts, with room for a round's

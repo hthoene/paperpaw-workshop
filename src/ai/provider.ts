@@ -17,6 +17,8 @@ export interface ContextManagement {
     clear_at_least: { type: "input_tokens"; value: number };
     /** Tools whose results are never cleared. */
     exclude_tools?: string[];
+    /** Whether a cleared tool use's input goes too: all, or of these tools. */
+    clear_tool_inputs?: boolean | string[];
   }[];
 }
 

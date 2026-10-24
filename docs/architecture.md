@@ -104,10 +104,15 @@ person chooses in Settings ("Conversation length": Short, Normal, Long,
 1. **Old tool results cleared** on Anthropic's side (context editing,
    `clear_tool_uses_20250919`, `clearing(rules)`): past `trimAt` prompt
    tokens the oldest results go (docs, file reads, screenshots, builds),
-   the last `keep` tool uses and the small lists (`KEPT_TOOLS`) never, at
-   least `clearAtLeast` tokens at a time, so the cache is written again
-   only now and then. The messages here stay whole: a server-side edit is
-   no edit of the conversation the thinking is bound to.
+   and with them the inputs of old `write_file` and `edit_file` calls
+   (`WRITING_TOOLS`: whole file contents, stale once the file changed);
+   the last `keep` tool uses and the small lists (`KEPT_TOOLS`) never.
+   At least `clearAtLeast` goes at a time, so the cache is written again
+   only now and then; it is set high, as Anthropic counts what a clearing
+   takes away far above what the prompt then loses (a real run: 8,288
+   reported, about 1,500 gone). The messages here stay whole: a
+   server-side edit is no edit of the conversation the thinking is bound
+   to.
 2. **A summary and a fresh conversation** past `summariseAt`, before a
    round, at the start of a turn or within one (after its tool round is
    answered). Haiku writes the summary from a plain transcript
@@ -121,8 +126,15 @@ person chooses in Settings ("Conversation length": Short, Normal, Long,
    requests stand in. A turn that alone fills two fresh conversations ends
    as `too_long`, and the person can go on in a fresh one.
 
+| Setting | `trimAt` | `keep` | `clearAtLeast` | `summariseAt` |
+| --- | --- | --- | --- | --- |
+| Short | 25,000 | 6 | 12,000 | 50,000 |
+| Normal | 40,000 | 10 | 20,000 | 90,000 |
+| Long | 70,000 | 15 | 30,000 | 160,000 |
+
 A model with a higher price for long prompts (Haiku past 100,000 tokens)
-summarises below it whatever is chosen.
+summarises below it whatever is chosen: on Haiku, Long summarises at
+90,000 and clears from 60,000.
 
 Today's date and the person's time zone go into the person's message
 (`TODAY`, hidden in the conversation) once a conversation and again when

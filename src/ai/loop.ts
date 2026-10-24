@@ -34,6 +34,10 @@ export const LOOKING_TOOLS = ["lookup_docs", "read_file", "list_files", "list_up
  *  holds. What the docs and the files said is cleared once old (a file
  *  read is often stale by then); the model looks it up again if need be. */
 export const KEPT_TOOLS = ["list_files", "list_uploads"];
+
+/** The tools whose inputs are cleared with their results: whole file
+ *  contents, stale once the file changed (read_file says what it is now). */
+export const WRITING_TOOLS = ["write_file", "edit_file"];
 /** The most uses of a tool in one turn, where there is a most. */
 export const PER_TURN: Record<string, number> = { fetch_sample: 5 };
 
@@ -68,9 +72,10 @@ function withNote(result: Anthropic.ToolResultBlockParam, note: string): Anthrop
   return { ...result, content: [...result.content, { type: "text", text: note }] };
 }
 
-/** Old tool results (docs, files read, screenshots, builds, checks)
- *  cleared on Anthropic's side once the prompt passes `trimAt`, never
- *  those of [`KEPT_TOOLS`] nor the last `keep`: the conversation here stays
+/** Old tool results (docs, files read, screenshots, builds, checks), and
+ *  the inputs of [`WRITING_TOOLS`], cleared on Anthropic's side once the
+ *  prompt passes `trimAt`, never those of [`KEPT_TOOLS`] nor the last
+ *  `keep` tool uses: the conversation here stays
  *  whole (append-only, so thinking holds; server-side edits are no edits
  *  of it), and at least `clearAtLeast` goes at a time, so the cache is
  *  written again only now and then. */
@@ -83,6 +88,7 @@ export function clearing(rules: LengthRules): ContextManagement {
         keep: { type: "tool_uses", value: rules.keep },
         clear_at_least: { type: "input_tokens", value: rules.clearAtLeast },
         exclude_tools: KEPT_TOOLS,
+        clear_tool_inputs: WRITING_TOOLS,
       },
     ],
   };

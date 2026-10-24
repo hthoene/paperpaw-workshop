@@ -328,9 +328,11 @@ describe("the loop's guards", () => {
   const answer = (...content: Anthropic.ContentBlock[]) => ({ content, stop_reason: "tool_use" as const });
   const done = { content: [{ type: "text", text: "Done.", citations: null } as Anthropic.ContentBlock], stop_reason: "end_turn" as const };
 
-  it("clears old docs and file reads too, never the small lists", () => {
+  it("clears old docs and file reads too, and the files written, never the small lists", () => {
     const edit = clearing(LENGTHS.normal).edits[0]!;
     expect(edit.exclude_tools).toEqual(["list_files", "list_uploads"]);
+    // Only the writes' inputs: what the other tools were asked stays.
+    expect(edit.clear_tool_inputs).toEqual(["write_file", "edit_file"]);
     expect(edit.trigger.value).toBeLessThan(LENGTHS.normal.summariseAt);
   });
 
