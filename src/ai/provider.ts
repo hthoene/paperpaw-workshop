@@ -35,5 +35,9 @@ export interface Provider {
   readonly label: string;
   /** Whether tools may stream their input as it is written. */
   readonly eagerTools: boolean;
+  /** Whether it sends its own system prompt and tools in place of the
+   *  request's (the site's quota proxy): a request of another kind, as the
+   *  summary of a long conversation, is not asked of it. */
+  readonly ownPrompt?: boolean;
   send(request: Request, stream: Stream, signal?: AbortSignal): Promise<Anthropic.Message>;
 }

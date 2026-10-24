@@ -20,6 +20,7 @@ import { thisMonth, turnOf } from "./costs";
 import { fromBase64 } from "./folders";
 import { NO_HISTORY, today, type History } from "./history";
 import { decideKind } from "./kind";
+import { savedLength } from "./length";
 import { lookRules, savedLooks } from "./looks";
 import { NativeEmulator } from "./native";
 import { pictureOf, WORKSHOP_SCREENS } from "./pictures";
@@ -207,9 +208,11 @@ export class Desk {
     workshop.withoutTools = ["set_fixtures", ...looks.without];
     workshop.perTurn = looks.perTurn;
     workshop.notes = looks.notes;
+    workshop.length = savedLength();
     await workshop.send(text);
     this.building = "";
-    const heard = project.messages.length > said;
+    // Heard: the conversation grew, or went on in a fresh one.
+    const heard = project.messages.length > said || ((project.earlier?.length ?? 0) > conversation && project.messages.length > 0);
     // A turn that changed the plugin: PaperPaw's checks, and what they
     // find to fix back to the AI, short and without pictures.
     for (let fix = 0; fix < AUTO_FIXES && !workshop.error && filesNow(project) !== files; fix++) {
@@ -232,7 +235,7 @@ export class Desk {
     // The plugin as this answer left it, to go back to.
     if (filesNow(project) !== started) {
       await this.workspace.save();
-      await this.keep(() => this.backend.historySnapshot(project.key, "answer", project.messages.length, conversation));
+      await this.keep(() => this.backend.historySnapshot(project.key, "answer", project.messages.length, project.earlier?.length ?? 0));
     }
     this.changed();
     return heard;

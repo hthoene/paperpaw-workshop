@@ -2,33 +2,38 @@
 // its tools as it takes, up to a limit. The conversation is append-only
 // (the model's thinking stays valid only so), every tool call gets its
 // result, and a tool's input is checked against its schema before it runs.
+// A conversation that grows long is kept short in two steps (length.ts):
+// old tool results cleared on Anthropic's side, then a summary and a fresh
+// conversation (summary.ts), within the turn if need be.
 
 import type Anthropic from "@anthropic-ai/sdk";
 
 import type { Handbook } from "../handbook/handbook";
 import type { Project } from "../project/project";
 import { definition, type Step, type ToolContext, type WorkshopTool } from "../tools/tool";
-import { addUsage, priced } from "./pricing";
+import { LENGTHS, type LengthRules } from "./length";
+import { addUsage, MODELS, priced } from "./pricing";
 import type { ContextManagement, Provider, Request } from "./provider";
+import { carriedText, startFresh, SUMMARY_PROMPT, SUMMARY_TOKENS, todayLine, told, transcript } from "./summary";
 import { invalidJson } from "./tool-input";
 
 /** The most rounds (requests) one turn of the person may take. */
 export const MAX_ROUNDS = 25;
-/** Past this many prompt tokens the conversation is too long to go on
- *  cheaply (Haiku's lower price holds up to 100,000): checked before every
- *  round, as one turn of 25 rounds could pass it. */
-export const MAX_PROMPT = 90_000;
 /** The most one answer may hold, thinking included. */
 export const MAX_TOKENS = 32_000;
-
-/** The tools whose results stay for the whole conversation: what the
- *  docs say and what the project holds are small, and cleared the model
- *  would look them up again and again. */
-export const KEPT_TOOLS = ["lookup_docs", "read_file", "list_files", "list_uploads", "fetch_sample"];
+/** How often one turn may go on in a fresh conversation: past that, the
+ *  turn ends as too long (one turn that alone fills a conversation). */
+export const FRESH_A_TURN = 2;
 
 /** Tools that only look. Asked again in one turn with the same input,
- *  they answer with where the first answer is, not with it again. */
-export const LOOKING_TOOLS = KEPT_TOOLS;
+ *  they answer with where the first answer is, not with it again, while
+ *  that answer is among the tool uses never cleared. */
+export const LOOKING_TOOLS = ["lookup_docs", "read_file", "list_files", "list_uploads", "fetch_sample"];
+
+/** The tools whose results are never cleared: small, and what the project
+ *  holds. What the docs and the files said is cleared once old (a file
+ *  read is often stale by then); the model looks it up again if need be. */
+export const KEPT_TOOLS = ["list_files", "list_uploads"];
 /** The most uses of a tool in one turn, where there is a most. */
 export const PER_TURN: Record<string, number> = { fetch_sample: 5 };
 
@@ -63,21 +68,25 @@ function withNote(result: Anthropic.ToolResultBlockParam, note: string): Anthrop
   return { ...result, content: [...result.content, { type: "text", text: note }] };
 }
 
-/** Old tool results (screenshots, builds, checks) cleared on Anthropic's
- *  side once the prompt grows, never those of [`KEPT_TOOLS`]: the
- *  conversation here stays whole (append-only, so thinking and the cache
- *  hold), the model sees the recent ones. */
-export const CLEARING: ContextManagement = {
-  edits: [
-    {
-      type: "clear_tool_uses_20250919",
-      trigger: { type: "input_tokens", value: 40_000 },
-      keep: { type: "tool_uses", value: 6 },
-      clear_at_least: { type: "input_tokens", value: 10_000 },
-      exclude_tools: KEPT_TOOLS,
-    },
-  ],
-};
+/** Old tool results (docs, files read, screenshots, builds, checks)
+ *  cleared on Anthropic's side once the prompt passes `trimAt`, never
+ *  those of [`KEPT_TOOLS`] nor the last `keep`: the conversation here stays
+ *  whole (append-only, so thinking holds; server-side edits are no edits
+ *  of it), and at least `clearAtLeast` goes at a time, so the cache is
+ *  written again only now and then. */
+export function clearing(rules: LengthRules): ContextManagement {
+  return {
+    edits: [
+      {
+        type: "clear_tool_uses_20250919",
+        trigger: { type: "input_tokens", value: rules.trimAt },
+        keep: { type: "tool_uses", value: rules.keep },
+        clear_at_least: { type: "input_tokens", value: rules.clearAtLeast },
+        exclude_tools: KEPT_TOOLS,
+      },
+    ],
+  };
+}
 
 export interface Session {
   provider: Provider;
@@ -102,6 +111,14 @@ export interface Session {
   /** A note after a tool's results, by its name (what the person asked
    *  of it). */
   notes?: Record<string, string>;
+  /** When old tool results are cleared and the conversation summarised
+   *  (Normal's if not given). */
+  length?: LengthRules;
+  /** The model that writes the summary (Haiku if not given). */
+  summariser?: string;
+  /** Now, and the person's time zone (the computer's if not given). */
+  now?: () => Date;
+  timeZone?: string;
 }
 
 export interface TurnEvents {
@@ -154,18 +171,38 @@ export type Said = string | Anthropic.ContentBlockParam[];
 
 export async function runTurn(session: Session, said: Said, events: TurnEvents = {}, signal?: AbortSignal): Promise<TurnEnd> {
   const { project, provider } = session;
-  if (lastPrompt(project) > MAX_PROMPT) return "too_long";
+  const rules = session.length ?? LENGTHS.normal;
+  const today = todayLine(session.now?.() ?? new Date(), session.timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone);
+  // Today's date, once a conversation and again when it changed: in the
+  // person's message, so the cached prompt before it stays the same.
+  const dated = (blocks: Anthropic.ContentBlockParam[]): Anthropic.ContentBlockParam[] =>
+    told(project.messages, today) ? blocks : [{ type: "text", text: today }, ...blocks];
+
+  // Grown long: on in a fresh conversation, the person's words after the
+  // summary (kept to be carried again if the request fails).
+  let fresh = 0;
+  let carried: string | undefined;
+  if (lastPrompt(project) > rules.summariseAt) {
+    try {
+      carried = await goOnFresh(session, false, signal);
+    } catch (error) {
+      if (signal?.aborted) return "stopped";
+      throw error;
+    }
+    fresh += 1;
+  }
 
   // A turn that stopped after its tools ran ends with their results: the
   // person's words join that message rather than following it.
   const last = project.messages.at(-1);
-  const blocks: Anthropic.ContentBlockParam[] = typeof said === "string" ? [{ type: "text", text: said }] : said;
+  const words: Anthropic.ContentBlockParam[] = typeof said === "string" ? [{ type: "text", text: said }] : said;
+  const blocks = dated(carried ? [{ type: "text", text: carried }, ...words] : words);
   let added: "message" | number;
   if (last?.role === "user" && Array.isArray(last.content)) {
     last.content.push(...blocks);
     added = blocks.length;
   } else {
-    project.messages.push({ role: "user", content: typeof said === "string" ? said : blocks });
+    project.messages.push({ role: "user", content: typeof said === "string" && blocks.length === 1 ? said : blocks });
     added = "message";
   }
 
@@ -174,17 +211,33 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
     { type: "text", text: session.prompt ?? session.handbook.prompt, cache_control: { type: "ephemeral" } },
   ];
 
-  // What this turn looked at (by input, the call that answered), how
-  // often since the last change, and whether it changed a file.
-  const seen = new Map<string, string>();
+  // What this turn looked at (by input, the call that answered and how
+  // many uses before it), how often since the last change, and whether it
+  // changed a file.
+  const seen = new Map<string, { id: string; at: number }>();
   const used = new Map<string, number>();
+  let uses = 0;
   let looks = 0;
   let changed = false;
   const before = project.usage.dollars;
 
   for (let round = 0; round < MAX_ROUNDS; round++) {
-    // Every round, not only the first: a long turn grows the prompt too.
-    if (round > 0 && lastPrompt(project) > MAX_PROMPT) return "too_long";
+    // Every round, not only the first: a long turn grows the prompt too,
+    // and goes on in a fresh conversation where it was.
+    if (round > 0 && lastPrompt(project) > rules.summariseAt) {
+      if (fresh >= FRESH_A_TURN) return "too_long";
+      let text: string;
+      try {
+        text = await goOnFresh(session, true, signal);
+      } catch (error) {
+        if (signal?.aborted) return "stopped";
+        throw error;
+      }
+      fresh += 1;
+      project.messages.push({ role: "user", content: dated([{ type: "text", text }]) });
+      seen.clear();
+      events.onRound?.();
+    }
     const request: Request = {
       model: session.model,
       max_tokens: MAX_TOKENS,
@@ -194,13 +247,17 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
       // The conversation so far is cached too, up to its last block.
       cache_control: { type: "ephemeral" },
       ...thinkingFor(session.model, session.kind, session.escalated ?? false),
-      context_management: CLEARING,
+      context_management: clearing(rules),
     };
     let message: Anthropic.Message;
     try {
       message = await provider.send(request, { onText: events.onText, onThinking: events.onThinking }, signal);
     } catch (error) {
-      if (round === 0) undo(project, added);
+      if (round === 0) {
+        undo(project, added);
+        // The summary goes with the person's next words.
+        if (carried) project.carried = carried;
+      }
       if (signal?.aborted) return "stopped";
       throw error;
     }
@@ -220,7 +277,10 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
     for (const call of calls) {
       const looking = LOOKING_TOOLS.includes(call.name);
       const key = looking ? inputKey(call.name, call.input) : "";
-      const earlier = looking ? seen.get(key) : undefined;
+      // An answer older than the uses never cleared may be gone: asked again.
+      const found = looking ? seen.get(key) : undefined;
+      const earlier = found && uses - found.at < rules.keep ? found.id : undefined;
+      uses += 1;
       let result: Anthropic.ToolResultBlockParam;
       const most = { ...PER_TURN, ...session.perTurn }[call.name];
       if (!earlier && most !== undefined && (used.get(call.name) ?? 0) >= most) {
@@ -239,7 +299,7 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
         };
       } else {
         result = await runTool(session, call, message.stop_reason === "max_tokens", events);
-        if (looking && !result.is_error) seen.set(key, call.id);
+        if (looking && !result.is_error) seen.set(key, { id: call.id, at: uses - 1 });
       }
       if (CHANGING_TOOLS.includes(call.name) && !result.is_error) {
         changed = true;
@@ -262,6 +322,42 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
     if (!changed && project.usage.dollars - before > (session.pauseAfter ?? PAUSE_AFTER_DOLLARS)) return "paused";
   }
   return "limit";
+}
+
+/** The conversation summarised (by the summariser, from a transcript)
+ *  and on in a fresh one; what its first message carries. Where no
+ *  summary comes (the provider sends its own prompt, the model refused or
+ *  failed), what the person asked for stands in for one. What the summary
+ *  cost is the turn's. */
+async function goOnFresh(session: Session, midTurn: boolean, signal?: AbortSignal): Promise<string> {
+  const { project, provider } = session;
+  let summary: string | undefined;
+  if (!provider.ownPrompt) {
+    const model = session.summariser ?? MODELS.data;
+    const request: Request = {
+      model,
+      max_tokens: SUMMARY_TOKENS,
+      system: [{ type: "text", text: SUMMARY_PROMPT }],
+      messages: [{ role: "user", content: transcript(project.messages) }],
+      ...thinkingFor(model, "data", false),
+    };
+    try {
+      const message = await provider.send(request, {}, signal);
+      project.usage = addUsage(project.usage, priced(model, message.usage));
+      if (message.stop_reason !== "refusal") {
+        summary = message.content
+          .filter((b): b is Anthropic.TextBlock => b.type === "text")
+          .map((b) => b.text)
+          .join("");
+      }
+    } catch (error) {
+      if (signal?.aborted) throw error;
+      // No summary: the person's requests stand in for one.
+    }
+  }
+  const carried = carriedText(project, summary, midTurn);
+  startFresh(project);
+  return carried;
 }
 
 async function runTool(session: Session, call: Anthropic.ToolUseBlock, cut: boolean, events: TurnEvents): Promise<Anthropic.ToolResultBlockParam> {

@@ -4,7 +4,8 @@ import path from "node:path";
 import type Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it } from "vitest";
 
-import { CLEARING, MAX_PROMPT, runTurn, thinkingFor, type Session } from "../src/ai/loop";
+import { LENGTHS } from "../src/ai/length";
+import { clearing, runTurn, thinkingFor, type Session } from "../src/ai/loop";
 import { MODELS } from "../src/ai/pricing";
 import { ReplayProvider, type Recording } from "../src/ai/replay";
 import type { Step } from "../src/tools/tool";
@@ -112,7 +113,7 @@ describe("the AI loop, with a recorded conversation", () => {
     expect(first.output_config).toEqual({ effort: "low" });
     expect(first.max_tokens).toBe(32_000);
     // Old tool results are cleared on Anthropic's side, not here.
-    expect(first.context_management).toEqual(CLEARING);
+    expect(first.context_management).toEqual(clearing(LENGTHS.normal));
     expect(first.tools!.map((t) => (t as Anthropic.Tool).name)).toEqual(DATA_TOOLS.map((t) => t.name));
 
     // Every request has the same prefix: system and tools never change.
@@ -262,30 +263,6 @@ describe("a turn's ends", () => {
     expect(await runTurn(s, "Write a long text")).toBe("cut");
   });
 
-  it("checks the prompt's size before every round, not only the first", async () => {
-    const call = { type: "tool_use", id: "a", name: "list_files", input: {} } as unknown as Anthropic.ToolUseBlock;
-    const provider = new ReplayProvider({
-      title: "long",
-      user: ["Go"],
-      answers: [
-        { stop_reason: "tool_use", content: [call] },
-        { stop_reason: "end_turn", content: [text("Done")] },
-      ],
-    });
-    // The replay reports 100 + 10,000 tokens a round: past the limit at once.
-    const { session: s, project } = session(provider);
-    const send = provider.send.bind(provider);
-    provider.send = async (...args) => {
-      const answer = await send(...args);
-      answer.usage.input_tokens = MAX_PROMPT;
-      return answer;
-    };
-    expect(await runTurn(s, "Go")).toBe("too_long");
-    expect(provider.requests).toHaveLength(1);
-    // The tool's result is there: the conversation is whole.
-    expect(project.messages.at(-1)!.role).toBe("user");
-  });
-
   it("writes a plugin with code, gives the compiler's error back, and runs the build", async () => {
     const rec = recording("quote-a-day");
     expect(rec.kind).toBe("code");
@@ -351,8 +328,10 @@ describe("the loop's guards", () => {
   const answer = (...content: Anthropic.ContentBlock[]) => ({ content, stop_reason: "tool_use" as const });
   const done = { content: [{ type: "text", text: "Done.", citations: null } as Anthropic.ContentBlock], stop_reason: "end_turn" as const };
 
-  it("keeps what the docs and the files said for the whole conversation", () => {
-    expect(CLEARING.edits[0]!.exclude_tools).toEqual(expect.arrayContaining(["lookup_docs", "read_file", "list_files"]));
+  it("clears old docs and file reads too, never the small lists", () => {
+    const edit = clearing(LENGTHS.normal).edits[0]!;
+    expect(edit.exclude_tools).toEqual(["list_files", "list_uploads"]);
+    expect(edit.trigger.value).toBeLessThan(LENGTHS.normal.summariseAt);
   });
 
   it("points to the answer of a lookup or read asked again in the same turn, until a file changes", async () => {

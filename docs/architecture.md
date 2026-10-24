@@ -95,14 +95,44 @@ of these calls (`Backend`), and a stand-in for a plain browser
 The messages are only ever added to, never changed. That keeps the prompt
 cache working (the handbook is cached once and read cheaply after) and keeps
 the AI's thinking valid from one round to the next. Thinking blocks are
-never taken out. Old tool results are cleared on Anthropic's side once the
-prompt grows (`CLEARING`), never what the docs and the project's files
-said (`KEPT_TOOLS`): cleared, the model would look them up again and again.
+never taken out.
+
+A conversation that grows long is kept short in two steps, at points the
+person chooses in Settings ("Conversation length": Short, Normal, Long,
+[src/ai/length.ts](../src/ai/length.ts)):
+
+1. **Old tool results cleared** on Anthropic's side (context editing,
+   `clear_tool_uses_20250919`, `clearing(rules)`): past `trimAt` prompt
+   tokens the oldest results go (docs, file reads, screenshots, builds),
+   the last `keep` tool uses and the small lists (`KEPT_TOOLS`) never, at
+   least `clearAtLeast` tokens at a time, so the cache is written again
+   only now and then. The messages here stay whole: a server-side edit is
+   no edit of the conversation the thinking is bound to.
+2. **A summary and a fresh conversation** past `summariseAt`, before a
+   round, at the start of a turn or within one (after its tool round is
+   answered). Haiku writes the summary from a plain transcript
+   ([src/ai/summary.ts](../src/ai/summary.ts)): what was built, what is
+   open, what the person decided, what was learned. The old conversation
+   moves to `earlier` ("The conversation before"), the fresh one's first
+   message carries the summary and the file list (`CARRIED`, shown as
+   "Summarised the conversation so far"), and nothing else is sent again.
+   The summary's cost is the turn's. Without a summary (the summariser
+   failed, or the quota proxy, which sends its own prompt) the person's
+   requests stand in. A turn that alone fills two fresh conversations ends
+   as `too_long`, and the person can go on in a fresh one.
+
+A model with a higher price for long prompts (Haiku past 100,000 tokens)
+summarises below it whatever is chosen.
+
+Today's date and the person's time zone go into the person's message
+(`TODAY`, hidden in the conversation) once a conversation and again when
+the day changed, not into the system prompt, which stays cached.
 
 The loop keeps a turn from going round in circles:
 
 - a lookup or a file read asked again in the same turn with the same input
-  is answered with where its first answer is (until a file changes);
+  is answered with where its first answer is (until a file changes, and
+  while that answer is among the `keep` tool uses never cleared);
 - after 15 looks without a change, a tool result tells the model to write
   with what it has, or to ask the person;
 - a turn that cost more than $0.25 without changing a file pauses

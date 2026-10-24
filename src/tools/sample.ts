@@ -10,7 +10,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 
-import { CARRIED, CHECKED } from "../project/project";
+import { CARRIED, CHECKED, TODAY } from "../project/project";
 import { ADDED } from "../project/uploads";
 import type { WorkshopTool } from "./tool";
 
@@ -43,7 +43,7 @@ export function personsUrls(messages: Anthropic.MessageParam[]): string[] {
   for (const m of messages) {
     if (m.role !== "user") continue;
     if (typeof m.content === "string") texts.push(m.content);
-    else for (const b of m.content) if (b.type === "text" && ![CHECKED, CARRIED, ADDED].some((p) => b.text.startsWith(p))) texts.push(b.text);
+    else for (const b of m.content) if (b.type === "text" && ![CHECKED, CARRIED, ADDED, TODAY].some((p) => b.text.startsWith(p))) texts.push(b.text);
   }
   const found = texts.flatMap((t) => t.match(/https?:\/\/[^\s"'<>()\[\]{}]+/gi) ?? []);
   return [...new Set(found.map((u) => u.replace(/[.,;:!?]+$/, "")))];

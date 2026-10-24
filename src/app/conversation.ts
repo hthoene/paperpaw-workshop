@@ -7,7 +7,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 
 import { t } from "../i18n";
-import { CARRIED, CHECKED } from "../project/project";
+import { CARRIED, CHECKED, TODAY } from "../project/project";
 import { ADDED } from "../project/uploads";
 
 export type Line =
@@ -43,6 +43,8 @@ export function lines(messages: Anthropic.MessageParam[]): Line[] {
       } else if (block.type === "text" && m.role === "user" && block.text.startsWith(CHECKED)) {
         const n = /^\S+ checks found (\d+)/.exec(block.text)?.[1] ?? "0";
         out.push({ kind: "step", text: t("workshop.checked", { n }), failed: false });
+      } else if (block.type === "text" && m.role === "user" && block.text.startsWith(TODAY)) {
+        // Today's date, for the AI only.
       } else if (block.type === "text" && m.role === "user" && block.text.startsWith(CARRIED)) {
         out.push({ kind: "step", text: t("workshop.carried"), failed: false });
       } else if (block.type === "text" && block.text.trim()) {

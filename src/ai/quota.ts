@@ -28,6 +28,7 @@ export class QuotaProxy implements Provider {
   // The proxy sends its own copy of the tools; this only keeps the
   // definitions the loop makes the same as with a key.
   readonly eagerTools = true;
+  readonly ownPrompt = true;
   private csrf: string | null = null;
 
   constructor(

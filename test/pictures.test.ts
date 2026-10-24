@@ -303,7 +303,8 @@ describe("a conversation with a picture", () => {
       said,
     );
     expect(end).toBe("done");
-    expect(provider.requests[0]!.messages[0]!.content).toEqual(said);
+    // Today's date first, then what the person said.
+    expect((provider.requests[0]!.messages[0]!.content as Anthropic.ContentBlockParam[]).slice(1)).toEqual(said);
     // Every tool worked: no result is an error.
     const results = b.project.messages.flatMap((m) => (Array.isArray(m.content) ? m.content : [])).filter((c) => c.type === "tool_result");
     expect(results.filter((r) => (r as Anthropic.ToolResultBlockParam).is_error)).toEqual([]);

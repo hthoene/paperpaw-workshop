@@ -5,6 +5,7 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
 
 import { AnthropicDirect } from "../ai/anthropic";
+import type { LengthChoice } from "../ai/length";
 import { ReplayProvider, type Recording } from "../ai/replay";
 import { Handbook } from "../handbook/handbook";
 import type { Backend } from "./backend";
@@ -14,6 +15,7 @@ import { Findings } from "./Findings";
 import { Conversation } from "./Conversation";
 import { Desk } from "./desk";
 import { CHOICES, saveChoice, savedChoice, usable, type ModelChoice } from "./models";
+import { LENGTH_CHOICES, saveLength, savedLength } from "./length";
 import { LOOK_CHOICES, saveLooks, savedLooks, type LookChoice } from "./looks";
 import { Drawer } from "./Drawer";
 import { Projects } from "./Projects";
@@ -240,6 +242,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
 function Settings({ workspace, backend, keyKind, may, onClose }: { workspace: Workspace; backend: Backend; keyKind: "claude" | "paperpaw" | null; may: ModelChoice[]; onClose(): void }) {
   const [choice, setChoice] = useState<ModelChoice>(usable(savedChoice(), may));
   const [looks, setLooks] = useState<LookChoice>(savedLooks());
+  const [length, setLength] = useState<LengthChoice>(savedLength());
   const project = workspace.project;
   const own = usable(project?.model as ModelChoice | undefined, may);
   const pick = (c: ModelChoice) => { setChoice(c); saveChoice(c); };
@@ -285,6 +288,18 @@ function Settings({ workspace, backend, keyKind, may, onClose }: { workspace: Wo
         {LOOK_CHOICES.map((c) => (
           <label class="choice">
             <input type="radio" name="looks" checked={looks === c.choice} onChange={() => { setLooks(c.choice); saveLooks(c.choice); }} />
+            <span>
+              {c.label}
+              <small>{c.hint}</small>
+            </span>
+          </label>
+        ))}
+      </fieldset>
+      <fieldset class="choices">
+        <legend>Conversation length</legend>
+        {LENGTH_CHOICES.map((c) => (
+          <label class="choice">
+            <input type="radio" name="length" checked={length === c.choice} onChange={() => { setLength(c.choice); saveLength(c.choice); }} />
             <span>
               {c.label}
               <small>{c.hint}</small>

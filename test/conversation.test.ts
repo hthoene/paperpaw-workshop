@@ -59,7 +59,7 @@ describe("a conversation grown too long", () => {
 
     // The carried summary shows as a line of its own, not as the person's.
     expect(lines([{ role: "user", content: [{ type: "text", text: project.carried! }, { type: "text", text: "Rounder corners" }] }])).toEqual([
-      { kind: "step", text: "A fresh conversation: the AI got a summary of the earlier one", failed: false },
+      { kind: "step", text: "Summarised the conversation so far", failed: false },
       { kind: "me", text: "Rounder corners" },
     ]);
     expect(project.carried!.startsWith(CARRIED)).toBe(true);

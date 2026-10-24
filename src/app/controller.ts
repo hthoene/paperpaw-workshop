@@ -4,7 +4,9 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 
+import { lengthRules, type LengthChoice } from "../ai/length";
 import { runTurn, type Said, type TurnEnd } from "../ai/loop";
+import { carriedText, startFresh } from "../ai/summary";
 import { namedBy, personsUrls, type Samples } from "../tools/sample";
 import { MODELS, modelName } from "../ai/pricing";
 import type { Provider } from "../ai/provider";
@@ -17,7 +19,7 @@ import { canSleep, type NetworkMode, type Screen } from "../emulator/protocol";
 import { SHOWN_PROFILES, type Handbook, type Profile } from "../handbook/handbook";
 import { t } from "../i18n";
 import { browserKit, type PictureKit } from "../pictures/kit";
-import { CARRIED, Files, identity, type Project } from "../project/project";
+import { Files, identity, type Project } from "../project/project";
 import { browserUploads, saveProject } from "../project/storage";
 import { ADDED, MAX_PICTURES_A_MESSAGE, UploadRefused, Uploads, type UploadStore } from "../project/uploads";
 import { pluginZip } from "../project/zip";
@@ -46,8 +48,12 @@ export class Workshop {
   live = "";
   /** The summary of its thinking in the round running, as it comes. */
   thinking = "";
-  /** Whether the conversation has grown too long to go on in. */
+  /** Whether the conversation has grown too long to go on in: one turn
+   *  filled fresh conversations (a long one goes on by itself). */
   long = false;
+  /** How long the conversation grows before it is made shorter
+   *  ("Conversation length" in the app's Settings). */
+  length: LengthChoice = "normal";
   /** Tools this workshop does without (the app's reader fetches from the
    *  internet itself: no recorded answers). */
   withoutTools: string[] = [];
@@ -248,38 +254,22 @@ export class Workshop {
     this.changed();
   }
 
-  /** The person's words with what they attached: each picture as the AI
-   *  sees it (reduced), each named so the AI can use it with its tools. */
   /** The conversation has grown too long: it goes on in a fresh one. The
    *  files and uploads stay; the earlier conversation is kept to read
-   *  back; the next message carries a short summary of it. */
+   *  back; the next message carries what the person asked for in it (a
+   *  conversation that grows long is summarised by the loop itself). */
   freshConversation(): void {
     if (this.busy || this.project.messages.length === 0) return;
-    const asked = this.project.messages
-      .filter((m) => m.role === "user")
-      .flatMap((m) => (typeof m.content === "string" ? [m.content] : m.content.filter((b) => b.type === "text").map((b) => b.text)))
-      .filter((text) => !text.startsWith(ADDED) && !text.startsWith(CARRIED))
-      .map((text) => `- ${text.length > 300 ? `${text.slice(0, 300)} ...` : text}`);
-    const files = this.files.list().map((f) => `- ${f.path} (${f.size} bytes)`);
-    const uploads = this.uploads.list().map((u) => `- ${u.name}`);
-    this.project.carried = [
-      `${CARRIED}, which grew too long. What the person asked for in it:`,
-      ...asked.slice(-20),
-      "",
-      "The plugin's files now (read them with read_file before changing them):",
-      ...(files.length ? files : ["(none)"]),
-      ...(uploads.length ? ["", "The person's uploads (list_uploads, view_upload):", ...uploads] : []),
-    ].join("\n");
-    (this.project.earlier ??= []).push(this.project.messages);
-    this.project.messages = [];
-    this.project.lastPrompt = 0;
-    this.project.picturesShown = 0;
+    this.project.carried = carriedText(this.project, undefined);
+    startFresh(this.project);
     this.long = false;
     this.error = "";
     void this.save(this.project);
     this.changed();
   }
 
+  /** The person's words with what they attached: each picture as the AI
+   *  sees it (reduced), each named so the AI can use it with its tools. */
   private async said(text: string): Promise<Said> {
     const carried: Anthropic.ContentBlockParam[] = this.project.carried ? [{ type: "text", text: this.project.carried }] : [];
     if (this.attached.length === 0) return carried.length ? [...carried, { type: "text", text }] : text;
@@ -441,6 +431,7 @@ export class Workshop {
           escalated: this.escalated,
           perTurn: this.perTurn,
           notes: this.notes,
+          length: lengthRules(this.length, this.model),
         },
         said,
         {

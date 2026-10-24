@@ -53,7 +53,8 @@ export interface Project {
   /** What each turn of the person cost (desktop/costs.ts). */
   turns?: import("../desktop/costs").Turn[];
   /** Conversations before this one, kept to read back: a conversation that
-   *  grew too long goes on in a fresh one (append-only, never cut). */
+   *  grew long goes on in a fresh one with a summary of it (append-only,
+   *  never cut; ai/summary.ts). */
   earlier?: Anthropic.MessageParam[][];
   /** What the next message carries into a fresh conversation: a summary
    *  of the one before. */
@@ -75,6 +76,11 @@ export interface Project {
 /** How a fresh conversation's first message begins: the summary of the
  *  one before (the conversation shows it as such, not as the person's). */
 export const CARRIED = "This conversation continues an earlier one about the same plugin";
+
+/** How the line with today's date begins, which the loop adds to the
+ *  person's words when the conversation does not have it yet (the
+ *  conversation does not show it). */
+export const TODAY = "Today's date and the person's time zone:";
 
 /** How a message of PaperPaw's checks begins, sent to the AI by the
  *  workshop after a change (the conversation shows it as such). */

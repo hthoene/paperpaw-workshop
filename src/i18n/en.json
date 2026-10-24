@@ -216,7 +216,7 @@
   "reader.button.power": "Power",
   "workshop.fresh": "Go on in a fresh conversation",
   "workshop.earlier": "The earlier conversation",
-  "workshop.carried": "A fresh conversation: the AI got a summary of the earlier one",
+  "workshop.carried": "Summarised the conversation so far",
   "workshop.error.cut": "The answer reached its length limit before it was done. Tell it to go on.",
   "workshop.error.billing": "Your Anthropic account has no credit left. Add some in the Claude Console (Billing), then send again.",
   "workshop.error.busy": "Anthropic is overloaded right now. Wait a minute and send again.",
