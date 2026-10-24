@@ -78,7 +78,13 @@ if (ready.paperpaw.includes("-dev")) {
 const signed = !!process.env.TAURI_SIGNING_PRIVATE_KEY;
 if (!signed) console.warn("installer: no TAURI_SIGNING_PRIVATE_KEY: the installer is not signed for updates, and no latest.json is made.");
 const args = ["tauri", "build"];
-if (signed) args.push("--config", JSON.stringify({ bundle: { createUpdaterArtifacts: true } }));
+// As a file: on Windows the shell would strip the quotes of inline JSON.
+if (signed) {
+  const updater = join(root, "src-tauri", "target", "updater.conf.json");
+  mkdirSync(dirname(updater), { recursive: true });
+  writeFileSync(updater, JSON.stringify({ bundle: { createUpdaterArtifacts: true } }));
+  args.push("--config", updater);
+}
 const build = spawnSync("npx", args, { cwd: root, stdio: "inherit", shell: process.platform === "win32" });
 if (build.status !== 0 || !signed) process.exit(build.status ?? 1);
 
