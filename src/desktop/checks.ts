@@ -77,11 +77,10 @@ export class Checker {
     this.listeners.forEach((l) => l());
   }
 
-  /** Checks `project`'s plugin once it has a plugin.ini (a plugin with
-   *  code in `plugin/`); until then there is nothing to check and the bar
-   *  says nothing. */
+  /** Checks `project`'s plugin once it has a plugin.ini; until then
+   *  there is nothing to check and the bar says nothing. */
   async plugin(project: { key: string; files: Record<string, unknown> }): Promise<CheckState> {
-    if (project.files["plugin.ini"] === undefined && project.files["plugin/plugin.ini"] === undefined) {
+    if (project.files["plugin.ini"] === undefined) {
       this.set({ state: "none" });
       return this.checks;
     }

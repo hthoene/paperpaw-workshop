@@ -15,16 +15,6 @@ describe("the checks", () => {
     expect(summary({ state: "done", found: [] })).toBe("Checks: ok");
   });
 
-  it("run for a plugin with code too, whose plugin.ini lies in plugin/", async () => {
-    const asked: string[] = [];
-    const checker = new Checker({ pluginCheck: async (project) => (asked.push(project), [cut]) });
-    expect((await checker.plugin({ key: "Snake", files: { "Cargo.toml": "", "src/lib.rs": "" } })).state).toBe("none");
-    const state = await checker.plugin({ key: "Snake", files: { "Cargo.toml": "", "plugin/plugin.ini": "[plugin]\nid = snake\n" } });
-    expect(state).toEqual({ state: "done", found: [cut] });
-    expect(await checker.plugin({ key: "Calm", files: { "plugin.ini": "[plugin]\nid = calm\n" } })).toEqual({ state: "done", found: [cut] });
-    expect(asked).toEqual(["Snake", "Calm"]);
-  });
-
   it("give the model one short line each", () => {
     expect(forModel([cut])).toBe("PaperPaw's checks found 1 to fix:\n- error visual.text-cut at home.clock 2x1 (xteink-x4 de): the text is cut at the right");
     expect(forModel([])).toBe("PaperPaw's checks found nothing to fix.");

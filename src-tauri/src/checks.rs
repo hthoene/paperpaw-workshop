@@ -9,10 +9,6 @@
 //! about the plugin goes to the model and to the person, with a small
 //! picture of the spot where the check took one; measurements and the
 //! app's own findings do not.
-//!
-//! A plugin with code is checked as the reader beside the conversation
-//! runs it: its folder `plugin/` with its last build for the emulator,
-//! put together apart (see [`to_check`]).
 
 use std::io::Cursor;
 use std::path::{Path, PathBuf};
@@ -182,43 +178,6 @@ pub fn check(program: &Path, folder: &Path, on: &[&str], files: &[(String, Vec<u
     findings(&report, crate::emulator::plugin_id(files).as_deref(), Some(out))
 }
 
-/// What is checked of the project in `project` with `files`: the folder
-/// as it is for a plugin without code. For a plugin with code (`Cargo.toml`
-/// and `plugin/plugin.ini`), its `plugin/` folder with its last build for
-/// the emulator, written anew into `stage`.
-pub fn to_check(project: &Path, files: Vec<(String, Vec<u8>)>, stage: &Path) -> Result<(PathBuf, Vec<(String, Vec<u8>)>), String> {
-    let code = files.iter().any(|(p, _)| p == "Cargo.toml") && files.iter().any(|(p, _)| p == "plugin/plugin.ini");
-    if !code {
-        return Ok((project.to_path_buf(), files));
-    }
-    let files = crate::code::for_emulator(project, files);
-    let _ = std::fs::remove_dir_all(stage);
-    for (path, bytes) in &files {
-        let file = stage.join(path);
-        if let Some(parent) = file.parent() {
-            std::fs::create_dir_all(parent).map_err(|e| format!("{}: {e}", parent.display()))?;
-        }
-        std::fs::write(&file, bytes).map_err(|e| format!("{path}: {e}"))?;
-    }
-    Ok((stage.to_path_buf(), files))
-}
-
-/// Findings about a plugin with code's files named as the project has
-/// them, in `plugin/` (`settings.ini:2` is `plugin/settings.ini:2`), so
-/// that the AI and the person find them; screens and widgets as they are.
-pub fn in_plugin_folder(found: Vec<Found>, files: &[(String, Vec<u8>)]) -> Vec<Found> {
-    found
-        .into_iter()
-        .map(|mut f| {
-            let file = f.place.split(':').next().unwrap_or_default();
-            if files.iter().any(|(p, _)| p == file) {
-                f.place = format!("plugin/{}", f.place);
-            }
-            f
-        })
-        .collect()
-}
-
 /// The project's plugin checked on the readers the workshop shows, in
 /// its languages: what is to fix. Off the window's thread; a check takes
 /// some seconds. Its pictures are kept in the app's folder until the next.
@@ -227,11 +186,9 @@ pub async fn plugin_check(project: String) -> Result<Vec<Found>, String> {
     tauri::async_runtime::spawn_blocking(move || {
         let root = crate::paths::projects()?;
         let files = crate::projects::plugin_files(&root, &project)?;
-        let stage = crate::paths::app_data()?.join("checks-plugin").join(&project);
-        let (folder, files) = to_check(&crate::projects::folder(&root, &project)?, files, &stage)?;
+        let folder = crate::projects::folder(&root, &project)?;
         let out = crate::paths::app_data()?.join("checks").join(&project);
-        let found = check(&crate::paths::emulator_program()?, &folder, &crate::emulator::PROFILES, &files, &out)?;
-        Ok(if folder == stage { in_plugin_folder(found, &files) } else { found })
+        check(&crate::paths::emulator_program()?, &folder, &crate::emulator::PROFILES, &files, &out)
     })
     .await
     .map_err(|e| e.to_string())?
@@ -258,33 +215,6 @@ mod tests {
             args.join(" "),
             "check p --profile xteink-x4 --profile boox-go-7 --language en --language de --light --theme default --out out"
         );
-    }
-
-    #[test]
-    fn a_plugin_with_code_is_checked_as_its_plugin_folder() {
-        let project = tempfile::tempdir().unwrap();
-        let stage = tempfile::tempdir().unwrap();
-        let stage = stage.path().join("snake");
-        // Without code: the project's folder, as it is.
-        let (folder, files) = to_check(project.path(), plugin(), &stage).unwrap();
-        assert_eq!((folder.as_path(), files.len()), (project.path(), 4));
-        assert!(!stage.exists());
-        // With code: plugin/ at the top of a folder of its own, no crate.
-        let mut code: Vec<(String, Vec<u8>)> = plugin().into_iter().map(|(p, b)| (format!("plugin/{p}"), b)).collect();
-        code.push(("Cargo.toml".into(), b"[package]\nname = \"snake\"\n".to_vec()));
-        code.push(("src/lib.rs".into(), b"#![no_std]\n".to_vec()));
-        std::fs::create_dir_all(stage.join("old")).unwrap();
-        let (folder, files) = to_check(project.path(), code, &stage).unwrap();
-        assert_eq!(folder, stage);
-        assert!(files.iter().any(|(p, _)| p == "plugin.ini"), "found where the checks look");
-        assert!(!files.iter().any(|(p, _)| p == "Cargo.toml" || p.starts_with("src/")));
-        assert_eq!(std::fs::read(stage.join("plugin.ini")).unwrap(), plugin()[0].1);
-        assert!(stage.join("i18n").join("de.ini").exists() && !stage.join("old").exists() && !stage.join("Cargo.toml").exists());
-        assert_eq!(languages(&files), ["en", "de"]);
-        // What they find in its files is named as the project has them.
-        let finding = |place: &str| Found { check: "lint".into(), level: "error".into(), place: place.into(), message: String::new(), seen: Vec::new(), picture: None };
-        let named: Vec<String> = in_plugin_folder(vec![finding("settings.ini:2"), finding("home")], &files).into_iter().map(|f| f.place).collect();
-        assert_eq!(named, ["plugin/settings.ini:2", "home"]);
     }
 
     #[test]
