@@ -397,3 +397,6 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .menu-list button:disabled { opacity: .45; cursor: default; background: none; }
 .menu-note { margin: .15rem .7rem .35rem; max-width: 15rem; font-size: .76rem; line-height: 1.4; color: var(--ink-2); }
 .menu-list .menu-note .link { margin-top: .45rem; padding: .3em .85em .38em; border-radius: 999px; font-size: .8rem; }
+
+/* The licences in Settings: the notices as they are written, scrolled. */
+.licences-text { max-height: 24rem; overflow: auto; white-space: pre-wrap; font-size: 0.75rem; line-height: 1.4; margin: 0.5rem 0 0; padding: 0.75rem; background: var(--sheet-2); border-radius: 6px; }

@@ -41,6 +41,12 @@ if (!existsSync(dev)) {
 for (const name of readdirSync(into)) if (name !== "README.md") rmSync(join(into, name), { recursive: true });
 copyFileSync(emu, join(into, `paperpaw-emu${exe}`));
 copyFileSync(dev, join(into, `paperpaw-dev${exe}`));
+// PaperPaw's licence and notices, beside its tools as its release has them.
+for (const name of ["LICENSE", "NOTICE"]) {
+  const from = join(dirname(emu), name);
+  if (existsSync(from)) copyFileSync(from, join(into, name));
+  else console.warn(`installer: no ${name} beside ${emu}: PaperPaw's notices are missing from the installer.`);
+}
 // paperpaw-sign packs plugins with code for the readers (Publish…).
 const sign = join(dirname(emu), `paperpaw-sign${exe}`);
 if (existsSync(sign)) copyFileSync(sign, join(into, `paperpaw-sign${exe}`));

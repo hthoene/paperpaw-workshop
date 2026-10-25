@@ -45,7 +45,9 @@
     ],
     "resources": {
       "resources/emulator/": "emulator/",
-      "resources/sdk/": "sdk/"
+      "resources/sdk/": "sdk/",
+      "../LICENSE": "LICENSE",
+      "../public/THIRD-PARTY-NOTICES.txt": "THIRD-PARTY-NOTICES.txt"
     },
     "windows": {
       "webviewInstallMode": {

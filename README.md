@@ -139,3 +139,10 @@ installed workshops ask for. There are no installers for macOS or Linux
 yet.
 
 Licensed under the [Apache License 2.0](LICENSE).
+
+What the app contains of others' work, and under which licence, is in
+[public/THIRD-PARTY-NOTICES.txt](public/THIRD-PARTY-NOTICES.txt), which
+the installer puts beside the app and Settings shows. It is made from
+`Cargo.lock` and `package-lock.json` by `npm run notices`; after a
+dependency changes, run it and commit the file (`npm run notices:check`,
+which the release workflow runs, fails until then).

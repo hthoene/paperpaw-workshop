@@ -66,6 +66,8 @@ jobs:
             cp "$RUNNER_TEMP/sign/bin/paperpaw-sign.exe" "$bin/"
           fi
       - run: npm ci
+      # Every dependency that ships has its notice (scripts/notices.mjs).
+      - run: npm run notices:check
       - run: npm test
       - name: The installer, signed for updates
         shell: bash

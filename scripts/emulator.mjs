@@ -44,6 +44,10 @@ const out = path.join(here, "public", "emulator");
 fs.mkdirSync(out, { recursive: true });
 fs.writeFileSync(path.join(out, "paperpaw-web.wasm"), wasm);
 fs.copyFileSync(path.join(work, "shells", "web", "www", "paperpaw-web.js"), path.join(here, "src", "emulator", "frame", "shell", "paperpaw-web.js"));
+// PaperPaw's licence and notices, beside the module made from it.
+for (const name of ["LICENSE", "NOTICE"]) {
+  fs.copyFileSync(path.join(work, name), path.join(out, `${name}.txt`));
+}
 const meta = {
   ref,
   commit,

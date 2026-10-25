@@ -310,7 +310,28 @@ function Settings({ workspace, backend, keyKind, may, onClose }: { workspace: Wo
       <p class="hint">What each turn cost shows in the conversation.</p>
       <KeySettings backend={backend} />
       <AppUpdates backend={backend} />
+      <Licences />
     </aside>
+  );
+}
+
+/** The workshop's licence and the notices of what it contains
+ *  (scripts/notices.mjs), opened on asking. */
+function Licences() {
+  const [text, setText] = useState<string | null>(null);
+  const open = () => {
+    fetch("/THIRD-PARTY-NOTICES.txt")
+      .then((r) => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
+      .then(setText, () => setText("The notices could not be read. They are also in THIRD-PARTY-NOTICES.txt beside the app."));
+  };
+  return (
+    <section class="licences" aria-label="Licences">
+      <p class="hint">
+        The workshop is open source, under the Apache License 2.0. It contains others' work under their licences.{" "}
+        {text === null && <button type="button" class="link" onClick={open}>Licences</button>}
+      </p>
+      {text !== null && <pre class="licences-text">{text}</pre>}
+    </section>
   );
 }
 
