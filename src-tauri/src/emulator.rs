@@ -156,6 +156,9 @@ pub struct Emulator {
     /// The devices' bodies as the program said them, with the program
     /// they are of (`bodies`).
     bodies: Mutex<Option<(PathBuf, Value)>>,
+    /// Whether the program takes `--wifi`, with the program it is of
+    /// (`spawn`).
+    wifi: Mutex<Option<(PathBuf, bool)>>,
 }
 
 impl Emulator {
@@ -175,6 +178,7 @@ impl Emulator {
             plugin: Mutex::new(None),
             project: Mutex::new(None),
             bodies: Mutex::new(None),
+            wifi: Mutex::new(None),
         }
     }
 
@@ -197,13 +201,14 @@ impl Emulator {
     fn spawn(&self) -> Result<Running, String> {
         let program = (self.program)()?;
         let mut command = Command::new(&program);
-        command.arg("--stdio").stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::null());
-        #[cfg(windows)]
-        {
-            use std::os::windows::process::CommandExt;
-            // No console window beside the workshop's.
-            command.creation_flags(0x0800_0000);
+        // Online from the start, as a reader on its Wi-Fi: a plugin that
+        // fetches shows what it fetched. Before `--stdio`, which runs at
+        // once; only where the program takes it (PaperPaw 0.5.0-beta.7 on).
+        if self.takes_wifi(&program) {
+            command.args(["--wifi", "online"]);
         }
+        command.arg("--stdio").stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::null());
+        hidden(&mut command);
         let mut child = command.spawn().map_err(|e| format!("{}: {e}", program.display()))?;
         let stdin = child.stdin.take().ok_or("the emulator has no input")?;
         let stdout = child.stdout.take().ok_or("the emulator has no output")?;
@@ -213,6 +218,21 @@ impl Emulator {
             .spawn(move || read_events(BufReader::new(stdout), &shared, &*tell))
             .map_err(|e| e.to_string())?;
         Ok(Running { child, stdin })
+    }
+
+    /// Whether `program` takes `--wifi`, as its `--help` says; asked once
+    /// of each program.
+    fn takes_wifi(&self, program: &Path) -> bool {
+        let Ok(mut kept) = self.wifi.lock() else { return false };
+        if let Some((_, takes)) = kept.as_ref().filter(|(of, _)| of == program) {
+            return *takes;
+        }
+        let mut command = Command::new(program);
+        command.arg("--help").stdin(Stdio::null()).stderr(Stdio::null());
+        hidden(&mut command);
+        let takes = command.output().is_ok_and(|out| usage_takes_wifi(&String::from_utf8_lossy(&out.stdout)));
+        *kept = Some((program.to_path_buf(), takes));
+        takes
     }
 
     /// Sends `request` and waits for the event `event` that answers it.
@@ -344,11 +364,7 @@ impl Emulator {
         let file = folder.join("registry.json");
         let mut command = Command::new(&program);
         command.arg("--registry").arg(&file).stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null());
-        #[cfg(windows)]
-        {
-            use std::os::windows::process::CommandExt;
-            command.creation_flags(0x0800_0000);
-        }
+        hidden(&mut command);
         let status = command.status().map_err(|e| format!("{}: {e}", program.display()))?;
         let text = std::fs::read_to_string(&file);
         let _ = std::fs::remove_dir_all(&folder);
@@ -612,6 +628,22 @@ pub fn same_plugin(folder: &Path, files: &[(String, Vec<u8>)]) -> bool {
 
 /// Of a registry (`paperpaw-emu --registry`), each profile's body, by
 /// its id: those that have one.
+/// No console window beside the workshop's.
+fn hidden(command: &mut Command) {
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        command.creation_flags(0x0800_0000);
+    }
+    #[cfg(not(windows))]
+    let _ = command;
+}
+
+/// Whether the usage `paperpaw-emu --help` prints names `--wifi`.
+fn usage_takes_wifi(usage: &str) -> bool {
+    usage.lines().any(|line| line.trim_start().starts_with("--wifi"))
+}
+
 pub fn bodies_of(registry: &Value) -> Value {
     let bodies = registry["profiles"]
         .as_array()
@@ -688,6 +720,20 @@ mod tests {
     /// that need it are skipped (they say so).
     fn program() -> Option<PathBuf> {
         std::env::var_os("PAPERPAW_EMU").map(PathBuf::from).filter(|p| p.exists())
+    }
+
+    #[test]
+    fn wifi_is_asked_for_only_of_an_emulator_that_takes_it() {
+        let newer = "OPTIONS:
+    --profile <id>        Device
+    --wifi <state>        online, offline or none
+";
+        let older = "OPTIONS:
+    --profile <id>        Device
+    --network <how>       real or fixtures (Wi-Fi)
+";
+        assert!(usage_takes_wifi(newer));
+        assert!(!usage_takes_wifi(older));
     }
 
     #[test]

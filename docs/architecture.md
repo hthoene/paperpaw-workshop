@@ -267,6 +267,10 @@ The plugin being made is copied into the emulated reader's own folder
 it, only when its files changed. If the program stops, the next request
 starts it again.
 
+The reader is online from the start, as one on its Wi-Fi
+(`--wifi online`, where the program's `--help` names it: PaperPaw
+0.5.0-beta.7 on), so a plugin that fetches shows what it fetched.
+
 The device is drawn in its body, with its keys where they sit on the
 real one, as the emulator says (`paperpaw-emu --registry`, each
 profile's `body`, asked once of each program): the X4's four keys below
@@ -311,7 +315,7 @@ A release's installer is built by
 [.github/workflows/release.yml](../.github/workflows/release.yml) on a tag
 `v<version>`, with the `paperpaw-emu` and `paperpaw-dev` of the PaperPaw
 release that [paperpaw-release.txt](../paperpaw-release.txt) names (now
-0.5.0-beta.4), fetched from that release and taken only where its checksum
+0.5.0-beta.7), fetched from that release and taken only where its checksum
 and PaperPaw's signature hold. Windows only for now.
 
 Tests use `FakeEmulator` ([src/emulator/fake.ts](../src/emulator/fake.ts)).
