@@ -1,14 +1,15 @@
-# The workshop's release, on a tag v<version> (the version of
-# src-tauri/tauri.conf.json, e.g. v0.1.0-beta.1): the Windows installer
-# with PaperPaw's emulator and paperpaw-dev of the PaperPaw release
-# paperpaw-release.txt names, fetched from that release and taken only
-# where its checksum and its signature by PaperPaw's release key hold
-# (scripts/paperpaw-release.mjs). The installer is signed for the
-# workshop's own updates with the key in the secret
-# TAURI_SIGNING_PRIVATE_KEY (its password, if it has one, in
-# TAURI_SIGNING_PRIVATE_KEY_PASSWORD), and attached to a release of the
-# tag with its signature and latest.json, which installed workshops ask
-# for (tauri.conf.json's updater: releases/latest/download/latest.json).
+# The workshop's release check, on a tag v<version> (the version of
+# src-tauri/tauri.conf.json, e.g. v0.1.0-beta.1): the tag is the app's
+# version, PaperPaw's emulator and paperpaw-dev of the release
+# paperpaw-release.txt names are there and hold (checksum and signature by
+# PaperPaw's release key, scripts/paperpaw-release.mjs), the notices are
+# complete and the tests pass.
+#
+# The release itself is made on the maintainer's computer with
+# scripts/release-local.mjs: the installer is Authenticode-signed with a
+# certificate whose key never leaves Certum's cloud, then signed for the
+# workshop's updates, and only then released with its signature and
+# latest.json. GitHub's runners can do neither.
 #
 # Windows only for now. PaperPaw's releases have emulators for macOS and
 # Linux too; their installers can follow as jobs of their own.
@@ -19,11 +20,11 @@ on:
     tags: ["v*"]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   windows:
-    name: Windows installer
+    name: Release check (Windows)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
@@ -69,25 +70,3 @@ jobs:
       # Every dependency that ships has its notice (scripts/notices.mjs).
       - run: npm run notices:check
       - run: npm test
-      - name: The installer, signed for updates
-        shell: bash
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-        run: |
-          if [[ -z "$TAURI_SIGNING_PRIVATE_KEY" ]]; then
-            echo "::error::no TAURI_SIGNING_PRIVATE_KEY: installed workshops take only signed updates"
-            exit 1
-          fi
-          npm run app:installer
-      # Not marked as a pre-release, betas neither: installed workshops ask
-      # for releases/latest, which GitHub never points at a pre-release.
-      - name: Make the release
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "$GITHUB_REF_NAME" --latest \
-            --title "PaperPaw Workshop $VERSION" \
-            --notes "PaperPaw Workshop $VERSION, with PaperPaw $PAPERPAW. Download paperpaw-workshop-$VERSION-setup.exe for Windows 10 or 11." \
-            dist-installer/*

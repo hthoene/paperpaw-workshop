@@ -10,6 +10,7 @@
     "app": "tauri dev",
     "app:build": "tauri build",
     "app:installer": "node scripts/installer.mjs",
+    "release": "node scripts/release-local.mjs",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",

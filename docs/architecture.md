@@ -308,15 +308,26 @@ of a PaperPaw in work loads only code built against its own source; and the
 workspace's Cargo.toml with them as its only members. It lies in `sdk/`
 beside the app, with `version.txt`. The
 installer is NSIS, for the person alone (no administrator), and fetches
-Microsoft's WebView2 only where Windows lacks it. It is not signed with a
-certificate yet, so Windows SmartScreen warns before the first start.
+Microsoft's WebView2 only where Windows lacks it.
 
-A release's installer is built by
-[.github/workflows/release.yml](../.github/workflows/release.yml) on a tag
-`v<version>`, with the `paperpaw-emu` and `paperpaw-dev` of the PaperPaw
-release that [paperpaw-release.txt](../paperpaw-release.txt) names (now
-0.5.0-beta.7), fetched from that release and taken only where its checksum
-and PaperPaw's signature hold. Windows only for now.
+A release is made on the maintainer's computer by
+[scripts/release-local.mjs](../scripts/release-local.mjs) (`npm run
+release`), as its code signing certificate's key stays in Certum's cloud
+and GitHub's runners cannot reach it. For the tag `v<version>` at HEAD it
+fetches the `paperpaw-emu`, `paperpaw-dev` and `paperpaw-sign` of the
+PaperPaw release that [paperpaw-release.txt](../paperpaw-release.txt)
+names (now 0.5.0-beta.7), taken only where its checksum and PaperPaw's
+signature hold, runs the tests, and builds the installer with
+`WORKSHOP_SIGN_THUMBPRINT` set: PaperPaw's programs, the app and the
+installer are Authenticode-signed (signtool through tauri's
+`signCommand`), and only then is the updater's signature made, over the
+signed installer, and checked against the updater's key
+([scripts/updater-signature.mjs](../scripts/updater-signature.mjs)): an
+installer changed after it would be refused by every installed workshop.
+Then it releases the installer, its signature and `latest.json`.
+[.github/workflows/release.yml](../.github/workflows/release.yml) checks
+the tag on GitHub: the version, PaperPaw's release, the notices, the
+tests. Windows only for now.
 
 Tests use `FakeEmulator` ([src/emulator/fake.ts](../src/emulator/fake.ts)).
 

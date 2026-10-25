@@ -14,6 +14,13 @@
 // workshop attaches: the installer, its signature and `latest.json`,
 // which installed workshops ask for (tauri.conf.json's updater). The key
 // is never in the repository.
+//
+// With a code signing certificate's thumbprint in WORKSHOP_SIGN_THUMBPRINT
+// (the certificate in the user's store, e.g. while SimplySign Desktop is
+// logged in; signtool where SIGNTOOL says, else Windows' SDK), PaperPaw's
+// programs, the app and the installer are Authenticode-signed first
+// (tauri's signCommand), the updater's signature made after, over the
+// signed installer, and both checked (scripts/release-local.mjs).
 
 import { spawnSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
@@ -21,6 +28,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { bundleSdk } from "./sdk.mjs";
+import { checkUpdaterSignature } from "./updater-signature.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const into = join(root, "src-tauri", "resources", "emulator");
@@ -51,6 +59,20 @@ for (const name of ["LICENSE", "NOTICE"]) {
 const sign = join(dirname(emu), `paperpaw-sign${exe}`);
 if (existsSync(sign)) copyFileSync(sign, join(into, `paperpaw-sign${exe}`));
 else console.warn(`installer: no paperpaw-sign beside ${emu}: Publish… cannot pack plugins with code (cargo build --release -p paperpaw-sign).`);
+
+// Authenticode, where a certificate is named: signtool's command for a file.
+const thumbprint = process.env.WORKSHOP_SIGN_THUMBPRINT?.trim();
+const signtool = thumbprint ? findSigntool() : null;
+const signArgs = (file) => ["sign", "/sha1", thumbprint, "/fd", "sha256", "/tr", "http://time.certum.pl", "/td", "sha256", file];
+if (thumbprint) {
+  for (const name of readdirSync(into).filter((n) => n.endsWith(".exe"))) {
+    const signed = spawnSync(signtool, signArgs(join(into, name)), { stdio: "inherit" });
+    if (signed.status !== 0) {
+      console.error(`installer: ${name} could not be signed: is SimplySign Desktop logged in?`);
+      process.exit(1);
+    }
+  }
+}
 
 // What it is, as it says when it starts (`ready`: PaperPaw's version, its
 // fingerprint, the compiler of plugins with code).
@@ -84,11 +106,16 @@ if (ready.paperpaw.includes("-dev")) {
 const signed = !!process.env.TAURI_SIGNING_PRIVATE_KEY;
 if (!signed) console.warn("installer: no TAURI_SIGNING_PRIVATE_KEY: the installer is not signed for updates, and no latest.json is made.");
 const args = ["tauri", "build"];
+const extra = {};
+if (signed) extra.createUpdaterArtifacts = true;
+// The app and the installer Authenticode-signed by tauri as it makes
+// them, before the updater's signature.
+if (thumbprint) extra.windows = { signCommand: { cmd: signtool, args: signArgs("%1") } };
 // As a file: on Windows the shell would strip the quotes of inline JSON.
-if (signed) {
+if (Object.keys(extra).length) {
   const updater = join(root, "src-tauri", "target", "updater.conf.json");
   mkdirSync(dirname(updater), { recursive: true });
-  writeFileSync(updater, JSON.stringify({ bundle: { createUpdaterArtifacts: true } }));
+  writeFileSync(updater, JSON.stringify({ bundle: extra }));
   args.push("--config", updater);
 }
 const build = spawnSync("npx", args, { cwd: root, stdio: "inherit", shell: process.platform === "win32" });
@@ -110,6 +137,22 @@ mkdirSync(out);
 const name = `paperpaw-workshop-${version}-setup.exe`;
 copyFileSync(join(nsis, setup), join(out, name));
 const signature = readFileSync(join(nsis, `${setup}.sig`), "utf8").trim();
+// The updater's signature over the installer as it is now, Authenticode
+// and all: else installed workshops refuse the update.
+const why = checkUpdaterSignature(readFileSync(join(nsis, setup)), signature, conf.plugins.updater.pubkey);
+if (why) {
+  console.error(`installer: the updater's signature of ${setup}: ${why}`);
+  process.exit(1);
+}
+if (thumbprint) {
+  for (const file of [join(nsis, setup), join(root, "src-tauri", "target", "release", "paperpaw-workshop.exe")]) {
+    const checked = spawnSync(signtool, ["verify", "/pa", file], { stdio: "inherit" });
+    if (checked.status !== 0) {
+      console.error(`installer: ${file} is not Authenticode-signed as it should be`);
+      process.exit(1);
+    }
+  }
+}
 writeFileSync(join(out, `${name}.sig`), `${signature}\n`);
 const latest = {
   version,
@@ -124,3 +167,17 @@ const latest = {
 };
 writeFileSync(join(out, "latest.json"), `${JSON.stringify(latest, null, 2)}\n`);
 console.log(`installer: ${out}: ${name}, its signature, latest.json (attach all three to the release v${version})`);
+
+/** signtool: SIGNTOOL, else the newest of Windows' SDK. */
+function findSigntool() {
+  if (process.env.SIGNTOOL) return process.env.SIGNTOOL;
+  const kits = "C:\\Program Files (x86)\\Windows Kits\\10\\bin";
+  const versions = existsSync(kits) ? readdirSync(kits).filter((v) => /^10\./.test(v)) : [];
+  versions.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  for (const version of versions.reverse()) {
+    const tool = join(kits, version, "x64", "signtool.exe");
+    if (existsSync(tool)) return tool;
+  }
+  console.error("installer: no signtool: install Windows' SDK, or name it in SIGNTOOL.");
+  process.exit(1);
+}

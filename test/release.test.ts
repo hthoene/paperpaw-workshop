@@ -1,10 +1,12 @@
 // @vitest-environment node
 import { generateKeyPairSync, sign } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
+import fs, { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
 import { checkAsset, checksum } from "../scripts/paperpaw-release.mjs";
+import { checkUpdaterSignature } from "../scripts/updater-signature.mjs";
 
 /** An asset's signature as paperpaw-sign's sign-asset makes it, by a key
  *  of the test's own: its trailer, and the key's 64 hexadecimal digits. */
@@ -58,5 +60,23 @@ describe("PaperPaw's release assets for the installer", () => {
   it.skipIf(!sample || !existsSync(`${sample}.sig`))("takes a signature paperpaw-sign made", () => {
     const key = readFileSync(`${sample}.pub`, "utf8").trim();
     expect(checkAsset(readFileSync(sample!), readFileSync(`${sample}.sig`), [key])).toBeNull();
+  });
+});
+
+describe("the updater's signature", () => {
+  // A file signed by `tauri signer sign` with a key made for this test.
+  const dir = path.join(import.meta.dirname, "fixtures", "updater");
+  const read = (name: string) => fs.readFileSync(path.join(dir, name));
+  const pubkey = read("test.key.pub").toString("utf8");
+  const signature = read("file.bin.sig").toString("utf8");
+
+  it("holds for the file it was made over, under its key", () => {
+    expect(checkUpdaterSignature(read("file.bin"), signature, pubkey)).toBeNull();
+  });
+
+  it("fails for a file changed after it, and under another key", () => {
+    expect(checkUpdaterSignature(Buffer.from("hello installer, signed again"), signature, pubkey)).toMatch(/does not hold/);
+    const conf = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, "..", "src-tauri", "tauri.conf.json"), "utf8"));
+    expect(checkUpdaterSignature(read("file.bin"), signature, conf.plugins.updater.pubkey)).toMatch(/another key/);
   });
 });
