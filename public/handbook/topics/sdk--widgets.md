@@ -134,6 +134,7 @@ pub fn paperpaw_sdk::widgets::grid::GridView::hint(&self, &paperpaw_sdk::Id, &pa
 pub fn paperpaw_sdk::widgets::grid::GridView::holds_edges(&self) -> bool
 pub fn paperpaw_sdk::widgets::grid::GridView::items(&self) -> alloc::vec::Vec<paperpaw_sdk::widgets::grid::Item>
 pub fn paperpaw_sdk::widgets::grid::GridView::layout(&mut self, &paperpaw_sdk::Env<'_>, paperpaw_sdk::widgets::grid::Geometry, &[paperpaw_sdk::widgets::grid::Item], &[(paperpaw_platform::geometry::Rect, u16)])
+pub fn paperpaw_sdk::widgets::grid::GridView::let_go(&mut self)
 pub fn paperpaw_sdk::widgets::grid::GridView::on_action(&mut self, &paperpaw_sdk::Id, &mut paperpaw_sdk::Cx<'_, '_>) -> paperpaw_sdk::widgets::grid::GridResponse
 pub fn paperpaw_sdk::widgets::grid::GridView::on_event(&mut self, &paperpaw_sdk::Id, &paperpaw_sdk::Params, &mut paperpaw_sdk::Cx<'_, '_>) -> paperpaw_sdk::widgets::grid::GridResponse
 pub fn paperpaw_sdk::widgets::grid::GridView::on_gesture(&mut self, paperpaw_sdk::Gesture, &mut paperpaw_sdk::Cx<'_, '_>) -> paperpaw_sdk::widgets::grid::GridResponse

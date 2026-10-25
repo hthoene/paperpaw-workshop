@@ -1,6 +1,7 @@
 ```rust
 pub struct paperpaw_sdk::contribution::Registrar
 pub fn paperpaw_sdk::contribution::Registrar::add_action(&mut self, paperpaw_sdk::ActionSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_actions(&mut self, &'static [paperpaw_sdk::FixedAction]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_book_badge(&mut self, paperpaw_sdk::library::service::BookBadge) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_book_cache(&mut self, impl core::convert::Into<alloc::borrow::Cow<'static, str>>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_book_data(&mut self, impl core::convert::Into<alloc::borrow::Cow<'static, str>>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
@@ -8,6 +9,7 @@ pub fn paperpaw_sdk::contribution::Registrar::add_book_field(&mut self, paperpaw
 pub fn paperpaw_sdk::contribution::Registrar::add_choice(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_chrome(&mut self, paperpaw_sdk::chrome::ChromeSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_decorator(&mut self, paperpaw_sdk::decorations::DecoratorSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_extended(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, paperpaw_sdk::Params) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_font(&mut self, paperpaw_sdk::FontSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_font_extension(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<alloc::string::String>, impl core::convert::Into<paperpaw_sdk::Id>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_font_face(&mut self, paperpaw_sdk::FontFace) -> core::result::Result<(), paperpaw_sdk::RegisterError>
@@ -17,12 +19,14 @@ pub fn paperpaw_sdk::contribution::Registrar::add_gatt_service(&mut self, paperp
 pub fn paperpaw_sdk::contribution::Registrar::add_gesture(&mut self, paperpaw_sdk::keys::GestureSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_hyphenation(&mut self, paperpaw_sdk::HyphenationSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_icon(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_icons(&mut self, &'static [(paperpaw_sdk::Id, &'static str)]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_input(&mut self, paperpaw_sdk::keys::InputSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_input_filter(&mut self, paperpaw_sdk::filters::InputFilterSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_keymap(&mut self, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_keymap_preset(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_keymap_when(&mut self, &paperpaw_sdk::setting::Setting<bool>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_lookup_provider(&mut self, paperpaw_sdk::lookup::LookupProviderSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_menu_entries(&mut self, &'static [paperpaw_sdk::MenuEntry]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_menu_entry(&mut self, paperpaw_sdk::MenuEntry) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_menu_section(&mut self, paperpaw_sdk::MenuSection) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_page_frame(&mut self, paperpaw_sdk::layers::PageFrameSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
@@ -33,6 +37,7 @@ pub fn paperpaw_sdk::contribution::Registrar::add_presets(&mut self, &'static [p
 pub fn paperpaw_sdk::contribution::Registrar::add_reader(&mut self, paperpaw_sdk::readers::ReaderSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_refresh_filter(&mut self, paperpaw_sdk::filters::RefreshFilterSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_screen(&mut self, paperpaw_sdk::ScreenSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_screens(&mut self, &'static [paperpaw_sdk::FixedScreen]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_setting(&mut self, paperpaw_sdk::SettingSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_setting_group(&mut self, impl core::convert::Into<paperpaw_sdk::SettingGroup>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_settings(&mut self, &'static [paperpaw_sdk::SettingSpec]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
@@ -70,6 +75,7 @@ pub fn paperpaw_sdk::contribution::Registrar::set_setting_default(&mut self, imp
 pub fn paperpaw_sdk::contribution::Registrar::set_ui_look(&mut self, &'static paperpaw_sdk::ui::look::Painters, paperpaw_sdk::Priority) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::subscribe(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, paperpaw_sdk::event::EventHandler) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_action(&mut self, paperpaw_sdk::ActionSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_actions(&mut self, &'static [paperpaw_sdk::FixedAction]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_book_badge(&mut self, paperpaw_sdk::library::service::BookBadge) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_book_cache(&mut self, impl core::convert::Into<alloc::borrow::Cow<'static, str>>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_book_data(&mut self, impl core::convert::Into<alloc::borrow::Cow<'static, str>>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
@@ -77,6 +83,7 @@ pub fn paperpaw_sdk::contribution::Registrar::add_book_field(&mut self, paperpaw
 pub fn paperpaw_sdk::contribution::Registrar::add_choice(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_chrome(&mut self, paperpaw_sdk::chrome::ChromeSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_decorator(&mut self, paperpaw_sdk::decorations::DecoratorSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_extended(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, paperpaw_sdk::Params) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_font(&mut self, paperpaw_sdk::FontSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_font_extension(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<alloc::string::String>, impl core::convert::Into<paperpaw_sdk::Id>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_font_face(&mut self, paperpaw_sdk::FontFace) -> core::result::Result<(), paperpaw_sdk::RegisterError>
@@ -86,12 +93,14 @@ pub fn paperpaw_sdk::contribution::Registrar::add_gatt_service(&mut self, paperp
 pub fn paperpaw_sdk::contribution::Registrar::add_gesture(&mut self, paperpaw_sdk::keys::GestureSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_hyphenation(&mut self, paperpaw_sdk::HyphenationSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_icon(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_icons(&mut self, &'static [(paperpaw_sdk::Id, &'static str)]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_input(&mut self, paperpaw_sdk::keys::InputSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_input_filter(&mut self, paperpaw_sdk::filters::InputFilterSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_keymap(&mut self, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_keymap_preset(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_keymap_when(&mut self, &paperpaw_sdk::setting::Setting<bool>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_lookup_provider(&mut self, paperpaw_sdk::lookup::LookupProviderSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_menu_entries(&mut self, &'static [paperpaw_sdk::MenuEntry]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_menu_entry(&mut self, paperpaw_sdk::MenuEntry) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_menu_section(&mut self, paperpaw_sdk::MenuSection) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_page_frame(&mut self, paperpaw_sdk::layers::PageFrameSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
@@ -102,6 +111,7 @@ pub fn paperpaw_sdk::contribution::Registrar::add_presets(&mut self, &'static [p
 pub fn paperpaw_sdk::contribution::Registrar::add_reader(&mut self, paperpaw_sdk::readers::ReaderSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_refresh_filter(&mut self, paperpaw_sdk::filters::RefreshFilterSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_screen(&mut self, paperpaw_sdk::ScreenSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_screens(&mut self, &'static [paperpaw_sdk::FixedScreen]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_setting(&mut self, paperpaw_sdk::SettingSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_setting_group(&mut self, impl core::convert::Into<paperpaw_sdk::SettingGroup>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_settings(&mut self, &'static [paperpaw_sdk::SettingSpec]) -> core::result::Result<(), paperpaw_sdk::RegisterError>

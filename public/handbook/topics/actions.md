@@ -3,7 +3,7 @@
 | `about.open` | About PaperPaw |
 | `battery.open` | Battery |
 | `bluetooth.open` | Bluetooth |
-| `calibre.open` | Calibre |
+| `calibre.open` | Calibre connection |
 | `core.apps` | Apps |
 | `core.back` | Back |
 | `core.clean-up` | Clean up storage |
@@ -46,6 +46,7 @@
 | `fonts-browser.open` | More fonts |
 | `home.all-tools` | All tools |
 | `home.edit-pages` | Edit home screen |
+| `keyboard.done` | Finish typing |
 | `keys.open` | Buttons and gestures |
 | `kosync.sync-now` | Sync progress |
 | `lock.now` | Lock now |

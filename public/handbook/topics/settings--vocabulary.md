@@ -1,10 +1,10 @@
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
-| `[vocabulary] collect` | Keep words looked up | `true`, `false` | `true` | Words you look up go into Vocabulary. It keeps the newest 2,000 words. |
+| `[vocabulary] collect` | Keep a list of words looked up | `true`, `false` | `true` | Words you look up go into Vocabulary. It keeps the newest 2,000 words. |
 | `[vocabulary] mark` | Mark vocabulary | `true`, `false` | `false` | Marks the words in Vocabulary in books; choosing one looks it up again. |
 | `[vocabulary] new-per-day` | New cards a day | 0 to 200 | `20` | The most new cards a day, besides those due again. |
 | `[vocabulary] retention` | Retention wanted | 70 to 97 | `90` | The chance you still know a card when due. Higher means more reviews. |
-| `[vocabulary] cards-from-lookups` | Words looked up become cards | `true`, `false` | `false` | Each word you look up becomes a card in the deck Looked up. |
+| `[vocabulary] cards-from-lookups` | Make cards of words looked up | `true`, `false` | `false` | Each word you look up becomes a card in the deck Looked up. |
 | `[vocabulary] review-on-wake` | Review on waking | `true`, `false` | `false` | The review opens as the device wakes, where flash cards are due. |
 | `[vocabulary] learning.background` | Background | `core.tone.none`, `core.tone.light-gray`, `core.tone.gray`, `core.tone.dark-gray`, `core.tone.black`, `core.tone.white`, `core.tone.yellow`, `core.tone.green`, `core.tone.blue`, `core.tone.pink`, `core.tone.orange`, `core.tone.red` | `core.tone.none` | A colour behind the marked words; shown as a gray where there is no colour. |
 | `[vocabulary] learning.ink` | Text | `core.tone.as-is`, `core.tone.light-gray`, `core.tone.gray`, `core.tone.dark-gray`, `core.tone.black`, `core.tone.white`, `core.tone.yellow`, `core.tone.green`, `core.tone.blue`, `core.tone.pink`, `core.tone.orange`, `core.tone.red` | `core.tone.as-is` | The colour of the marked words themselves; as it is, or a tone of its own. |

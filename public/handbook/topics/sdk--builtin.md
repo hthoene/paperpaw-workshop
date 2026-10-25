@@ -217,16 +217,18 @@ pub fn paperpaw_sdk::builtin::events::NotesExported::from_params(&paperpaw_sdk::
 pub fn paperpaw_sdk::builtin::events::NotesExported::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::NotesExported::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::PageLayerTapped
+pub paperpaw_sdk::builtin::events::PageLayerTapped::item: core::option::Option<u32>
 pub paperpaw_sdk::builtin::events::PageLayerTapped::layer: paperpaw_sdk::Id
 pub paperpaw_sdk::builtin::events::PageLayerTapped::offset: core::option::Option<u32>
 pub paperpaw_sdk::builtin::events::PageLayerTapped::path: alloc::string::String
 pub paperpaw_sdk::builtin::events::PageLayerTapped::section: core::option::Option<u32>
 pub paperpaw_sdk::builtin::events::PageLayerTapped::x: i32
 pub paperpaw_sdk::builtin::events::PageLayerTapped::y: i32
-pub fn paperpaw_sdk::builtin::events::PageLayerTapped::line(&self) -> core::option::Option<paperpaw_document::Locator>
+pub fn paperpaw_sdk::builtin::events::PageLayerTapped::item(self, impl core::convert::Into<core::option::Option<u32>>) -> Self
 pub fn paperpaw_sdk::builtin::events::PageLayerTapped::new(paperpaw_sdk::Id, alloc::string::String, i32, i32) -> Self
 pub fn paperpaw_sdk::builtin::events::PageLayerTapped::offset(self, impl core::convert::Into<core::option::Option<u32>>) -> Self
 pub fn paperpaw_sdk::builtin::events::PageLayerTapped::section(self, impl core::convert::Into<core::option::Option<u32>>) -> Self
+pub fn paperpaw_sdk::builtin::events::PageLayerTapped::line(&self) -> core::option::Option<paperpaw_document::Locator>
 pub fn paperpaw_sdk::builtin::events::PageLayerTapped::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
 pub fn paperpaw_sdk::builtin::events::PageLayerTapped::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::PageLayerTapped::to_params(&self) -> paperpaw_sdk::Params
@@ -538,9 +540,20 @@ pub const paperpaw_sdk::builtin::groups::LIBRARY: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::groups::LOOK: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::groups::MARKS: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::groups::OTHER: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::groups::PLUGINS: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::groups::READING: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::groups::READING_AIDS: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::groups::READING_ALOUD: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::groups::READING_BEHAVIOUR: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::groups::READING_BOOK_STYLES: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::groups::READING_DISPLAY: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::groups::READING_HYPHENATION: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::groups::READING_LAYOUT: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::groups::READING_TEXT: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::groups::STATUS_LINES: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::groups::SYSTEM: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::groups::TIME: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::groups::WORDS: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::keymap_presets::LEFT_HANDED: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::keymap_presets::STANDARD: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::keymap_presets::STANDARD_NAME: &str
@@ -594,7 +607,15 @@ pub const paperpaw_sdk::builtin::screens::PLACEHOLDER: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::screens::STATUS_ITEMS: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::screens::STATUS_LINES: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::screens::WIDGET_LIST: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::settings::AWAKE_HOLDS: paperpaw_sdk::setting::Setting<bool>
 pub const paperpaw_sdk::builtin::settings::BATTERY_LOW: paperpaw_sdk::setting::Setting<i64>
+pub const paperpaw_sdk::builtin::settings::BOOK_ALIGN: paperpaw_sdk::setting::Setting<bool>
+pub const paperpaw_sdk::builtin::settings::BOOK_FONTS: paperpaw_sdk::setting::Setting<bool>
+pub const paperpaw_sdk::builtin::settings::BOOK_INDENT: paperpaw_sdk::setting::Setting<bool>
+pub const paperpaw_sdk::builtin::settings::BOOK_LINE_HEIGHT: paperpaw_sdk::setting::Setting<bool>
+pub const paperpaw_sdk::builtin::settings::BOOK_MARGINS: paperpaw_sdk::setting::Setting<bool>
+pub const paperpaw_sdk::builtin::settings::BOOK_SIZES: paperpaw_sdk::setting::Setting<bool>
+pub const paperpaw_sdk::builtin::settings::BOOK_SPACING: paperpaw_sdk::setting::Setting<bool>
 pub const paperpaw_sdk::builtin::settings::BUTTON_HINTS: paperpaw_sdk::setting::Setting<bool>
 pub const paperpaw_sdk::builtin::settings::CLOCK_FORMAT: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
 pub const paperpaw_sdk::builtin::settings::CONTRAST_NORMAL: &str
@@ -623,11 +644,20 @@ pub const paperpaw_sdk::builtin::settings::HEADER_DARK: &str
 pub const paperpaw_sdk::builtin::settings::HEADER_LIGHT: &str
 pub const paperpaw_sdk::builtin::settings::HEADER_PLAIN: &str
 pub const paperpaw_sdk::builtin::settings::HYPHENATE: paperpaw_sdk::setting::Setting<bool>
+pub const paperpaw_sdk::builtin::settings::HYPHEN_MIN_LEFT: paperpaw_sdk::setting::Setting<i64>
+pub const paperpaw_sdk::builtin::settings::HYPHEN_MIN_RIGHT: paperpaw_sdk::setting::Setting<i64>
 pub const paperpaw_sdk::builtin::settings::INDENT: paperpaw_sdk::setting::Setting<bool>
+pub const paperpaw_sdk::builtin::settings::INDENT_SIZE: paperpaw_sdk::setting::Setting<i64>
 pub const paperpaw_sdk::builtin::settings::JUSTIFY: paperpaw_sdk::setting::Setting<bool>
+pub const paperpaw_sdk::builtin::settings::KERNING: paperpaw_sdk::setting::Setting<bool>
 pub const paperpaw_sdk::builtin::settings::KEYMAP_PRESET: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
 pub const paperpaw_sdk::builtin::settings::LANGUAGE: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
+pub const paperpaw_sdk::builtin::settings::LETTER_SPACING: paperpaw_sdk::setting::Setting<i64>
 pub const paperpaw_sdk::builtin::settings::LIBRARY_FOLDER: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
+pub const paperpaw_sdk::builtin::settings::LIGATURES: paperpaw_sdk::setting::Setting<bool>
+pub const paperpaw_sdk::builtin::settings::LINE_BREAKING: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
+pub const paperpaw_sdk::builtin::settings::LINE_BREAKING_BALANCED: &str
+pub const paperpaw_sdk::builtin::settings::LINE_BREAKING_FAST: &str
 pub const paperpaw_sdk::builtin::settings::LINE_SPACING: paperpaw_sdk::setting::Setting<i64>
 pub const paperpaw_sdk::builtin::settings::LONG_PRESS_MS: paperpaw_sdk::setting::Setting<i64>
 pub const paperpaw_sdk::builtin::settings::MARGIN: paperpaw_sdk::setting::Setting<i64>
@@ -645,6 +675,7 @@ pub const paperpaw_sdk::builtin::settings::PAGE_FRAME_SINGLE: &str
 pub const paperpaw_sdk::builtin::settings::PAPER_COLOR: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
 pub const paperpaw_sdk::builtin::settings::PAPER_COLORS: &[&str]
 pub const paperpaw_sdk::builtin::settings::PAPER_COLOR_OWN: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
+pub const paperpaw_sdk::builtin::settings::PARAGRAPH_SPACE: paperpaw_sdk::setting::Setting<i64>
 pub const paperpaw_sdk::builtin::settings::PARAGRAPH_SPACING: paperpaw_sdk::setting::Setting<bool>
 pub const paperpaw_sdk::builtin::settings::PICTURES_IN_GRAYS: paperpaw_sdk::setting::Setting<bool>
 pub const paperpaw_sdk::builtin::settings::PUBLISHER_STYLES: paperpaw_sdk::setting::Setting<bool>
@@ -658,6 +689,7 @@ pub const paperpaw_sdk::builtin::settings::SEPARATORS_INSET: &str
 pub const paperpaw_sdk::builtin::settings::SEPARATORS_LINE: &str
 pub const paperpaw_sdk::builtin::settings::SEPARATORS_NONE: &str
 pub const paperpaw_sdk::builtin::settings::SLEEP_AFTER: paperpaw_sdk::setting::Setting<i64>
+pub const paperpaw_sdk::builtin::settings::SMOOTH_TEXT: paperpaw_sdk::setting::Setting<bool>
 pub const paperpaw_sdk::builtin::settings::SPEAK_FOCUS: paperpaw_sdk::setting::Setting<bool>
 pub const paperpaw_sdk::builtin::settings::STATUS_FONT: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
 pub const paperpaw_sdk::builtin::settings::STATUS_FONT_BOOK: &str
@@ -668,6 +700,8 @@ pub const paperpaw_sdk::builtin::settings::TAP_SLOP: paperpaw_sdk::setting::Sett
 pub const paperpaw_sdk::builtin::settings::TEXT_COLOR: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
 pub const paperpaw_sdk::builtin::settings::TEXT_COLORS: &[&str]
 pub const paperpaw_sdk::builtin::settings::TEXT_COLOR_OWN: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
+pub const paperpaw_sdk::builtin::settings::TEXT_CONTRAST: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
+pub const paperpaw_sdk::builtin::settings::TEXT_CONTRAST_LEVELS: &[&str]
 pub const paperpaw_sdk::builtin::settings::TIME_ZONE: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
 pub const paperpaw_sdk::builtin::settings::TIME_ZONE_RULE: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
 pub const paperpaw_sdk::builtin::settings::UI_CONTRAST: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>

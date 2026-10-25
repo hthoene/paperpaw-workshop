@@ -69,4 +69,11 @@ jobs:
       - run: npm ci
       # Every dependency that ships has its notice (scripts/notices.mjs).
       - run: npm run notices:check
+      - run: npm run build
       - run: npm test
+      # Build from the registry SDK selected by the real emulator, then
+      # load the plugin in it. No checkout SDK may hide missing crates.
+      - name: Rust checks and plugins against the released SDK
+        env:
+          PAPERPAW_RUST: system
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked --lib -- --test-threads=1

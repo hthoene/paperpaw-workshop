@@ -1,5 +1,7 @@
 ```rust
 pub struct paperpaw_sdk::usage::PluginUsage
+pub paperpaw_sdk::usage::PluginUsage::awake_ms: u64
+pub paperpaw_sdk::usage::PluginUsage::awake_reason: alloc::borrow::Cow<'static, str>
 pub paperpaw_sdk::usage::PluginUsage::busy_us: u64
 pub paperpaw_sdk::usage::PluginUsage::calls: u32
 pub paperpaw_sdk::usage::PluginUsage::pixels: u64

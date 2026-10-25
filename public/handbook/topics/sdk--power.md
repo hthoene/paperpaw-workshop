@@ -9,6 +9,15 @@ pub fn paperpaw_sdk::power::Power::new(paperpaw_sdk::power::PowerLevel, paperpaw
 pub fn paperpaw_sdk::power::Power::normal() -> &'static paperpaw_sdk::power::Power
 pub fn paperpaw_sdk::power::Power::online(&self) -> bool
 pub fn paperpaw_sdk::power::Power::default() -> Self
+pub struct paperpaw_sdk::power::WakeHold
+pub fn paperpaw_sdk::power::WakeHold::duration(&self) -> core::time::Duration
+pub fn paperpaw_sdk::power::WakeHold::id(&self) -> &paperpaw_sdk::Id
+pub fn paperpaw_sdk::power::WakeHold::keeps_light(&self) -> bool
+pub fn paperpaw_sdk::power::WakeHold::lasting(self, core::time::Duration) -> Self
+pub fn paperpaw_sdk::power::WakeHold::light(self) -> Self
+pub fn paperpaw_sdk::power::WakeHold::new(impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> Self
+pub fn paperpaw_sdk::power::WakeHold::reason(&self) -> &str
+pub fn paperpaw_sdk::power::WakeHold::screen(&self) -> core::option::Option<paperpaw_sdk::ScreenKey>
 pub struct paperpaw_sdk::power::Wear
 pub paperpaw_sdk::power::Wear::automatic: bool
 pub paperpaw_sdk::power::Wear::mode: paperpaw_sdk::Id
@@ -27,6 +36,7 @@ pub paperpaw_sdk::power::Start::Unknown
 pub paperpaw_sdk::power::Start::Wake
 pub const paperpaw_sdk::power::AUTOMATIC: &str
 pub const paperpaw_sdk::power::LEVEL: paperpaw_sdk::Id
+pub const paperpaw_sdk::power::MAX_HOLD: core::time::Duration
 pub const paperpaw_sdk::power::MODE_KIND: paperpaw_sdk::Id
 pub const paperpaw_sdk::power::NORMAL: paperpaw_sdk::Id
 pub const paperpaw_sdk::power::OFFLINE: paperpaw_sdk::Id

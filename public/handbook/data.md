@@ -408,19 +408,37 @@ change a setting that keeps the device safe, such as the lock's.
 Packs for other scripts are read a glyph at a time, so devices with
 little memory can use them ([ADR 0018](adr/0018-font-packs-for-other-scripts.md)).
 `tools/script-pack.py` builds Cyrillic and Greek for Literata.
+A pack that extends a face with sizes larger than its own draws text
+asked that large, and the font size goes as far: the X4's firmware has
+Literata up to 32 px, and `tools/literata-packs.py` builds its larger
+sizes (and its bold italic face) as plugins for the font library.
 Icon packs are such packs for the icon font: `tools/icons/pack.py` builds
 one with the Tabler icons named
 (`[extends] icons.ppfp = fonts-default.icons`).
 
-A family of its own needs a name and a regular face; its faces are
-packs, drawn on every device and read a glyph at a time, or font files,
-drawn where scalable fonts are, a variable font at its style's weight:
+A family needs a name and a face, a family of its own a regular face;
+its faces are packs, drawn on every device and read a glyph at a time,
+or font files, drawn where scalable fonts are, a variable font at its
+style's weight:
 
 ```ini
 [family]
 name = Fredoka
 regular = regular.ppfp
 bold = bold.ppfp
+```
+
+A plugin may also bring a face of a family that is there without it,
+bound to its role: the X4's firmware has no Literata Bold Italic, which
+such a plugin brings back:
+
+```ini
+[family]
+name = Literata
+bold-italic = literata-bold-italic.ppfp
+
+[fonts]
+core.font-reading-bold-italic = literata-bold-italic.bold-italic
 ```
 
 A logo of its own takes the place of PaperPaw's (on the sleep screen,
@@ -858,79 +876,29 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `[core] ui-size` | Menu text size | 7 to 24 | `9` | Size of menus, lists and the status line. |
 | `[core] ui-contrast` | Contrast | `core.contrast.normal`, `core.contrast.strong` | `core.contrast.normal` | Strong draws gray hints and notes in black. |
 | `[core] ui-header` | Headers | `core.header.plain`, `core.header.light`, `core.header.dark` | `core.header.plain` | How the title at the top of menus and lists looks. |
-| `[core] widgets.frame` | Frames of widgets | `core.frame.own`, `core.frame.none`, `core.frame.line`, `core.frame.card`, `core.frame.dark` | `core.frame.own` | A frame for every widget that has none chosen in its own settings. |
 | `[core] ui-corners` | Corners | `core.corners.square`, `core.corners.small`, `core.corners.round`, `core.corners.soft` | `core.corners.soft` | Of highlighted rows, buttons and boxes. |
-| `[core] ui-focus` | Highlight | `core.focus.fill`, `core.focus.ring`, `core.focus.soft` | `core.focus.fill` | How the chosen row is shown. |
+| `[core] ui-focus` | Selected row | `core.focus.fill`, `core.focus.ring`, `core.focus.soft` | `core.focus.fill` | How the chosen row is shown. |
 | `[core] ui-separators` | Lines between rows | `core.separators.inset`, `core.separators.line`, `core.separators.none` | `core.separators.inset` | Light lines, fainter lines from where the text starts, or none. |
-| `[core] ui-groups` | Groups | `core.groups.plain`, `core.groups.cards` | `core.groups.plain` | The sections of lists as they are or on rounded cards. |
+| `[core] ui-groups` | List sections | `core.groups.plain`, `core.groups.cards` | `core.groups.plain` | The sections of lists as they are or on rounded cards. |
 | `[core] ui-title` | Title size | 100 to 200 | `115` | Size of the titles at the top of menus and lists, in percent of the text's. |
 | `[core] ui-margin` | Margins of menus | 0 to 15 | `4` | Space at the left and right of menus and lists. |
 | `[core] ui-row` | Row height | 120 to 300 | `160` | Height of the rows of menus and lists, relative to their text. |
-| `[core] ui-lines` | Lines | 1 to 10 | `3` | How thick lines and frames are drawn. |
-| `[core] logo` | Logo picture | text | `` | Path of a JPEG or PNG shown instead of PaperPaw's logo; empty: the usual one. |
+| `[core] ui-lines` | Line thickness | 1 to 10 | `3` | How thick lines and frames are drawn. |
 | `[core] ui-palette` | Grays | text | `` | Grays by purpose, e.g. muted=60 line=170 (0 black, 255 white). |
-| `[core] text-color` | Text colour | `core.color.black`, `core.color.dark-gray`, `core.color.gray`, `core.color.brown`, `core.color.dark-blue`, `core.color.dark-green`, `core.color.burgundy`, `core.color.violet`, `core.color.own` | `core.color.black` | Softer than black on white, easier on the eyes; night mode swaps them. |
-| `[core] text-color-own` | Own text colour | text | `#5b4636` | A colour code such as #5b4636 (red, green, blue), used when the colour above is "Own colour". |
-| `[core] paper-color` | Paper colour | `core.paper.white`, `core.paper.cream`, `core.paper.sepia`, `core.paper.sand`, `core.paper.light-gray`, `core.paper.mint`, `core.paper.light-blue`, `core.paper.rose`, `core.paper.own` | `core.paper.white` | Softer than black on white, easier on the eyes; night mode swaps them. |
-| `[core] paper-color-own` | Own paper colour | text | `#f4ecd8` | A colour code such as #5b4636 (red, green, blue), used when the colour above is "Own colour". |
-| `[home] page-1` | Home page 1 | text | `home.clock, home.continue, home.recent` | The items on this page and their places. Change them on the home screen. |
-| `[home] page-2` | Home page 2 | text | `home.tools` | The items on this page and their places. Change them on the home screen. |
-| `[home] page-3` | Home page 3 | text | `` | The items on this page and their places. Change them on the home screen. |
-| `[home] page-4` | Home page 4 | text | `` | The items on this page and their places. Change them on the home screen. |
-| `[home] page-5` | Home page 5 | text | `` | The items on this page and their places. Change them on the home screen. |
-| `[home] page-6` | Home page 6 | text | `` | The items on this page and their places. Change them on the home screen. |
-| `[home] page-7` | Home page 7 | text | `` | The items on this page and their places. Change them on the home screen. |
-| `[home] page-8` | Home page 8 | text | `` | The items on this page and their places. Change them on the home screen. |
-| `[home] columns` | Columns | 2 to 6 | `3` | How many cells the home screen has across. |
-| `[home] rows` | Rows | 0 to 12 | `0` | How many cells it has down; 0: as many as make the cells about square. |
-| `[home] tool-labels` | Names under the tools | `true`, `false` | `true` | The tools on the home screen with their names, or only their icons. |
-| `[home] focus-at-once` | Show the focus at once | `true`, `false` | `false` | The selection frame shows at once, not only after the first button press. |
-| `[home] status-bar` | The status line at the top | `true`, `false` | `true` | The time, the battery and more, above the home screen. |
-| `[home] footer.pencil` | Pencil below the page | `true`, `false` | `true` | Without it, edit the home screen by a long press or from the menu. |
-| `[home] footer.dots` | Dots for the pages | `true`, `false` | `true` | Where one is among the pages, below them. |
-| `[home] footer.items` | More below the page | list | `` | Status items beside the dots, e.g. the battery. |
+| `[core] notice-seconds` | Message time | 1 to 60 | `4` | How long short messages such as “Sync done” stay on the screen. |
 | `[menu] style` | Menus | `menu.style.list`, `menu.style.tiles` | `menu.style.list` | Menus as a list, or as tiles with their icons at the top of the screen. |
 
 ## The reading settings
 
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
-| `[core] reading-font` | Font | `core.font.default`, `Literata`, `PaperPaw Sans` | `core.font.default` | “Book's font” is Literata, or the book's own where the device draws them. |
-| `[core] font-size` | Font size | 6 to 16 | `9` | Size of the book text. |
-| `[core] line-spacing` | Line spacing | 80 to 250 | `135` | Space between lines, relative to the font size. |
-| `[core] font-weight` | Font weight | 0 to 4 | `0` | Darker, bolder text with any font; helps on light screens. |
-| `[core] word-spacing` | Word spacing | 50 to 200 | `100` | Space between words; at 100 % as the font has it. |
-| `[core] margin` | Margins | 0 to 30 | `4` | Space between the text and the edges of the screen. |
-| `[core] margin-ends` | Margins at the top and bottom | 0 to 30 | `4` | Space above and below the text. As the margins at the sides until it is changed. |
-| `[core] justify` | Justify text | `true`, `false` | `true` | Align paragraphs on both sides. |
-| `[core] hyphenate` | Hyphenate words | `true`, `false` | `true` | Break long words at the end of lines, in the book's language. |
-| `[core] publisher-styles` | Publisher's formatting | `true`, `false` | `true` | Use the book's own layout; off shows the text plainly. |
-| `[core] indent` | Indent paragraphs | `true`, `false` | `true` | Indent the first line of each paragraph. |
-| `[core] paragraph-spacing` | Space between paragraphs | `true`, `false` | `false` | Leave some space between paragraphs, with or without indented first lines. |
-| `[core] widows` | Lines kept at the top | 1 to 4 | `1` | The fewest lines of a paragraph carried to the top of a page. |
-| `[core] orphans` | Lines kept at the bottom | 1 to 4 | `1` | The fewest lines of a paragraph left at the bottom of a page. |
-| `[core] reading-app` | Reading app | `core.reading-app.default` | `core.reading-app.default` | The app books open in; formats, books and folders can have their own. |
-| `[core] footnotes` | Footnotes | `core.footnotes.popup`, `core.footnotes.jump` | `core.footnotes.popup` | A tapped note mark (1, [2], *) shows its note over the page, or goes to it. |
-| `[core] page-frame` | Page frame | `core.page-frame.single` | `core.page-frame.single` | How the text stands on the page; plugins can add other frames. |
 | `[core] scope-only` | Only this book | `true`, `false` | `false` | Changes to font and layout apply to this book only (marked •). |
 | `[dictionary] folder` | Dictionary folder | text | `dictionaries` | Where your StarDict dictionaries are (also in subfolders). |
-| `[reader] smooth-text` | Smooth text | `true`, `false` | `false` | Letters with soft gray edges; pages turn slower and use more battery. |
-| `[reader] open-last` | Reopen the last book at start | `true`, `false` | `true` | Start with the last book instead of the home screen. |
-| `[reader] auto-turn-seconds` | Turn pages automatically every | 5 to 600 | `30` | For “Turn pages automatically” in the reader’s menu. |
-| `[reader] aloud-speed` | Speed | 50 to 300 | `100` | How fast books are read aloud. |
-| `[reader] aloud-highlight` | Underline the sentence | `true`, `false` | `true` | Shows which sentence is being read. |
-| `[reader] aloud-turn-pages` | Turn pages | `true`, `false` | `true` | Reads on over the pages; else it stops at the end of the page. |
-| `[reader] aloud-timer` | Stop after | `reader.aloud-timer.off`, `reader.aloud-timer.15`, `reader.aloud-timer.30`, `reader.aloud-timer.60`, `reader.aloud-timer.90` | `reader.aloud-timer.off` | Reading aloud stops by itself after this long, e.g. at bedtime. |
-| `[reading-goal] content` | Content from | 5 to 95 | `50` | From which share of the goal the cat is content rather than meh. |
-| `[reading-goal] happy` | Happy from | 50 to 200 | `100` | From which share of the goal the cat is happy. 100 % is the goal itself. |
-| `[reading-goal] pictures` | Own pictures | text | `` | Pictures named sad, meh, content and happy, in place of the cats. |
-| `[aids] bold-beginnings` | Bold word beginnings | `true`, `false` | `false` | The first half of every word in bold, which some find easier to follow. |
-| `[aids] replace` | Replace words | text | `` | Pairs like “colour = color; Mr. = Mister”, for whole words in every book. |
-| `[vocabulary] collect` | Keep words looked up | `true`, `false` | `true` | Words you look up go into Vocabulary. It keeps the newest 2,000 words. |
+| `[vocabulary] collect` | Keep a list of words looked up | `true`, `false` | `true` | Words you look up go into Vocabulary. It keeps the newest 2,000 words. |
 | `[vocabulary] mark` | Mark vocabulary | `true`, `false` | `false` | Marks the words in Vocabulary in books; choosing one looks it up again. |
 | `[vocabulary] new-per-day` | New cards a day | 0 to 200 | `20` | The most new cards a day, besides those due again. |
 | `[vocabulary] retention` | Retention wanted | 70 to 97 | `90` | The chance you still know a card when due. Higher means more reviews. |
-| `[vocabulary] cards-from-lookups` | Words looked up become cards | `true`, `false` | `false` | Each word you look up becomes a card in the deck Looked up. |
+| `[vocabulary] cards-from-lookups` | Make cards of words looked up | `true`, `false` | `false` | Each word you look up becomes a card in the deck Looked up. |
 | `[vocabulary] review-on-wake` | Review on waking | `true`, `false` | `false` | The review opens as the device wakes, where flash cards are due. |
 | `[translate] to` | Translate into | `translate.to.auto`, `translate.to.ar`, `translate.to.bg`, `translate.to.cs`, `translate.to.da`, `translate.to.de`, `translate.to.el`, `translate.to.en-gb`, `translate.to.en-us`, `translate.to.es`, `translate.to.et`, `translate.to.fi`, `translate.to.fr`, `translate.to.hu`, `translate.to.id`, `translate.to.it`, `translate.to.ja`, `translate.to.ko`, `translate.to.lt`, `translate.to.lv`, `translate.to.nb`, `translate.to.nl`, `translate.to.pl`, `translate.to.pt-br`, `translate.to.pt-pt`, `translate.to.ro`, `translate.to.ru`, `translate.to.sk`, `translate.to.sl`, `translate.to.sv`, `translate.to.tr`, `translate.to.uk`, `translate.to.zh-hans` | `translate.to.auto` | The language selected text is translated into. |
 
@@ -989,7 +957,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `about.open` | About PaperPaw |
 | `battery.open` | Battery |
 | `bluetooth.open` | Bluetooth |
-| `calibre.open` | Calibre |
+| `calibre.open` | Calibre connection |
 | `core.apps` | Apps |
 | `core.back` | Back |
 | `core.clean-up` | Clean up storage |
@@ -1032,6 +1000,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `fonts-browser.open` | More fonts |
 | `home.all-tools` | All tools |
 | `home.edit-pages` | Edit home screen |
+| `keyboard.done` | Finish typing |
 | `keys.open` | Buttons and gestures |
 | `kosync.sync-now` | Sync progress |
 | `lock.now` | Lock now |

@@ -526,12 +526,12 @@ mod tests {
     }
 
     /// The recipes the AI's handbook gives in full build as the workshop
-    /// builds a project, without a warning: with `PAPERPAW_EMU` and
-    /// `PAPERPAW_SDK`, as the test below.
+    /// builds a project, without a warning: with `PAPERPAW_EMU`, against
+    /// its released SDK or the checkout `PAPERPAW_SDK` names.
     #[test]
     fn the_handbook_s_recipes_build_without_a_warning() {
-        let (Some(program), true) = (std::env::var_os("PAPERPAW_EMU").map(PathBuf::from), std::env::var_os("PAPERPAW_SDK").is_some()) else {
-            eprintln!("skipped: PAPERPAW_EMU and PAPERPAW_SDK name no PaperPaw");
+        let Some(program) = std::env::var_os("PAPERPAW_EMU").map(PathBuf::from) else {
+            eprintln!("skipped: PAPERPAW_EMU names no PaperPaw");
             return;
         };
         let emulator = crate::emulator::Emulator::new(move || Ok(program.clone()), |_| {});
@@ -556,14 +556,15 @@ mod tests {
 
     #[test]
     fn a_plugin_with_code_is_built_and_runs_in_paperpaw_s_emulator() {
-        let (Some(program), true) = (std::env::var_os("PAPERPAW_EMU").map(PathBuf::from), std::env::var_os("PAPERPAW_SDK").is_some()) else {
-            eprintln!("skipped: PAPERPAW_EMU and PAPERPAW_SDK name no PaperPaw");
+        let Some(program) = std::env::var_os("PAPERPAW_EMU").map(PathBuf::from) else {
+            eprintln!("skipped: PAPERPAW_EMU names no PaperPaw");
             return;
         };
         let (events, seen) = std::sync::mpsc::channel();
         let emulator = crate::emulator::Emulator::new(move || Ok(program.clone()), move |e| {
             let _ = events.send(e);
         });
+        emulator.show_plugin(Some("calm-code")).unwrap();
         let library = tempfile::tempdir().unwrap();
         emulator.start("xteink-x4", library.path()).unwrap();
         let ready = emulator.ready().unwrap();
@@ -627,7 +628,8 @@ impl Plugin for Calm {
             std::thread::sleep(std::time::Duration::from_secs(2));
             emulator.describe().unwrap().to_string()
         };
-        assert!(shown(&on_reader).contains("Calm code here"), "the plugin's screen");
+        let described = shown(&on_reader);
+        assert!(described.contains("Calm code here"), "the plugin's screen: {described}");
 
         // A library not built so does not run.
         on_reader[1].1 = b"not a library".to_vec();

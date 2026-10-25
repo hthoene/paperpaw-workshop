@@ -12,15 +12,20 @@ pub fn paperpaw_sdk::Screen::hint(&self, &paperpaw_sdk::Id, &paperpaw_sdk::Env<'
 pub fn paperpaw_sdk::Screen::hints(&self) -> core::option::Option<paperpaw_sdk::HintVisibility>
 pub fn paperpaw_sdk::Screen::holds_edges(&self) -> bool
 pub fn paperpaw_sdk::Screen::mirrored(&self) -> bool
+pub fn paperpaw_sdk::Screen::mode(&self) -> paperpaw_sdk::realtime::ScreenMode
 pub fn paperpaw_sdk::Screen::on_action(&mut self, &paperpaw_sdk::Id, &mut paperpaw_sdk::Cx<'_, '_>) -> paperpaw_sdk::Handled
 pub fn paperpaw_sdk::Screen::on_button(&mut self, &str, bool, &mut paperpaw_sdk::Cx<'_, '_>) -> paperpaw_sdk::Handled
 pub fn paperpaw_sdk::Screen::on_close(&mut self, &mut paperpaw_sdk::Cx<'_, '_>)
 pub fn paperpaw_sdk::Screen::on_close_request(&mut self, paperpaw_sdk::CloseCause, &mut paperpaw_sdk::Cx<'_, '_>) -> paperpaw_sdk::Handled
 pub fn paperpaw_sdk::Screen::on_event(&mut self, &paperpaw_sdk::Id, &paperpaw_sdk::Params, &mut paperpaw_sdk::Cx<'_, '_>)
+pub fn paperpaw_sdk::Screen::on_extended(&mut self, &paperpaw_sdk::Id, &paperpaw_sdk::Params, &mut paperpaw_sdk::Cx<'_, '_>) -> paperpaw_sdk::Handled
 pub fn paperpaw_sdk::Screen::on_gesture(&mut self, paperpaw_sdk::Gesture, &mut paperpaw_sdk::Cx<'_, '_>) -> paperpaw_sdk::Handled
 pub fn paperpaw_sdk::Screen::on_hide(&mut self)
+pub fn paperpaw_sdk::Screen::on_key(&mut self, &paperpaw_sdk::realtime::KeyEvent, &mut paperpaw_sdk::Cx<'_, '_>) -> paperpaw_sdk::Handled
 pub fn paperpaw_sdk::Screen::on_pointer(&mut self, &paperpaw_platform::input::PointerEvent, &mut paperpaw_sdk::Cx<'_, '_>) -> paperpaw_sdk::Handled
+pub fn paperpaw_sdk::Screen::on_reopen(&mut self, &paperpaw_sdk::Params, &mut paperpaw_sdk::Cx<'_, '_>)
 pub fn paperpaw_sdk::Screen::on_show(&mut self, &mut paperpaw_sdk::Cx<'_, '_>)
+pub fn paperpaw_sdk::Screen::on_squeeze(&mut self, &paperpaw_sdk::realtime::Squeeze, &mut paperpaw_sdk::Cx<'_, '_>) -> paperpaw_sdk::Handled
 pub fn paperpaw_sdk::Screen::on_timer(&mut self, &mut paperpaw_sdk::Cx<'_, '_>)
 pub fn paperpaw_sdk::Screen::outside(&self) -> paperpaw_sdk::Outside
 pub fn paperpaw_sdk::Screen::passes_through(&self) -> bool
@@ -53,8 +58,8 @@ pub fn paperpaw_sdk::ActionSpec::search_keywords(&self) -> core::option::Option<
 pub fn paperpaw_sdk::ActionSpec::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub struct paperpaw_sdk::Actions
 pub fn paperpaw_sdk::Actions::contains(&self, &str) -> bool
-pub fn paperpaw_sdk::Actions::get(&self, &str) -> core::option::Option<&paperpaw_sdk::ActionSpec>
-pub fn paperpaw_sdk::Actions::iter(&self) -> impl core::iter::traits::iterator::Iterator<Item = &paperpaw_sdk::ActionSpec>
+pub fn paperpaw_sdk::Actions::get(&self, &str) -> core::option::Option<paperpaw_sdk::Action<'_>>
+pub fn paperpaw_sdk::Actions::iter(&self) -> impl core::iter::traits::iterator::Iterator<Item = paperpaw_sdk::Action<'_>>
 pub fn paperpaw_sdk::Actions::new() -> Self
 pub fn paperpaw_sdk::Actions::runnable(&self, &str) -> bool
 pub fn paperpaw_sdk::Actions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
@@ -79,6 +84,16 @@ pub paperpaw_sdk::Capabilities::speech: bool
 pub paperpaw_sdk::Capabilities::system_clipboard: bool
 pub paperpaw_sdk::Capabilities::touch: bool
 pub paperpaw_sdk::Capabilities::wifi: bool
+pub const fn paperpaw_sdk::Capabilities::has(&self, paperpaw_sdk::Capability) -> bool
+pub struct paperpaw_sdk::Capability(_)
+pub const paperpaw_sdk::Capability::AUDIO: Self
+pub const paperpaw_sdk::Capability::BUTTONS: Self
+pub const paperpaw_sdk::Capability::CHARGE_LIMIT: Self
+pub const paperpaw_sdk::Capability::HOT_CODE: Self
+pub const paperpaw_sdk::Capability::KEYBOARD: Self
+pub const paperpaw_sdk::Capability::PAGE_KEYS: Self
+pub const paperpaw_sdk::Capability::USB_LINK: Self
+pub const paperpaw_sdk::Capability::WARMTH: Self
 pub struct paperpaw_sdk::Commands
 pub fn paperpaw_sdk::Commands::extend<I: core::iter::traits::collect::IntoIterator<Item = paperpaw_sdk::Command>>(&mut self, I)
 pub fn paperpaw_sdk::Commands::from_iter<I: core::iter::traits::collect::IntoIterator<Item = paperpaw_sdk::Command>>(I) -> Self
@@ -95,6 +110,24 @@ pub fn paperpaw_sdk::Commands::into_iter(self) -> Self::IntoIter
 pub type paperpaw_sdk::Commands::Target = [paperpaw_sdk::Command]
 pub fn paperpaw_sdk::Commands::deref(&self) -> &[paperpaw_sdk::Command]
 pub struct paperpaw_sdk::Event<P: paperpaw_sdk::event::EventData>
+pub struct paperpaw_sdk::FixedAction
+pub const fn paperpaw_sdk::FixedAction::describe(self, &'static str) -> Self
+pub const fn paperpaw_sdk::FixedAction::handler(self, paperpaw_sdk::FixedHandler) -> Self
+pub const fn paperpaw_sdk::FixedAction::hint(self, paperpaw_sdk::ActionHint) -> Self
+pub const fn paperpaw_sdk::FixedAction::id(&self) -> &paperpaw_sdk::Id
+pub const fn paperpaw_sdk::FixedAction::is_sealed(&self) -> bool
+pub const fn paperpaw_sdk::FixedAction::keywords(self, &'static str) -> Self
+pub const fn paperpaw_sdk::FixedAction::new(paperpaw_sdk::Id, &'static str) -> Self
+pub const fn paperpaw_sdk::FixedAction::sealed(self) -> Self
+pub struct paperpaw_sdk::FixedScreen
+pub const fn paperpaw_sdk::FixedScreen::how_many(&self) -> paperpaw_sdk::Instances
+pub const fn paperpaw_sdk::FixedScreen::id(&self) -> &paperpaw_sdk::Id
+pub const fn paperpaw_sdk::FixedScreen::instances(self, paperpaw_sdk::Instances) -> Self
+pub fn paperpaw_sdk::FixedScreen::make(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params) -> alloc::boxed::Box<dyn paperpaw_sdk::Screen>
+pub const fn paperpaw_sdk::FixedScreen::new(paperpaw_sdk::Id, &'static str, paperpaw_sdk::FixedFactory) -> Self
+pub const fn paperpaw_sdk::FixedScreen::refresh(&self) -> core::option::Option<paperpaw_platform::display::RefreshMode>
+pub const fn paperpaw_sdk::FixedScreen::refresh_on_open(self, paperpaw_platform::display::RefreshMode) -> Self
+pub const fn paperpaw_sdk::FixedScreen::title(&self) -> &'static str
 pub struct paperpaw_sdk::FolderChosen
 pub paperpaw_sdk::FolderChosen::context: paperpaw_sdk::Params
 pub paperpaw_sdk::FolderChosen::path: alloc::string::String
@@ -256,6 +289,11 @@ pub fn paperpaw_sdk::Id::from(paperpaw_sdk::setting::Setting<T>) -> paperpaw_sdk
 pub fn paperpaw_sdk::Id::eq(&self, &paperpaw_sdk::setting::Setting<T>) -> bool
 pub fn paperpaw_sdk::Id::from(&paperpaw_sdk::setting::Setting<T>) -> paperpaw_sdk::Id
 pub fn paperpaw_sdk::Id::from(paperpaw_sdk::setting::Setting<T>) -> paperpaw_sdk::Id
+pub struct paperpaw_sdk::Instances(_)
+pub const paperpaw_sdk::Instances::MANY: Self
+pub const paperpaw_sdk::Instances::PER_PARAMS: Self
+pub const paperpaw_sdk::Instances::SINGLE: Self
+pub fn paperpaw_sdk::Instances::default() -> Self
 pub struct paperpaw_sdk::InvalidId
 pub fn paperpaw_sdk::InvalidId::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub struct paperpaw_sdk::ItemState
@@ -295,15 +333,18 @@ pub fn paperpaw_sdk::MemoryStorage::remove(&self, &str) -> core::result::Result<
 pub fn paperpaw_sdk::MemoryStorage::remove_dir_all(&self, &str) -> core::result::Result<(), paperpaw_platform::storage::StorageError>
 pub fn paperpaw_sdk::MemoryStorage::rename(&self, &str, &str) -> core::result::Result<(), paperpaw_platform::storage::StorageError>
 pub fn paperpaw_sdk::MemoryStorage::size(&self, &str) -> core::result::Result<u64, paperpaw_platform::storage::StorageError>
+pub fn paperpaw_sdk::MemoryStorage::truncate(&self, &str, u64) -> core::result::Result<(), paperpaw_platform::storage::StorageError>
 pub fn paperpaw_sdk::MemoryStorage::write(&self, &str, &[u8]) -> core::result::Result<(), paperpaw_platform::storage::StorageError>
+pub fn paperpaw_sdk::MemoryStorage::write_at(&self, &str, u64, &[u8]) -> core::result::Result<(), paperpaw_platform::storage::StorageError>
 pub struct paperpaw_sdk::MenuEntry
 pub paperpaw_sdk::MenuEntry::item: paperpaw_sdk::Id
 pub paperpaw_sdk::MenuEntry::menu: paperpaw_sdk::Id
 pub paperpaw_sdk::MenuEntry::order: i16
 pub paperpaw_sdk::MenuEntry::place: core::option::Option<paperpaw_sdk::MenuPlace>
-pub fn paperpaw_sdk::MenuEntry::new(paperpaw_sdk::Id, paperpaw_sdk::Id) -> Self
-pub fn paperpaw_sdk::MenuEntry::order(self, i16) -> Self
+pub const fn paperpaw_sdk::MenuEntry::new(paperpaw_sdk::Id, paperpaw_sdk::Id) -> Self
+pub const fn paperpaw_sdk::MenuEntry::order(self, i16) -> Self
 pub fn paperpaw_sdk::MenuEntry::place(self, paperpaw_sdk::MenuPlace) -> Self
+pub const fn paperpaw_sdk::MenuEntry::placed(paperpaw_sdk::Id, paperpaw_sdk::Id, paperpaw_sdk::MenuPlace) -> Self
 pub struct paperpaw_sdk::MenuItem<'a>
 pub paperpaw_sdk::MenuItem::icon: core::option::Option<&'a str>
 pub paperpaw_sdk::MenuItem::id: &'a paperpaw_sdk::Id
@@ -327,15 +368,12 @@ pub fn paperpaw_sdk::Menus::icon(&self, &str) -> core::option::Option<&str>
 pub fn paperpaw_sdk::Menus::ids(&self, &str) -> alloc::vec::Vec<&paperpaw_sdk::Id>
 pub fn paperpaw_sdk::Menus::is_customized(&self, &str) -> bool
 pub fn paperpaw_sdk::Menus::is_section(&self, &str) -> bool
-pub fn paperpaw_sdk::Menus::items(&self, &str) -> alloc::vec::Vec<paperpaw_sdk::MenuItem<'_>>
 pub fn paperpaw_sdk::Menus::known(&self, &str) -> core::option::Option<&[paperpaw_sdk::Id]>
 pub fn paperpaw_sdk::Menus::menu_ids(&self) -> alloc::vec::Vec<&paperpaw_sdk::Id>
 pub fn paperpaw_sdk::Menus::new() -> Self
 pub fn paperpaw_sdk::Menus::order_of(&self, &str, &str) -> core::option::Option<i16>
 pub fn paperpaw_sdk::Menus::referenced_items(&self) -> impl core::iter::traits::iterator::Iterator<Item = &paperpaw_sdk::Id>
-pub fn paperpaw_sdk::Menus::shown_items(&self, &paperpaw_sdk::Env<'_>, &str) -> alloc::vec::Vec<paperpaw_sdk::MenuItem<'_>>
 pub fn paperpaw_sdk::Menus::state(&self, &paperpaw_sdk::Env<'_>, &str) -> paperpaw_sdk::ItemState
-pub fn paperpaw_sdk::Menus::title(&self, &str) -> core::option::Option<&str>
 pub struct paperpaw_sdk::Metrics
 pub paperpaw_sdk::Metrics::dpi: u16
 pub const fn paperpaw_sdk::Metrics::mm(&self, u32) -> u32
@@ -427,8 +465,10 @@ pub struct paperpaw_sdk::ScreenKey(_)
 pub struct paperpaw_sdk::ScreenSpec
 pub paperpaw_sdk::ScreenSpec::factory: paperpaw_sdk::ScreenFactory
 pub paperpaw_sdk::ScreenSpec::id: paperpaw_sdk::Id
+pub paperpaw_sdk::ScreenSpec::instances: paperpaw_sdk::Instances
 pub paperpaw_sdk::ScreenSpec::refresh_on_open: core::option::Option<paperpaw_platform::display::RefreshMode>
 pub paperpaw_sdk::ScreenSpec::title: alloc::borrow::Cow<'static, str>
+pub fn paperpaw_sdk::ScreenSpec::instances(self, paperpaw_sdk::Instances) -> Self
 pub fn paperpaw_sdk::ScreenSpec::new(paperpaw_sdk::Id, impl core::convert::Into<alloc::borrow::Cow<'static, str>>, paperpaw_sdk::ScreenFactory) -> Self
 pub fn paperpaw_sdk::ScreenSpec::refresh_on_open(self, paperpaw_platform::display::RefreshMode) -> Self
 pub fn paperpaw_sdk::ScreenSpec::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
@@ -483,10 +523,12 @@ pub struct paperpaw_sdk::SettingGroupSpec
 pub paperpaw_sdk::SettingGroupSpec::id: paperpaw_sdk::Id
 pub paperpaw_sdk::SettingGroupSpec::order: i32
 pub paperpaw_sdk::SettingGroupSpec::page: core::option::Option<paperpaw_sdk::Id>
+pub paperpaw_sdk::SettingGroupSpec::parent: core::option::Option<paperpaw_sdk::Id>
 pub paperpaw_sdk::SettingGroupSpec::title: alloc::borrow::Cow<'static, str>
 pub const fn paperpaw_sdk::SettingGroupSpec::new(paperpaw_sdk::Id, &'static str) -> Self
 pub const fn paperpaw_sdk::SettingGroupSpec::order(self, i32) -> Self
 pub const fn paperpaw_sdk::SettingGroupSpec::page(self, paperpaw_sdk::Id) -> Self
+pub const fn paperpaw_sdk::SettingGroupSpec::within(self, paperpaw_sdk::Id) -> Self
 pub struct paperpaw_sdk::SettingSpec
 pub paperpaw_sdk::SettingSpec::default: paperpaw_sdk::SettingValue
 pub paperpaw_sdk::SettingSpec::description: core::option::Option<alloc::borrow::Cow<'static, str>>
@@ -531,6 +573,7 @@ pub fn paperpaw_sdk::Settings::is_scoped(&self, &str) -> bool
 pub fn paperpaw_sdk::Settings::is_set(&self, &str) -> bool
 pub fn paperpaw_sdk::Settings::is_worn(&self, &str) -> bool
 pub fn paperpaw_sdk::Settings::new() -> Self
+pub fn paperpaw_sdk::Settings::parent_of(&self, &paperpaw_sdk::Id) -> core::option::Option<&paperpaw_sdk::Id>
 pub fn paperpaw_sdk::Settings::placement_values(&self, &str) -> alloc::vec::Vec<paperpaw_sdk::Id>
 pub fn paperpaw_sdk::Settings::presets(&self) -> &paperpaw_sdk::presets::Presets
 pub fn paperpaw_sdk::Settings::previewing(&self) -> bool
@@ -543,6 +586,7 @@ pub fn paperpaw_sdk::Settings::spec(&self, &str) -> core::option::Option<&paperp
 pub fn paperpaw_sdk::Settings::specs(&self) -> impl core::iter::traits::iterator::Iterator<Item = &paperpaw_sdk::SettingSpec>
 pub fn paperpaw_sdk::Settings::text(&self, &str) -> &str
 pub fn paperpaw_sdk::Settings::with_placement<R>(&self, core::option::Option<&str>, impl core::ops::function::FnOnce() -> R) -> R
+pub fn paperpaw_sdk::Settings::within(&self, &paperpaw_sdk::Id, &paperpaw_sdk::Id) -> bool
 pub struct paperpaw_sdk::SlotSpec
 pub paperpaw_sdk::SlotSpec::id: paperpaw_sdk::Id
 pub paperpaw_sdk::SlotSpec::title: alloc::borrow::Cow<'static, str>
@@ -599,6 +643,7 @@ pub paperpaw_sdk::Typed::text: alloc::string::String
 pub paperpaw_sdk::Typed::typing: bool
 pub struct paperpaw_sdk::Uses(_)
 pub const paperpaw_sdk::Uses::BLUETOOTH: paperpaw_sdk::Uses
+pub const paperpaw_sdk::Uses::DEVELOPER: paperpaw_sdk::Uses
 pub const paperpaw_sdk::Uses::NETWORK: paperpaw_sdk::Uses
 pub const paperpaw_sdk::Uses::NOTHING: paperpaw_sdk::Uses
 pub const fn paperpaw_sdk::Uses::bits(self) -> u8
@@ -661,13 +706,19 @@ pub paperpaw_sdk::Command::Connect::events: paperpaw_sdk::Id
 pub paperpaw_sdk::Command::Connect::host: alloc::string::String
 pub paperpaw_sdk::Command::Connect::port: u16
 pub paperpaw_sdk::Command::Connect::socket: paperpaw_sdk::Id
+pub paperpaw_sdk::Command::Developer(alloc::boxed::Box<paperpaw_sdk::developer::DevRequest>)
 pub paperpaw_sdk::Command::Disconnect(paperpaw_sdk::Id)
 pub paperpaw_sdk::Command::Emit(paperpaw_sdk::Id, paperpaw_sdk::Params)
+pub paperpaw_sdk::Command::Extended
+pub paperpaw_sdk::Command::Extended::key: paperpaw_sdk::Id
+pub paperpaw_sdk::Command::Extended::params: paperpaw_sdk::Params
 pub paperpaw_sdk::Command::Firmware(paperpaw_sdk::firmware::FirmwareCommand)
 pub paperpaw_sdk::Command::GoOnline
 pub paperpaw_sdk::Command::Http(alloc::boxed::Box<paperpaw_sdk::HttpRequest>)
 pub paperpaw_sdk::Command::Input(alloc::string::String)
 pub paperpaw_sdk::Command::InstallPlugin(paperpaw_sdk::Id, alloc::string::String)
+pub paperpaw_sdk::Command::KeepAwake(paperpaw_sdk::power::WakeHold)
+pub paperpaw_sdk::Command::LetSleep(paperpaw_sdk::Id)
 pub paperpaw_sdk::Command::LoadPlugin(alloc::string::String)
 pub paperpaw_sdk::Command::NoNetwork
 pub paperpaw_sdk::Command::Notify(alloc::string::String)
@@ -907,13 +958,20 @@ pub enum paperpaw_sdk::Text
 pub type paperpaw_sdk::ActionHandler = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params, &mut paperpaw_sdk::Commands)>
 pub use paperpaw_sdk::Arg
 pub use paperpaw_sdk::Battery
+pub use paperpaw_sdk::Bitmap
+pub use paperpaw_sdk::BitmapError
+pub use paperpaw_sdk::BitmapFormat
+pub use paperpaw_sdk::Blit
 pub use paperpaw_sdk::ButtonState
 pub use paperpaw_sdk::Canvas
 pub use paperpaw_sdk::Color
 pub use paperpaw_sdk::DeviceInfo
 pub use paperpaw_sdk::DirEntry
 pub use paperpaw_sdk::DisplayInfo
+pub use paperpaw_sdk::Dither
 pub type paperpaw_sdk::EventHandler = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params, &mut paperpaw_sdk::Commands)>
+pub type paperpaw_sdk::FixedFactory = fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params) -> alloc::boxed::Box<dyn paperpaw_sdk::Screen>
+pub type paperpaw_sdk::FixedHandler = fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params, &mut paperpaw_sdk::Commands)
 pub use paperpaw_sdk::Font
 pub use paperpaw_sdk::FontError
 pub type paperpaw_sdk::FormatOpener = alloc::boxed::Box<dyn core::ops::function::Fn(&dyn paperpaw_platform::storage::Storage, &str, &paperpaw_sdk::OpenOptions) -> core::result::Result<alloc::boxed::Box<dyn paperpaw_document::Document>, paperpaw_document::DocumentError>>
@@ -942,13 +1000,27 @@ pub use paperpaw_sdk::StorageError
 pub use paperpaw_sdk::SystemStatus
 pub use paperpaw_sdk::Translator
 pub use paperpaw_sdk::WallClock
+pub enum paperpaw_sdk::Action<'a>
+pub fn paperpaw_sdk::Action<'a>::description(self) -> core::option::Option<&'a str>
+pub fn paperpaw_sdk::Action<'a>::hint(self) -> &'a paperpaw_sdk::ActionHint
+pub fn paperpaw_sdk::Action<'a>::id(self) -> &'a paperpaw_sdk::Id
+pub fn paperpaw_sdk::Action<'a>::is_sealed(self) -> bool
+pub fn paperpaw_sdk::Action<'a>::run(self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params, &mut paperpaw_sdk::Commands) -> bool
+pub fn paperpaw_sdk::Action<'a>::runs_itself(self) -> bool
+pub fn paperpaw_sdk::Action<'a>::search_keywords(self) -> core::option::Option<&'a str>
+pub fn paperpaw_sdk::Action<'a>::title(self) -> &'a str
+pub fn paperpaw_sdk::Action<'a>::title_key(self) -> alloc::borrow::Cow<'static, str>
+pub paperpaw_sdk::Action::Fixed(&'static paperpaw_sdk::FixedAction)
+pub paperpaw_sdk::Action::Spec(&'a paperpaw_sdk::ActionSpec)
 pub struct paperpaw_sdk::Cx<'a, 'e>
 pub fn paperpaw_sdk::Cx<'a, 'e>::close(&mut self)
 pub fn paperpaw_sdk::Cx<'a, 'e>::command(&mut self, paperpaw_sdk::Command)
 pub fn paperpaw_sdk::Cx<'a, 'e>::entry(&self) -> core::option::Option<&paperpaw_sdk::StackEntry>
 pub fn paperpaw_sdk::Cx<'a, 'e>::env(&self) -> &paperpaw_sdk::Env<'e>
 pub fn paperpaw_sdk::Cx<'a, 'e>::for_screen(self, paperpaw_sdk::ScreenKey) -> Self
+pub fn paperpaw_sdk::Cx<'a, 'e>::keep_awake(&mut self, paperpaw_sdk::power::WakeHold)
 pub fn paperpaw_sdk::Cx<'a, 'e>::key(&self) -> core::option::Option<paperpaw_sdk::ScreenKey>
+pub fn paperpaw_sdk::Cx<'a, 'e>::let_sleep(&mut self, impl core::convert::Into<paperpaw_sdk::Id>)
 pub fn paperpaw_sdk::Cx<'a, 'e>::new(&'a paperpaw_sdk::Env<'e>, &'a mut paperpaw_sdk::Output) -> Self
 pub fn paperpaw_sdk::Cx<'a, 'e>::params(&self) -> &paperpaw_sdk::Params
 pub fn paperpaw_sdk::Cx<'a, 'e>::refresh_cause(&mut self, paperpaw_sdk::filters::RefreshCause)
@@ -987,21 +1059,24 @@ pub fn paperpaw_sdk::Env<'a>::hyphenation(&self) -> &'a paperpaw_sdk::Hyphenatio
 pub fn paperpaw_sdk::Env<'a>::i18n(&self) -> &'a paperpaw_i18n::Translator
 pub fn paperpaw_sdk::Env<'a>::inputs(&self) -> &'a [paperpaw_sdk::keys::InputSpec]
 pub fn paperpaw_sdk::Env<'a>::keys(&self) -> &'a dyn paperpaw_sdk::keys::KeyBindings
+pub fn paperpaw_sdk::Env<'a>::keys_held(&self) -> paperpaw_sdk::realtime::KeysHeld<'a>
 pub fn paperpaw_sdk::Env<'a>::last_input(&self) -> paperpaw_sdk::keys::InputMode
 pub fn paperpaw_sdk::Env<'a>::look(&self) -> paperpaw_sdk::ui::look::Look
 pub fn paperpaw_sdk::Env<'a>::lookup(&self) -> &'a paperpaw_sdk::lookup::LookupProviders
 pub fn paperpaw_sdk::Env<'a>::memory(&self) -> paperpaw_sdk::memory::Memory
-pub fn paperpaw_sdk::Env<'a>::menus(&self) -> &'a paperpaw_sdk::Menus
+pub fn paperpaw_sdk::Env<'a>::menus(&self) -> paperpaw_sdk::MenuView<'a>
 pub fn paperpaw_sdk::Env<'a>::metrics(&self) -> paperpaw_sdk::Metrics
 pub fn paperpaw_sdk::Env<'a>::native(&self) -> core::option::Option<&'a paperpaw_sdk::native::Native>
 pub fn paperpaw_sdk::Env<'a>::now(&self) -> paperpaw_platform::input::Instant
 pub fn paperpaw_sdk::Env<'a>::page_layers(&self) -> &'a paperpaw_sdk::layers::PageLayers
+pub fn paperpaw_sdk::Env<'a>::panel(&self) -> paperpaw_sdk::realtime::PanelInfo
 pub fn paperpaw_sdk::Env<'a>::plugins(&self) -> &'a paperpaw_sdk::Plugins
 pub fn paperpaw_sdk::Env<'a>::power(&self) -> &'a paperpaw_sdk::power::Power
 pub fn paperpaw_sdk::Env<'a>::random(&self) -> paperpaw_sdk::random::Random
 pub fn paperpaw_sdk::Env<'a>::reader(&self) -> bool
 pub fn paperpaw_sdk::Env<'a>::readers(&self) -> &'a paperpaw_sdk::readers::Readers
-pub fn paperpaw_sdk::Env<'a>::screens(&self) -> &'a [(paperpaw_sdk::Id, alloc::borrow::Cow<'static, str>)]
+pub fn paperpaw_sdk::Env<'a>::room(&self) -> paperpaw_sdk::realtime::Room
+pub fn paperpaw_sdk::Env<'a>::screens(&self) -> paperpaw_sdk::ScreenList<'a>
 pub fn paperpaw_sdk::Env<'a>::secrets(&self) -> paperpaw_sdk::secrets::Visible<'a>
 pub fn paperpaw_sdk::Env<'a>::services(&self) -> &'a paperpaw_sdk::services::Services
 pub fn paperpaw_sdk::Env<'a>::settings(&self) -> &'a paperpaw_sdk::Settings
@@ -1032,17 +1107,42 @@ pub fn paperpaw_sdk::FontHandle<'a>::advance(&self, f32, char) -> f32
 pub fn paperpaw_sdk::FontHandle<'a>::display(self) -> Self
 pub fn paperpaw_sdk::FontHandle<'a>::draw(&self, &mut paperpaw_graphics::canvas::Canvas<'_>, f32, f32, i32, &str, paperpaw_platform::pixel::Color) -> f32
 pub fn paperpaw_sdk::FontHandle<'a>::draw_bolder(&self, &mut paperpaw_graphics::canvas::Canvas<'_>, f32, f32, i32, &str, paperpaw_platform::pixel::Color, u16) -> f32
+pub fn paperpaw_sdk::FontHandle<'a>::draw_toned(&self, &mut paperpaw_graphics::canvas::Canvas<'_>, f32, f32, i32, &str, paperpaw_platform::pixel::Color, u16, paperpaw_text::curve::ToneCurve) -> f32
 pub fn paperpaw_sdk::FontHandle<'a>::has_char(&self, char) -> bool
 pub fn paperpaw_sdk::FontHandle<'a>::heading_line_height(&self, f32) -> f32
 pub fn paperpaw_sdk::FontHandle<'a>::id(&self) -> &'a paperpaw_sdk::Id
 pub fn paperpaw_sdk::FontHandle<'a>::ink(&self, f32, &str) -> core::option::Option<(i32, i32)>
 pub fn paperpaw_sdk::FontHandle<'a>::ink_across(&self, f32, &str) -> core::option::Option<(i32, i32)>
+pub fn paperpaw_sdk::FontHandle<'a>::kern(&self, f32, char, char) -> f32
 pub fn paperpaw_sdk::FontHandle<'a>::largest_size(&self) -> core::option::Option<f32>
+pub fn paperpaw_sdk::FontHandle<'a>::ligatures(self) -> Self
 pub fn paperpaw_sdk::FontHandle<'a>::line_metrics(&self, f32) -> paperpaw_text::font::LineMetrics
 pub fn paperpaw_sdk::FontHandle<'a>::measure(&self, f32, &str) -> f32
 pub fn paperpaw_sdk::FontHandle<'a>::size_for(&self, f32, &str) -> f32
+pub fn paperpaw_sdk::FontHandle<'a>::unkerned(self) -> Self
 pub fn paperpaw_sdk::FontHandle<'a>::wrap(&self, f32, &str, f32) -> alloc::vec::Vec<core::ops::range::Range<usize>>
 pub fn paperpaw_sdk::FontHandle<'_>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+pub struct paperpaw_sdk::MenuView<'a>
+pub fn paperpaw_sdk::MenuView<'a>::contributed_ids(&self, &str) -> alloc::vec::Vec<&'a paperpaw_sdk::Id>
+pub fn paperpaw_sdk::MenuView<'a>::default_ids(&self, &str) -> alloc::vec::Vec<&'a paperpaw_sdk::Id>
+pub fn paperpaw_sdk::MenuView<'a>::description(&self, &str) -> core::option::Option<&'a str>
+pub fn paperpaw_sdk::MenuView<'a>::hidden_by(&self, &str, &str) -> core::option::Option<&'a paperpaw_sdk::Id>
+pub fn paperpaw_sdk::MenuView<'a>::icon(&self, &str) -> core::option::Option<&'a str>
+pub fn paperpaw_sdk::MenuView<'a>::ids(&self, &str) -> alloc::vec::Vec<&'a paperpaw_sdk::Id>
+pub fn paperpaw_sdk::MenuView<'a>::items(&self, &str) -> alloc::vec::Vec<paperpaw_sdk::MenuItem<'a>>
+pub fn paperpaw_sdk::MenuView<'a>::known(&self, &str) -> core::option::Option<&'a [paperpaw_sdk::Id]>
+pub fn paperpaw_sdk::MenuView<'a>::menu_ids(&self) -> alloc::vec::Vec<&'a paperpaw_sdk::Id>
+pub fn paperpaw_sdk::MenuView<'a>::menus(&self) -> &'a paperpaw_sdk::Menus
+pub fn paperpaw_sdk::MenuView<'a>::new(&'a paperpaw_sdk::Menus, &'a paperpaw_sdk::Actions, &'a paperpaw_sdk::Settings) -> Self
+pub fn paperpaw_sdk::MenuView<'a>::shown_items(&self, &paperpaw_sdk::Env<'_>, &str) -> alloc::vec::Vec<paperpaw_sdk::MenuItem<'a>>
+pub fn paperpaw_sdk::MenuView<'a>::title(&self, &str) -> core::option::Option<&'a str>
+pub fn paperpaw_sdk::MenuView<'_>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+pub type paperpaw_sdk::MenuView<'_>::Target = paperpaw_sdk::Menus
+pub fn paperpaw_sdk::MenuView<'_>::deref(&self) -> &paperpaw_sdk::Menus
+pub struct paperpaw_sdk::ScreenList<'a>
+pub fn paperpaw_sdk::ScreenList<'a>::is_empty(&self) -> bool
+pub fn paperpaw_sdk::ScreenList<'a>::iter(self) -> impl core::iter::traits::iterator::Iterator<Item = (&'a paperpaw_sdk::Id, &'a str)> + 'a
+pub fn paperpaw_sdk::ScreenList<'a>::len(&self) -> usize
 pub const paperpaw_sdk::COVER_FIT: paperpaw_image::Fit
 pub const paperpaw_sdk::DATA_FORMATS: u32
 pub const paperpaw_sdk::IMAGE_FIT: paperpaw_image::Fit
@@ -1069,6 +1169,7 @@ pub mod paperpaw_sdk::contribution
 pub mod paperpaw_sdk::data
 pub fn paperpaw_platform::storage::StorageError::from(paperpaw_sdk::data::Error) -> Self
 pub mod paperpaw_sdk::decorations
+pub mod paperpaw_sdk::developer
 pub mod paperpaw_sdk::device_name
 pub mod paperpaw_sdk::digest
 pub mod paperpaw_sdk::document
@@ -1135,6 +1236,7 @@ pub mod paperpaw_sdk::qr
 pub mod paperpaw_sdk::random
 pub mod paperpaw_sdk::readers
 pub mod paperpaw_sdk::reading
+pub mod paperpaw_sdk::realtime
 pub mod paperpaw_sdk::replies
 pub mod paperpaw_sdk::secrets
 pub mod paperpaw_sdk::semantics
@@ -1164,6 +1266,7 @@ pub mod paperpaw_sdk::work
 pub mod paperpaw_sdk::xml
 pub macro paperpaw_sdk::data_path!
 pub macro paperpaw_sdk::event_data!
+pub macro paperpaw_sdk::hot!
 pub macro paperpaw_sdk::package_version!
 pub macro paperpaw_sdk::plugin!
 pub macro paperpaw_sdk::role_settings!

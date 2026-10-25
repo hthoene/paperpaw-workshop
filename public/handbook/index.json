@@ -4,7 +4,7 @@
   "title": "The sample plugin",
   "file": "docs--the-sample-plugin.md",
   "summary": "[`samples/hello-plugin`](../samples/hello-plugin/src/lib.rs) is a small\nplugin to start from.",
-  "tokens": 6008
+  "tokens": 6273
  },
  {
   "id": "docs/the-plugin",
@@ -25,7 +25,7 @@
   "title": "Screens",
   "file": "docs--screens.md",
   "summary": "A screen implements [`Screen`].",
-  "tokens": 1521
+  "tokens": 1786
  },
  {
   "id": "docs/which-building-block-for-what",
@@ -102,7 +102,7 @@
   "title": "What plugins contribute",
   "file": "docs--what-plugins-contribute.md",
   "summary": "| Contribution | Registrar | What it is |\n|---|---|---|\n| Actions | `add_action` | Something to do, bound to buttons and gestures, listed in menus |\n| Screens |",
-  "tokens": 14108
+  "tokens": 16054
  },
  {
   "id": "docs/what-a-slot-s-screen-does",
@@ -130,14 +130,14 @@
   "title": "What every reader offers",
   "file": "docs--what-every-reader-offers.md",
   "summary": "A plugin that works with books never names the reader plugin: it uses\nwhat `builtin` defines for every reader, so a reader of one's own (bound\nto `core.reader`)",
-  "tokens": 908
+  "tokens": 964
  },
  {
   "id": "docs/what-the-other-slots-promise",
   "title": "What the other slots promise",
   "file": "docs--what-the-other-slots-promise.md",
   "summary": "A screen bound to one of these slots replaces the shipped one; it is\nopened with what the table says and keeps its promises, so the plugins\naround it go on work",
-  "tokens": 797
+  "tokens": 910
  },
  {
   "id": "docs/what-every-library-offers",
@@ -154,18 +154,18 @@
   "tokens": 381
  },
  {
-  "id": "docs/marks-in-the-text",
-  "title": "Marks in the text",
-  "file": "docs--marks-in-the-text.md",
+  "id": "docs/marks-decorations",
+  "title": "Marks (decorations)",
+  "file": "docs--marks-decorations.md",
   "summary": "A plugin marks words on book pages with a decorator (ADR 0021): it gets\nthe words of a page with their places in the book and gives back ranges,\neach with a *ro",
-  "tokens": 912
+  "tokens": 909
  },
  {
   "id": "docs/drawing-on-the-page",
   "title": "Drawing on the page",
   "file": "docs--drawing-on-the-page.md",
   "summary": "A page layer (`layers::PageLayerSpec`) draws on every page a reader\nshows: side notes, a reading ruler, change bars.",
-  "tokens": 464
+  "tokens": 1243
  },
  {
   "id": "docs/pictures-over-what-is-drawn",
@@ -207,7 +207,7 @@
   "title": "Passwords and keys",
   "file": "docs--passwords-and-keys.md",
   "summary": "Plugins keep passwords, API keys and tokens with\n`Command::set_secret(SecretChange::keep(id, label, value))` and read them\nwith `env.secrets().get(id)`.",
-  "tokens": 243
+  "tokens": 279
  },
  {
   "id": "docs/the-network",
@@ -222,6 +222,13 @@
   "file": "docs--bluetooth.md",
   "summary": "Where the device has a Bluetooth Low Energy radio the kernel uses\n(`env.caps().bluetooth`; `env.bluetooth()` shows the radio's state and\nthe bonded devices give",
   "tokens": 1577
+ },
+ {
+  "id": "docs/screens-that-run-in-real-time",
+  "title": "Screens that run in real time",
+  "file": "docs--screens-that-run-in-real-time.md",
+  "summary": "Games, emulators and animations draw many frames a second and want\nevery button as it goes down.",
+  "tokens": 964
  },
  {
   "id": "docs/work-in-the-background",
@@ -242,7 +249,7 @@
   "title": "Memory",
   "file": "docs--memory.md",
   "summary": "PaperPaw's code guidelines ([CONTRIBUTING.md](../CONTRIBUTING.md#code-guidelines)) hold for plugins too: length limits, errors on user data, memory, comments.",
-  "tokens": 276
+  "tokens": 372
  },
  {
   "id": "docs/plugins-as-files",
@@ -305,7 +312,7 @@
   "title": "Plugins without code",
   "file": "docs--plugins-without-code.md",
   "summary": "A data plugin is a folder:\n\n```text\nplugins/large-print/\n  plugin.ini     [plugin] id, name, description, version, formats\n  i18n/*.ini     translation catalogs",
-  "tokens": 2234
+  "tokens": 2404
  },
  {
   "id": "docs/publishing",
@@ -416,8 +423,8 @@
   "id": "actions",
   "title": "Actions for key maps",
   "file": "actions.md",
-  "summary": "| Action id | Name |\n|---|---|\n| `about.open` | About PaperPaw |\n| `battery.open` | Battery |\n| `bluetooth.open` | Bluetooth |\n| `calibre.open` | Calibre |\n| `c",
-  "tokens": 1067
+  "summary": "| Action id | Name |\n|---|---|\n| `about.open` | About PaperPaw |\n| `battery.open` | Battery |\n| `bluetooth.open` | Bluetooth |\n| `calibre.open` | Calibre connec",
+  "tokens": 1080
  },
  {
   "id": "devices",
@@ -431,7 +438,7 @@
   "title": "The SDK's top level (paperpaw_sdk::...)",
   "file": "sdk--root.md",
   "summary": "```rust\npub trait paperpaw_sdk::EventData: core::clone::Clone + core::marker::Sized + 'static\npub trait paperpaw_sdk::Plugin\npub fn paperpaw_sdk::Plugin::manife",
-  "tokens": 22249
+  "tokens": 24453
  },
  {
   "id": "sdk/annotations",
@@ -445,7 +452,7 @@
   "title": "The SDK's module ask",
   "file": "sdk--ask.md",
   "summary": "```rust\npub struct paperpaw_sdk::ask::ChoiceQuestion\npub fn paperpaw_sdk::ask::ChoiceQuestion::about(self, impl core::convert::Into<alloc::string::String>) -> S",
-  "tokens": 838
+  "tokens": 870
  },
  {
   "id": "sdk/bluetooth",
@@ -459,7 +466,7 @@
   "title": "The SDK's module builtin",
   "file": "sdk--builtin.md",
   "summary": "```rust\npub struct paperpaw_sdk::builtin::events::AnnotationsChanged\npub paperpaw_sdk::builtin::events::AnnotationsChanged::path: alloc::string::String\npub fn p",
-  "tokens": 18126
+  "tokens": 18946
  },
  {
   "id": "sdk/chrome",
@@ -487,7 +494,7 @@
   "title": "The SDK's module contribution",
   "file": "sdk--contribution.md",
   "summary": "```rust\npub struct paperpaw_sdk::contribution::Registrar\npub fn paperpaw_sdk::contribution::Registrar::add_action(&mut self, paperpaw_sdk::ActionSpec) -> core::",
-  "tokens": 7141
+  "tokens": 7617
  },
  {
   "id": "sdk/data",
@@ -502,6 +509,13 @@
   "file": "sdk--decorations.md",
   "summary": "```rust\npub struct paperpaw_sdk::decorations::Decorated\npub paperpaw_sdk::decorations::Decorated::end: paperpaw_document::Locator\npub paperpaw_sdk::decorations:",
   "tokens": 2706
+ },
+ {
+  "id": "sdk/developer",
+  "title": "The SDK's module developer",
+  "file": "sdk--developer.md",
+  "summary": "```rust\npub struct paperpaw_sdk::developer::DevRequest\npub enum paperpaw_sdk::developer::DevClose\npub paperpaw_sdk::developer::DevClose::Asked\npub paperpaw_sdk:",
+  "tokens": 978
  },
  {
   "id": "sdk/device_name",
@@ -536,7 +550,7 @@
   "title": "The SDK's module reading",
   "file": "sdk--reading.md",
   "summary": "```rust\npub struct paperpaw_sdk::reading::DroppedRuns\npub fn paperpaw_sdk::reading::DroppedRuns::clear(&self)\npub fn paperpaw_sdk::reading::DroppedRuns::new() -",
-  "tokens": 2139
+  "tokens": 2300
  },
  {
   "id": "sdk/replies",
@@ -550,7 +564,7 @@
   "title": "The SDK's module ui",
   "file": "sdk--ui.md",
   "summary": "```rust\npub struct paperpaw_sdk::ui::CellGrid\npub fn paperpaw_sdk::ui::CellGrid::cell(&self, usize) -> paperpaw_platform::geometry::Rect\npub fn paperpaw_sdk::ui",
-  "tokens": 22807
+  "tokens": 24921
  },
  {
   "id": "sdk/work",
@@ -647,8 +661,8 @@
   "id": "sdk/layers",
   "title": "The SDK's module layers",
   "file": "sdk--layers.md",
-  "summary": "```rust\npub struct paperpaw_sdk::layers::LineBox\npub paperpaw_sdk::layers::LineBox::area: paperpaw_platform::geometry::Rect\npub paperpaw_sdk::layers::LineBox::e",
-  "tokens": 1896
+  "summary": "```rust\npub struct paperpaw_sdk::layers::LayerItem\npub paperpaw_sdk::layers::LayerItem::area: paperpaw_platform::geometry::Rect\npub paperpaw_sdk::layers::LayerI",
+  "tokens": 2415
  },
  {
   "id": "sdk/library",
@@ -676,7 +690,7 @@
   "title": "The SDK's module memory",
   "file": "sdk--memory.md",
   "summary": "```rust\npub struct paperpaw_sdk::memory::Memory\npub const paperpaw_sdk::memory::Memory::NONE: Self\npub const fn paperpaw_sdk::memory::Memory::new(fn() -> core::",
-  "tokens": 441
+  "tokens": 631
  },
  {
   "id": "sdk/native",
@@ -711,7 +725,7 @@
   "title": "The SDK's module power",
   "file": "sdk--power.md",
   "summary": "```rust\npub struct paperpaw_sdk::power::Power\npub paperpaw_sdk::power::Power::automatic: bool\npub paperpaw_sdk::power::Power::level: paperpaw_sdk::power::PowerL",
-  "tokens": 506
+  "tokens": 720
  },
  {
   "id": "sdk/presets",
@@ -740,6 +754,13 @@
   "file": "sdk--readers.md",
   "summary": "```rust\npub struct paperpaw_sdk::readers::ReaderSpec\npub paperpaw_sdk::readers::ReaderSpec::formats: alloc::vec::Vec<paperpaw_sdk::Id>\npub paperpaw_sdk::readers",
   "tokens": 1007
+ },
+ {
+  "id": "sdk/realtime",
+  "title": "The SDK's module realtime",
+  "file": "sdk--realtime.md",
+  "summary": "```rust\npub struct paperpaw_sdk::realtime::FrameReport\npub const fn paperpaw_sdk::realtime::FrameReport::area(&self) -> paperpaw_platform::geometry::Rect\npub co",
+  "tokens": 1577
  },
  {
   "id": "sdk/secrets",
@@ -794,8 +815,8 @@
   "id": "sdk/text",
   "title": "The SDK's module text",
   "file": "sdk--text.md",
-  "summary": "```rust\npub use paperpaw_sdk::text::OUTLINES\npub use paperpaw_sdk::text::sfnt\n```",
-  "tokens": 23
+  "summary": "```rust\npub use paperpaw_sdk::text::OUTLINES\npub use paperpaw_sdk::text::ToneCurve\npub use paperpaw_sdk::text::sfnt\n```",
+  "tokens": 33
  },
  {
   "id": "sdk/time",
@@ -808,8 +829,8 @@
   "id": "sdk/usage",
   "title": "The SDK's module usage",
   "file": "sdk--usage.md",
-  "summary": "```rust\npub struct paperpaw_sdk::usage::PluginUsage\npub paperpaw_sdk::usage::PluginUsage::busy_us: u64\npub paperpaw_sdk::usage::PluginUsage::calls: u32\npub pape",
-  "tokens": 403
+  "summary": "```rust\npub struct paperpaw_sdk::usage::PluginUsage\npub paperpaw_sdk::usage::PluginUsage::awake_ms: u64\npub paperpaw_sdk::usage::PluginUsage::awake_reason: allo",
+  "tokens": 441
  },
  {
   "id": "sdk/voices",
@@ -830,7 +851,7 @@
   "title": "The SDK's module widgets",
   "file": "sdk--widgets.md",
   "summary": "```rust\npub trait paperpaw_sdk::widgets::Widget\npub fn paperpaw_sdk::widgets::Widget::context(&mut self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::widgets::WidgetC",
-  "tokens": 7777
+  "tokens": 7794
  },
  {
   "id": "sdk/words",
@@ -851,7 +872,7 @@
   "title": "Settings of core",
   "file": "settings--core.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] developer` | Developer options | `true`, `false` | `false` | For developers",
-  "tokens": 6379
+  "tokens": 7052
  },
  {
   "id": "settings/dictionary",
@@ -865,21 +886,21 @@
   "title": "Settings of reader",
   "file": "settings--reader.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[reader] status.size` | Text size | 5 to 16 | `6` | The size of the text in the st",
-  "tokens": 827
+  "tokens": 753
  },
  {
   "id": "settings/files",
   "title": "Settings of files",
   "file": "settings--files.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[files] archive` | Archive folder | text | `books/Archive` | Where “Move to the ar",
-  "tokens": 188
+  "tokens": 183
  },
  {
   "id": "settings/home",
   "title": "Settings of home",
   "file": "settings--home.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[home] page-1` | Home page 1 | text | `home.clock, home.continue, home.recent` | T",
-  "tokens": 1899
+  "tokens": 1882
  },
  {
   "id": "settings/menu",
@@ -899,15 +920,15 @@
   "id": "settings/calibre",
   "title": "Settings of calibre",
   "file": "settings--calibre.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[calibre] address` | Calibre's address | text | `` | Only if Calibre is not found:",
-  "tokens": 53
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[calibre] address` | Address | text | `` | Only if Calibre is not found: the addre",
+  "tokens": 50
  },
  {
   "id": "settings/stats",
   "title": "Settings of stats",
   "file": "settings--stats.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[stats] goal` | Daily reading goal | `stats.goal.off`, `stats.goal.10`, `stats.goa",
-  "tokens": 3281
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[stats] goal` | Daily goal | `stats.goal.off`, `stats.goal.10`, `stats.goal.15`, `",
+  "tokens": 3278
  },
  {
   "id": "settings/reading-goal",
@@ -921,14 +942,14 @@
   "title": "Settings of battery",
   "file": "settings--battery.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[battery] enabled` | Record battery use | `true`, `false` | `true` | Notes the bat",
-  "tokens": 97
+  "tokens": 93
  },
  {
   "id": "settings/wifi",
   "title": "Settings of wifi",
   "file": "settings--wifi.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[wifi] on-demand` | Connect when needed | `true`, `false` | `true` | Switches Wi-F",
-  "tokens": 156
+  "tokens": 205
  },
  {
   "id": "settings/bluetooth",
@@ -942,21 +963,21 @@
   "title": "Settings of power",
   "file": "settings--power.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[power] mode` | Power mode | `power.mode.auto`, `power.mode.normal`, `power.mode.s",
-  "tokens": 196
+  "tokens": 194
  },
  {
   "id": "settings/file-manager",
   "title": "Settings of file-manager",
   "file": "settings--file-manager.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[file-manager] hidden` | Show hidden files | `true`, `false` | `false` | Files and",
-  "tokens": 60
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[file-manager] hidden` | Hidden files | `true`, `false` | `false` | Files and fold",
+  "tokens": 59
  },
  {
   "id": "settings/opds",
   "title": "Settings of opds",
   "file": "settings--opds.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[opds] covers` | Covers | `true`, `false` | `true` | Pictures of the books in the ",
-  "tokens": 90
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[opds] covers` | Catalog covers | `true`, `false` | `true` | Pictures of the books",
+  "tokens": 92
  },
  {
   "id": "settings/fonts-browser",
@@ -990,15 +1011,15 @@
   "id": "settings/vocabulary",
   "title": "Settings of vocabulary",
   "file": "settings--vocabulary.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[vocabulary] collect` | Keep words looked up | `true`, `false` | `true` | Words yo",
-  "tokens": 1888
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[vocabulary] collect` | Keep a list of words looked up | `true`, `false` | `true` ",
+  "tokens": 1891
  },
  {
   "id": "settings/sleep",
   "title": "Settings of sleep",
   "file": "settings--sleep.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[sleep] show` | While asleep, show | `sleep.show.cat`, `sleep.show.cover`, `sleep.",
-  "tokens": 501
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[sleep] show` | Show | `sleep.show.cat`, `sleep.show.cover`, `sleep.show.picture`,",
+  "tokens": 490
  },
  {
   "id": "settings/translate",
@@ -1011,15 +1032,15 @@
   "id": "settings/news",
   "title": "Settings of news",
   "file": "settings--news.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[news] articles` | News articles a feed | 5 to 200 | `30` | How many of a feed's n",
-  "tokens": 526
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[news] articles` | Articles a feed | 5 to 200 | `30` | How many of a feed's newest",
+  "tokens": 524
  },
  {
   "id": "settings/weather",
   "title": "Settings of weather",
   "file": "settings--weather.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[weather] place` | Place | text | `` | Search by name.",
-  "tokens": 1862
+  "tokens": 1860
  },
  {
   "id": "settings/widgets",
@@ -1033,21 +1054,21 @@
   "title": "Settings of keyboard",
   "file": "settings--keyboard.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[keyboard] layouts` | Keyboard layouts | list | `keyboard.layout.auto` | The layou",
-  "tokens": 219
+  "tokens": 259
  },
  {
   "id": "settings/settings",
   "title": "Settings of settings",
   "file": "settings--settings.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[settings] advanced` | Show advanced settings | `true`, `false` | `false` | Also s",
-  "tokens": 55
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[settings] advanced` | Advanced settings | `true`, `false` | `false` | Also show s",
+  "tokens": 54
  },
  {
   "id": "settings/diagnostics",
   "title": "Settings of diagnostics",
   "file": "settings--diagnostics.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[diagnostics] pages` | Number of test pages | 1 to 10000 | `20` | Pages of the dis",
-  "tokens": 50
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[diagnostics] pages` | Test pages | 1 to 10000 | `20` | Pages of the display test ",
+  "tokens": 47
  },
  {
   "id": "settings/update",
@@ -1060,43 +1081,85 @@
   "id": "settings/help",
   "title": "Settings of help",
   "file": "settings--help.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[help] show` | Hints for new screens | `true`, `false` | `true` | The first time a",
-  "tokens": 91
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[help] show` | Hints | `true`, `false` | `true` | The first time a screen opens, a",
+  "tokens": 87
  },
  {
   "id": "settings-group/core.group.system",
   "title": "Settings in the group core.group.system",
   "file": "settings-group--core.group.system.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] developer` | Developer options | `true`, `false` | `false` | For developers",
-  "tokens": 1152
+  "tokens": 260
  },
  {
-  "id": "settings-group/core.group.display",
-  "title": "Settings in the group core.group.display",
-  "file": "settings-group--core.group.display.md",
+  "id": "settings-group/core.group.reading-display",
+  "title": "Settings in the group core.group.reading-display",
+  "file": "settings-group--core.group.reading-display.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] night-mode` | Night mode | `true`, `false` | `false` | White text on black.",
-  "tokens": 926
+  "tokens": 334
+ },
+ {
+  "id": "settings-group/core.group.reading-aloud",
+  "title": "Settings in the group core.group.reading-aloud",
+  "file": "settings-group--core.group.reading-aloud.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] voice` | Voice | `core.voice.system` | `core.voice.system` | Automatic uses",
+  "tokens": 228
  },
  {
   "id": "settings-group/core.group.controls",
   "title": "Settings in the group core.group.controls",
   "file": "settings-group--core.group.controls.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] edge-ends` | Edges for swipes: top and bottom | 0 to 25 | `10` | How far fr",
-  "tokens": 475
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] edge-ends` | Swipe edges: top and bottom | 0 to 25 | `10` | How far from th",
+  "tokens": 428
  },
  {
   "id": "settings-group/core.group.library",
   "title": "Settings in the group core.group.library",
   "file": "settings-group--core.group.library.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] library-folder` | Library folder | text | `books` | The folder with your bo",
-  "tokens": 348
+  "tokens": 379
+ },
+ {
+  "id": "settings-group/wifi.group",
+  "title": "Settings in the group wifi.group",
+  "file": "settings-group--wifi.group.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] device-name` | Device name | text | `PaperPaw X4` | The name Calibre, your ",
+  "tokens": 244
  },
  {
   "id": "settings-group/core.group.look",
   "title": "Settings in the group core.group.look",
   "file": "settings-group--core.group.look.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] ui-size` | Menu text size | 7 to 24 | `9` | Size of menus, lists and the st",
-  "tokens": 1465
+  "tokens": 572
+ },
+ {
+  "id": "settings-group/home.group",
+  "title": "Settings in the group home.group",
+  "file": "settings-group--home.group.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] widgets.frame` | Frames of widgets | `core.frame.own`, `core.frame.none`, `",
+  "tokens": 643
+ },
+ {
+  "id": "settings-group/sleep.group",
+  "title": "Settings in the group sleep.group",
+  "file": "settings-group--sleep.group.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] logo` | Logo picture | text | `` | Path of a JPEG or PNG shown instead of P",
+  "tokens": 525
+ },
+ {
+  "id": "settings-group/core.group.display",
+  "title": "Settings in the group core.group.display",
+  "file": "settings-group--core.group.display.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] flash-screens` | Flash on screen change | `true`, `false` | `false` | Redra",
+  "tokens": 200
+ },
+ {
+  "id": "settings-group/power.group",
+  "title": "Settings in the group power.group",
+  "file": "settings-group--power.group.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] sleep-after` | Sleep after | 0 to 120 | `10` | Minutes without use before t",
+  "tokens": 306
  },
  {
   "id": "settings-group/core.space",
@@ -1106,18 +1169,53 @@
   "tokens": 61
  },
  {
+  "id": "settings-group/core.group.reading-text",
+  "title": "Settings in the group core.group.reading-text",
+  "file": "settings-group--core.group.reading-text.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] text-color` | Text colour | `core.color.black`, `core.color.dark-gray`, `co",
+  "tokens": 523
+ },
+ {
   "id": "settings-group/core.group.status",
   "title": "Settings in the group core.group.status",
   "file": "settings-group--core.group.status.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] status-font` | Font | `core.status-font.ui`, `core.status-font.book`, `Lite",
-  "tokens": 514
+  "tokens": 528
+ },
+ {
+  "id": "settings-group/core.group.reading-layout",
+  "title": "Settings in the group core.group.reading-layout",
+  "file": "settings-group--core.group.reading-layout.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] line-spacing` | Line spacing | 80 to 250 | `135` | Space between lines, rel",
+  "tokens": 457
+ },
+ {
+  "id": "settings-group/core.group.reading-hyphenation",
+  "title": "Settings in the group core.group.reading-hyphenation",
+  "file": "settings-group--core.group.reading-hyphenation.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] hyphenate` | Hyphenate words | `true`, `false` | `true` | Break long words ",
+  "tokens": 132
+ },
+ {
+  "id": "settings-group/core.group.reading-book-styles",
+  "title": "Settings in the group core.group.reading-book-styles",
+  "file": "settings-group--core.group.reading-book-styles.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] publisher-styles` | Publisher's formatting | `true`, `false` | `true` | Use",
+  "tokens": 297
+ },
+ {
+  "id": "settings-group/core.group.reading-behaviour",
+  "title": "Settings in the group core.group.reading-behaviour",
+  "file": "settings-group--core.group.reading-behaviour.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] reading-app` | Reading app | `core.reading-app.default` | `core.reading-app",
+  "tokens": 191
  },
  {
   "id": "settings-group/core.group.reading",
   "title": "Settings in the group core.group.reading",
   "file": "settings-group--core.group.reading.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] reading-font` | Font | `core.font.default`, `Literata`, `PaperPaw Sans` | `",
-  "tokens": 1639
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] scope-only` | Only this book | `true`, `false` | `false` | Changes to font ",
+  "tokens": 546
  },
  {
   "id": "settings-group/core.group.marks",
@@ -1125,6 +1223,13 @@
   "file": "settings-group--core.group.marks.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] highlight.background` | Background | `core.tone.none`, `core.tone.light-gra",
   "tokens": 2263
+ },
+ {
+  "id": "settings-group/core.group.time",
+  "title": "Settings in the group core.group.time",
+  "file": "settings-group--core.group.time.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] clock-format` | Clock | `core.clock.24h`, `core.clock.12h` | `core.clock.24",
+  "tokens": 289
  },
  {
   "id": "settings-group/home.status",
@@ -1145,21 +1250,21 @@
   "title": "Settings in the group home.clock",
   "file": "settings-group--home.clock.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[home] clock.align` | Alignment | `core.align.left`, `core.align.center`, `core.al",
-  "tokens": 296
+  "tokens": 294
  },
  {
   "id": "settings-group/home.continue",
   "title": "Settings in the group home.continue",
   "file": "settings-group--home.continue.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[home] continue.align` | Alignment | `core.align.left`, `core.align.center`, `core",
-  "tokens": 290
+  "tokens": 285
  },
  {
   "id": "settings-group/home.recent",
   "title": "Settings in the group home.recent",
   "file": "settings-group--home.recent.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[home] recent.align` | Alignment | `core.align.left`, `core.align.center`, `core.a",
-  "tokens": 323
+  "tokens": 321
  },
  {
   "id": "settings-group/kosync.group",
@@ -1172,8 +1277,8 @@
   "id": "settings-group/stats.group",
   "title": "Settings in the group stats.group",
   "file": "settings-group--stats.group.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[stats] goal` | Daily reading goal | `stats.goal.off`, `stats.goal.10`, `stats.goa",
-  "tokens": 284
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[stats] goal` | Daily goal | `stats.goal.off`, `stats.goal.10`, `stats.goal.15`, `",
+  "tokens": 389
  },
  {
   "id": "settings-group/stats.widget.today",
@@ -1228,15 +1333,8 @@
   "id": "settings-group/core.group.developer",
   "title": "Settings in the group core.group.developer",
   "file": "settings-group--core.group.developer.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[battery] by-plugin` | Battery: what each plugin took | `true`, `false` | `true` |",
-  "tokens": 196
- },
- {
-  "id": "settings-group/wifi.group",
-  "title": "Settings in the group wifi.group",
-  "file": "settings-group--wifi.group.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[wifi] on-demand` | Connect when needed | `true`, `false` | `true` | Switches Wi-F",
-  "tokens": 156
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[battery] by-plugin` | Battery by plugin | `true`, `false` | `true` | Also lists t",
+  "tokens": 219
  },
  {
   "id": "settings-group/bluetooth.group",
@@ -1246,11 +1344,18 @@
   "tokens": 74
  },
  {
-  "id": "settings-group/power.group",
-  "title": "Settings in the group power.group",
-  "file": "settings-group--power.group.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[power] mode` | Power mode | `power.mode.auto`, `power.mode.normal`, `power.mode.s",
-  "tokens": 196
+  "id": "settings-group/lock.group",
+  "title": "Settings in the group lock.group",
+  "file": "settings-group--lock.group.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[lock] kind` | Screen lock | `lock.kind.off`, `lock.kind.pin`, `lock.kind.pattern`",
+  "tokens": 145
+ },
+ {
+  "id": "settings-group/core.group.reading-aids",
+  "title": "Settings in the group core.group.reading-aids",
+  "file": "settings-group--core.group.reading-aids.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[aids] bold-beginnings` | Bold word beginnings | `true`, `false` | `false` | The f",
+  "tokens": 98
  },
  {
   "id": "settings-group/vocabulary.widget.word",
@@ -1285,7 +1390,7 @@
   "title": "Settings in the group weather.group",
   "file": "settings-group--weather.group.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[weather] place` | Place | text | `` | Search by name.",
-  "tokens": 234
+  "tokens": 233
  },
  {
   "id": "settings-group/weather.now",
@@ -1461,6 +1566,20 @@
   "file": "settings-group--widgets.battery.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[widgets] battery.align` | Alignment | `core.align.left`, `core.align.center`, `co",
   "tokens": 453
+ },
+ {
+  "id": "settings-group/keyboard.group",
+  "title": "Settings in the group keyboard.group",
+  "file": "settings-group--keyboard.group.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[keyboard] layouts` | Keyboard layouts | list | `keyboard.layout.auto` | The layou",
+  "tokens": 259
+ },
+ {
+  "id": "settings-group/update.group",
+  "title": "Settings in the group update.group",
+  "file": "settings-group--update.group.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[update] look` | Look for updates | `true`, `false` | `false` | About once a week,",
+  "tokens": 93
  },
  {
   "id": "settings-group/core.group.network",
