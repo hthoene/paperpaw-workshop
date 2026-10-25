@@ -127,7 +127,7 @@ function Screenshots({ desk, onClose }: { desk: Desk; onClose(): void }) {
         <p class="hint">None yet. Take them with the camera above the reader, or let the AI take them.</p>
       )}
       <p class="hint">
-        {shots.length} of {MAX_SCREENSHOTS}, shown in this order. The first one is what people see first.
+        {shots.length} of {MAX_SCREENSHOTS}. The first is what people see first.
       </p>
       <button type="button" class="link" disabled={!!desk.workshop?.busy} onClick={askAi}>
         {shots.length ? "Let the AI improve them" : "Let the AI take them"}

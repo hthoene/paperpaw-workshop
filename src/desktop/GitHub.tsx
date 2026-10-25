@@ -141,10 +141,7 @@ export function GitHub({ desk, backend, held, prepare, raise, done, remember }: 
   return (
     <section class="way github" aria-label="Publish on GitHub">
       <h3>Publish on GitHub</h3>
-      <p>
-        Your plugin gets its own public repository on GitHub, and the store lists it as a community plugin. New
-        versions go the same way. You need a free GitHub account.
-      </p>
+      <p>Its own public repository on GitHub, listed in the store as a community plugin. Needs a free GitHub account.</p>
       {account === null ? (
         <p class="hint" role="status">Looking for your GitHub account…</p>
       ) : !account.login ? (

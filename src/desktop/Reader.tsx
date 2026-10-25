@@ -78,7 +78,7 @@ function Camera({ shown, onShot }: { shown: string; onShot(id: string, dark: boo
       </button>
       {open && (
         <div class="menu-list camera-panel" role="dialog" aria-label="Store screenshot">
-          <p class="menu-note">A screenshot for the store, of what the reader shows now.</p>
+          <p class="menu-note">For the store: what the reader shows now.</p>
           <div class="which" role="radiogroup" aria-label="Reader">
             {READERS.map((r) => (
               <button type="button" role="radio" aria-checked={r.id === device} class={r.id === device ? "on" : ""} onClick={() => setDevice(r.id)}>
