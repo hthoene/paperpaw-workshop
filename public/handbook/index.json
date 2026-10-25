@@ -1033,7 +1033,7 @@
   "title": "Settings of keyboard",
   "file": "settings--keyboard.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[keyboard] layouts` | Keyboard layouts | list | `keyboard.layout.auto` | The layou",
-  "tokens": 217
+  "tokens": 219
  },
  {
   "id": "settings/settings",
@@ -1054,7 +1054,7 @@
   "title": "Settings of update",
   "file": "settings--update.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[update] server` | Update server | text | `https://paperpaw.org` | Where PaperPaw ",
-  "tokens": 126
+  "tokens": 133
  },
  {
   "id": "settings/help",
@@ -1068,7 +1068,7 @@
   "title": "Settings in the group core.group.system",
   "file": "settings-group--core.group.system.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] developer` | Developer options | `true`, `false` | `false` | For developers",
-  "tokens": 1143
+  "tokens": 1152
  },
  {
   "id": "settings-group/core.group.display",

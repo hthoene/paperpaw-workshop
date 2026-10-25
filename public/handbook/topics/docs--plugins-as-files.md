@@ -67,11 +67,11 @@ below) takes it. One manifest gives each its own, by target:
 
 ```toml
 [dependencies]
-paperpaw-sdk = "0.5.0-beta.6"
+paperpaw-sdk = "0.5.0-beta.7"
 
 # Outline fonts for the emulator's build only: the X4s draw font packs.
 [target.'cfg(not(target_os = "none"))'.dependencies]
-paperpaw-sdk = { version = "0.5.0-beta.6", features = ["outline"] }
+paperpaw-sdk = { version = "0.5.0-beta.7", features = ["outline"] }
 ```
 
 A build for a device that asks for `outline` stops and says so.

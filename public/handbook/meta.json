@@ -1,7 +1,7 @@
 {
-  "ref": "plugin-store",
-  "commit": "526e306478e1da6da79d34f50fedc21807902c89",
+  "ref": "v0.5.0-beta.7",
+  "commit": "afd46a44e3934f78352254eb25721d14f711b9b3",
   "generated": "2026-10-25",
-  "dataTokens": 14078,
-  "codeTokens": 32761
+  "dataTokens": 14289,
+  "codeTokens": 32972
 }

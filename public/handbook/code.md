@@ -133,7 +133,20 @@ deletes and reorders them under Publish.
 
 ## Publishing from the Workshop
 
-When the person asks how to publish, say it in these steps:
+There are two ways, both under Publish in the menu.
+
+**On GitHub** (the first): the person signs in to GitHub once (a free
+account; the workshop guides them), then presses Publish on GitHub. The
+workshop gives the plugin its own public repository, checks it as the
+store will, and releases it there; the store lists it as a community
+plugin, usually within minutes. A new version goes the same way. When
+GitHub or the store refuse it, the workshop gives you what they said, in
+a message that begins "Publishing version … on GitHub was refused": fix
+exactly that in the plugin's files, change nothing else, and check it.
+The workshop publishes again by itself and raises the version where it
+must. Never tell the person to do anything on GitHub by hand.
+
+**Through the store's form**, when they prefer it, in these steps:
 
 1. Publish in the menu, then Pack. The workshop checks the plugin, builds
    a plugin with code for the readers and signs it, and makes one file,

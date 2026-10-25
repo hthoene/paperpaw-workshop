@@ -19,10 +19,10 @@
 | `[keyboard] layouts` | Keyboard layouts | list | `keyboard.layout.auto` | The layouts to type with; a key switches between them. |
 | `[keyboard] umlaut-keys` | Umlaut keys | `true`, `false` | `false` | Keys of their own for ä, ö, ü and ß. Off, hold a, o, u or s for them. |
 | `[keyboard] key-shape` | Shape of keys | `keyboard.key-shape.round`, `keyboard.key-shape.tall`, `keyboard.key-shape.wide` | `keyboard.key-shape.round` | Taller keys make the keyboard higher, wider keys make it lower. |
-| `[keyboard] size` | Keyboard size | `keyboard.size.small`, `keyboard.size.medium`, `keyboard.size.large` | `keyboard.size.medium` | Smaller leaves more of the screen in view; larger keys are easier to hit. |
+| `[keyboard] size` | Keyboard size | `keyboard.size.small`, `keyboard.size.medium`, `keyboard.size.large` | `keyboard.size.large` | Smaller shows more of the page. Larger keys are easier to hit, with fewer presses. |
 | `[settings] advanced` | Show advanced settings | `true`, `false` | `false` | Also show settings that are rarely needed. |
 | `[diagnostics] pages` | Number of test pages | 1 to 10000 | `20` | Pages of the display test screen. |
 | `[update] look` | Look for updates | `true`, `false` | `false` | About once a week, when Wi-Fi is on or the device charges. |
-| `[update] betas` | Beta updates | `true`, `false` | `false` | Betas are for testing; they may have bugs. |
+| `[update] betas` | Beta updates | `true`, `false` | `false` | For testing, may have bugs. On a beta, the next beta comes anyway. |
 | `[help] show` | Hints for new screens | `true`, `false` | `true` | The first time a screen opens, a short note says what its controls do. |
 | `[help] again` | Show hints again | text | `` | Each screen's hints show once more, the next time it opens. |
