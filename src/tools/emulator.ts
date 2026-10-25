@@ -11,7 +11,7 @@ import { deviceNamed, shortName, type ToolContext, type WorkshopTool } from "./t
 
 const DEVICE = z.string().describe('"X4", "X4 Pro" or "Boox Go 7"');
 
-const STUB_NOTE =
+export const STUB_NOTE =
   "(This picture is the workshop's preview, not PaperPaw's real emulator yet: it shows the look settings and home layouts roughly. Trust the checker for ids and values.)";
 
 export const check: WorkshopTool<Record<string, never>> = {
@@ -52,7 +52,7 @@ function since(context: ToolContext): string {
 /** A screenshot as the AI sees it: no side longer than AI_LONG_SIDE (the
  *  Boox's screen is), as every picture it is sent. Anthropic would reduce
  *  it anyway; the free quota's proxy takes none larger. */
-async function seen(context: ToolContext, shot: { png: string; width: number; height: number }): Promise<Anthropic.ImageBlockParam> {
+export async function seen(context: ToolContext, shot: { png: string; width: number; height: number }): Promise<Anthropic.ImageBlockParam> {
   if (Math.max(shot.width, shot.height) <= AI_LONG_SIDE) {
     return { type: "image", source: { type: "base64", media_type: "image/png", data: shot.png } };
   }

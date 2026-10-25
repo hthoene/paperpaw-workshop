@@ -4,10 +4,13 @@
 // so what passes here passes the store's form.
 
 import { parseIni } from "./ini";
-import type { Files } from "./project";
+import { storeFolder, type Files, type Kind } from "./project";
 import { validId } from "./rules";
 
-export const ENTRY_PATH = "store/store.ini";
+/** Where a plugin of `kind` keeps its entry. */
+export function entryPath(kind: Kind): string {
+  return `${storeFolder(kind)}store.ini`;
+}
 
 /** Where a plugin belongs in the store. */
 export const GROUPS = ["look", "home", "reading", "library", "formats", "sync", "notes", "learning", "news", "tools", "games", "system"] as const;
@@ -42,7 +45,7 @@ export interface Entry {
 export const EMPTY_ENTRY: Entry = { summary: "", description: "", group: "", tags: [], licence: "", source: "", alts: {} };
 
 export function readEntry(files: Files): Entry {
-  const text = files.read(ENTRY_PATH);
+  const text = files.read(entryPath(files.kind));
   if (!text) return structuredClone(EMPTY_ENTRY);
   const ini = parseIni(text);
   const said = (key: string) => ini.entries.find((e) => e.section === "store" && e.key === key)?.value ?? "";
@@ -80,7 +83,7 @@ export function writeEntry(files: Files, entry: Entry): string | null {
     lines.push("", "[screenshots]");
     for (const [file, alt] of shots) lines.push(`${file} = ${oneLine(alt)}`);
   }
-  return files.write(ENTRY_PATH, lines.join("\n") + "\n");
+  return files.write(entryPath(files.kind), lines.join("\n") + "\n");
 }
 
 /** What the store would refuse in the entry, as catalog keys with

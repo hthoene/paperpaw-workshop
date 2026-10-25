@@ -82,6 +82,8 @@
   "step.look": "Looked at it on the {device}",
   "step.press": "Pressed buttons on the {device}",
   "step.set_entry": "Wrote the store entry",
+  "step.screenshot": "Took a store screenshot on the {device}",
+  "step.screenshot.remove": "Deleted the store screenshot {file}",
   "step.failed": "{step}: it did not work",
   "units.cent": "1 cent",
   "units.under-cent": "less than a cent",

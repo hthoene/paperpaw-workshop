@@ -23,6 +23,7 @@ import { decideKind } from "./kind";
 import { savedLength } from "./length";
 import { lookRules, savedLooks } from "./looks";
 import { NativeEmulator } from "./native";
+import { base64Bytes, keepShot } from "../publish/screenshots";
 import { pictureOf, WORKSHOP_SCREENS } from "./pictures";
 import type { Workspace } from "./workspace";
 
@@ -299,6 +300,24 @@ export class Desk {
     await this.workspace.open(project.key);
     await this.backend.emulatorSync(project.key).catch(() => {});
     this.changed();
+  }
+
+  /** Keeps what reader `id` shows now (`dark`: in night mode) as one of
+   *  the store's screenshots, after the others; what to say. */
+  async storeShot(id: string, dark: boolean): Promise<string> {
+    const project = this.workspace.project;
+    const profile = this.handbook.profile(id);
+    if (!project || !this.workshop || !profile) return "There is no plugin yet.";
+    const context = this.workshop.toolContext();
+    await context.sync();
+    const shot = await context.emulator.screenshot(profile, dark);
+    const device = profile.name.replace(/^Xteink\s+/, "");
+    const alt = `${shownName(project) ?? "The plugin"} on the ${device}${dark ? " in night mode" : ""}`;
+    const kept = keepShot(this.workshop.files, base64Bytes(shot.png), profile, dark, alt);
+    if (!kept.ok) return `Not kept: ${kept.why}.`;
+    await this.workspace.save();
+    this.changed();
+    return `Kept as ${kept.file}. Publish shows the store's screenshots.`;
   }
 
   /** Marks the project's state now as `version`, packed for the store. */

@@ -106,6 +106,31 @@ or `system` (the device itself). Leave out `licence` and `sdk`: the
 person chooses the licence when publishing, and the workshop adds the
 SDK.
 
+## The store's screenshots
+
+The store shows two to four screenshots of a plugin, the first one
+first: they decide whether someone installs it, so make them as good as
+they can be. Take them with `screenshot` once the plugin works and its
+entry is written, or when the person asks:
+
+1. Set the scene first, with `control` and `press`: realistic content,
+   never "Lorem ipsum", "Test" or placeholder names; a good book open
+   where the plugin shows while reading; widgets arranged on the home
+   screen as a person would keep them.
+2. Show the plugin's most appealing screens, what it does at its best.
+   Never an empty page, an error, a screen still loading or a plain list
+   of settings.
+3. Vary them: other devices (the X4, the X4 Pro, the Boox Go 7) and light
+   and dark, where the plugin looks good on each. The best one goes
+   first.
+4. Look at each picture `screenshot` returns before you go on. Replace a
+   weak one (`replace` with its file), delete one that adds nothing
+   (`remove`).
+5. Say in `alt`, in one sentence, what each one shows.
+
+The person can take them too, with the camera above the reader, and
+deletes and reorders them under Publish.
+
 ## Publishing from the Workshop
 
 When the person asks how to publish, say it in these steps:

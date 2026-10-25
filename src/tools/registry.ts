@@ -5,6 +5,7 @@ import { control, setFixtures } from "./control";
 import { lookupDocs } from "./docs";
 import { check, look, press } from "./emulator";
 import { setEntry } from "./entry";
+import { screenshot } from "./screenshot";
 import { deleteFile, editFile, listFiles, readFile, writeFile } from "./files";
 import { build } from "./build";
 import type { WorkshopTool } from "./tool";
@@ -27,6 +28,8 @@ export const DATA_TOOLS: WorkshopTool<any>[] = [
   convertPicture,
   placeFile,
   control,
+  // Last: the order is part of the cached prompt.
+  screenshot,
 ];
 
 /** The tools for a plugin with code: its files, the docs, the build, the
@@ -45,6 +48,7 @@ export const CODE_TOOLS: WorkshopTool<any>[] = [
   check,
   control,
   setFixtures,
-  // Last: the order is part of the cached prompt.
   fetchSample,
+  // Last: the order is part of the cached prompt.
+  screenshot,
 ];

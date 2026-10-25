@@ -219,7 +219,12 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
       </header>
       <div class="main">
         <Conversation desk={desk} />
-        <Reader backend={backend} shown={desk.shown} onChoose={(id) => void desk.choose(id)} />
+        <Reader
+          backend={backend}
+          shown={desk.shown}
+          onChoose={(id) => void desk.choose(id)}
+          onShot={workspace.project ? (id, dark) => desk.storeShot(id, dark) : undefined}
+        />
         {notice && (
           <p class="notice" role="status">
             {notice}

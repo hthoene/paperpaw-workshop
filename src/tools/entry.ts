@@ -4,7 +4,7 @@
 
 import { z } from "zod";
 
-import { GROUPS, LICENCES, MAX_DESCRIPTION, MAX_SUMMARY, MAX_TAG, MAX_TAGS, readEntry, writeEntry } from "../project/entry";
+import { GROUPS, LICENCES, MAX_DESCRIPTION, MAX_SUMMARY, MAX_TAG, MAX_TAGS, entryPath, readEntry, writeEntry } from "../project/entry";
 import type { WorkshopTool } from "./tool";
 
 export interface EntryInput {
@@ -18,7 +18,7 @@ export interface EntryInput {
 export const setEntry: WorkshopTool<EntryInput> = {
   name: "set_entry",
   description:
-    "Write the plugin's store entry (store/store.ini): one sentence the store shows (at most 160 characters), a longer description in plain words if useful (what it changes, for whom), its group in the store, up to five tags, and its licence (CC0-1.0 unless the person chose another). Screenshots are taken by the workshop itself.",
+    "Write the plugin's store entry (store.ini in its store/ folder): one sentence the store shows (at most 160 characters), a longer description in plain words if useful (what it changes, for whom), its group in the store, up to five tags, and its licence (CC0-1.0 unless the person chose another). Screenshots are taken with screenshot.",
   schema: z
     .object({
       summary: z.string().min(1).max(MAX_SUMMARY),
@@ -42,6 +42,6 @@ export const setEntry: WorkshopTool<EntryInput> = {
     const problem = writeEntry(files, entry);
     if (problem) return { content: `Not written: ${problem}.`, isError: true, step: { key: "step.set_entry" } };
     await sync();
-    return { content: "Wrote store/store.ini.", step: { key: "step.set_entry" } };
+    return { content: `Wrote ${entryPath(files.kind)}.`, step: { key: "step.set_entry" } };
   },
 };

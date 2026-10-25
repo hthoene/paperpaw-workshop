@@ -14,6 +14,17 @@ export type Kind = "data" | "code";
 /** What only the store reads: the entry and the screenshots. */
 export const STORE_FOLDER = "store/";
 
+/** Where a plugin of `kind` keeps its store page: `store/` in its folder,
+ *  which for a plugin with code is `plugin/`. */
+export function storeFolder(kind: Kind): string {
+  return kind === "code" ? `plugin/${STORE_FOLDER}` : STORE_FOLDER;
+}
+
+/** Whether `path` is in the store's folder (of either kind of plugin). */
+export function inStore(path: string): boolean {
+  return path.startsWith(STORE_FOLDER) || path.startsWith(`plugin/${STORE_FOLDER}`);
+}
+
 export interface Usage {
   inputTokens: number;
   cacheWriteTokens: number;
@@ -143,6 +154,11 @@ export function shownName(project: Project): string | undefined {
 export class Files {
   constructor(private project: Project, private changed: () => void = () => {}) {}
 
+  /** The kind of plugin the files are of. */
+  get kind(): Kind {
+    return this.project.kind;
+  }
+
   list(): { path: string; size: number }[] {
     return Object.entries(this.project.files)
       .map(([path, content]) => ({
@@ -194,7 +210,7 @@ export class Files {
   private limits(path: string, size: number): string | null {
     const files = this.list();
     const known = files.find((f) => f.path === path);
-    const counted = (p: string) => !p.startsWith(STORE_FOLDER);
+    const counted = (p: string) => !inStore(p);
     const most = this.project.kind === "code" ? MAX_CODE_FILES : MAX_FILES;
     if (!known && counted(path) && files.filter((f) => counted(f.path)).length >= most) {
       return `a plugin holds at most ${most} files: delete one first`;
@@ -216,7 +232,7 @@ export class Files {
   bytes({ store = true } = {}): Record<string, Uint8Array> {
     const out: Record<string, Uint8Array> = {};
     for (const [path, content] of Object.entries(this.project.files)) {
-      if (!store && path.startsWith(STORE_FOLDER)) continue;
+      if (!store && inStore(path)) continue;
       out[path] = typeof content === "string" ? new TextEncoder().encode(content) : content;
     }
     return out;

@@ -5,7 +5,8 @@
 // device's profile binds while the reader has the focus; touches with the
 // mouse where the reader has a touch screen. An emulator from before
 // bodies: the keyboard alone (arrows, Enter, Escape, Page Up and Down, P
-// for power).
+// for power). The camera beside the switch keeps what a reader shows as
+// one of the store's screenshots.
 
 import { useEffect, useRef, useState } from "preact/hooks";
 
@@ -43,6 +44,60 @@ interface Props {
   shown: string;
   /** Another reader chosen; whoever owns the reader starts it. */
   onChoose(id: string): void;
+  /** Keeps what reader `id` shows (`dark`: in night mode) as a store
+   *  screenshot; what to say. None where there is no plugin yet. */
+  onShot?(id: string, dark: boolean): Promise<string>;
+}
+
+/** The camera: which reader, light or dark, then the picture. */
+function Camera({ shown, onShot }: { shown: string; onShot(id: string, dark: boolean): Promise<string> }) {
+  const [open, setOpen] = useState(false);
+  const [device, setDevice] = useState(shown);
+  const [dark, setDark] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [said, setSaid] = useState("");
+  useEffect(() => setDevice(shown), [shown]);
+  const take = async () => {
+    setBusy(true);
+    setSaid("");
+    try {
+      setSaid(await onShot(device, dark));
+    } catch (e) {
+      setSaid(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div class="camera">
+      <button type="button" class="camera-button" aria-label="Store screenshot" title="Store screenshot" aria-expanded={open} onClick={() => { setOpen(!open); setSaid(""); }}>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 8h3l1.6-2.2h6.8L17 8h3v11H4z" />
+          <circle cx="12" cy="13.2" r="3.4" />
+        </svg>
+      </button>
+      {open && (
+        <div class="menu-list camera-panel" role="dialog" aria-label="Store screenshot">
+          <p class="menu-note">A screenshot for the store, of what the reader shows now.</p>
+          <div class="which" role="radiogroup" aria-label="Reader">
+            {READERS.map((r) => (
+              <button type="button" role="radio" aria-checked={r.id === device} class={r.id === device ? "on" : ""} onClick={() => setDevice(r.id)}>
+                {r.name}
+              </button>
+            ))}
+          </div>
+          <div class="which" role="radiogroup" aria-label="Light or dark">
+            <button type="button" role="radio" aria-checked={!dark} class={!dark ? "on" : ""} onClick={() => setDark(false)}>Light</button>
+            <button type="button" role="radio" aria-checked={dark} class={dark ? "on" : ""} onClick={() => setDark(true)}>Dark</button>
+          </div>
+          <button type="button" class="go" disabled={busy} onClick={() => void take()}>
+            {busy ? "Taking it…" : "Take screenshot"}
+          </button>
+          {said && <p class="menu-note" role="status">{said}</p>}
+        </div>
+      )}
+    </div>
+  );
 }
 
 /** A key's icon, as PaperPaw's hint bar draws it. */
@@ -62,7 +117,7 @@ function Icon({ name }: { name: NonNullable<Label["icon"]> }) {
   );
 }
 
-export function Reader({ backend, shown, onChoose }: Props) {
+export function Reader({ backend, shown, onChoose, onShot }: Props) {
   const profile = shown;
   const [frame, setFrame] = useState<Frame | null>(null);
   const [error, setError] = useState("");
@@ -143,6 +198,7 @@ export function Reader({ backend, shown, onChoose }: Props) {
 
   return (
     <section class="reader" aria-label="Reader">
+      <div class="reader-top">
       <div class="which" role="radiogroup" aria-label="Reader">
         {READERS.map((r) => (
           <button
@@ -155,6 +211,8 @@ export function Reader({ backend, shown, onChoose }: Props) {
             {r.name}
           </button>
         ))}
+      </div>
+      {onShot && <Camera shown={profile} onShot={onShot} />}
       </div>
       <div class="stage" ref={stage}>
       <div class="body-room" style={edges ? { padding: edges.map((n) => `${n}px`).join(" ") } : undefined}>

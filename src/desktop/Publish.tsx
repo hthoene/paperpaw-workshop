@@ -13,7 +13,9 @@
 
 import { useEffect, useState } from "preact/hooks";
 
+import { MAX_SCREENSHOTS } from "../project/entry";
 import { identity } from "../project/project";
+import { moveShot, removeShot, storeShots } from "../publish/screenshots";
 import { KeyGate } from "./AuthorKey";
 import type { AuthorStatus, Backend, DeviceBuilt, DeviceReadiness, StoreFile } from "./backend";
 import { forModel, shown, type CheckState } from "./checks";
@@ -74,6 +76,62 @@ function whyFailed(built: DeviceBuilt): string[] {
   const errors = [...new Set(built.diagnostics.filter((d) => d.level === "error").map((d) => d.rendered.split("\n")[0] ?? d.message))];
   const said = [...built.problems, ...errors];
   return said.length ? said : [built.log_tail || "The build failed."];
+}
+
+/** The store's screenshots: each small, to move or delete; the way to
+ *  more (the camera, the AI). */
+function Screenshots({ desk, onClose }: { desk: Desk; onClose(): void }) {
+  const [, redraw] = useState(0);
+  const [said, setSaid] = useState("");
+  const files = desk.workshop?.files;
+  if (!files) return null;
+  const shots = storeShots(files);
+  const all = files.all();
+  const done = async (problem: string | null) => {
+    setSaid(problem ?? "");
+    if (!problem) await desk.workspace.save();
+    redraw((n) => n + 1);
+  };
+  const picture = (path: string) => {
+    const bytes = all[path];
+    const type = /\.webp$/.test(path) ? "image/webp" : /\.jpe?g$/.test(path) ? "image/jpeg" : "image/png";
+    return typeof bytes === "string" || !bytes ? "" : `data:${type};base64,${toBase64(bytes)}`;
+  };
+  const askAi = () => {
+    onClose();
+    void desk.send(
+      `Take the store's screenshots with screenshot, 2 to ${MAX_SCREENSHOTS}, as the handbook says: set the scene first, the plugin's best screens, look at each and replace weak ones.` +
+        (shots.length ? " Replace or delete the ones there where yours are better." : ""),
+    );
+  };
+  return (
+    <section class="way shots" aria-label="Screenshots">
+      <h3>Screenshots</h3>
+      {shots.length ? (
+        <ol class="shot-list">
+          {shots.map((shot, i) => (
+            <li key={shot.file}>
+              <img src={picture(shot.path)} alt={shot.alt || shot.file} />
+              <div class="shot-actions">
+                <button type="button" class="link quiet" aria-label={`Move ${shot.file} earlier`} disabled={i === 0} onClick={() => void done(moveShot(files, shot.file, -1))}>←</button>
+                <button type="button" class="link quiet" aria-label={`Move ${shot.file} later`} disabled={i === shots.length - 1} onClick={() => void done(moveShot(files, shot.file, 1))}>→</button>
+                <button type="button" class="link quiet" onClick={() => void done(removeShot(files, shot.file))}>Delete</button>
+              </div>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p class="hint">None yet. Take them with the camera above the reader, or let the AI take them.</p>
+      )}
+      <p class="hint">
+        {shots.length} of {MAX_SCREENSHOTS}, shown in this order. The first one is what people see first.
+      </p>
+      <button type="button" class="link" disabled={!!desk.workshop?.busy} onClick={askAi}>
+        {shots.length ? "Let the AI improve them" : "Let the AI take them"}
+      </button>
+      {said && <p class="said" role="status">{said}</p>}
+    </section>
+  );
 }
 
 export function Publish({ desk, backend, onClose }: Props) {
@@ -341,6 +399,7 @@ export function Publish({ desk, backend, onClose }: Props) {
                 ))}
             </div>
           )}
+          <Screenshots desk={desk} onClose={onClose} />
           <section class="way">
             <h3>Pack it for the store</h3>
             <p>

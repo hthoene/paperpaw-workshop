@@ -17,6 +17,10 @@ import type { Checker } from "./checks";
 const LONG_MS = 800;
 /** How long the reader takes to draw its sleep screen. */
 const SLEEP_MS = 1500;
+/** PaperPaw's night mode, switched for a picture of it and back. */
+const NIGHT_MODE = "core.toggle-night-mode";
+/** How long the screen takes to be drawn anew after it. */
+const NIGHT_MS = 400;
 /** How often `until` looks. */
 const LOOK_MS = 250;
 
@@ -68,7 +72,7 @@ export class NativeEmulator implements Emulator {
     await this.backend.emulatorButton(event.name, false);
   }
 
-  async screenshot(profile?: Profile, _dark?: boolean, screen?: Screen): Promise<ScreenshotResult> {
+  async screenshot(profile?: Profile, dark?: boolean, screen?: Screen): Promise<ScreenshotResult> {
     const shown = this.shown;
     const other = profile && shown && profile.id !== shown.id;
     if (other) await this.backend.emulatorStart(profile.id);
@@ -79,11 +83,16 @@ export class NativeEmulator implements Emulator {
       await this.input({ kind: "button", name: "power" });
       await new Promise((r) => setTimeout(r, SLEEP_MS));
     }
+    if (dark) {
+      await this.backend.emulatorRun(NIGHT_MODE);
+      await new Promise((r) => setTimeout(r, NIGHT_MS));
+    }
     try {
       const png = await this.backend.emulatorShot();
       const at = profile ?? shown;
       return { png, width: at?.width ?? 0, height: at?.height ?? 0 };
     } finally {
+      if (dark) await this.backend.emulatorRun(NIGHT_MODE);
       if (asleep) await this.input({ kind: "button", name: "power" });
       if (other) await this.backend.emulatorStart(shown.id);
     }
