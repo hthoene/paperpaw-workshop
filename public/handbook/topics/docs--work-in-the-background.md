@@ -34,7 +34,11 @@ drawn anew each time in the address (`served::key`), checked by a
 wrong keys. Where PaperPaw runs Wi-Fi itself (the X4s),
 `paperpaw_sdk::wifi` says the radio's state, and
 `WifiCommand::Host` opens a network of the device's own for a phone to
-join, as the Wi-Fi transfer does without a router.
+join, as the Wi-Fi transfer does without a router. In the emulator
+the X4s start with the radio off, as a device does; with `--wifi
+online` (over `--stdio`, `start` with `"wifi": "online"`) they start on
+USB, in a network `Workshop Wi-Fi` joined before, and a plugin's
+requests go out at once.
 
 Other protocols go over sockets ([ADR 0014](adr/0014-sockets-for-plugins.md)):
 `Command::Connect` opens a TCP connection, `Command::SocketSend` sends,

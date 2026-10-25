@@ -14,7 +14,15 @@ online for goes out: a screen that needs the network says so on itself
 and offers *Go online*, which sends `Command::GoOnline` (the network for
 that screen until it closes); anything else is refused with
 `Reason::Offline` and may try again on `events::WORK_ALLOWED`.
-`Command::CancelHttp` takes requests back. Where a server or a computer
+`Command::CancelHttp` takes requests back. A download that may take a
+while says how far it came with `.progress(&PROGRESS)`, an
+`Event<HttpProgress>`: the bytes received, the size where the server
+said (`permille()` for a bar), and the request's parameters, at most
+every 5 % or every 2 seconds and never after the reply, so a screen
+redraws its bar no more often (only the bar's area, with a partial
+refresh). Downloaded into a file of the plugin's own and moved into the
+library once whole, a download taken back leaves nothing there (as the
+OPDS plugin does). Where a server or a computer
 is told which device this is (a sync service, Calibre), the name is
 `env.device_name()`: the one the reader set under *Device name*, else
 the model's; a plugin never makes one of its own.

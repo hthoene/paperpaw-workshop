@@ -13,6 +13,7 @@
 | `[core] battery-low` | Battery low at | 5 to 50 | `20` | The charge at which "Battery when low" shows in a status line. |
 | `[battery] enabled` | Record battery use | `true`, `false` | `true` | Notes the battery each minute, to show how long it lasts. |
 | `[file-manager] hidden` | Show hidden files | `true`, `false` | `false` | Files and folders starting with a dot, e.g. PaperPaw's own data. |
+| `[store] community` | Community plugins | `true`, `false` | `false` | Also show plugins others publish on GitHub. Not reviewed: code plugins get full access. |
 | `[lock] kind` | Screen lock | `lock.kind.off`, `lock.kind.pin`, `lock.kind.pattern`, `lock.kind.password` | `lock.kind.off` | Asks for a PIN, a pattern or a password on start and on waking. |
 | `[lock] on-wake` | Lock when waking up | `true`, `false` | `true` | Off: the lock comes only when PaperPaw starts and with “Lock now”. |
 | `[keyboard] layouts` | Keyboard layouts | list | `keyboard.layout.auto` | The layouts to type with; a key switches between them. |
@@ -21,6 +22,7 @@
 | `[keyboard] size` | Keyboard size | `keyboard.size.small`, `keyboard.size.medium`, `keyboard.size.large` | `keyboard.size.medium` | Smaller leaves more of the screen in view; larger keys are easier to hit. |
 | `[settings] advanced` | Show advanced settings | `true`, `false` | `false` | Also show settings that are rarely needed. |
 | `[diagnostics] pages` | Number of test pages | 1 to 10000 | `20` | Pages of the display test screen. |
+| `[update] look` | Look for updates | `true`, `false` | `false` | About once a week, when Wi-Fi is on or the device charges. |
 | `[update] betas` | Beta updates | `true`, `false` | `false` | Betas are for testing; they may have bugs. |
 | `[help] show` | Hints for new screens | `true`, `false` | `true` | The first time a screen opens, a short note says what its controls do. |
 | `[help] again` | Show hints again | text | `` | Each screen's hints show once more, the next time it opens. |

@@ -106,6 +106,31 @@ or `system` (the device itself). Leave out `licence` and `sdk`: the
 person chooses the licence when publishing, and the workshop adds the
 SDK.
 
+## The store's screenshots
+
+The store shows two to four screenshots of a plugin, the first one
+first: they decide whether someone installs it, so make them as good as
+they can be. Take them with `screenshot` once the plugin works and its
+entry is written, or when the person asks:
+
+1. Set the scene first, with `control` and `press`: realistic content,
+   never "Lorem ipsum", "Test" or placeholder names; a good book open
+   where the plugin shows while reading; widgets arranged on the home
+   screen as a person would keep them.
+2. Show the plugin's most appealing screens, what it does at its best.
+   Never an empty page, an error, a screen still loading or a plain list
+   of settings.
+3. Vary them: other devices (the X4, the X4 Pro, the Boox Go 7) and light
+   and dark, where the plugin looks good on each. The best one goes
+   first.
+4. Look at each picture `screenshot` returns before you go on. Replace a
+   weak one (`replace` with its file), delete one that adds nothing
+   (`remove`).
+5. Say in `alt`, in one sentence, what each one shows.
+
+The person can take them too, with the camera above the reader, and
+deletes and reorders them under Publish.
+
 ## Publishing from the Workshop
 
 When the person asks how to publish, say it in these steps:
@@ -248,7 +273,7 @@ group = home
 tags = clock, widget
 licence = MIT
 source = https://codeberg.org/your-name/clock
-sdk = 0.4
+sdk = 0.5
 
 [source]
 repository = https://codeberg.org/your-name/clock
@@ -586,6 +611,21 @@ long.confirm = core.long-confirm
 long.menu = core.toggle-night-mode
 # The quick panel by the buttons, as down from the top edge by touch.
 long.right = core.quick-panel
+# A Bluetooth remote's or keyboard's keys (button.hid.<key>): arrows as
+# the device's own, page, space, volume and track keys turn pages.
+button.hid.up = core.up
+button.hid.down = core.down
+button.hid.left = core.left
+button.hid.right = core.right
+button.hid.page-down = core.next-page
+button.hid.page-up = core.prev-page
+button.hid.space = core.next-page
+button.hid.volume-up = core.next-page
+button.hid.volume-down = core.prev-page
+button.hid.next-track = core.next-page
+button.hid.previous-track = core.prev-page
+button.hid.enter = core.confirm
+button.hid.escape = core.back
 
 tap.top-left = core.prev-page
 tap.left = core.prev-page
@@ -842,7 +882,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
-| `[core] reading-font` | Font | `core.font.default`, `Literata`, `Source Sans 3` | `core.font.default` | “Book's font” is Literata, or the book's own where the device draws them. |
+| `[core] reading-font` | Font | `core.font.default`, `Literata`, `PaperPaw Sans` | `core.font.default` | “Book's font” is Literata, or the book's own where the device draws them. |
 | `[core] font-size` | Font size | 6 to 16 | `9` | Size of the book text. |
 | `[core] line-spacing` | Line spacing | 80 to 250 | `135` | Space between lines, relative to the font size. |
 | `[core] font-weight` | Font weight | 0 to 4 | `0` | Darker, bolder text with any font; helps on light screens. |
@@ -935,6 +975,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 |---|---|
 | `about.open` | About PaperPaw |
 | `battery.open` | Battery |
+| `bluetooth.open` | Bluetooth |
 | `calibre.open` | Calibre |
 | `core.apps` | Apps |
 | `core.back` | Back |
@@ -1045,6 +1086,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `xteink-x4` | Xteink X4 | 480 x 800, 220 dpi | no | page-back, page-forward, left, right, confirm, back, power |
 | `xteink-x4-pro` | Xteink X4 Pro | 480 x 800, 217 dpi | yes | page-back, page-forward, home, power |
 | `xteink-x4-classic` | Xteink X4 Classic | 480 x 800, 217 dpi | no | page-back, page-forward, left, right, confirm, back, power |
+| `xteink-x3` | Xteink X3 | 528 x 792, 260 dpi | no | page-back, page-forward, left, right, confirm, back, power |
 | `boox-go-7` | Boox Go 7 | 1264 x 1680, 300 dpi | yes | page-back, page-forward, back |
 | `kobo-libra-colour` | Kobo Libra Colour | 1264 x 1680, 300 dpi | yes | page-back, page-forward, power |
 | `kindle-paperwhite-5` | Kindle Paperwhite (11th gen) | 1236 x 1648, 300 dpi | yes | power |

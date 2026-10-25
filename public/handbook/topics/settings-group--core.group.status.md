@@ -1,6 +1,6 @@
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
-| `[core] status-font` | Font | `core.status-font.ui`, `core.status-font.book`, `Literata`, `Source Sans 3` | `core.status-font.ui` | The font of the status lines while reading: as the menus', as the book's, or one of its own. |
+| `[core] status-font` | Font | `core.status-font.ui`, `core.status-font.book`, `Literata`, `PaperPaw Sans` | `core.status-font.ui` | The font of the status lines while reading: as the menus', as the book's, or one of its own. |
 | `[reader] status.size` | Text size | 5 to 16 | `6` | The size of the text in the status lines. |
 | `[reader] status.edge` | Distance from the edge | 0 to 150 | `15` | How near the status lines sit to the edge. The text keeps its margins. |
 | `[reader] status.top-lines` | Status lines | list | `` | The lines a tap on the status line switches between. None: no line here. |

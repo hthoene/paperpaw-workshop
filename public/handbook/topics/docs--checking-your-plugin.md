@@ -43,6 +43,15 @@ for the pseudo-language), light and dark (`--light`, `--dark`) and look
 strong contrast). `--quick` takes one variant a device: English, light,
 the default look. `--set <id>=<value>` sets a setting for every run.
 
+Plugins' requests go to the network, unless `--network fixtures`: then
+the emulator answers them offline, alike everywhere, from its own
+answers for PaperPaw's plugins (a plugin library, an OPDS catalog, the
+weather and others; `shells/desktop/src/offline.rs`), and every other
+request fails. The screens that show what those answers give are drawn
+with it, and `reach` takes a screen that stays out of reach while its
+requests went unanswered for an error: it waits for data, it is no dead
+end. PaperPaw's CI checks its screens so.
+
 ### The commands
 
 | Command | What it does |
@@ -135,10 +144,10 @@ plugin and the app share one:
 
 ```toml
 [dev-dependencies]
-paperpaw-dev = { git = "https://github.com/hthoene/paperpaw", tag = "v0.4.0" }
+paperpaw-dev = { git = "https://github.com/hthoene/paperpaw", tag = "v0.5.0-beta.6" }
 
 [patch.crates-io]
-paperpaw-sdk = { git = "https://github.com/hthoene/paperpaw", tag = "v0.4.0" }
+paperpaw-sdk = { git = "https://github.com/hthoene/paperpaw", tag = "v0.5.0-beta.6" }
 ```
 
 `examples/paperpaw-dev.rs` adds the plugin to the app:

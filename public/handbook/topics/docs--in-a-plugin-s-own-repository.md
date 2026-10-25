@@ -8,10 +8,10 @@ plugin and the app share one:
 
 ```toml
 [dev-dependencies]
-paperpaw-dev = { git = "https://github.com/hthoene/paperpaw", tag = "v0.4.0" }
+paperpaw-dev = { git = "https://github.com/hthoene/paperpaw", tag = "v0.5.0-beta.6" }
 
 [patch.crates-io]
-paperpaw-sdk = { git = "https://github.com/hthoene/paperpaw", tag = "v0.4.0" }
+paperpaw-sdk = { git = "https://github.com/hthoene/paperpaw", tag = "v0.5.0-beta.6" }
 ```
 
 `examples/paperpaw-dev.rs` adds the plugin to the app:

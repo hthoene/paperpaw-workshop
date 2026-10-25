@@ -1,6 +1,7 @@
 ```rust
 pub struct paperpaw_sdk::work::Moments(_)
 pub const paperpaw_sdk::work::Moments::ALL: paperpaw_sdk::work::Moments
+pub const paperpaw_sdk::work::Moments::BLUETOOTH_ON: paperpaw_sdk::work::Moments
 pub const paperpaw_sdk::work::Moments::BOOK_CLOSED: paperpaw_sdk::work::Moments
 pub const paperpaw_sdk::work::Moments::BOOK_OPENED: paperpaw_sdk::work::Moments
 pub const paperpaw_sdk::work::Moments::CHARGING: paperpaw_sdk::work::Moments
@@ -18,6 +19,15 @@ pub fn paperpaw_sdk::work::Moments::names(self) -> alloc::string::String
 pub fn paperpaw_sdk::work::Moments::parse(&str) -> paperpaw_sdk::work::Moments
 pub type paperpaw_sdk::work::Moments::Output = paperpaw_sdk::work::Moments
 pub fn paperpaw_sdk::work::Moments::bitor(self, paperpaw_sdk::work::Moments) -> paperpaw_sdk::work::Moments
+pub struct paperpaw_sdk::work::Needs(_)
+pub const paperpaw_sdk::work::Needs::BLUETOOTH: paperpaw_sdk::work::Needs
+pub const paperpaw_sdk::work::Needs::CHARGING: paperpaw_sdk::work::Needs
+pub const paperpaw_sdk::work::Needs::NETWORK: paperpaw_sdk::work::Needs
+pub const paperpaw_sdk::work::Needs::NOTHING: paperpaw_sdk::work::Needs
+pub const fn paperpaw_sdk::work::Needs::bits(self) -> u8
+pub const fn paperpaw_sdk::work::Needs::contains(self, paperpaw_sdk::work::Needs) -> bool
+pub type paperpaw_sdk::work::Needs::Output = paperpaw_sdk::work::Needs
+pub fn paperpaw_sdk::work::Needs::bitor(self, paperpaw_sdk::work::Needs) -> paperpaw_sdk::work::Needs
 pub struct paperpaw_sdk::work::Note
 pub paperpaw_sdk::work::Note::at: paperpaw_platform::input::Instant
 pub paperpaw_sdk::work::Note::text: alloc::string::String
@@ -35,18 +45,18 @@ pub fn paperpaw_sdk::work::Refusal::write(&self, &mut paperpaw_sdk::Params)
 pub struct paperpaw_sdk::work::Work
 pub paperpaw_sdk::work::Work::after: core::option::Option<core::time::Duration>
 pub paperpaw_sdk::work::Work::at: core::option::Option<paperpaw_platform::input::Instant>
-pub paperpaw_sdk::work::Work::charging: bool
 pub paperpaw_sdk::work::Work::every: core::option::Option<core::time::Duration>
 pub paperpaw_sdk::work::Work::id: paperpaw_sdk::Id
 pub paperpaw_sdk::work::Work::importance: paperpaw_sdk::work::Importance
 pub paperpaw_sdk::work::Work::key: alloc::string::String
 pub paperpaw_sdk::work::Work::moments: paperpaw_sdk::work::Moments
-pub paperpaw_sdk::work::Work::network: bool
+pub paperpaw_sdk::work::Work::needs: paperpaw_sdk::work::Needs
 pub paperpaw_sdk::work::Work::params: paperpaw_sdk::Params
 pub paperpaw_sdk::work::Work::within: core::option::Option<core::time::Duration>
 pub fn paperpaw_sdk::work::Work::after(self, core::time::Duration) -> Self
 pub fn paperpaw_sdk::work::Work::at(impl core::convert::Into<paperpaw_sdk::Id>, paperpaw_platform::input::Instant) -> Self
 pub fn paperpaw_sdk::work::Work::at_moments(self, paperpaw_sdk::work::Moments) -> Self
+pub fn paperpaw_sdk::work::Work::bluetooth(impl core::convert::Into<paperpaw_sdk::Id>) -> Self
 pub fn paperpaw_sdk::work::Work::charging(self) -> Self
 pub fn paperpaw_sdk::work::Work::every(self, core::time::Duration) -> Self
 pub fn paperpaw_sdk::work::Work::expected(self) -> Self
@@ -87,6 +97,7 @@ pub enum paperpaw_sdk::work::Importance
 pub paperpaw_sdk::work::Importance::Expected
 pub paperpaw_sdk::work::Importance::Optional
 pub enum paperpaw_sdk::work::Reason
+pub paperpaw_sdk::work::Reason::BluetoothOff
 pub paperpaw_sdk::work::Reason::Cancelled
 pub paperpaw_sdk::work::Reason::NetworkOff
 pub paperpaw_sdk::work::Reason::NoNetwork

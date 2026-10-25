@@ -19,6 +19,8 @@ pub paperpaw_sdk::firmware::FirmwareCommand::Install
 pub paperpaw_sdk::firmware::FirmwareCommand::Install::key: core::option::Option<[u8; 32]>
 pub paperpaw_sdk::firmware::FirmwareCommand::Install::older: bool
 pub paperpaw_sdk::firmware::FirmwareCommand::Install::path: alloc::string::String
+pub paperpaw_sdk::firmware::FirmwareCommand::InstallForeign
+pub paperpaw_sdk::firmware::FirmwareCommand::InstallForeign::path: alloc::string::String
 pub paperpaw_sdk::firmware::FirmwareCommand::Restart
 pub enum paperpaw_sdk::firmware::FirmwareState
 pub paperpaw_sdk::firmware::FirmwareState::Failed(paperpaw_sdk::firmware::InstallFailure)
@@ -29,6 +31,7 @@ pub paperpaw_sdk::firmware::FirmwareState::Installing::done: u64
 pub paperpaw_sdk::firmware::FirmwareState::Installing::total: u64
 pub enum paperpaw_sdk::firmware::InstallFailure
 pub paperpaw_sdk::firmware::InstallFailure::Damaged
+pub paperpaw_sdk::firmware::InstallFailure::LowBattery
 pub paperpaw_sdk::firmware::InstallFailure::NewerFormat
 pub paperpaw_sdk::firmware::InstallFailure::NotAnUpdate
 pub paperpaw_sdk::firmware::InstallFailure::NotNewer
@@ -53,7 +56,9 @@ pub use paperpaw_sdk::firmware::Plugins
 pub use paperpaw_sdk::firmware::Problem
 pub use paperpaw_sdk::firmware::TRAILER_LEN
 pub use paperpaw_sdk::firmware::Trailer
+pub const paperpaw_sdk::firmware::INSTALL_BATTERY: u8
 pub const paperpaw_sdk::firmware::UPDATE_DIR: &str
+pub fn paperpaw_sdk::firmware::battery_allows_install(&paperpaw_platform::status::SystemStatus) -> bool
 pub fn paperpaw_sdk::firmware::beta(&str) -> core::option::Option<(&str, &str)>
 pub fn paperpaw_sdk::firmware::compare_versions(&str, &str) -> core::cmp::Ordering
 pub use paperpaw_sdk::firmware::fingerprint

@@ -19,7 +19,7 @@ group = home
 tags = clock, widget
 licence = MIT
 source = https://codeberg.org/your-name/clock
-sdk = 0.4
+sdk = 0.5
 
 [source]
 repository = https://codeberg.org/your-name/clock

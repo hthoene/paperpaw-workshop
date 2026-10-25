@@ -67,6 +67,7 @@ pub fn paperpaw_sdk::Broadcast::ports(&self) -> &[u16]
 pub fn paperpaw_sdk::Broadcast::wait_ms(&self) -> u32
 pub struct paperpaw_sdk::Capabilities
 pub paperpaw_sdk::Capabilities::black_and_white: bool
+pub paperpaw_sdk::Capabilities::bluetooth: bool
 pub paperpaw_sdk::Capabilities::button_row: bool
 pub paperpaw_sdk::Capabilities::colors: bool
 pub paperpaw_sdk::Capabilities::firmware: bool
@@ -168,6 +169,10 @@ pub struct paperpaw_sdk::HttpOptions
 pub paperpaw_sdk::HttpOptions::max_body: core::option::Option<usize>
 pub paperpaw_sdk::HttpOptions::timeout: core::option::Option<core::time::Duration>
 pub paperpaw_sdk::HttpOptions::want_headers: alloc::vec::Vec<alloc::string::String>
+pub struct paperpaw_sdk::HttpProgress
+pub paperpaw_sdk::HttpProgress::context: paperpaw_sdk::Params
+pub paperpaw_sdk::HttpProgress::received: u64
+pub paperpaw_sdk::HttpProgress::total: core::option::Option<u64>
 pub struct paperpaw_sdk::HttpReply
 pub paperpaw_sdk::HttpReply::body: alloc::vec::Vec<u8>
 pub paperpaw_sdk::HttpReply::content_type: core::option::Option<alloc::string::String>
@@ -193,6 +198,7 @@ pub fn paperpaw_sdk::HttpRequest::new(&str, &str, impl core::convert::Into<paper
 pub fn paperpaw_sdk::HttpRequest::options(&self) -> &paperpaw_sdk::HttpOptions
 pub fn paperpaw_sdk::HttpRequest::param(self, impl core::convert::Into<alloc::borrow::Cow<'static, str>>, impl core::convert::Into<alloc::string::String>) -> Self
 pub fn paperpaw_sdk::HttpRequest::params(&self) -> &paperpaw_sdk::Params
+pub fn paperpaw_sdk::HttpRequest::progress(self, &paperpaw_sdk::event::Event<paperpaw_sdk::replies::HttpProgress>) -> Self
 pub fn paperpaw_sdk::HttpRequest::reply(&self) -> &paperpaw_sdk::Id
 pub fn paperpaw_sdk::HttpRequest::save_path(&self) -> core::option::Option<&str>
 pub fn paperpaw_sdk::HttpRequest::save_to(self, impl core::convert::Into<alloc::string::String>) -> Self
@@ -200,6 +206,7 @@ pub fn paperpaw_sdk::HttpRequest::timeout(self, core::time::Duration) -> Self
 pub fn paperpaw_sdk::HttpRequest::url(&self) -> &str
 pub fn paperpaw_sdk::HttpRequest::want_headers(self, &[&str]) -> Self
 pub fn paperpaw_sdk::HttpRequest::with(self, paperpaw_sdk::Params) -> Self
+pub fn paperpaw_sdk::HttpRequest::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub struct paperpaw_sdk::Hyphenation
 pub fn paperpaw_sdk::Hyphenation::contains(&self, &str) -> bool
 pub fn paperpaw_sdk::Hyphenation::get(&self, &str) -> core::option::Option<&paperpaw_hyphen::Patterns<'static>>
@@ -591,6 +598,7 @@ pub paperpaw_sdk::Typed::context: paperpaw_sdk::Params
 pub paperpaw_sdk::Typed::text: alloc::string::String
 pub paperpaw_sdk::Typed::typing: bool
 pub struct paperpaw_sdk::Uses(_)
+pub const paperpaw_sdk::Uses::BLUETOOTH: paperpaw_sdk::Uses
 pub const paperpaw_sdk::Uses::NETWORK: paperpaw_sdk::Uses
 pub const paperpaw_sdk::Uses::NOTHING: paperpaw_sdk::Uses
 pub const fn paperpaw_sdk::Uses::bits(self) -> u8
@@ -643,6 +651,7 @@ pub paperpaw_sdk::Command::Bind::action: core::option::Option<paperpaw_sdk::Id>
 pub paperpaw_sdk::Command::Bind::input: alloc::string::String
 pub paperpaw_sdk::Command::Bind::layer: alloc::string::String
 pub paperpaw_sdk::Command::BindSlot(paperpaw_sdk::Id, core::option::Option<paperpaw_sdk::Id>)
+pub paperpaw_sdk::Command::Bluetooth(alloc::boxed::Box<paperpaw_sdk::bluetooth::BtRequest>)
 pub paperpaw_sdk::Command::Broadcast(alloc::boxed::Box<paperpaw_sdk::Broadcast>)
 pub paperpaw_sdk::Command::CancelHttp(paperpaw_sdk::Id)
 pub paperpaw_sdk::Command::CancelWork(paperpaw_sdk::Id, core::option::Option<alloc::string::String>)
@@ -762,6 +771,7 @@ pub paperpaw_sdk::Level::Advanced
 pub paperpaw_sdk::Level::Basic
 pub enum paperpaw_sdk::MenuNeed
 pub paperpaw_sdk::MenuNeed::BlackAndWhite
+pub paperpaw_sdk::MenuNeed::Bluetooth
 pub paperpaw_sdk::MenuNeed::ButtonRow
 pub paperpaw_sdk::MenuNeed::Colors
 pub paperpaw_sdk::MenuNeed::Firmware
@@ -958,6 +968,7 @@ pub fn paperpaw_sdk::Env<'_>::plugin_dir(&str) -> alloc::string::String
 pub fn paperpaw_sdk::Env<'_>::plugin_usage(&self) -> alloc::vec::Vec<paperpaw_sdk::usage::PluginUsage>
 pub fn paperpaw_sdk::Env<'_>::top(&self) -> core::option::Option<&paperpaw_sdk::StackEntry>
 pub fn paperpaw_sdk::Env<'a>::actions(&self) -> &'a paperpaw_sdk::Actions
+pub fn paperpaw_sdk::Env<'a>::bluetooth(&self) -> core::option::Option<paperpaw_sdk::bluetooth::BluetoothView<'a>>
 pub fn paperpaw_sdk::Env<'a>::book_badges(&self) -> &'a [paperpaw_sdk::library::service::BookBadge]
 pub fn paperpaw_sdk::Env<'a>::book_data(&self) -> &'a [paperpaw_sdk::library::BookData]
 pub fn paperpaw_sdk::Env<'a>::book_fields(&self) -> &'a [paperpaw_sdk::library::service::BookField]
@@ -1046,6 +1057,7 @@ pub mod paperpaw_sdk
 pub use paperpaw_sdk::round
 pub mod paperpaw_sdk::annotations
 pub mod paperpaw_sdk::ask
+pub mod paperpaw_sdk::bluetooth
 pub mod paperpaw_sdk::builtin
 pub mod paperpaw_sdk::chrome
 pub mod paperpaw_sdk::collections

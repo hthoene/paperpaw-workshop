@@ -76,6 +76,7 @@ pub fn paperpaw_sdk::ui::ListView::set_active(&mut self, bool)
 pub fn paperpaw_sdk::ui::ListView::set_area(&mut self, paperpaw_platform::geometry::Rect)
 pub fn paperpaw_sdk::ui::ListView::set_focus(&mut self, usize) -> paperpaw_sdk::ui::ListChange
 pub fn paperpaw_sdk::ui::ListView::set_len(&mut self, usize)
+pub fn paperpaw_sdk::ui::ListView::set_row(&mut self, u32)
 pub fn paperpaw_sdk::ui::ListView::set_shown(&mut self, bool)
 pub fn paperpaw_sdk::ui::ListView::shown(&self) -> bool
 pub struct paperpaw_sdk::ui::NumberEdit
@@ -183,6 +184,7 @@ pub fn paperpaw_sdk::ui::UiStyle::header_colors(&self) -> (paperpaw_platform::pi
 pub fn paperpaw_sdk::ui::UiStyle::ink(&self, paperpaw_sdk::ui::Ink) -> paperpaw_platform::pixel::Color
 pub fn paperpaw_sdk::ui::UiStyle::new(&paperpaw_sdk::Env<'_>) -> Self
 pub fn paperpaw_sdk::ui::UiStyle::noted_row(&self) -> u32
+pub fn paperpaw_sdk::ui::UiStyle::noted_row_for<'n>(&self, &paperpaw_sdk::Env<'_>, u16, impl core::iter::traits::collect::IntoIterator<Item = &'n str>) -> u32
 pub fn paperpaw_sdk::ui::UiStyle::noted_row_of(&self, usize) -> u32
 pub fn paperpaw_sdk::ui::UiStyle::radius(&self, u32) -> u32
 pub fn paperpaw_sdk::ui::UiStyle::size(&self, paperpaw_sdk::ui::TextRole) -> f32
@@ -785,6 +787,7 @@ pub paperpaw_sdk::ui::slider::SliderView::title: &'a str
 pub paperpaw_sdk::ui::slider::SliderView::value: i64
 pub const paperpaw_sdk::ui::ICON_SCALE: f32
 pub const paperpaw_sdk::ui::NOTE_LINES: usize
+pub const paperpaw_sdk::ui::NOTE_LINES_MOST: usize
 pub const paperpaw_sdk::ui::choice::OPTION: &str
 pub const paperpaw_sdk::ui::confirm::ANSWER: &str
 pub const paperpaw_sdk::ui::confirm::FOCUS_YES: &str
@@ -868,6 +871,9 @@ pub fn paperpaw_sdk::ui::setting_height(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::u
 pub fn paperpaw_sdk::ui::setting_opens(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::SettingSpec) -> core::option::Option<paperpaw_sdk::Command>
 pub fn paperpaw_sdk::ui::setting_row(&paperpaw_sdk::ui::UiStyle, &paperpaw_sdk::SettingSpec, u32, bool) -> u32
 pub fn paperpaw_sdk::ui::setting_value(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::SettingSpec) -> alloc::string::String
+pub fn paperpaw_sdk::ui::shown_number(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::SettingSpec, i64) -> i64
+pub fn paperpaw_sdk::ui::shown_slider_value(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::SettingSpec, i64, i64) -> i64
+pub fn paperpaw_sdk::ui::shown_step(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::SettingSpec, i64, i64) -> i64
 pub fn paperpaw_sdk::ui::step_focus(usize, isize, usize) -> usize
 pub fn paperpaw_sdk::ui::stepper(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::ui::UiStyle, paperpaw_platform::geometry::Rect, &str) -> core::option::Option<(paperpaw_platform::geometry::Rect, paperpaw_platform::geometry::Rect)>
 pub fn paperpaw_sdk::ui::stepper_lines(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::ui::UiStyle, u16, u16, &str, &str) -> paperpaw_sdk::ui::RowLines

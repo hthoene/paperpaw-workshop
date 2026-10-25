@@ -21,7 +21,11 @@ Calibre, the syncs and the others of
 [`tools/plugin-files/plugins.txt`](../tools/plugin-files/plugins.txt))
 come this way on the X4s: their firmware leaves them out, and each
 release builds them as files, signed with PaperPaw's plugin key, which
-readers install from the store.
+readers install from the store. Each has a version of its own, apart
+from PaperPaw's: a release builds one that did not change again for its
+firmware, at the version it has, and a fix comes as a newer version,
+with a release or alone between releases
+([`tools/plugin-files`](../tools/plugin-files/README.md)).
 
 [`samples/hello-native`](../samples/hello-native) is the sample plugin
 above as a file, in a workspace of its own as a plugin's own repository
@@ -57,6 +61,21 @@ cargo x4                  # riscv32imc-unknown-none-elf, the X4
 cargo +esp x4pro          # xtensa-esp32s3-none-elf, the X4 Pro (espup's toolchain)
 ```
 
+The devices draw font packs and load only plugins built without the
+SDK's `outline` feature; the emulator's build (for the computer, see
+below) takes it. One manifest gives each its own, by target:
+
+```toml
+[dependencies]
+paperpaw-sdk = "0.5.0-beta.6"
+
+# Outline fonts for the emulator's build only: the X4s draw font packs.
+[target.'cfg(not(target_os = "none"))'.dependencies]
+paperpaw-sdk = { version = "0.5.0-beta.6", features = ["outline"] }
+```
+
+A build for a device that asks for `outline` stops and says so.
+
 The X4's core libraries (`core`, `alloc`) come from rustup, with the
 target in the sample's `rust-toolchain.toml`. The X4 Pro's come with each
 PaperPaw release, built once and signed
@@ -86,15 +105,16 @@ new interface. The file names the compiler that built it:
 format's linker script keeps, and a device loads the file only where
 that compiler built the firmware too. A beta or a release that keeps
 the interface runs the plugin as it is. The store and the update check
-show which plugins wait for a build.
+show which plugins wait for a build. Interface 3 came with 0.5.0-beta.7
+(Bluetooth, installing another firmware): a plugin built for an earlier
+release is to be built again for it.
 
 ### The file in the emulator
 
 The desktop emulator loads a plugin's code built for the computer it runs
 on, as Android loads `code.so`: a `cdylib` crate with the same
 `plugin!` line, built with the emulator's toolchain against its SDK with
-the `outline` feature (`paperpaw-sdk = { version = "0.4", features =
-["outline"] }`), is `code-host.dll`, `code-host.so` or `code-host.dylib`
+the `outline` feature (the target section above gives it), is `code-host.dll`, `code-host.so` or `code-host.dylib`
 in the plugin's folder (`plugins/<id>/` of the emulator's library,
 beside its `plugin.ini`). The emulator runs such code only when it is started
 with `--trust-code`, which installs every such file in the library first

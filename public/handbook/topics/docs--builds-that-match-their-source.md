@@ -22,7 +22,7 @@ installs as authors do (see [The crate](#the-crate)). So:
 - commit `Cargo.lock`;
 - keep the release's compilers pinned (`rust-toolchain.toml`, the job's
   `RUST_X4`, `RUST_X4_PRO`, `ESP_GCC`), its SDK
-  (`paperpaw-sdk = "0.4"`) and, for the X4 Pro, its core libraries
+  (`paperpaw-sdk = "0.5.0-beta.6"`) and, for the X4 Pro, its core libraries
   installed, and build again for every release until 1.0 (see
   [Which build fits](#which-build-fits));
 - never set `RUSTFLAGS`, which would replace the flags that link the
@@ -37,10 +37,3 @@ The sample's `build.sh`, which the job runs, builds both readers, packs
 and signs the files, and zips the folder, with and without `store/`; the
 job attaches them to the tag's release with their SHA-256. Building twice, in two folders, and
 comparing the files with `cmp` shows that the build holds.
-
-[`Plugin`]: ../crates/paperpaw-sdk/src/plugin.rs
-[`Registrar`]: ../crates/paperpaw-sdk/src/contribution.rs
-[`Env`]: ../crates/paperpaw-sdk/src/env.rs
-[`Command`]: ../crates/paperpaw-sdk/src/command.rs
-[`Screen`]: ../crates/paperpaw-sdk/src/screen.rs
-[`Widget`]: ../crates/paperpaw-sdk/src/widgets.rs

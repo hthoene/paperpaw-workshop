@@ -468,6 +468,7 @@ pub const paperpaw_sdk::builtin::actions::TOOLS: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::actions::UP: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::events::ANNOTATIONS_CHANGED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::AnnotationsChanged>
 pub const paperpaw_sdk::builtin::events::BATTERY_MEASURED: paperpaw_sdk::event::Event<()>
+pub const paperpaw_sdk::builtin::events::BLUETOOTH_CHANGED: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::BOOK_ADDED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::BookAdded>
 pub const paperpaw_sdk::builtin::events::BOOK_CHANGED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::BookChanged>
 pub const paperpaw_sdk::builtin::events::BOOK_CHOSEN: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::BookChosen>
@@ -587,6 +588,7 @@ pub const paperpaw_sdk::builtin::roles::SEARCH_HIT: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::screens::ADD_WIDGET: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::screens::CHOICE: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::screens::CONFIRM: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::screens::FINISHING_UPDATE: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::screens::FOLDER_EDITOR: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::screens::PLACEHOLDER: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::screens::STATUS_ITEMS: paperpaw_sdk::Id
@@ -690,6 +692,7 @@ pub const paperpaw_sdk::builtin::settings_page::CUSTOMISE: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::settings_page::DEVICE: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::settings_page::READING: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::slots::ANNOTATIONS: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::slots::BLUETOOTH: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::slots::BOOK_INFO: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::slots::BROWSER: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::slots::CABLE: paperpaw_sdk::Id

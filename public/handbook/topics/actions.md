@@ -2,6 +2,7 @@
 |---|---|
 | `about.open` | About PaperPaw |
 | `battery.open` | Battery |
+| `bluetooth.open` | Bluetooth |
 | `calibre.open` | Calibre |
 | `core.apps` | Apps |
 | `core.back` | Back |

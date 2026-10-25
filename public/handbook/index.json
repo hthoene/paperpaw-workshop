@@ -67,14 +67,14 @@
   "title": "Checking your plugin",
   "file": "docs--checking-your-plugin.md",
   "summary": "`paperpaw-dev` ([`tools/dev`](../tools/dev/src/lib.rs)) looks at a\nplugin the way its users will meet it, before it is published.",
-  "tokens": 2871
+  "tokens": 3023
  },
  {
   "id": "docs/variants",
   "title": "Variants",
   "file": "docs--variants.md",
   "summary": "A plugin is looked at in every combination of device profile\n(`--profile <id>|all`; `paperpaw-dev --list` lists them), language\n(`--language <code>`, by default",
-  "tokens": 138
+  "tokens": 286
  },
  {
   "id": "docs/the-commands",
@@ -95,14 +95,14 @@
   "title": "In a plugin's own repository",
   "file": "docs--in-a-plugin-s-own-repository.md",
   "summary": "[`tools/dev/templates`](../tools/dev/templates/README.md) has what a\nplugin's repository needs: the harness, the snapshot test and a CI job.",
-  "tokens": 375
+  "tokens": 379
  },
  {
   "id": "docs/what-plugins-contribute",
   "title": "What plugins contribute",
   "file": "docs--what-plugins-contribute.md",
   "summary": "| Contribution | Registrar | What it is |\n|---|---|---|\n| Actions | `add_action` | Something to do, bound to buttons and gestures, listed in menus |\n| Screens |",
-  "tokens": 12201
+  "tokens": 14108
  },
  {
   "id": "docs/what-a-slot-s-screen-does",
@@ -214,21 +214,28 @@
   "title": "The network",
   "file": "docs--the-network.md",
   "summary": "`Command::http(HttpRequest::get(url, &FETCHED))` makes a request where\nthe device has a network (`env.caps().network`); the answer comes as the\nrequest's reply ",
-  "tokens": 351
+  "tokens": 496
+ },
+ {
+  "id": "docs/bluetooth",
+  "title": "Bluetooth",
+  "file": "docs--bluetooth.md",
+  "summary": "Where the device has a Bluetooth Low Energy radio the kernel uses\n(`env.caps().bluetooth`; `env.bluetooth()` shows the radio's state and\nthe bonded devices give",
+  "tokens": 1577
  },
  {
   "id": "docs/work-in-the-background",
   "title": "Work in the background",
   "file": "docs--work-in-the-background.md",
   "summary": "What a plugin does on its own, not because the reader just asked for\nit, it declares as work (`paperpaw_sdk::work`, ADR 0025), and the\nkernel runs it at the mom",
-  "tokens": 794
+  "tokens": 862
  },
  {
   "id": "docs/firmware-updates",
   "title": "Firmware updates",
   "file": "docs--firmware-updates.md",
   "summary": "Where PaperPaw is the device's firmware (the X4s), `env.firmware()` says\nwhich version runs and how an install goes; elsewhere it is `None`.",
-  "tokens": 223
+  "tokens": 340
  },
  {
   "id": "docs/memory",
@@ -242,28 +249,28 @@
   "title": "Plugins as files",
   "file": "docs--plugins-as-files.md",
   "summary": "A code plugin can also be a file, `code.ppn`, in a plugin's folder on\nthe card, which the X4 and the X4 Pro load at their\nstart (ADR 0024): from the plugin stor",
-  "tokens": 2665
+  "tokens": 2918
  },
  {
   "id": "docs/the-crate",
   "title": "The crate",
   "file": "docs--the-crate.md",
   "summary": "The plugin stays a library crate, tried in the emulator and tested as\nany other.",
-  "tokens": 444
+  "tokens": 587
  },
  {
   "id": "docs/which-build-fits",
   "title": "Which build fits",
   "file": "docs--which-build-fits.md",
   "summary": "A plugin file runs on every PaperPaw of the plugin interface it was\nbuilt for ([ADR 0026](adr/0026-plugin-interface-version.md)),\nwhichever release made it: its",
-  "tokens": 353
+  "tokens": 393
  },
  {
   "id": "docs/the-file-in-the-emulator",
   "title": "The file in the emulator",
   "file": "docs--the-file-in-the-emulator.md",
   "summary": "The desktop emulator loads a plugin's code built for the computer it runs\non, as Android loads `code.so`: a `cdylib` crate with the same\n`plugin!` line, built w",
-  "tokens": 271
+  "tokens": 264
  },
  {
   "id": "docs/packing-and-signing",
@@ -305,7 +312,7 @@
   "title": "Publishing",
   "file": "docs--publishing.md",
   "summary": "The plugin library on paperpaw.org is what the website lists and every\nreader's store (*More plugins*) installs from (ADR 0023).",
-  "tokens": 1641
+  "tokens": 2574
  },
  {
   "id": "docs/what-is-uploaded",
@@ -319,14 +326,21 @@
   "title": "The author's key",
   "file": "docs--the-author-s-key.md",
   "summary": "Code plugins are signed by their author with an Ed25519 key of their\nown, made once:\n\n```sh\npaperpaw-sign key ~/.paperpaw/author.key     # prints the public key",
-  "tokens": 223
+  "tokens": 245
  },
  {
   "id": "docs/builds-that-match-their-source",
   "title": "Builds that match their source",
   "file": "docs--builds-that-match-their-source.md",
   "summary": "The site keeps each code plugin's source, shows it file by file, and\nrebuilds each build in a container with the toolchain its fingerprint\nnames, with the sampl",
-  "tokens": 715
+  "tokens": 634
+ },
+ {
+  "id": "docs/publishing-from-github",
+  "title": "Publishing from GitHub",
+  "file": "docs--publishing-from-github.md",
+  "summary": "A plugin can also reach the library from its own repository, without the\nform.",
+  "tokens": 946
  },
  {
   "id": "docs/customisation",
@@ -340,7 +354,7 @@
   "title": "The default key map",
   "file": "keymap--default.md",
   "summary": "```ini\n# Default key bindings of the PaperPaw kernel.",
-  "tokens": 608
+  "tokens": 769
  },
  {
   "id": "samples/airy-theme",
@@ -402,22 +416,22 @@
   "id": "actions",
   "title": "Actions for key maps",
   "file": "actions.md",
-  "summary": "| Action id | Name |\n|---|---|\n| `about.open` | About PaperPaw |\n| `battery.open` | Battery |\n| `calibre.open` | Calibre |\n| `core.apps` | Apps |\n| `core.back` ",
-  "tokens": 1058
+  "summary": "| Action id | Name |\n|---|---|\n| `about.open` | About PaperPaw |\n| `battery.open` | Battery |\n| `bluetooth.open` | Bluetooth |\n| `calibre.open` | Calibre |\n| `c",
+  "tokens": 1067
  },
  {
   "id": "devices",
   "title": "The devices (emulator profiles)",
   "file": "devices.md",
   "summary": "| Profile | Device | Screen | Touch | Buttons |\n|---|---|---|---|---|\n| `xteink-x4` | Xteink X4 | 480 x 800, 220 dpi | no | page-back, page-forward, left, right",
-  "tokens": 244
+  "tokens": 276
  },
  {
   "id": "sdk/root",
   "title": "The SDK's top level (paperpaw_sdk::...)",
   "file": "sdk--root.md",
   "summary": "```rust\npub trait paperpaw_sdk::EventData: core::clone::Clone + core::marker::Sized + 'static\npub trait paperpaw_sdk::Plugin\npub fn paperpaw_sdk::Plugin::manife",
-  "tokens": 22023
+  "tokens": 22249
  },
  {
   "id": "sdk/annotations",
@@ -434,11 +448,18 @@
   "tokens": 838
  },
  {
+  "id": "sdk/bluetooth",
+  "title": "The SDK's module bluetooth",
+  "file": "sdk--bluetooth.md",
+  "summary": "```rust\npub struct paperpaw_sdk::bluetooth::Advertising\npub paperpaw_sdk::bluetooth::Advertising::appearance: core::option::Option<u16>\npub paperpaw_sdk::blueto",
+  "tokens": 7945
+ },
+ {
   "id": "sdk/builtin",
   "title": "The SDK's module builtin",
   "file": "sdk--builtin.md",
   "summary": "```rust\npub struct paperpaw_sdk::builtin::events::AnnotationsChanged\npub paperpaw_sdk::builtin::events::AnnotationsChanged::path: alloc::string::String\npub fn p",
-  "tokens": 18060
+  "tokens": 18126
  },
  {
   "id": "sdk/chrome",
@@ -466,7 +487,7 @@
   "title": "The SDK's module contribution",
   "file": "sdk--contribution.md",
   "summary": "```rust\npub struct paperpaw_sdk::contribution::Registrar\npub fn paperpaw_sdk::contribution::Registrar::add_action(&mut self, paperpaw_sdk::ActionSpec) -> core::",
-  "tokens": 7047
+  "tokens": 7141
  },
  {
   "id": "sdk/data",
@@ -522,21 +543,21 @@
   "title": "The SDK's module replies",
   "file": "sdk--replies.md",
   "summary": "```rust\npub struct paperpaw_sdk::replies::Confirmed\npub fn paperpaw_sdk::replies::Confirmed::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>\npu",
-  "tokens": 3992
+  "tokens": 4483
  },
  {
   "id": "sdk/ui",
   "title": "The SDK's module ui",
   "file": "sdk--ui.md",
   "summary": "```rust\npub struct paperpaw_sdk::ui::CellGrid\npub fn paperpaw_sdk::ui::CellGrid::cell(&self, usize) -> paperpaw_platform::geometry::Rect\npub fn paperpaw_sdk::ui",
-  "tokens": 22643
+  "tokens": 22807
  },
  {
   "id": "sdk/work",
   "title": "The SDK's module work",
   "file": "sdk--work.md",
   "summary": "```rust\npub struct paperpaw_sdk::work::Moments(_)\npub const paperpaw_sdk::work::Moments::ALL: paperpaw_sdk::work::Moments\npub const paperpaw_sdk::work::Moments:",
-  "tokens": 2598
+  "tokens": 2833
  },
  {
   "id": "sdk/wifi",
@@ -564,7 +585,7 @@
   "title": "The SDK's module firmware",
   "file": "sdk--firmware.md",
   "summary": "```rust\npub struct paperpaw_sdk::firmware::Firmware\npub paperpaw_sdk::firmware::Firmware::chip: u16\npub paperpaw_sdk::firmware::Firmware::keys: alloc::vec::Vec<",
-  "tokens": 991
+  "tokens": 1091
  },
  {
   "id": "sdk/help",
@@ -634,7 +655,7 @@
   "title": "The SDK's module library",
   "file": "sdk--library.md",
   "summary": "```rust\npub trait paperpaw_sdk::library::Library\npub fn paperpaw_sdk::library::Library::book(&self, &paperpaw_sdk::Env<'_>, &str) -> core::option::Option<paperp",
-  "tokens": 11245
+  "tokens": 11329
  },
  {
   "id": "sdk/logo",
@@ -788,7 +809,7 @@
   "title": "The SDK's module usage",
   "file": "sdk--usage.md",
   "summary": "```rust\npub struct paperpaw_sdk::usage::PluginUsage\npub paperpaw_sdk::usage::PluginUsage::busy_us: u64\npub paperpaw_sdk::usage::PluginUsage::calls: u32\npub pape",
-  "tokens": 389
+  "tokens": 403
  },
  {
   "id": "sdk/voices",
@@ -851,7 +872,7 @@
   "title": "Settings of files",
   "file": "settings--files.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[files] archive` | Archive folder | text | `books/Archive` | Where “Move to the ar",
-  "tokens": 147
+  "tokens": 188
  },
  {
   "id": "settings/home",
@@ -907,7 +928,14 @@
   "title": "Settings of wifi",
   "file": "settings--wifi.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[wifi] on-demand` | Connect when needed | `true`, `false` | `true` | Switches Wi-F",
-  "tokens": 165
+  "tokens": 156
+ },
+ {
+  "id": "settings/bluetooth",
+  "title": "Settings of bluetooth",
+  "file": "settings--bluetooth.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[bluetooth] remotes` | Remotes | `bluetooth.remotes.hand`, `bluetooth.remotes.read",
+  "tokens": 74
  },
  {
   "id": "settings/power",
@@ -942,7 +970,7 @@
   "title": "Settings of store",
   "file": "settings--store.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[store] catalog` | Plugin library | text | `https://paperpaw.org/api/v1/plugins.js",
-  "tokens": 69
+  "tokens": 114
  },
  {
   "id": "settings/lock",
@@ -984,14 +1012,14 @@
   "title": "Settings of news",
   "file": "settings--news.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[news] articles` | News articles a feed | 5 to 200 | `30` | How many of a feed's n",
-  "tokens": 505
+  "tokens": 526
  },
  {
   "id": "settings/weather",
   "title": "Settings of weather",
   "file": "settings--weather.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[weather] place` | Place | text | `` | Search by name.",
-  "tokens": 1773
+  "tokens": 1862
  },
  {
   "id": "settings/widgets",
@@ -1026,7 +1054,7 @@
   "title": "Settings of update",
   "file": "settings--update.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[update] server` | Update server | text | `https://paperpaw.org` | Where PaperPaw ",
-  "tokens": 91
+  "tokens": 126
  },
  {
   "id": "settings/help",
@@ -1040,7 +1068,7 @@
   "title": "Settings in the group core.group.system",
   "file": "settings-group--core.group.system.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] developer` | Developer options | `true`, `false` | `false` | For developers",
-  "tokens": 1063
+  "tokens": 1143
  },
  {
   "id": "settings-group/core.group.display",
@@ -1061,7 +1089,7 @@
   "title": "Settings in the group core.group.library",
   "file": "settings-group--core.group.library.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] library-folder` | Library folder | text | `books` | The folder with your bo",
-  "tokens": 307
+  "tokens": 348
  },
  {
   "id": "settings-group/core.group.look",
@@ -1088,7 +1116,7 @@
   "id": "settings-group/core.group.reading",
   "title": "Settings in the group core.group.reading",
   "file": "settings-group--core.group.reading.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] reading-font` | Font | `core.font.default`, `Literata`, `Source Sans 3` | `",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] reading-font` | Font | `core.font.default`, `Literata`, `PaperPaw Sans` | `",
   "tokens": 1639
  },
  {
@@ -1208,7 +1236,14 @@
   "title": "Settings in the group wifi.group",
   "file": "settings-group--wifi.group.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[wifi] on-demand` | Connect when needed | `true`, `false` | `true` | Switches Wi-F",
-  "tokens": 165
+  "tokens": 156
+ },
+ {
+  "id": "settings-group/bluetooth.group",
+  "title": "Settings in the group bluetooth.group",
+  "file": "settings-group--bluetooth.group.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[bluetooth] remotes` | Remotes | `bluetooth.remotes.hand`, `bluetooth.remotes.read",
+  "tokens": 74
  },
  {
   "id": "settings-group/power.group",
@@ -1243,7 +1278,7 @@
   "title": "Settings in the group news.widget.headlines",
   "file": "settings-group--news.widget.headlines.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[news] widget.headlines.frame` | Frame | `core.frame.none`, `core.frame.line`, `co",
-  "tokens": 472
+  "tokens": 493
  },
  {
   "id": "settings-group/weather.group",
@@ -1257,14 +1292,14 @@
   "title": "Settings in the group weather.now",
   "file": "settings-group--weather.now.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[weather] now.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.frame.c",
-  "tokens": 827
+  "tokens": 865
  },
  {
   "id": "settings-group/weather.forecast",
   "title": "Settings in the group weather.forecast",
   "file": "settings-group--weather.forecast.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[weather] forecast.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.fr",
-  "tokens": 753
+  "tokens": 804
  },
  {
   "id": "settings-group/widgets.analogue-clock",

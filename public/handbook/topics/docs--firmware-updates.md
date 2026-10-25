@@ -13,3 +13,10 @@ way. `firmware::Update::read` tells what a file holds before. The
 `update` plugin does all this for update files on the card; a plugin
 that fetches updates from somewhere else only needs to put the file
 there.
+
+`FirmwareCommand::InstallForeign { path }` installs another firmware's
+app image instead (the way back to CrossPoint): not signed, so send it
+only for a file the reader chose as such, told that it is not PaperPaw.
+`firmware::ForeignImage::read` and `fits` tell what the file is before;
+the shell checks the whole image as it writes it (`ForeignCheck`: its
+chip, segments, checksum and hash, and CrossPoint's board tag).

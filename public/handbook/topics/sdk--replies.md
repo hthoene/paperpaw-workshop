@@ -29,6 +29,26 @@ pub fn paperpaw_sdk::replies::FolderChosen::to_params(&self) -> paperpaw_sdk::Pa
 pub fn paperpaw_sdk::replies::FolderChosen::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
 pub fn paperpaw_sdk::replies::FolderChosen::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::replies::FolderChosen::to_params(&self) -> paperpaw_sdk::Params
+pub struct paperpaw_sdk::replies::HttpProgress
+pub fn paperpaw_sdk::replies::HttpProgress::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::replies::HttpProgress::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::replies::HttpProgress::to_params(&self) -> paperpaw_sdk::Params
+pub paperpaw_sdk::replies::HttpProgress::context: paperpaw_sdk::Params
+pub paperpaw_sdk::replies::HttpProgress::received: u64
+pub paperpaw_sdk::replies::HttpProgress::total: core::option::Option<u64>
+pub fn paperpaw_sdk::replies::HttpProgress::new(u64, core::option::Option<u64>, paperpaw_sdk::Params) -> Self
+pub fn paperpaw_sdk::replies::HttpProgress::permille(&self) -> core::option::Option<u16>
+pub fn paperpaw_sdk::replies::HttpProgress::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::replies::HttpProgress::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::replies::HttpProgress::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::replies::HttpProgress::new(u64, core::option::Option<u64>, paperpaw_sdk::Params) -> Self
+pub fn paperpaw_sdk::replies::HttpProgress::permille(&self) -> core::option::Option<u16>
+pub fn paperpaw_sdk::replies::HttpProgress::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::replies::HttpProgress::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::replies::HttpProgress::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::replies::HttpProgress::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::replies::HttpProgress::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::replies::HttpProgress::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::replies::HttpReply
 pub fn paperpaw_sdk::replies::HttpReply::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
 pub fn paperpaw_sdk::replies::HttpReply::into_params(self) -> paperpaw_sdk::Params

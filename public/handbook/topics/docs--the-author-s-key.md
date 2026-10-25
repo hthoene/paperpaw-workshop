@@ -13,6 +13,7 @@ repository (`PAPERPAW_PLUGIN_KEY` in the sample's job); the site's page
 <https://paperpaw.org/authors/sign> also signs in the browser, the key
 never leaving the computer. The store reads the public key from the
 builds: all of them are signed by one key, and every update by the same
-one. Readers remember it at the first install and are warned when an
-update is signed by another; a lost key is changed only in the open,
-through the site's contact address.
+one. Readers remember it at the first install and refuse an update, or
+a new install after a removal, signed by another: a new key means a new
+plugin for the readers who have it. A lost key is changed only in the
+open, through the site's contact address.

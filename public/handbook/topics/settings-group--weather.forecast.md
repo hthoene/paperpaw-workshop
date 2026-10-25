@@ -4,11 +4,11 @@
 | `[weather] forecast.padding` | Spacing | `core.padding.auto`, `core.padding.none`, `core.padding.small`, `core.padding.normal`, `core.padding.large` | `core.padding.auto` | Space between the widget's content and its edges or frame. |
 | `[weather] forecast.size` | Size | `core.size.small`, `core.size.medium`, `core.size.large`, `core.size.fit` | `core.size.fit` | How large the widget's text is. Where it does not fit, it is made smaller. |
 | `[weather] forecast.align` | Alignment | `core.align.left`, `core.align.center`, `core.align.right` | `core.align.center` | Where the widget's text sits in its place: at the left, in the middle or at the right. |
-| `[weather] forecast.days` | Days | 3 to 7 | `5` |  |
-| `[weather] forecast.start` | First day | `weather.start.today`, `weather.start.tomorrow` | `weather.start.today` |  |
-| `[weather] forecast.layout` | Days placed | `weather.layout.auto`, `weather.layout.row`, `weather.layout.list` | `weather.layout.auto` |  |
-| `[weather] forecast.names` | Weekdays named | `weather.names.short`, `weather.names.initial`, `weather.names.long` | `weather.names.short` |  |
-| `[weather] forecast.style` | Symbols drawn | `weather.style.line`, `weather.style.solid` | `weather.style.line` |  |
+| `[weather] forecast.days` | Days | 3 to 7 | `5` | How many days the forecast shows. |
+| `[weather] forecast.start` | First day | `weather.start.today`, `weather.start.tomorrow` | `weather.start.today` | Whether the first day is today or tomorrow. |
+| `[weather] forecast.layout` | Days placed | `weather.layout.auto`, `weather.layout.row`, `weather.layout.list` | `weather.layout.auto` | Days side by side, or one below the other. |
+| `[weather] forecast.names` | Weekdays named | `weather.names.short`, `weather.names.initial`, `weather.names.long` | `weather.names.short` | How the weekdays are written. |
+| `[weather] forecast.style` | Symbols drawn | `weather.style.line`, `weather.style.solid` | `weather.style.line` | Weather symbols as outlines or filled. |
 | `[weather] forecast.symbol` | Weather symbols | `true`, `false` | `true` | Whether the widget shows this. Where there is too little room, it may be left out anyway. |
 | `[weather] forecast.low` | Lowest temperatures | `true`, `false` | `true` | Whether the widget shows this. Where there is too little room, it may be left out anyway. |
 | `[weather] forecast.rain` | Chance of rain | `true`, `false` | `false` | Whether the widget shows this. Where there is too little room, it may be left out anyway. |

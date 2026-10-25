@@ -3,8 +3,7 @@
 The desktop emulator loads a plugin's code built for the computer it runs
 on, as Android loads `code.so`: a `cdylib` crate with the same
 `plugin!` line, built with the emulator's toolchain against its SDK with
-the `outline` feature (`paperpaw-sdk = { version = "0.4", features =
-["outline"] }`), is `code-host.dll`, `code-host.so` or `code-host.dylib`
+the `outline` feature (the target section above gives it), is `code-host.dll`, `code-host.so` or `code-host.dylib`
 in the plugin's folder (`plugins/<id>/` of the emulator's library,
 beside its `plugin.ini`). The emulator runs such code only when it is started
 with `--trust-code`, which installs every such file in the library first

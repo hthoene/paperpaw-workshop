@@ -34,6 +34,21 @@ long.confirm = core.long-confirm
 long.menu = core.toggle-night-mode
 # The quick panel by the buttons, as down from the top edge by touch.
 long.right = core.quick-panel
+# A Bluetooth remote's or keyboard's keys (button.hid.<key>): arrows as
+# the device's own, page, space, volume and track keys turn pages.
+button.hid.up = core.up
+button.hid.down = core.down
+button.hid.left = core.left
+button.hid.right = core.right
+button.hid.page-down = core.next-page
+button.hid.page-up = core.prev-page
+button.hid.space = core.next-page
+button.hid.volume-up = core.next-page
+button.hid.volume-down = core.prev-page
+button.hid.next-track = core.next-page
+button.hid.previous-track = core.prev-page
+button.hid.enter = core.confirm
+button.hid.escape = core.back
 
 tap.top-left = core.prev-page
 tap.left = core.prev-page

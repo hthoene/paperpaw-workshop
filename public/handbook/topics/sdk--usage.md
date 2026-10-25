@@ -19,6 +19,7 @@ pub paperpaw_sdk::usage::Refreshes::partial: u32
 pub const fn paperpaw_sdk::usage::Refreshes::new(u32, u32, u32) -> Self
 pub fn paperpaw_sdk::usage::Refreshes::total(&self) -> u32
 pub struct paperpaw_sdk::usage::Usage
+pub paperpaw_sdk::usage::Usage::bluetooth_ms: u64
 pub paperpaw_sdk::usage::Usage::inputs: u32
 pub paperpaw_sdk::usage::Usage::panel_ms: u64
 pub paperpaw_sdk::usage::Usage::pixels: u64
