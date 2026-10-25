@@ -144,13 +144,13 @@ if (why) {
   console.error(`installer: the updater's signature of ${setup}: ${why}`);
   process.exit(1);
 }
+// The installer Authenticode-signed (the app in it was signed before it
+// was packed; the copy in target/ is written again by cargo, unsigned).
 if (thumbprint) {
-  for (const file of [join(nsis, setup), join(root, "src-tauri", "target", "release", "paperpaw-workshop.exe")]) {
-    const checked = spawnSync(signtool, ["verify", "/pa", file], { stdio: "inherit" });
-    if (checked.status !== 0) {
-      console.error(`installer: ${file} is not Authenticode-signed as it should be`);
-      process.exit(1);
-    }
+  const checked = spawnSync(signtool, ["verify", "/pa", join(nsis, setup)], { stdio: "inherit" });
+  if (checked.status !== 0) {
+    console.error(`installer: ${setup} is not Authenticode-signed as it should be`);
+    process.exit(1);
   }
 }
 writeFileSync(join(out, `${name}.sig`), `${signature}\n`);
