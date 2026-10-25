@@ -95,6 +95,8 @@ export interface DeviceBuilt {
 /** Who is signed in at GitHub, and how one could sign in. */
 export interface GitHubAccount {
   login: string | null;
+  /** A sign-in is kept, but GitHub refuses it (it expired). */
+  expired: boolean;
   /** The GitHub CLI is installed and signed in. */
   gh: boolean;
   /** Signing in through the browser is ready. */
@@ -484,7 +486,7 @@ export function standInBackend(): Backend {
     }),
     publishShow: async () => {},
     // GitHub needs the app.
-    githubAccount: async () => ({ login: null, gh: false, browser: false }),
+    githubAccount: async () => ({ login: null, expired: false, gh: false, browser: false }),
     githubUseGh: async () => { throw new Error("Publishing on GitHub needs the app."); },
     githubDeviceStart: async () => { throw new Error("Publishing on GitHub needs the app."); },
     githubDevicePoll: async () => "pending",

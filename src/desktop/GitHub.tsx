@@ -49,7 +49,7 @@ export function GitHub({ desk, backend, held, prepare, raise, done, remember }: 
   const [said, setSaid] = useState("");
 
   useEffect(() => {
-    void backend.githubAccount().then(setAccount, () => setAccount({ login: null, gh: false, browser: false }));
+    void backend.githubAccount().then(setAccount, () => setAccount({ login: null, expired: false, gh: false, browser: false }));
   }, [backend]);
 
   // The device flow: asked as often as GitHub says, until the code is typed.
@@ -103,6 +103,9 @@ export function GitHub({ desk, backend, held, prepare, raise, done, remember }: 
 
   const go = async () => {
     setSaid("");
+    // Signed in still: GitHub's sign-ins expire after some hours.
+    const now = await backend.githubAccount().catch(() => null);
+    if (!now?.login) return setAccount(now);
     for (let round = 0; ; round++) {
       setStep({ at: "working", stage: "check", text: "Getting it ready…" });
       const ready = await prepare().catch((e: unknown) => [text(e)]);
@@ -113,6 +116,10 @@ export function GitHub({ desk, backend, held, prepare, raise, done, remember }: 
         return setStep({ at: "done", outcome });
       }
       if (outcome.repo) await remember(outcome.repo);
+      if (outcome.problems.some((p) => p.startsWith("Confirm with GitHub again"))) {
+        setStep({ at: "idle" });
+        return setAccount(await backend.githubAccount());
+      }
       // Only the version is used up: the next one, without the AI.
       if (outcome.stage === "check" && outcome.released) {
         await raise();
@@ -149,11 +156,14 @@ export function GitHub({ desk, backend, held, prepare, raise, done, remember }: 
           </div>
         ) : (
           <div class="choices-row">
-            {account.gh && (
-              <button type="button" class="go" onClick={() => void signIn("gh")}>Use my GitHub account (GitHub CLI)</button>
-            )}
+            {account.expired && <p class="hint">Your GitHub sign-in has expired.</p>}
             {account.browser && (
-              <button type="button" class={account.gh ? "link" : "go"} onClick={() => void signIn("browser")}>Sign in to GitHub</button>
+              <button type="button" class="go" onClick={() => void signIn("browser")}>
+                {account.expired ? "Confirm with GitHub again" : "Sign in to GitHub"}
+              </button>
+            )}
+            {account.gh && (
+              <button type="button" class={account.browser ? "link" : "go"} onClick={() => void signIn("gh")}>Use the GitHub CLI's account</button>
             )}
             {!account.gh && !account.browser && (
               <p class="hint">

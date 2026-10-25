@@ -9,7 +9,10 @@
 //! as a community plugin. The window follows both (`github_run`,
 //! `github_site`) and, where one refuses, lets the AI fix it.
 //!
-//! The token is kept in the system's keychain, never in a file. Everything
+//! The token is kept in the system's keychain, never in a file. The
+//! workshop's OAuth app gives tokens that expire (after some 8 hours) and
+//! has no secret to renew them with: a token refused means signing in
+//! again, which the window offers as "Confirm with GitHub again". Everything
 //! goes to GitHub's API (no Git is needed): the files as one commit, made
 //! of blobs and a tree, so the repository holds exactly the plugin.
 
@@ -24,9 +27,11 @@ use keyring::Entry;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
-/// The workshop's OAuth app at GitHub (device flow enabled); none until it
-/// is registered, and then only the GitHub CLI signs in.
-pub const CLIENT_ID: &str = "";
+/// The workshop's OAuth app at GitHub ("PaperPaw Workshop", device flow
+/// enabled, no secret): public, as every device flow's.
+pub const CLIENT_ID: &str = "Ov23liQsDhFATPhrrrYF";
+/// What GitHub refusing the token is said as (the window looks for it).
+pub const EXPIRED: &str = "Confirm with GitHub again: the sign-in has expired.";
 /// What the token may do: the person's public repositories with their
 /// secrets (`repo`, as GitHub asks for secrets), and their workflows.
 const SCOPES: &str = "repo workflow";
@@ -108,6 +113,9 @@ fn host(url: &str) -> &str {
 
 /// What GitHub said, where it said something else than was hoped.
 fn said(status: u16, answer: &Value) -> String {
+    if status == 401 {
+        return EXPIRED.into();
+    }
     let message = answer["message"].as_str().unwrap_or("");
     let errors: Vec<String> = answer["errors"]
         .as_array()
@@ -652,6 +660,8 @@ fn web() -> Web {
 #[derive(Debug, Clone, Serialize, Default)]
 pub struct Account {
     pub login: Option<String>,
+    /// A token is kept, but GitHub refuses it (it expired).
+    pub expired: bool,
     pub gh: bool,
     /// Whether signing in through the browser is ready (the OAuth app).
     pub browser: bool,
@@ -660,8 +670,14 @@ pub struct Account {
 #[tauri::command]
 pub async fn github_account() -> Result<Account, String> {
     tauri::async_runtime::spawn_blocking(|| {
-        let login = token().and_then(|_| login(&mut web()).ok());
-        Ok(Account { login, gh: gh_token().is_some(), browser: !CLIENT_ID.is_empty() })
+        let (login, expired) = match token() {
+            None => (None, false),
+            Some(_) => match login(&mut web()) {
+                Ok(who) => (Some(who), false),
+                Err(e) => (None, e == EXPIRED),
+            },
+        };
+        Ok(Account { login, expired, gh: gh_token().is_some(), browser: !CLIENT_ID.is_empty() })
     })
     .await
     .map_err(|e| e.to_string())?
@@ -674,7 +690,7 @@ pub async fn github_use_gh() -> Result<Account, String> {
         let token = gh_token().ok_or("The GitHub CLI is not signed in: gh auth login")?;
         let who = login(&mut Web::new(Some(token.clone())))?;
         keep_token(&token)?;
-        Ok(Account { login: Some(who), gh: true, browser: !CLIENT_ID.is_empty() })
+        Ok(Account { login: Some(who), expired: false, gh: true, browser: !CLIENT_ID.is_empty() })
     })
     .await
     .map_err(|e| e.to_string())?
