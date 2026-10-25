@@ -1,9 +1,10 @@
 // "Publish…": the plugin checked as PaperPaw checks it, its version
-// higher than the last one packed for the store, packed into one file for
-// the store's upload form (`<id>-<version>-store.zip`), then the form
-// opened in the browser and the file shown in its folder. The person
-// chooses that one file in the form's first field and sends it to the
-// moderators; nothing is uploaded from here.
+// higher than the last one packed for the store, then published on GitHub
+// (GitHub.tsx: its own repository, released there, taken by the store as a
+// community plugin), or packed into one file for the store's upload form
+// (`<id>-<version>-store.zip`), the form opened in the browser and the
+// file shown in its folder: the person chooses that one file in the form's
+// first field and sends it to the moderators.
 //
 // A plugin with code also needs its build for each reader, signed with
 // the author's key (whose backup is saved first), and its source, both
@@ -17,6 +18,8 @@ import { MAX_SCREENSHOTS } from "../project/entry";
 import { identity } from "../project/project";
 import { moveShot, removeShot, storeShots } from "../publish/screenshots";
 import { KeyGate } from "./AuthorKey";
+import { GitHub } from "./GitHub";
+import type { Publication } from "./releasing";
 import type { AuthorStatus, Backend, DeviceBuilt, DeviceReadiness, StoreFile } from "./backend";
 import { forModel, shown, type CheckState } from "./checks";
 import type { Desk } from "./desk";
@@ -221,9 +224,8 @@ export function Publish({ desk, backend, onClose }: Props) {
     );
   };
 
-  const raise = async () => {
-    if (version.ok || !version.version) return;
-    const next = raised(version.why === "not-higher" ? version.last : version.version);
+  /** Sets the plugin's version to `next`: why not, if it could not. */
+  const setVersion = async (next: string): Promise<string | null> => {
     // A plugin with code says its version in its folder and in its crate.
     const where = code ? ["plugin/plugin.ini", "Cargo.toml"] : ["plugin.ini"];
     for (const path of where) {
@@ -231,11 +233,57 @@ export function Publish({ desk, backend, onClose }: Props) {
       if (typeof old !== "string") continue;
       const text = path === "Cargo.toml" ? withCrateVersion(old, next) : withVersion(old, next);
       const problem = desk.workshop ? desk.workshop.files.write(path, text) : ((project.files[path] = text), null);
-      if (problem) return setSaid(problem);
+      if (problem) return problem;
     }
     await desk.workspace.save();
     setAgain(false);
     redraw((n) => n + 1);
+    return null;
+  };
+
+  const raise = async () => {
+    if (version.ok || !version.version) return;
+    const problem = await setVersion(raised(version.why === "not-higher" ? version.last : version.version));
+    if (problem) setSaid(problem);
+  };
+
+  /** The plugin ready for GitHub: its store entry complete, checked as
+   *  the form checks it, a plugin with code built for the readers. */
+  const forGitHub = async (): Promise<Publication | string[]> => {
+    const incomplete = await completeEntry();
+    if (incomplete) return [incomplete];
+    const packed = uploadPackage(project);
+    if (!packed.ok) return packed.problems;
+    let source: string | null = null;
+    if (code) {
+      const built = await backend.deviceBuild(project.key, packed.id, packed.version);
+      if (built.state !== "done" || !built.source) return whyFailed(built);
+      source = built.source;
+    }
+    const { name } = identity(project);
+    return { project: project.key, id: packed.id, version: packed.version, description: `${name ?? packed.id}, a plugin for PaperPaw`, known: project.github ?? null, source };
+  };
+
+  /** The version after the one used up. */
+  const raiseNext = async () => {
+    const now = identity(project).version;
+    if (!now) return;
+    const problem = await setVersion(raised(now));
+    if (problem) throw new Error(problem);
+  };
+
+  const rememberRepo = async (repo: string) => {
+    if (project.github === repo) return;
+    project.github = repo;
+    await desk.workspace.save();
+  };
+
+  /** Published on GitHub: kept as published, marked in the history. */
+  const publishedOnGitHub = async (published: string, repo: string) => {
+    project.github = repo;
+    recordPublished(project, published);
+    await desk.workspace.save();
+    await desk.markPublished(published);
   };
 
   const fetchRust = async () => {
@@ -400,8 +448,17 @@ export function Publish({ desk, backend, onClose }: Props) {
             </div>
           )}
           <Screenshots desk={desk} onClose={onClose} />
+          <GitHub
+            desk={desk}
+            backend={backend}
+            held={step.at === "checking" || step.at === "building" || held}
+            prepare={forGitHub}
+            raise={raiseNext}
+            done={publishedOnGitHub}
+            remember={rememberRepo}
+          />
           <section class="way">
-            <h3>Pack it for the store</h3>
+            <h3>Or pack it for the store's form</h3>
             <p>
               {code
                 ? "The workshop makes one file for the store: the plugin, its build for the X4 signed with your key, and its source. Then it opens the store's form in your browser. You upload the file there yourself."

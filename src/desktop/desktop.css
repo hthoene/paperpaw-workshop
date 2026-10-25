@@ -226,6 +226,14 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* The reader */
 .reader { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; justify-items: center; gap: .8rem; padding: 1rem 1rem 1.1rem; min-height: 0; }
 .which { display: flex; gap: .3rem; }
+/* Publishing on GitHub: the code to type, the steps reached. */
+.device-code .code { margin: .3rem 0; font: 600 1.6rem/1.2 var(--display); letter-spacing: .08em; user-select: all; }
+.github-steps li { color: var(--ink-2); }
+.github-steps li.past { color: var(--ink); }
+.github-steps li.now { color: var(--ink); font-weight: 600; }
+.github-steps li small { font-weight: 400; color: var(--ink-2); }
+.publish-sheet .problems pre { margin: 0; white-space: pre-wrap; font: .82rem/1.4 ui-monospace, monospace; }
+
 /* The store's screenshots under Publish, small, in their order. */
 .shot-list { display: flex; flex-wrap: wrap; gap: .8rem; margin: 0; padding: 0; list-style: none; }
 .shot-list li { display: grid; gap: .3rem; justify-items: center; }

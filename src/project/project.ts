@@ -61,6 +61,9 @@ export interface Project {
   /** The versions packed for the store's upload form, oldest first
    *  (desktop/publishing.ts): a new one must be higher. */
   published?: { version: string; packed: string }[];
+  /** The plugin's own repository on GitHub (`owner/name`), once it was
+   *  published there (desktop/releasing.ts). */
+  github?: string;
   /** What each turn of the person cost (desktop/costs.ts). */
   turns?: import("../desktop/costs").Turn[];
   /** Conversations before this one, kept to read back: a conversation that

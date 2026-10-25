@@ -76,6 +76,7 @@ window may call. Each file is one concern:
 | `install.rs` | A plugin installed on a reader in one step, through PaperPaw's install requests, the same over Wi-Fi and the cable |
 | `usb.rs` | The reader on the USB cable: PaperPaw's cable transfer, lines over the chip's own serial link |
 | `history.rs` | The project's history: a state after every answer that changed the plugin, going back to one, the versions packed for the store |
+| `github.rs` | Publishing on GitHub: signing in (the GitHub CLI, or GitHub's device flow), the plugin's own repository laid out as `paperpaw-dev new --github` does and checked with `check-publish`, its files as one commit through GitHub's API, the topic, the author key as a sealed secret, the tag; the release workflow's run and paperpaw.org's answer |
 | `export.rs` | Projects to another computer: one file with everything of a project, or of all, and bringing it back |
 
 [src/desktop/backend.ts](../src/desktop/backend.ts) is the window's side
@@ -212,6 +213,37 @@ plugin's files only: not `.workshop/` (the conversation, the person's
 files, the packages), not builds (`target/`), never a key file
 (`*.key`). An imported plugin's history starts at the import; a project
 from before the history, at its next change.
+
+## Publishing
+
+Publish offers two ways ([src/desktop/Publish.tsx](../src/desktop/Publish.tsx)).
+**On GitHub** ([src/desktop/GitHub.tsx](../src/desktop/GitHub.tsx),
+[src/desktop/releasing.ts](../src/desktop/releasing.ts),
+[src-tauri/src/github.rs](../src-tauri/src/github.rs)): the person signs in
+once, with the GitHub CLI where it is signed in, else through GitHub's
+device flow (a code typed in the browser; the token kept in the keychain).
+One press then:
+
+1. makes the plugin ready as for the form (the store entry, a plugin with
+   code built for the X4, whose source ZIP is the crate the store
+   rebuilds);
+2. lays out its repository as PaperPaw's `paperpaw-dev new --github` does
+   (the plugin in `plugin/`, a plugin with code's crate at the top, the
+   release workflow set for it, README, `.gitignore`) and checks it with
+   `paperpaw-dev check-publish` by the site's rules;
+3. makes the repository (`<login>/<id>`, else `<login>/paperpaw-<id>`)
+   or brings it up to date with exactly these files as one commit, gives
+   it the topic `paperpaw-plugin`, keeps the author key as its secret
+   `PAPERPAW_PLUGIN_KEY` (sealed with the repository's key, a plugin with
+   code) and tags `v<version>`;
+4. follows the release workflow's run, then asks paperpaw.org to look at
+   the repository now and waits for its answer
+   (`/api/v1/community/<owner>/<name>`).
+
+What the check, GitHub or the store refuse goes to the AI to fix, and it
+is published again by itself, twice at most; a version whose release was
+made is raised first. **Through the store's form**: one file packed, as
+below.
 
 ## Another computer
 

@@ -8,6 +8,7 @@ mod device;
 mod code;
 mod emulator;
 mod export;
+mod github;
 mod history;
 mod install;
 mod key;
@@ -69,6 +70,16 @@ pub fn run() {
             device::device_toolchain_install,
             device::device_build,
             publish::publish_show,
+            github::github_account,
+            github::github_use_gh,
+            github::github_device_start,
+            github::github_device_poll,
+            github::github_sign_out,
+            github::github_open,
+            github::github_prepare,
+            github::github_publish,
+            github::github_run,
+            github::github_site,
             projects::projects_list,
             projects::project_create,
             projects::project_rename,

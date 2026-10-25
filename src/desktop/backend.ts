@@ -92,6 +92,60 @@ export interface DeviceBuilt {
 
 /** The one file for the store's form and what it holds: `package`, each
  *  reader built for (`x4`), `source` (src-tauri's publish.rs). */
+/** Who is signed in at GitHub, and how one could sign in. */
+export interface GitHubAccount {
+  login: string | null;
+  /** The GitHub CLI is installed and signed in. */
+  gh: boolean;
+  /** Signing in through the browser is ready. */
+  browser: boolean;
+}
+
+/** GitHub's device flow, begun: the code to type at the address. */
+export interface DeviceCode {
+  device_code: string;
+  user_code: string;
+  verification_uri: string;
+  interval: number;
+  expires_in: number;
+}
+
+/** The repository as it will be, checked as the store will check it. */
+export interface GitHubPrepared {
+  place: { repo: string; exists: boolean; released: boolean };
+  passes: boolean;
+  /** check-publish's lines, errors first. */
+  problems: string[];
+  files: number;
+}
+
+export interface GitHubPublished {
+  repo: string;
+  tag: string;
+  sha: string;
+  url: string;
+}
+
+/** The release workflow's run. */
+export interface GitHubRun {
+  /** `waiting`, `queued`, `in_progress`, `success`, `failure`, … */
+  state: string;
+  url: string;
+  failed_step: string | null;
+  log: string | null;
+}
+
+/** What paperpaw.org says of a repository's newest release. */
+export interface SiteStatus {
+  found: boolean;
+  tag: string | null;
+  version: string | null;
+  /** `offered`, `submitted`, `failed`, `held` or `none`. */
+  state: string | null;
+  listed: boolean;
+  problems: string[];
+}
+
 export interface StoreFile {
   path: string;
   name: string;
@@ -167,6 +221,28 @@ export interface Backend extends FolderApi, PictureApi, CheckApi, HistoryApi {
   /** Opens the store's upload form in the browser and shows the store
    *  file in its folder. */
   publishShow(path: string): Promise<void>;
+  /** Who is signed in at GitHub. */
+  githubAccount(): Promise<GitHubAccount>;
+  /** Signs in with the GitHub CLI's account. */
+  githubUseGh(): Promise<GitHubAccount>;
+  /** Begins signing in through the browser (the page opened). */
+  githubDeviceStart(): Promise<DeviceCode>;
+  /** `pending`, `slow_down`, or `done` once the code was typed. */
+  githubDevicePoll(deviceCode: string): Promise<string>;
+  githubSignOut(): Promise<void>;
+  /** The plugin's repository laid out and checked as the store will
+   *  (`source`: a plugin with code's source ZIP, as its build made it). */
+  githubPrepare(project: string, id: string, version: string, known: string | null, source: string | null): Promise<GitHubPrepared>;
+  /** The repository made or brought up to date, listed, its key kept,
+   *  the version tagged: its release workflow starts. */
+  githubPublish(project: string, id: string, version: string, description: string, known: string | null, source: string | null): Promise<GitHubPublished>;
+  githubRun(repo: string, sha: string): Promise<GitHubRun>;
+  /** What paperpaw.org says; `check`: asked to look now. */
+  githubSite(repo: string, check: boolean): Promise<SiteStatus>;
+  /** Opens a page of GitHub's in the browser. */
+  githubOpen(url: string): Promise<void>;
+  /** Calls `told` with each step of publishing on GitHub. */
+  onGitHubProgress(told: (text: string) => void): Promise<() => void>;
   /** What building a plugin with code for the readers needs, and has. */
   deviceReadiness(): Promise<DeviceReadiness>;
   /** Fetches the X4's part of Rust (about `x4_mb` MB). */
@@ -282,6 +358,18 @@ export const appBackend: Backend = {
   saveFile: (path, base64) => invoke("save_file", { path, base64 }),
   publishPack: (project, id, version, base64, code) => invoke("publish_pack", { project, id, version, base64, code }),
   publishShow: (path) => invoke("publish_show", { path }),
+  githubAccount: () => invoke("github_account"),
+  githubUseGh: () => invoke("github_use_gh"),
+  githubDeviceStart: () => invoke("github_device_start"),
+  githubDevicePoll: (deviceCode) => invoke("github_device_poll", { deviceCode }),
+  githubSignOut: () => invoke("github_sign_out"),
+  githubPrepare: (project, id, version, known, source) => invoke("github_prepare", { project, id, version, known, source }),
+  githubPublish: (project, id, version, description, known, source) =>
+    invoke("github_publish", { project, id, version, description, known, source }),
+  githubRun: (repo, sha) => invoke("github_run", { repo, sha }),
+  githubSite: (repo, check) => invoke("github_site", { repo, check }),
+  githubOpen: (url) => invoke("github_open", { url }),
+  onGitHubProgress: async (told) => listen<string>("github-progress", (event) => told(event.payload)),
   deviceReadiness: () => invoke("device_readiness"),
   deviceToolchainInstall: () => invoke("device_toolchain_install"),
   deviceBuild: (project, id, version) => invoke("device_build", { project, id, version }),
@@ -395,6 +483,18 @@ export function standInBackend(): Backend {
       parts: code ? ["package", "x4", "source"] : ["package"],
     }),
     publishShow: async () => {},
+    // GitHub needs the app.
+    githubAccount: async () => ({ login: null, gh: false, browser: false }),
+    githubUseGh: async () => { throw new Error("Publishing on GitHub needs the app."); },
+    githubDeviceStart: async () => { throw new Error("Publishing on GitHub needs the app."); },
+    githubDevicePoll: async () => "pending",
+    githubSignOut: async () => {},
+    githubPrepare: async () => { throw new Error("Publishing on GitHub needs the app."); },
+    githubPublish: async () => { throw new Error("Publishing on GitHub needs the app."); },
+    githubRun: async () => ({ state: "waiting", url: "", failed_step: null, log: null }),
+    githubSite: async () => ({ found: false, tag: null, version: null, state: null, listed: false, problems: [] }),
+    githubOpen: async (url) => void window.open(url, "_blank"),
+    onGitHubProgress: async () => () => {},
     // No builds for the readers in a plain browser.
     deviceReadiness: async () => ({ x4: false, x4_mb: 62, x4_pro: false, sign: false }),
     deviceToolchainInstall: async () => { throw new Error("Building for the readers needs the app."); },

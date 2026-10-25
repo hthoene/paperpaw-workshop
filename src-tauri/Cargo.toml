@@ -52,6 +52,9 @@ sha2 = "0.10"
 # The projects' history (history.rs): a Git repository of each project's
 # own, through libgit2 built into the app, so no Git is needed.
 git2 = { version = "0.20", default-features = false, features = ["vendored-libgit2"] }
+# The author key kept as a repository's secret on GitHub, sealed with the
+# repository's key as GitHub takes secrets (github.rs).
+crypto_box = { version = "0.9", features = ["seal", "getrandom"] }
 
 [dev-dependencies]
 tempfile = "3"
