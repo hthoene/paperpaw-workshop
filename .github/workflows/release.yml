@@ -73,6 +73,8 @@ jobs:
       - run: npm test
       # Build from the registry SDK selected by the real emulator, then
       # load the plugin in it. No checkout SDK may hide missing crates.
+      # Stable builds the workshop tests only. Their plugin builder
+      # installs and selects cargo +<ready.toolchain>, even in system mode.
       - name: Rust checks and plugins against the released SDK
         env:
           PAPERPAW_RUST: system
