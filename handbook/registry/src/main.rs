@@ -77,7 +77,7 @@ fn main() {
     let actions: Vec<Value> = kernel
         .actions()
         .iter()
-        .map(|a| json!({ "id": a.id.as_str(), "title": tr(&a.title) }))
+        .map(|a| json!({ "id": a.id().as_str(), "title": tr(a.title()) }))
         .collect();
 
     let profiles: Vec<Value> = PROFILES

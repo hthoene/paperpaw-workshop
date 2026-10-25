@@ -1,6 +1,6 @@
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
-| `[news] articles` | News articles a feed | 5 to 200 | `30` | How many of a feed's newest articles its book holds. |
+| `[news] articles` | Articles a feed | 5 to 200 | `30` | How many of a feed's newest articles its book holds. |
 | `[news] widget.headlines.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.frame.card`, `core.frame.dark` | `core.frame.none` | What the widget is drawn in; a dark card has light text. |
 | `[news] widget.headlines.padding` | Spacing | `core.padding.auto`, `core.padding.none`, `core.padding.small`, `core.padding.normal`, `core.padding.large` | `core.padding.auto` | Space between the widget's content and its edges or frame. |
 | `[news] widget.headlines.size` | Size | `core.size.small`, `core.size.medium`, `core.size.large` | `core.size.small` | How large the widget's text is. Where it does not fit, it is made smaller. |

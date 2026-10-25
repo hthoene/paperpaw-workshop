@@ -33,7 +33,14 @@ least `Style::widows` lines of a paragraph at the top of a page and
 `orphans` at the bottom (`Style::lines_kept`, from the settings
 `WIDOWS` and `ORPHANS`; a paragraph that goes on whole takes its
 heading along), and
-`layout::wrap_lines_hyphenated` breaks lines of one's own as pages do.
+`layout::wrap_lines_kerned` breaks lines of one's own as pages do, with
+the pairs `Typesetter::kern` gives (`ReadingFaces` kerns as it draws;
+`FontHandle::kern`, `unkerned` and `ligatures` for text of one's own).
+`PageType::patterns` gives the patterns of the page's language with the
+letters the reader keeps before and after a hyphen (`HYPHEN_MIN_LEFT`,
+`HYPHEN_MIN_RIGHT`; 0: the table's own, see
+`hyphen::Patterns::with_minimums`); a reader of one's own hyphenates
+with them.
 
 A text filter that needs to know where a block is, or leaves blocks out
 (a web page's adverts, printed page numbers in a book), is a block

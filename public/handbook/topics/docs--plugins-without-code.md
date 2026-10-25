@@ -100,19 +100,37 @@ change a setting that keeps the device safe, such as the lock's.
 Packs for other scripts are read a glyph at a time, so devices with
 little memory can use them ([ADR 0018](adr/0018-font-packs-for-other-scripts.md)).
 `tools/script-pack.py` builds Cyrillic and Greek for Literata.
+A pack that extends a face with sizes larger than its own draws text
+asked that large, and the font size goes as far: the X4's firmware has
+Literata up to 32 px, and `tools/literata-packs.py` builds its larger
+sizes (and its bold italic face) as plugins for the font library.
 Icon packs are such packs for the icon font: `tools/icons/pack.py` builds
 one with the Tabler icons named
 (`[extends] icons.ppfp = fonts-default.icons`).
 
-A family of its own needs a name and a regular face; its faces are
-packs, drawn on every device and read a glyph at a time, or font files,
-drawn where scalable fonts are, a variable font at its style's weight:
+A family needs a name and a face, a family of its own a regular face;
+its faces are packs, drawn on every device and read a glyph at a time,
+or font files, drawn where scalable fonts are, a variable font at its
+style's weight:
 
 ```ini
 [family]
 name = Fredoka
 regular = regular.ppfp
 bold = bold.ppfp
+```
+
+A plugin may also bring a face of a family that is there without it,
+bound to its role: the X4's firmware has no Literata Bold Italic, which
+such a plugin brings back:
+
+```ini
+[family]
+name = Literata
+bold-italic = literata-bold-italic.ppfp
+
+[fonts]
+core.font-reading-bold-italic = literata-bold-italic.bold-italic
 ```
 
 A logo of its own takes the place of PaperPaw's (on the sleep screen,

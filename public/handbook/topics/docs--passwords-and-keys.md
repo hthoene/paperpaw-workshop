@@ -5,7 +5,9 @@ Plugins keep passwords, API keys and tokens with
 with `env.secrets().get(id)`. They are all listed in *Settings, Passwords
 and keys*, where the user changes or removes them. Ask for one on the
 keyboard in password mode (`ask::text(…).password()`); the keyboard
-offers to type it on a phone. They are kept apart from the settings and
+offers to type it on a phone. Ask for web and e-mail addresses with
+`.url()` and `.email()`: the keyboard types them as they are, without
+capitals of its own. They are kept apart from the settings and
 not readable at a glance, but not encrypted: the devices have no safe
 place for a key. A plugin sees its own alone: name them in its
 namespace (`myplugin.token`); `env.secrets().get` gives another plugin's

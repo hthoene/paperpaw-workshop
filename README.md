@@ -13,8 +13,8 @@ it on a reader right in the window. When you like it, it goes onto your
 reader. It works with [PaperPaw](https://paperpaw.org), first on the
 Xteink X4 and X4 Pro.
 
-> **This is a beta (0.1.0-beta.9), for testers and developers.** It works
-> with PaperPaw 0.5.0-beta.7, which is a beta too. Expect bugs, and expect
+> **This is a beta (0.1.0-beta.10), for testers and developers.** It works
+> with PaperPaw 0.5.0-beta.8, which is a beta too. Expect bugs, and expect
 > things to change before the first release. Keep a copy of your plugins
 > (*Export project…* in the menu). When something goes wrong, please open
 > an [issue](https://github.com/hthoene/paperpaw-workshop/issues) and say
@@ -129,14 +129,23 @@ PaperPaw build it brings along; with the update key in
 A release is a tag `v<version>`, the version of
 `src-tauri/tauri.conf.json`. Its workflow
 ([`.github/workflows/release.yml`](.github/workflows/release.yml))
-builds the Windows installer with the emulator of the PaperPaw release
-that [`paperpaw-release.txt`](paperpaw-release.txt) names. It fetches
-that emulator from PaperPaw's release and takes it only where its
-checksum and PaperPaw's signature hold. It signs the installer for
-updates with the repository's secret `TAURI_SIGNING_PRIVATE_KEY`, and
-attaches the installer, its signature and `latest.json`, which
-installed workshops ask for. There are no installers for macOS or Linux
-yet.
+checks the tag, the release assets, notices and tests. Make the release
+locally on Windows with `npm run release`: SimplySign Desktop must be
+logged in so that Certum's certificate can sign the bundled programs,
+the app and installer. The script fetches the emulator that
+[`paperpaw-release.txt`](paperpaw-release.txt) names and checks its
+checksum and PaperPaw's signature. It then signs the installer for the
+updater with `TAURI_SIGNING_PRIVATE_KEY`, or the key file named by
+`TAURI_SIGNING_PRIVATE_KEY_PATH` (default
+`~/.paperpaw/keys/workshop-updater.key`), and publishes the installer,
+its signature and `latest.json`. `npm run release -- --dry-run` still
+builds and signs; it only skips publication on GitHub. There are no
+installers for macOS or Linux yet.
+
+The installed workshop uses its bundled PaperPaw emulator and the SDK
+of that exact release. Automatic downloads and selection of other
+PaperPaw versions are planned. Until then, a newer PaperPaw release
+reaches installed workshops through a workshop update.
 
 Licensed under the [Apache License 2.0](LICENSE).
 

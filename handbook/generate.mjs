@@ -55,7 +55,7 @@ function run(cmd, args, opts = {}) {
 }
 
 // 1. PaperPaw at the ref, unpacked (never the working tree: what the ref says).
-const commit = run("git", ["-C", repo, "rev-parse", ref]).trim();
+const commit = run("git", ["-C", repo, "rev-parse", `${ref}^{commit}`]).trim();
 const tree = path.join(work, "paperpaw");
 fs.rmSync(tree, { recursive: true, force: true });
 fs.mkdirSync(tree, { recursive: true });

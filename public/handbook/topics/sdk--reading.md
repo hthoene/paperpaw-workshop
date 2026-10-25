@@ -34,6 +34,13 @@ pub paperpaw_sdk::reading::Word::end: paperpaw_document::Locator
 pub paperpaw_sdk::reading::Word::start: paperpaw_document::Locator
 pub paperpaw_sdk::reading::Word::text: alloc::string::String
 pub fn paperpaw_sdk::reading::Word::new(impl core::convert::Into<alloc::string::String>, paperpaw_document::Locator, paperpaw_document::Locator) -> Self
+pub struct paperpaw_sdk::reading::WordBox
+pub paperpaw_sdk::reading::WordBox::area: paperpaw_platform::geometry::Rect
+pub paperpaw_sdk::reading::WordBox::end: paperpaw_document::Locator
+pub paperpaw_sdk::reading::WordBox::start: paperpaw_document::Locator
+pub paperpaw_sdk::reading::WordBox::text: alloc::string::String
+pub fn paperpaw_sdk::reading::WordBox::lookup_text(&self) -> &str
+pub fn paperpaw_sdk::reading::WordBox::new(paperpaw_platform::geometry::Rect, impl core::convert::Into<alloc::string::String>, paperpaw_document::Locator, paperpaw_document::Locator) -> Self
 pub struct paperpaw_sdk::reading::FilteredDocument<'d, 'e>
 pub fn paperpaw_sdk::reading::FilteredDocument<'d, 'e>::in_book(self, &'d str, &'d str) -> Self
 pub fn paperpaw_sdk::reading::FilteredDocument<'d, 'e>::kept_block_at(&self, &dyn paperpaw_platform::storage::Storage, paperpaw_document::Locator) -> core::result::Result<core::option::Option<paperpaw_document::Block>, paperpaw_document::DocumentError>

@@ -32,6 +32,14 @@ Screens are made by a factory each time they open
 `Handled::No` for what a screen does not handle: the kernel then runs
 the action's own handler (e.g. the menu button opens the menu).
 
+A screen opened again while it is open is not made twice: the kernel
+goes back to the open one, closing the screens above it, and gives it
+the params in `on_reopen`, so *Back* leaves it in one press. By default
+that is one for each set of params (the details of another book open
+above those of the first); `.instances(Instances::SINGLE)` keeps one at
+most whatever the params (a transfer screen, a page of settings
+roots), and `Instances::MANY` opens each time.
+
 An action can be run with params: `Command::RunAction(id, params)`, or
 `Command::run(id)` without. Its handler gets them as its second argument
 (`.handler(|env, params, out| ..)`), and a screen reads them with
@@ -68,7 +76,15 @@ Some rules every screen should follow:
   standard app.
 - **Ask for redraws.** After a change, `cx.request_redraw()` (or a part
   of the screen) and `cx.request_refresh(mode)`: `Fast` for a moving
-  focus, `Partial` for new content, `Full` to clear ghosting.
+  focus, `Partial` for new content, `Full` to clear ghosting. A focus
+  that moves asks for the two items it left and came to, never the
+  whole screen: on the X4 a step then takes a fraction of a frame. The
+  lists do it themselves (`ListChange::request` after `ListView`,
+  `Rows` or `Sections` moved it); a focus of a screen's own asks with
+  `ListChange::focus(left, reached)` (for buttons with
+  `ui::button_reach`, as a focus frame goes round them). Where the focus
+  changes more, such as a line about the focused item, ask for that
+  part too.
 - **Overlays** are screens with a `region`. One that takes the reader's
   attention (a menu, a question) washes out what lies below it
   (`dims_below`); one looked through (a keyboard over the field it

@@ -190,6 +190,7 @@ paperpaw_sdk::plugin!(${lib}::${plugin});
 rustflags = [
     "-C", "link-arg=-Tpaperpaw-plugin.x",
     "-C", "link-arg=--emit-relocs",
+    "-C", "link-arg=--no-relax",
     "-C", "code-model=medium",
     "-C", "relocation-model=static",
     "-C", "force-frame-pointers",

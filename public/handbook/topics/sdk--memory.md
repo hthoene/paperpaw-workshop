@@ -21,4 +21,14 @@ pub const fn paperpaw_sdk::memory::MemoryUse::new(u32, u32) -> Self
 pub const fn paperpaw_sdk::memory::MemoryUse::with_largest_free(self, u32) -> Self
 pub fn paperpaw_sdk::memory::MemoryUse::with_region(self, paperpaw_sdk::memory::MemoryRegion) -> Self
 pub const fn paperpaw_sdk::memory::MemoryUse::with_stack(self, u32, u32) -> Self
+pub struct paperpaw_sdk::memory::Placement(_)
+pub const paperpaw_sdk::memory::Placement::FAST: Self
+pub const paperpaw_sdk::memory::Placement::LARGE: Self
+pub enum paperpaw_sdk::memory::MemoryError
+pub paperpaw_sdk::memory::MemoryError::Full
+pub paperpaw_sdk::memory::MemoryError::Full::bytes: usize
+pub paperpaw_sdk::memory::MemoryError::TooLarge
+pub fn paperpaw_sdk::memory::MemoryError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+pub type paperpaw_sdk::memory::Placer = fn(usize, usize, u32) -> *mut u8
+pub fn paperpaw_sdk::memory::vec_in<T>(paperpaw_sdk::memory::Placement, usize) -> core::result::Result<alloc::vec::Vec<T>, paperpaw_sdk::memory::MemoryError>
 ```

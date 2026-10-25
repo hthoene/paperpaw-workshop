@@ -204,7 +204,10 @@ export class Handbook {
     const scored = this.topics
       .map((t) => {
         const hay = `${t.id} ${t.title} ${t.summary}`.toLowerCase();
-        const score = words.reduce((n, w) => n + (hay.includes(w) ? (t.id.includes(w) ? 3 : 1) : 0), 0);
+        // A whole title named in the query matters more than words
+        // repeated across many settings' summaries.
+        const named = (` ${q} `).includes(` ${t.title.toLowerCase()} `) ? 4 : 0;
+        const score = named + words.reduce((n, w) => n + (hay.includes(w) ? (t.id.includes(w) ? 3 : 1) : 0), 0);
         return { t, score };
       })
       .filter((x) => x.score > 0)

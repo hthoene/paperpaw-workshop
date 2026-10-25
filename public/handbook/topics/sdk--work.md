@@ -10,9 +10,9 @@ pub const paperpaw_sdk::work::Moments::NONE: paperpaw_sdk::work::Moments
 pub const paperpaw_sdk::work::Moments::ONLINE: paperpaw_sdk::work::Moments
 pub const paperpaw_sdk::work::Moments::SLEEP: paperpaw_sdk::work::Moments
 pub const paperpaw_sdk::work::Moments::WAKE: paperpaw_sdk::work::Moments
-pub const fn paperpaw_sdk::work::Moments::bits(self) -> u8
+pub const fn paperpaw_sdk::work::Moments::bits(self) -> u32
 pub const fn paperpaw_sdk::work::Moments::contains(self, paperpaw_sdk::work::Moments) -> bool
-pub const fn paperpaw_sdk::work::Moments::from_bits(u8) -> paperpaw_sdk::work::Moments
+pub const fn paperpaw_sdk::work::Moments::from_bits(u32) -> paperpaw_sdk::work::Moments
 pub const fn paperpaw_sdk::work::Moments::intersects(self, paperpaw_sdk::work::Moments) -> bool
 pub const fn paperpaw_sdk::work::Moments::is_empty(self) -> bool
 pub fn paperpaw_sdk::work::Moments::names(self) -> alloc::string::String

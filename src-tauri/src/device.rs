@@ -51,6 +51,8 @@ x4pro = "build --release --target xtensa-esp32s3-none-elf"
 rustflags = [
     "-C", "link-arg=-Tpaperpaw-plugin.x",
     "-C", "link-arg=--emit-relocs",
+    // Keep calls across the hot-code boundary available to the packer.
+    "-C", "link-arg=--no-relax",
     "-C", "code-model=medium",
     "-C", "relocation-model=static",
     "-C", "force-frame-pointers",
@@ -451,6 +453,7 @@ mod tests {
         assert_eq!(linker_script(released, None, &home).as_deref(), Some(&b"release"[..]));
         assert_eq!(linker_script("{ version = \"=0.6.0\" }", None, &home), None);
         assert!(CARGO_CONFIG.contains("-Tpaperpaw-plugin.x"));
+        assert!(CARGO_CONFIG.contains("link-arg=--no-relax"));
         // The X4 Pro links with the release's core libraries, as PaperPaw's sample.
         assert!(!CARGO_CONFIG.contains("build-std"));
     }
@@ -480,6 +483,7 @@ mod tests {
         assert!(manifest.contains("lto = \"fat\"") && manifest.contains("panic = \"abort\""));
         assert!(text("device/main.rs").contains("paperpaw_sdk::plugin!(my_clock::MyClock);"));
         assert!(text(".cargo/config.toml").contains("x4 = \"build --release --target riscv32imc-unknown-none-elf\""));
+        assert!(text(".cargo/config.toml").contains("link-arg=--no-relax"));
         assert!(text("rust-toolchain.toml").contains("channel = \"1.99.0\""));
     }
 

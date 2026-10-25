@@ -19,6 +19,6 @@ new interface. The file names the compiler that built it:
 format's linker script keeps, and a device loads the file only where
 that compiler built the firmware too. A beta or a release that keeps
 the interface runs the plugin as it is. The store and the update check
-show which plugins wait for a build. Interface 3 came with 0.5.0-beta.7
-(Bluetooth, installing another firmware): a plugin built for an earlier
+show which plugins wait for a build. Interface 4 came with 0.5.0-beta.8
+(reading, settings and real-time screens): a plugin built for an earlier
 release is to be built again for it.

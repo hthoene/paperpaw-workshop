@@ -182,7 +182,7 @@ that their choices go along; a shell opens a book with
 | Text chosen, and the action chosen for it | `menus::SELECTION`, `events::TEXT_CHOSEN` | add an action to the menu, hear the event |
 | Notes exported as Markdown | `events::NOTES_EXPORTED` | for notes apps and syncs |
 | The reader's menus | `menus::READER`, `READER_MORE`, `READER_PANEL` | add entries there |
-| The type of pages | `settings::FONT_SIZE`, `FONT_WEIGHT`, `WORD_SPACING`, `LINE_SPACING`, `MARGIN`, `MARGIN_ENDS`, `JUSTIFY`, `HYPHENATE`, `INDENT`, `PARAGRAPH_SPACING`, `WIDOWS`, `ORPHANS`, `PUBLISHER_STYLES`, `FOOTNOTES` | the kernel's settings (each book may have its own), which readers read |
+| The type of pages | `settings::FONT_SIZE`, `FONT_WEIGHT`, `TEXT_CONTRAST`, `SMOOTH_TEXT`, `WORD_SPACING`, `LETTER_SPACING`, `KERNING`, `LIGATURES`, `LINE_SPACING`, `LINE_BREAKING`, `MARGIN`, `MARGIN_ENDS`, `JUSTIFY`, `HYPHENATE`, `HYPHEN_MIN_LEFT`, `HYPHEN_MIN_RIGHT`, `INDENT`, `INDENT_SIZE`, `PARAGRAPH_SPACING`, `PARAGRAPH_SPACE`, `WIDOWS`, `ORPHANS`, `PUBLISHER_STYLES`, `BOOK_ALIGN` and the other `BOOK_*`, `FOOTNOTES` | the kernel's settings (each book may have its own), which readers read |
 | The page's words | `events::PAGE_WORDS_WANTED`, `reading::PageWords` | readers answer `reading::ask_page_words` |
 | Where a book was left | `positions::{load, save}`, `Reading::xpointer` with `BOOK_CLOSED` | readers keep it; syncs and lists read it without opening the book |
 | The contents, search, the marks, a footnote, skimming | `slots::TOC`, `SEARCH`, `ANNOTATIONS`, `FOOTNOTE`, `SKIM`, `events::FOLLOW_LINK`, `SKIM`, `SKIMMED` | bind a screen of one's own; readers open the slots, follow the links and go where skimming asks |
@@ -231,7 +231,14 @@ least `Style::widows` lines of a paragraph at the top of a page and
 `orphans` at the bottom (`Style::lines_kept`, from the settings
 `WIDOWS` and `ORPHANS`; a paragraph that goes on whole takes its
 heading along), and
-`layout::wrap_lines_hyphenated` breaks lines of one's own as pages do.
+`layout::wrap_lines_kerned` breaks lines of one's own as pages do, with
+the pairs `Typesetter::kern` gives (`ReadingFaces` kerns as it draws;
+`FontHandle::kern`, `unkerned` and `ligatures` for text of one's own).
+`PageType::patterns` gives the patterns of the page's language with the
+letters the reader keeps before and after a hyphen (`HYPHEN_MIN_LEFT`,
+`HYPHEN_MIN_RIGHT`; 0: the table's own, see
+`hyphen::Patterns::with_minimums`); a reader of one's own hyphenates
+with them.
 
 A text filter that needs to know where a block is, or leaves blocks out
 (a web page's adverts, printed page numbers in a book), is a block
@@ -304,7 +311,7 @@ its documentation (for example one line per entry); others add to it
 with `r.contribute(point, text)`, and the plugin reads
 `env.services().contributions(point)`, each with the plugin it came from.
 
-### Marks in the text
+### Marks (decorations)
 
 A plugin marks words on book pages with a decorator (ADR 0021): it gets
 the words of a page with their places in the book and gives back ranges,
@@ -316,7 +323,7 @@ use paperpaw_sdk::decorations::{self, Decorated, Decoration, DecoratorSpec, Line
 
 const LEARNING: Id = Id::new_static("vocabulary.learning");
 
-// The role: its look is settings (Settings, Marks in the text), the
+// The role: its look is settings (Settings, Marks), the
 // plugin gives the default; themes and users change it.
 decorations::add_role(r, &LEARNING, "vocabulary.role.learning",
     Decoration::NONE.line(LineKind::Dotted))?;
@@ -414,7 +421,75 @@ r.add_page_layer(
   band of the page: they read nothing from storage there. Those of an
   order below 0 are drawn behind the text.
 - A layer whose drawing changes while the page stays asks for the
-  screen to be drawn again (`Command::Redraw`).
+  screen to be drawn again (`Command::Redraw(RefreshMode::Fast)`).
+
+A layer that writes between the lines, an interlinear reading with a
+small translation above each line, takes two parts: a text filter asks
+for room above every line (`Block::leading_above`, in hundredths of an
+em), which the layout adds to each line's height, so pages break with
+it and words are hit where they are drawn; and a layer that asks for the
+page's words (`.words()`) finds them in `page.words` (`WordBox`: each
+word's box, text and place), measured once a page and only where a
+layer asks:
+
+```rust
+const ON: Setting<bool> = Setting::new("interlinear.on");
+
+r.add_text_filter(TextFilterSpec::new(
+    Id::new_static("interlinear.room"),
+    "interlinear.room",
+    // Seven tenths of an em above every line, while switched on.
+    Box::new(|env, block| {
+        if env.settings().read(&ON) {
+            block.leading_above = Some(70);
+        }
+    }),
+    // Changes with the setting: pages are laid out anew.
+    Box::new(|env| u64::from(env.settings().read(&ON))),
+))?;
+r.add_page_layer(
+    PageLayerSpec::new(Id::new_static("interlinear.words"), "interlinear.words", |canvas, env, page| {
+        for word in page.words {
+            // The room above the word's line: line.leading pixels high.
+            let Some(line) = page.lines.iter().find(|l| l.start <= word.start && word.start < l.end) else { continue };
+            let gloss = translation(env, page.language, word.lookup_text());
+            draw_small(canvas, env, word.area.x, line.area.y - line.leading, gloss);
+        }
+    })
+    .switch(&ON)
+    .words(),
+)?;
+```
+
+A filter may also insert blocks after the one it gets: a translation
+after each paragraph (a parallel text), a gloss, a note. They show after
+the block and never apart from its last line, and take no place in the
+book: positions, progress, bookmarks, highlights and search stay the
+book's. At most four, 4 KiB of text, and best shorter than a page (they
+cannot go on over a page break):
+
+```rust
+let translation = translate(&block.text);
+let len = translation.len() as u32;
+block.insert_after(Block::new(BlockKind::Paragraph, 0, len, translation));
+```
+
+A layer takes taps on what it draws by saying where its items are; a tap
+on one, or Select on one chosen with the buttons as links are, comes to
+its plugin as `events::PAGE_LAYER_TAPPED` with the item's id
+(`tapped.item`), and every other tap and button stays the reader's:
+
+```rust
+PageLayerSpec::new(id, "interlinear.words", draw)
+    .items(|_, page| {
+        page.lines.iter().enumerate()
+            .filter(|(_, l)| l.leading > 0)
+            .map(|(i, l)| LayerItem::new(i as u32, Rect::new(l.area.x, l.area.y - l.leading, l.area.width, l.leading)).label("Translation"))
+            .collect()
+    })
+```
+
+`samples/interlinear` is all of this as a plugin to start from.
 
 A frame (`layers::PageFrameSpec`) sets the text in columns: two
 columns, two pages side by side. The setting `core.page-frame` (each
@@ -641,7 +716,9 @@ Plugins keep passwords, API keys and tokens with
 with `env.secrets().get(id)`. They are all listed in *Settings, Passwords
 and keys*, where the user changes or removes them. Ask for one on the
 keyboard in password mode (`ask::text(…).password()`); the keyboard
-offers to type it on a phone. They are kept apart from the settings and
+offers to type it on a phone. Ask for web and e-mail addresses with
+`.url()` and `.email()`: the keyboard types them as they are, without
+capitals of its own. They are kept apart from the settings and
 not readable at a glance, but not encrypted: the devices have no safe
 place for a key. A plugin sees its own alone: name them in its
 namespace (`myplugin.token`); `env.secrets().get` gives another plugin's
@@ -786,6 +863,75 @@ script presses with `ble-key:right` (or `left`, `page-down`,
 `volume-up` …) once they go to the key maps, and `Pulse HR`, a
 heart-rate belt that answers the example above, notifying a rate each
 second.
+
+### Screens that run in real time
+
+Games, emulators and animations draw many frames a second and want
+every button as it goes down. Such a screen says so in one place,
+[`Screen::mode`], with a `realtime::ScreenMode`
+([ADR 0030](adr/0030-real-time-screens.md)):
+
+```rust
+fn mode(&self) -> ScreenMode {
+    ScreenMode::new()
+        .full_screen()     // no row of hints, no bars
+        .raw_keys()        // buttons pressed and released, in on_key
+        .cleans_itself()   // no full refresh every few pages
+        .fastest()         // the fastest refresh the panel has
+        .grays(2)          // black and white is enough
+        .frame_every(Duration::from_millis(100))
+        .awake_for(Duration::from_secs(600))
+}
+```
+
+Each option asks for an intent; every device meets it as well as it
+can. With `raw_keys`, `on_key` gets each button pressed and let go,
+with its time, and `env.keys_held()` says which are down. The power
+button stays the device's, and holding *Back* for two seconds always
+leaves the screen. With `frame_every`, the screen asks for its timer as
+usual (`cx.wake_at`); the X4 then goes on while the panel refreshes, and
+shows the next frame as soon as the panel is free.
+
+The device says what it can do and what it did: `env.panel()` has the
+fastest time of each refresh mode as measured, its grays, and the last
+frame shown (`last_frame()`: when, how long it took, how many frames
+were merged into it). Pace yourself by these numbers rather than by
+your own: faster panels then make your plugin faster without a new
+build.
+
+Draw pictures that change every frame with `canvas.blit`: a packed
+`Bitmap` of 1, 2, 4 or 8 bits a pixel with a palette of grays, at a
+whole scale, dithered or not. A 160×144 picture at three times its size
+costs a fraction of drawing it pixel by pixel.
+
+Keep what a loop reads all the time in internal RAM and large data in
+PSRAM (`memory::vec_in(Placement::FAST, n)` and `Placement::LARGE`);
+devices with one kind of memory keep both alike. In a code plugin, mark
+the few functions that run every frame with `paperpaw_sdk::hot! { … }`:
+the X4 runs them from internal RAM instead of flash, a bounded part of
+its heap; what does not fit runs from flash as before.
+
+A screen that needs much memory says so (`.memory(bytes)`, and
+`.needs_network()` or `.needs_bluetooth()` where it does): as it shows,
+the kernel lets caches go, holds background work back, switches off
+the radios it does not need, asks the screens below to let go of what
+they can make again (`on_squeeze`; the reader lets its book go and
+keeps its place) and closes them where that is not enough, until there
+is enough, and gives everything back once it closes. Read what you got
+with `env.room()` in `on_show`, and make the large buffer there. A
+screen of yours that keeps much (pictures, a long list) lets it go in
+`on_squeeze` and makes it again in `on_show`.
+
+To keep the device from going to sleep by itself for a while (a clock,
+a slideshow, a long download), hold it: `cx.keep_awake(WakeHold::new(id,
+reason).lasting(...))` on a screen (it ends when the screen closes), or
+`Command::KeepAwake` from work and services; renew it before it ends,
+let go with `Command::LetSleep`. The reader can switch holds off.
+
+`samples/frame-test` does all of this and shows what it measures (frames
+a second, the work as hot and as ordinary code, the drawing, the heap):
+`cargo run -p paperpaw-emulator --features frame-test`, then *Frame
+test* in the tools.
 
 ### Work in the background
 

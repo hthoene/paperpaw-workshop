@@ -44,6 +44,7 @@ describe("a project the builder takes", () => {
     const x4 = native("my-quotes", "Quotes", "/paperpaw/crates/paperpaw-sdk");
     expect(x4["src/main.rs"]).toContain("paperpaw_sdk::plugin!(my_quotes::Quotes);");
     expect(x4[".cargo/config.toml"]).toContain("-Tpaperpaw-plugin.x");
+    expect(x4[".cargo/config.toml"]).toContain("link-arg=--no-relax");
     // The X4 Pro's flags: linked through the Xtensa GCC, its sysroot's
     // paths written as /rust, as PaperPaw's own plugin files are.
     expect(x4[".cargo/config.toml"]).toContain("[target.xtensa-esp32s3-none-elf]");

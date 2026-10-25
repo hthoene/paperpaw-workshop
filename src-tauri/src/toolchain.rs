@@ -287,6 +287,16 @@ mod tests {
     }
 
     #[test]
+    fn system_rust_still_builds_with_the_emulators_exact_compiler() {
+        let (version, _) = wanted("rustc 1.99.0 (b940084d7 2026-09-28), x86_64-pc-windows-msvc").unwrap();
+        let rust = Rust { cargo: PathBuf::from(exe("cargo")), version, homes: None };
+        let command = rust.cargo();
+        // An explicit rustup selector takes precedence over the default
+        // toolchain and RUSTUP_TOOLCHAIN, including a newer CI stable.
+        assert_eq!(command.get_args().next(), Some(std::ffi::OsStr::new("+1.99.0")));
+    }
+
+    #[test]
     fn other_targets_need_no_microsoft_linker() {
         assert!(can_link("x86_64-unknown-linux-gnu").is_ok());
         assert!(can_link("aarch64-apple-darwin").is_ok());
