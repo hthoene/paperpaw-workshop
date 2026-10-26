@@ -51,7 +51,7 @@ x4pro = "build --release --target xtensa-esp32s3-none-elf"
 rustflags = [
     "-C", "link-arg=-Tpaperpaw-plugin.x",
     "-C", "link-arg=--emit-relocs",
-    // Keep calls across the hot-code boundary available to the packer.
+    # Keep calls across the hot-code boundary available to the packer.
     "-C", "link-arg=--no-relax",
     "-C", "code-model=medium",
     "-C", "relocation-model=static",
@@ -432,6 +432,31 @@ mod tests {
     use super::*;
 
     const MANIFEST: &str = "[package]\nname = \"my-clock\"\nversion = \"0.2.0\"\n\n[package.metadata.paperpaw]\nplugin = \"MyClock\"\n\n[dependencies]\npaperpaw-sdk = \"0.5\"\n";
+
+    #[test]
+    fn cargo_accepts_the_generated_device_configuration() {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::create_dir(dir.path().join(".cargo")).unwrap();
+        std::fs::write(dir.path().join(".cargo/config.toml"), CARGO_CONFIG).unwrap();
+        std::fs::write(
+            dir.path().join("Cargo.toml"),
+            "[package]\nname = \"config-check\"\nversion = \"0.1.0\"\nedition = \"2021\"\n[lib]\npath = \"lib.rs\"\n[workspace]\n",
+        )
+        .unwrap();
+        std::fs::write(dir.path().join("lib.rs"), "").unwrap();
+        // Cargo itself parses the shipped config, without compiling, fetching
+        // dependencies or requiring either device target to be installed.
+        let result = std::process::Command::new(env!("CARGO"))
+            .args(["metadata", "--format-version", "1", "--no-deps", "--offline"])
+            .current_dir(dir.path())
+            .output()
+            .unwrap();
+        assert!(
+            result.status.success(),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+    }
 
     #[test]
     fn the_linker_script_comes_from_the_sdk_a_checkout_or_the_registry() {
