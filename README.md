@@ -13,8 +13,8 @@ it on a reader right in the window. When you like it, it goes onto your
 reader. It works with [PaperPaw](https://paperpaw.org), first on the
 Xteink X4 and X4 Pro.
 
-> **This is a beta (0.1.0-beta.11), for testers and developers.** It works
-> with PaperPaw 0.5.0-beta.10, which is a beta too. Expect bugs, and expect
+> **This is a beta (0.1.0-beta.12), for testers and developers.** It works
+> with PaperPaw 0.5.0-beta.11, which is a beta too. Expect bugs, and expect
 > things to change before the first release. Keep a copy of your plugins
 > (*Export project…* in the menu). When something goes wrong, please open
 > an [issue](https://github.com/hthoene/paperpaw-workshop/issues) and say
@@ -103,7 +103,8 @@ The workshop is a [Tauri](https://tauri.app/) app: the window is
 TypeScript with Preact (`src/desktop`, using the conversation, tools and
 checks in `src/`), the computer's side is Rust (`src-tauri`). The reader
 is PaperPaw's own emulator, `paperpaw-emu`, a program of each PaperPaw
-release, so a new PaperPaw needs no new workshop.
+release. The installer bundles the version in `paperpaw-release.txt`; a new
+Workshop release updates that bundle and its generated AI handbook.
 
 To build it you need Node 24, Rust and
 [Tauri's prerequisites](https://tauri.app/start/prerequisites/). Then:
