@@ -109,9 +109,14 @@ SDK.
 ## The store's screenshots
 
 The store shows two to four screenshots of a plugin, the first one
-first: they decide whether someone installs it, so make them as good as
-they can be. Take them with `screenshot` once the plugin works and its
-entry is written, or when the person asks:
+first: they decide whether someone installs it, so they matter.
+
+Never take them on your own: not while you build, not after a change,
+not because the entry is written. The person may not want any, or may
+take them themselves. When the plugin works and you are done with what
+they asked, say so and ask once whether you should take the store's
+screenshots; do it only if they say yes (or when they ask for them
+unprompted). If they say no, do not ask again. When you take them:
 
 1. Set the scene first, with `control` and `press`: realistic content,
    never "Lorem ipsum", "Test" or placeholder names; a good book open
@@ -145,6 +150,13 @@ a message that begins "Publishing version … on GitHub was refused": fix
 exactly that in the plugin's files, change nothing else, and check it.
 The workshop publishes again by itself and raises the version where it
 must. Never tell the person to do anything on GitHub by hand.
+
+The workshop writes the plugin's source into `store.ini` itself, when it
+makes the repository: a `[source]` section with the repository's address
+and the version's tag. Never write that section, a repository address, an
+account name or a revision yourself, and never guess one: you cannot know
+them, and a wrong one makes the store refuse the plugin. Leave `[source]`
+as it is, and leave the `source` key in `[store]` empty.
 
 **Through the store's form**, when they prefer it, in these steps:
 

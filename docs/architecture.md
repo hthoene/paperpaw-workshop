@@ -90,7 +90,9 @@ of these calls (`Backend`), and a stand-in for a plain browser
 1. Add what the person wrote to the messages.
 2. Send the messages, the handbook and the tools to the provider.
 3. If the answer asks for tools, run them (input checked with zod first),
-   add their results, and go to 2. At most 25 rounds per turn.
+   add their results, and go to 2. No number of rounds ends a turn; only
+   the work being done, the person's Stop, or an error does. An answer cut
+   at its length limit goes on by itself.
 4. Otherwise the turn is done.
 
 The messages are only ever added to, never changed. That keeps the prompt
@@ -148,8 +150,8 @@ The loop keeps a turn from going round in circles:
   while that answer is among the `keep` tool uses never cleared);
 - after 15 looks without a change, a tool result tells the model to write
   with what it has, or to ask the person;
-- a turn that cost more than $0.25 without changing a file pauses
-  (`paused`): the conversation says what it cost, calmly, and "Go on".
+- the turn is never paused for what it costs: the person sees what it
+  costs and stops it when they want.
 
 The conversation shows the same tool used several times in a row as one
 line, with how many and what about

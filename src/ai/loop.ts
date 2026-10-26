@@ -1,5 +1,6 @@
 // The AI loop: one turn of the person, as many rounds of the model and
-// its tools as it takes, up to a limit. The conversation is append-only
+// its tools as it takes: nothing stops it but the end of the work, the
+// person (the abort signal) or an error. The conversation is append-only
 // (the model's thinking stays valid only so), every tool call gets its
 // result, and a tool's input is checked against its schema before it runs.
 // A conversation that grows long is kept short in two steps (length.ts):
@@ -17,13 +18,8 @@ import type { ContextManagement, Provider, Request } from "./provider";
 import { carriedText, startFresh, SUMMARY_PROMPT, SUMMARY_TOKENS, todayLine, told, transcript } from "./summary";
 import { invalidJson } from "./tool-input";
 
-/** The most rounds (requests) one turn of the person may take. */
-export const MAX_ROUNDS = 25;
 /** The most one answer may hold, thinking included. */
 export const MAX_TOKENS = 32_000;
-/** How often one turn may go on in a fresh conversation: past that, the
- *  turn ends as too long (one turn that alone fills a conversation). */
-export const FRESH_A_TURN = 2;
 
 /** Tools that only look. Asked again in one turn with the same input,
  *  they answer with where the first answer is, not with it again, while
@@ -46,9 +42,9 @@ export const CHANGING_TOOLS = ["write_file", "edit_file", "delete_file", "place_
 /** After this many looks in a turn without a change, the model is told
  *  to write with what it has, or to ask; again every ten after. */
 export const LOOKS_BEFORE_WRITING = 15;
-/** What a turn may cost without changing a file before it pauses and
- *  the person is asked whether to go on, in dollars. */
-export const PAUSE_AFTER_DOLLARS = 0.25;
+
+/** What the model is told when its answer reached the length limit. */
+const CUT_OFF = "Your last answer reached its length limit and was cut off. Go on from where it stopped.";
 
 /** A tool's input as a key: the same input, the same key. */
 function inputKey(name: string, input: unknown): string {
@@ -108,9 +104,6 @@ export interface Session {
   /** The system prompt: the handbook for the plugin's kind (data's if not
    *  given). */
   prompt?: string;
-  /** What a turn may cost without changing a file before it pauses
-   *  ([`PAUSE_AFTER_DOLLARS`] if not given). */
-  pauseAfter?: number;
   /** The most uses of tools in one turn, over [`PER_TURN`] (the looks the
    *  person allows). */
   perTurn?: Record<string, number>;
@@ -138,11 +131,10 @@ export interface TurnEvents {
   onRound?(): void;
 }
 
-/** How a turn ended: `cut` when an answer reached its length limit with
- *  nothing more to do, so the person should know it is not finished;
- *  `paused` when it cost more than it may without changing a file, so
- *  the person says whether it goes on. */
-export type TurnEnd = "done" | "stopped" | "limit" | "refusal" | "too_long" | "cut" | "paused";
+/** How a turn ended: the work is `done`, the person `stopped` it, or the
+ *  model `refusal`. A turn never ends for being long or costly: the
+ *  person decides when to stop it. */
+export type TurnEnd = "done" | "stopped" | "refusal";
 
 type Effort = "low" | "medium" | "high";
 
@@ -186,7 +178,6 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
 
   // Grown long: on in a fresh conversation, the person's words after the
   // summary (kept to be carried again if the request fails).
-  let fresh = 0;
   let carried: string | undefined;
   if (lastPrompt(project) > rules.summariseAt) {
     try {
@@ -195,7 +186,6 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
       if (signal?.aborted) return "stopped";
       throw error;
     }
-    fresh += 1;
   }
 
   // A turn that stopped after its tools ran ends with their results: the
@@ -224,14 +214,12 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
   const used = new Map<string, number>();
   let uses = 0;
   let looks = 0;
-  let changed = false;
-  const before = project.usage.dollars;
 
-  for (let round = 0; round < MAX_ROUNDS; round++) {
+  for (let round = 0; ; round++) {
     // Every round, not only the first: a long turn grows the prompt too,
-    // and goes on in a fresh conversation where it was.
+    // and goes on in a fresh conversation where it was. A fresh one is
+    // empty, so the next one comes only after a round of work.
     if (round > 0 && lastPrompt(project) > rules.summariseAt) {
-      if (fresh >= FRESH_A_TURN) return "too_long";
       let text: string;
       try {
         text = await goOnFresh(session, true, signal);
@@ -239,7 +227,6 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
         if (signal?.aborted) return "stopped";
         throw error;
       }
-      fresh += 1;
       project.messages.push({ role: "user", content: dated([{ type: "text", text }]) });
       seen.clear();
       events.onRound?.();
@@ -277,7 +264,13 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
     if (message.stop_reason === "pause_turn") continue;
 
     const calls = message.content.filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
-    if (calls.length === 0) return message.stop_reason === "max_tokens" ? "cut" : "done";
+    if (calls.length === 0) {
+      if (message.stop_reason !== "max_tokens") return "done";
+      // An answer that reached its length limit goes on by itself.
+      project.messages.push({ role: "user", content: [{ type: "text", text: CUT_OFF }] });
+      events.onRound?.();
+      continue;
+    }
 
     const results: Anthropic.ToolResultBlockParam[] = [];
     for (const call of calls) {
@@ -308,7 +301,6 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
         if (looking && !result.is_error) seen.set(key, { id: call.id, at: uses - 1 });
       }
       if (CHANGING_TOOLS.includes(call.name) && !result.is_error) {
-        changed = true;
         looks = 0;
         // What the files say may differ now; the docs say the same.
         for (const k of [...seen.keys()]) if (!k.startsWith("lookup_docs ")) seen.delete(k);
@@ -324,10 +316,7 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
     project.messages.push({ role: "user", content: results });
     events.onRound?.();
     if (signal?.aborted) return "stopped";
-    // Costly, and nothing changed yet: the person says whether it goes on.
-    if (!changed && project.usage.dollars - before > (session.pauseAfter ?? PAUSE_AFTER_DOLLARS)) return "paused";
   }
-  return "limit";
 }
 
 /** The conversation summarised (by the summariser, from a transcript)

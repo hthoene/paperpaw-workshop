@@ -146,6 +146,14 @@ export function siteVerdict(
   }
 }
 
+/** Whether the store refused the plugin's source. The workshop names it
+ *  itself, when it makes the repository (src-tauri/src/github.rs,
+ *  `with_source`: the repository and the version's tag), so this is not
+ *  the AI's to fix: it can only guess an address. */
+export function aboutSource(problems: string[]): boolean {
+  return problems.some((p) => /(^|[\s:])source:/i.test(p));
+}
+
 /** What was refused, for the AI to fix. */
 export function forAi(outcome: Extract<Outcome, { ok: false }>, version: string): string {
   const where = {
@@ -159,7 +167,8 @@ export function forAi(outcome: Extract<Outcome, { ok: false }>, version: string)
     : "";
   return (
     `Publishing version ${version} on GitHub was refused. ${where} said:\n\n${outcome.problems.join("\n")}\n\n` +
-    `Fix it in the plugin's files, change nothing else, and check it. The workshop then publishes it again by itself.${then}`
+    `Fix it in the plugin's files, change nothing else, and check it. The workshop then publishes it again by itself.${then}\n\n` +
+    `Never write a [source] section, a repository address or a revision in store.ini: the workshop sets them itself, from the repository it makes.`
   );
 }
 

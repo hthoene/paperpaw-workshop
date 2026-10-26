@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { GitHubPrepared, GitHubRun, SiteStatus } from "../src/desktop/backend";
-import { forAi, publishOnGitHub, siteVerdict, type Publication, type Timing } from "../src/desktop/releasing";
+import { aboutSource, forAi, publishOnGitHub, siteVerdict, type Publication, type Timing } from "../src/desktop/releasing";
 
 const PLUGIN: Publication = { project: "p", id: "night-owl", version: "1.0.0", description: "Night owl", known: null, source: null };
 const NOW: Timing = { wait: async () => {}, runEvery: 1, runFor: 20, startFor: 3, siteEvery: 1, siteFor: 10 };
@@ -75,5 +75,12 @@ describe("publishing on GitHub", () => {
     const text = forAi({ ok: false, stage: "store", problems: ["id: taken"], released: true }, "1.0.0");
     expect(text).toContain("paperpaw.org said:\n\nid: taken");
     expect(text).toContain("raises the version itself");
+    expect(text).toContain("Never write a [source] section");
+  });
+
+  it("knows a refusal of the source, which the workshop names itself and the AI cannot fix", () => {
+    expect(aboutSource(["source: The source could not be fetched from https://github.com/x/y/archive/v0.1.0.zip."])).toBe(true);
+    expect(aboutSource(["metadata: Version 0.1.3: source: either a repository and a revision, or an archive and its sha256."])).toBe(true);
+    expect(aboutSource(["id: taken", "metadata: the group is none of the store's"])).toBe(false);
   });
 });

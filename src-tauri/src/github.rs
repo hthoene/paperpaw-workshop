@@ -32,9 +32,18 @@ use serde_json::{Value, json};
 pub const CLIENT_ID: &str = "Ov23liQsDhFATPhrrrYF";
 /// What GitHub refusing the token is said as (the window looks for it).
 pub const EXPIRED: &str = "Confirm with GitHub again: the sign-in has expired.";
-/// What the token may do: the person's public repositories with their
-/// secrets (`repo`, as GitHub asks for secrets), and their workflows.
-const SCOPES: &str = "repo workflow";
+/// What the token may do at first: the person's public repositories and
+/// their workflows, nothing of their private ones.
+const SCOPES: &str = "public_repo workflow";
+/// What it may do once GitHub asks for more: `repo` is the only scope that
+/// lets a token keep a secret, and a plugin with code is signed in its
+/// workflow with the author's key as the repository's secret. Asked only
+/// then (`MORE_ACCESS`), and the workshop still touches the plugin's own
+/// public repository alone.
+const SCOPES_MORE: &str = "repo workflow";
+/// What publishing says where GitHub does not let the token keep the
+/// secret (the window looks for it and offers signing in with `SCOPES_MORE`).
+pub const MORE_ACCESS: &str = "More access needed: GitHub lets only a sign-in with full repository access keep your author key as a secret. Allow it once, then publish again.";
 const API: &str = "https://api.github.com";
 const LOGIN: &str = "https://github.com/login";
 /// The store, which takes the release.
@@ -179,11 +188,11 @@ pub struct DeviceCode {
     pub expires_in: u64,
 }
 
-pub fn device_start(http: &mut dyn Http, client: &str) -> Result<DeviceCode, String> {
+pub fn device_start(http: &mut dyn Http, client: &str, more: bool) -> Result<DeviceCode, String> {
     if client.is_empty() {
         return Err("Signing in through the browser is not ready yet: sign in with the GitHub CLI (gh auth login), then try again.".into());
     }
-    let answer = ask(http, "POST", &format!("{LOGIN}/device/code"), Some(&json!({ "client_id": client, "scope": SCOPES })), &[200])?;
+    let answer = ask(http, "POST", &format!("{LOGIN}/device/code"), Some(&json!({ "client_id": client, "scope": if more { SCOPES_MORE } else { SCOPES } })), &[200])?;
     serde_json::from_value(answer).map_err(|e| format!("GitHub's answer: {e}"))
 }
 
@@ -287,6 +296,61 @@ pub fn with_scaffold(mut files: Vec<(String, Vec<u8>)>, scaffold: &[(String, Vec
         files.push((path.clone(), bytes));
     }
     files.sort_by(|a, b| a.0.cmp(&b.0));
+    files
+}
+
+/// Where a plugin with code keeps its store entry in the repository.
+const STORE_INI: &str = "plugin/store/store.ini";
+
+/// `ini` (a store.ini, perhaps empty) with `[source]` naming the
+/// repository on GitHub and the tag it is released at: the store fetches
+/// the source it rebuilds the plugin from there. `repository` and
+/// `revision` are the workshop's to write, from where it makes the
+/// repository, never a person's or the AI's; `path`, `bin` and the other
+/// keys stay.
+pub fn with_source(ini: &str, repo: &str, tag: &str) -> String {
+    let mut out: Vec<String> = Vec::new();
+    let mut in_source = false;
+    let mut written = false;
+    for line in ini.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with('[') && trimmed.ends_with(']') {
+            in_source = trimmed[1..trimmed.len() - 1].trim().eq_ignore_ascii_case("source");
+            out.push(line.to_string());
+            if in_source && !written {
+                out.push(format!("repository = https://github.com/{repo}"));
+                out.push(format!("revision = {tag}"));
+                written = true;
+            }
+            continue;
+        }
+        let key = line.split_once('=').map(|(k, _)| k.trim());
+        if in_source && matches!(key, Some("repository" | "revision")) {
+            continue;
+        }
+        out.push(line.to_string());
+    }
+    if !written {
+        if out.last().is_some_and(|l| !l.trim().is_empty()) {
+            out.push(String::new());
+        }
+        out.extend(["[source]".to_string(), format!("repository = https://github.com/{repo}"), format!("revision = {tag}")]);
+    }
+    out.join("\n") + "\n"
+}
+
+/// `files` of a plugin with code with its store entry naming `repo` and
+/// `tag` as the source (see `with_source`).
+pub fn pin_source(mut files: Vec<(String, Vec<u8>)>, repo: &str, tag: &str) -> Vec<(String, Vec<u8>)> {
+    let old = files.iter().find(|(p, _)| p == STORE_INI).map(|(_, b)| String::from_utf8_lossy(b).into_owned()).unwrap_or_default();
+    let new = with_source(&old, repo, tag).into_bytes();
+    match files.iter_mut().find(|(p, _)| p == STORE_INI) {
+        Some(entry) => entry.1 = new,
+        None => {
+            files.push((STORE_INI.to_string(), new));
+            files.sort_by(|a, b| a.0.cmp(&b.0));
+        }
+    }
     files
 }
 
@@ -537,15 +601,23 @@ pub fn publish(
 
     if let Some(key) = key {
         told("Keeping your author key as the repository's secret…");
-        let public = ask(http, "GET", &format!("{API}/repos/{repo}/actions/secrets/public-key"), None, &[200])?;
+        let (status, public) = http.call("GET", &format!("{API}/repos/{repo}/actions/secrets/public-key"), None)?;
+        if status == 403 || status == 404 {
+            return Err(MORE_ACCESS.into());
+        } else if status != 200 {
+            return Err(said(status, &public));
+        }
         let sealed = seal(public["key"].as_str().unwrap_or(""), key.as_bytes())?;
-        ask(
-            http,
+        let (status, answer) = http.call(
             "PUT",
             &format!("{API}/repos/{repo}/actions/secrets/{SECRET}"),
             Some(&json!({ "encrypted_value": sealed, "key_id": public["key_id"] })),
-            &[201, 204],
         )?;
+        match status {
+            201 | 204 => {}
+            403 | 404 => return Err(MORE_ACCESS.into()),
+            _ => return Err(said(status, &answer)),
+        }
     }
 
     told("Tagging the version, which starts the release…");
@@ -697,11 +769,11 @@ pub async fn github_use_gh() -> Result<Account, String> {
 }
 
 /// Begins signing in through the browser: the code to type, the page
-/// opened for it.
+/// opened for it. `more`: with the access to keep a secret (`MORE_ACCESS`).
 #[tauri::command]
-pub async fn github_device_start(app: tauri::AppHandle) -> Result<DeviceCode, String> {
+pub async fn github_device_start(app: tauri::AppHandle, more: bool) -> Result<DeviceCode, String> {
     use tauri_plugin_opener::OpenerExt;
-    let code = tauri::async_runtime::spawn_blocking(|| device_start(&mut Web::new(None), CLIENT_ID)).await.map_err(|e| e.to_string())??;
+    let code = tauri::async_runtime::spawn_blocking(move || device_start(&mut Web::new(None), CLIENT_ID, more)).await.map_err(|e| e.to_string())??;
     let _ = app.opener().open_url(&code.verification_uri, None::<&str>);
     Ok(code)
 }
@@ -748,12 +820,14 @@ pub struct Prepared {
 
 /// The repository's files for `project` (`source`: the source ZIP of a
 /// plugin with code, as its build made it).
-fn repository(project: &str, id: &str, source: Option<&str>, work: &Path) -> Result<Vec<(String, Vec<u8>)>, String> {
+/// At `place`'s repository, released as `tag`: a plugin with code names
+/// them as its source in its store entry.
+fn repository(project: &str, id: &str, source: Option<&str>, work: &Path, place: &Place, tag: &str) -> Result<Vec<(String, Vec<u8>)>, String> {
     let dev = dev_program(&crate::paths::emulator_program()?);
     let (files, bin) = match source {
         Some(zip) => {
             let (files, bin) = code_files(&std::fs::read(zip).map_err(|e| format!("{zip}: {e}"))?)?;
-            (files, Some(bin))
+            (pin_source(files, &place.repo, tag), Some(bin))
         }
         None => (data_files(&crate::projects::plugin_files(&crate::paths::projects()?, project)?), None),
     };
@@ -771,15 +845,17 @@ fn work_dir(project: &str) -> Result<PathBuf, String> {
 pub async fn github_prepare(project: String, id: String, version: String, known: Option<String>, source: Option<String>) -> Result<Prepared, String> {
     tauri::async_runtime::spawn_blocking(move || {
         let work = work_dir(&project)?;
-        let files = repository(&project, &id, source.as_deref(), &work)?;
+        // Where it goes first: the plugin's source is that repository's.
+        let mut http = web();
+        let who = login(&mut http)?;
+        let tag = format!("v{version}");
+        let place = place(&mut http, &who, &id, known.as_deref(), &tag)?;
+        let files = repository(&project, &id, source.as_deref(), &work, &place, &tag)?;
         let tree = work.join("repository");
         write_tree(&tree, &files)?;
         let rules = site_rules(&work);
         let dev = dev_program(&crate::paths::emulator_program()?);
         let (passes, problems) = check_publish(&dev, &tree, rules.as_deref())?;
-        let mut http = web();
-        let who = login(&mut http)?;
-        let place = place(&mut http, &who, &id, known.as_deref(), &format!("v{version}"))?;
         Ok(Prepared { place, passes, problems, files: files.len() })
     })
     .await
@@ -802,7 +878,11 @@ pub async fn github_publish(
             let _ = app.emit("github-progress", text.to_string());
         };
         let work = work_dir(&project)?;
-        let files = repository(&project, &id, source.as_deref(), &work)?;
+        let mut http = web();
+        let who = login(&mut http)?;
+        let tag = format!("v{version}");
+        let place = place(&mut http, &who, &id, known.as_deref(), &tag)?;
+        let files = repository(&project, &id, source.as_deref(), &work, &place, &tag)?;
         // A plugin with code is signed in its workflow with the author's key.
         let key = match source {
             Some(_) => {
@@ -812,10 +892,6 @@ pub async fn github_publish(
             }
             None => None,
         };
-        let mut http = web();
-        let who = login(&mut http)?;
-        let tag = format!("v{version}");
-        let place = place(&mut http, &who, &id, known.as_deref(), &tag)?;
         publish(&mut http, &place, &files, &description, &tag, key.as_deref(), &told)
     })
     .await
@@ -866,6 +942,8 @@ mod tests {
         tags: Vec<String>,
         topics: Vec<String>,
         secrets: Vec<String>,
+        /// A token without the access to keep secrets.
+        narrow: bool,
         blobs: usize,
         tree: Vec<String>,
         asked: RefCell<Vec<String>>,
@@ -914,6 +992,7 @@ mod tests {
                     self.topics = body.unwrap()["names"].as_array().unwrap().iter().map(|t| t.as_str().unwrap().to_string()).collect();
                     ok(json!({}))
                 }
+                ("GET", p) if p.ends_with("/actions/secrets/public-key") && self.narrow => Ok((404, json!({ "message": "Not Found" }))),
                 ("GET", p) if p.ends_with("/actions/secrets/public-key") => {
                     ok(json!({ "key_id": "k1", "key": STANDARD.encode(crypto_box::SecretKey::from([7u8; 32]).public_key().as_bytes()) }))
                 }
@@ -960,6 +1039,20 @@ mod tests {
         let sealed = STANDARD.decode(&github.secrets[0]).unwrap();
         let opened = crypto_box::SecretKey::from([7u8; 32]).unseal(&sealed).unwrap();
         assert_eq!(opened, "ab".repeat(32).as_bytes());
+    }
+
+    #[test]
+    fn a_token_that_cannot_keep_secrets_is_asked_to_sign_in_with_more_access() {
+        let mut github = Fake { narrow: true, ..Fake::default() };
+        let place = place(&mut github, "ann", "night-owl", None, "v1.0.0").unwrap();
+        let key = "ab".repeat(32);
+        let err = publish(&mut github, &place, &files(), "", "v1.0.0", Some(key.as_str()), &|_| {}).unwrap_err();
+        assert_eq!(err, MORE_ACCESS);
+        assert!(github.tags.is_empty(), "nothing is tagged, so no release starts without its key");
+        assert!(github.secrets.is_empty());
+        // A plugin without code needs no secret, and so no more access.
+        publish(&mut github, &place, &files(), "", "v1.0.0", None, &|_| {}).unwrap();
+        assert_eq!(github.tags, ["v1.0.0"]);
     }
 
     #[test]
@@ -1019,6 +1112,31 @@ mod tests {
     }
 
     #[test]
+    fn a_plugin_with_code_names_its_own_repository_and_tag_as_its_source() {
+        // The store's entry as the AI left it: a made-up address, an old tag.
+        let guessed = "[store]\nsummary = A timer.\ngroup = tools\n\n[source]\nrepository = https://github.com/paperpaw-plugins/pomodoro\nrevision = v0.1.0\nbin = pomodoro\n\n[screenshots]\nhome.png = The timer.\n";
+        let pinned = with_source(guessed, "ann/pomodoro", "v0.1.3");
+        assert_eq!(
+            pinned,
+            "[store]\nsummary = A timer.\ngroup = tools\n\n[source]\nrepository = https://github.com/ann/pomodoro\nrevision = v0.1.3\nbin = pomodoro\n\n[screenshots]\nhome.png = The timer.\n"
+        );
+        // Again: the same.
+        assert_eq!(with_source(&pinned, "ann/pomodoro", "v0.1.3"), pinned);
+        // None named: a section is added after the rest.
+        assert_eq!(
+            with_source("[store]\nsummary = A timer.\n", "ann/pomodoro", "v1.0.0"),
+            "[store]\nsummary = A timer.\n\n[source]\nrepository = https://github.com/ann/pomodoro\nrevision = v1.0.0\n"
+        );
+        assert_eq!(with_source("", "ann/x", "v1.0.0"), "[source]\nrepository = https://github.com/ann/x\nrevision = v1.0.0\n");
+        // In the repository's files: the entry is changed, or made where there is none.
+        let files = pin_source(vec![("Cargo.toml".into(), b"".to_vec()), (STORE_INI.into(), guessed.as_bytes().to_vec())], "ann/pomodoro", "v0.1.3");
+        assert_eq!(files[1].1, pinned.as_bytes());
+        let made = pin_source(vec![("Cargo.toml".into(), b"".to_vec()), ("src/lib.rs".into(), b"".to_vec())], "ann/pomodoro", "v0.1.3");
+        let paths: Vec<&str> = made.iter().map(|(p, _)| p.as_str()).collect();
+        assert_eq!(paths, ["Cargo.toml", STORE_INI, "src/lib.rs"]);
+    }
+
+    #[test]
     fn check_publish_says_errors_first_and_a_log_its_errors() {
         let out = "warning [screenshot] store/: no screenshot\nerror [id] plugin.ini: taken\ncheck-publish: the plugin store would refuse it\n";
         assert_eq!(problems_of(out), ["error [id] plugin.ini: taken", "warning [screenshot] store/: no screenshot"]);
@@ -1036,13 +1154,13 @@ mod tests {
                 Ok((200, self.0.remove(0)))
             }
         }
-        assert!(device_start(&mut Login(vec![]), "").unwrap_err().contains("GitHub CLI"));
+        assert!(device_start(&mut Login(vec![]), "", false).unwrap_err().contains("GitHub CLI"));
         let mut github = Login(vec![
             json!({ "device_code": "d", "user_code": "ABCD-1234", "verification_uri": "https://github.com/login/device", "interval": 5, "expires_in": 900 }),
             json!({ "error": "authorization_pending" }),
             json!({ "access_token": "gho_x" }),
         ]);
-        assert_eq!(device_start(&mut github, "client").unwrap().user_code, "ABCD-1234");
+        assert_eq!(device_start(&mut github, "client", false).unwrap().user_code, "ABCD-1234");
         assert_eq!(device_poll(&mut github, "client", "d").unwrap(), Polled::Pending);
         assert_eq!(device_poll(&mut github, "client", "d").unwrap(), Polled::Token("gho_x".into()));
     }

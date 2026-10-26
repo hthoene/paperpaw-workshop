@@ -227,8 +227,9 @@ export interface Backend extends FolderApi, PictureApi, CheckApi, HistoryApi {
   githubAccount(): Promise<GitHubAccount>;
   /** Signs in with the GitHub CLI's account. */
   githubUseGh(): Promise<GitHubAccount>;
-  /** Begins signing in through the browser (the page opened). */
-  githubDeviceStart(): Promise<DeviceCode>;
+  /** Begins signing in through the browser (the page opened); `more`:
+   *  with the access to keep a secret, which only a plugin with code needs. */
+  githubDeviceStart(more: boolean): Promise<DeviceCode>;
   /** `pending`, `slow_down`, or `done` once the code was typed. */
   githubDevicePoll(deviceCode: string): Promise<string>;
   githubSignOut(): Promise<void>;
@@ -362,7 +363,7 @@ export const appBackend: Backend = {
   publishShow: (path) => invoke("publish_show", { path }),
   githubAccount: () => invoke("github_account"),
   githubUseGh: () => invoke("github_use_gh"),
-  githubDeviceStart: () => invoke("github_device_start"),
+  githubDeviceStart: (more) => invoke("github_device_start", { more }),
   githubDevicePoll: (deviceCode) => invoke("github_device_poll", { deviceCode }),
   githubSignOut: () => invoke("github_sign_out"),
   githubPrepare: (project, id, version, known, source) => invoke("github_prepare", { project, id, version, known, source }),
@@ -488,7 +489,7 @@ export function standInBackend(): Backend {
     // GitHub needs the app.
     githubAccount: async () => ({ login: null, expired: false, gh: false, browser: false }),
     githubUseGh: async () => { throw new Error("Publishing on GitHub needs the app."); },
-    githubDeviceStart: async () => { throw new Error("Publishing on GitHub needs the app."); },
+    githubDeviceStart: async (_more) => { throw new Error("Publishing on GitHub needs the app."); },
     githubDevicePoll: async () => "pending",
     githubSignOut: async () => {},
     githubPrepare: async () => { throw new Error("Publishing on GitHub needs the app."); },

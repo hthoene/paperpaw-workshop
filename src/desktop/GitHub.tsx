@@ -8,10 +8,17 @@ import { useEffect, useState } from "preact/hooks";
 
 import type { Backend, DeviceCode, GitHubAccount } from "./backend";
 import type { Desk } from "./desk";
-import { forAi, publishOnGitHub, type Outcome, type Publication, type Stage } from "./releasing";
+import { aboutSource, forAi, publishOnGitHub, type Outcome, type Publication, type Stage } from "./releasing";
 
 /** How often a refusal goes to the AI before the person decides. */
 const AUTO_ROUNDS = 2;
+
+/** What publishing says where the sign-in cannot keep the author key (src-tauri/src/github.rs, `MORE_ACCESS`). */
+const MORE_ACCESS = "More access needed";
+
+/** What is said where the store could not take the source. */
+const SOURCE_SAID =
+  "The store could not take the plugin's source. The workshop names it itself, from the repository it makes and the version's tag, so the AI has nothing to fix here. Try again; if it keeps happening, look at the repository on GitHub: it must be public and hold the tag.";
 
 const STAGES: { stage: Stage; name: string }[] = [
   { stage: "check", name: "Checked as the store will" },
@@ -40,7 +47,9 @@ type Step =
   | { at: "idle" }
   | { at: "working"; stage: Stage; text: string; fixing?: boolean }
   | { at: "done"; outcome: Extract<Outcome, { ok: true }> }
-  | { at: "failed"; problems: string[]; url?: string; held?: boolean };
+  | { at: "failed"; problems: string[]; url?: string; held?: boolean }
+  /** GitHub keeps the author key as a secret only for a sign-in with more access. */
+  | { at: "more"; text: string };
 
 export function GitHub({ desk, backend, held, prepare, raise, done, remember }: Props) {
   const [account, setAccount] = useState<GitHubAccount | null>(null);
@@ -63,6 +72,10 @@ export function GitHub({ desk, backend, held, prepare, raise, done, remember }: 
         const answer = await backend.githubDevicePoll(device.device_code);
         if (answer === "done") {
           setDevice(null);
+          setStep((now) => {
+            if (now.at === "more") setSaid("Allowed. Press Publish on GitHub again.");
+            return now.at === "more" ? { at: "idle" } : now;
+          });
           setAccount(await backend.githubAccount());
           return;
         }
@@ -86,11 +99,11 @@ export function GitHub({ desk, backend, held, prepare, raise, done, remember }: 
     return () => off?.();
   }, [backend]);
 
-  const signIn = async (how: "gh" | "browser") => {
+  const signIn = async (how: "gh" | "browser" | "more") => {
     setSaid("");
     try {
       if (how === "gh") setAccount(await backend.githubUseGh());
-      else setDevice(await backend.githubDeviceStart());
+      else setDevice(await backend.githubDeviceStart(how === "more"));
     } catch (e) {
       setSaid(text(e));
     }
@@ -120,6 +133,8 @@ export function GitHub({ desk, backend, held, prepare, raise, done, remember }: 
         setStep({ at: "idle" });
         return setAccount(await backend.githubAccount());
       }
+      const more = outcome.problems.find((p) => p.startsWith(MORE_ACCESS));
+      if (more) return setStep({ at: "more", text: more });
       // Only the version is used up: the next one, without the AI.
       if (outcome.stage === "check" && outcome.released) {
         await raise();
@@ -127,6 +142,11 @@ export function GitHub({ desk, backend, held, prepare, raise, done, remember }: 
       }
       if (outcome.held || outcome.stage === "publish" || round >= AUTO_ROUNDS) {
         return setStep({ at: "failed", problems: outcome.problems, url: outcome.url, held: outcome.held });
+      }
+      // The source is named by the workshop, not by the AI, which could only guess.
+      if (aboutSource(outcome.problems)) {
+        if (outcome.released) await raise();
+        return setStep({ at: "failed", problems: [SOURCE_SAID, ...outcome.problems], url: outcome.url });
       }
       setStep({ at: "working", stage: outcome.stage, text: "The AI fixes what was refused…", fixing: true });
       const heard = await desk.send(forAi(outcome, ready.version));
@@ -138,19 +158,26 @@ export function GitHub({ desk, backend, held, prepare, raise, done, remember }: 
   const working = step.at === "working";
   const reached = working ? STAGES.findIndex((s) => s.stage === step.stage) : -1;
 
+  const code = device && (
+    <div class="before device-code">
+      <p>GitHub opened in your browser. Type this code there:</p>
+      <p class="code" aria-live="polite">{device.user_code}</p>
+      <p class="hint">Waiting for GitHub…</p>
+    </div>
+  );
+
   return (
     <section class="way github" aria-label="Publish on GitHub">
       <h3>Publish on GitHub</h3>
-      <p>Its own public repository on GitHub, listed in the store as a community plugin. Needs a free GitHub account.</p>
+      <p>
+        Its own public repository on GitHub, listed in the store as a community plugin. Needs a free GitHub account. The
+        workshop asks to reach your public repositories only, never your private ones.
+      </p>
       {account === null ? (
         <p class="hint" role="status">Looking for your GitHub account…</p>
       ) : !account.login ? (
         device ? (
-          <div class="before device-code">
-            <p>GitHub opened in your browser. Type this code there:</p>
-            <p class="code" aria-live="polite">{device.user_code}</p>
-            <p class="hint">Waiting for GitHub…</p>
-          </div>
+          code
         ) : (
           <div class="choices-row">
             {account.expired && <p class="hint">Your GitHub sign-in has expired.</p>}
@@ -186,6 +213,17 @@ export function GitHub({ desk, backend, held, prepare, raise, done, remember }: 
               ))}
             </ol>
           )}
+          {step.at === "more" && !device && (
+            <div class="before">
+              <p>
+                A plugin with code is built and signed by GitHub with your author key, which GitHub keeps as a secret in
+                the plugin's repository. GitHub lets only a sign-in with full repository access do that. The workshop
+                still touches that one public repository and nothing else. Allow it once.
+              </p>
+              <button type="button" class="go" onClick={() => void signIn("more")}>Allow more access</button>
+            </div>
+          )}
+          {device && code}
           {step.at === "done" && (
             <p class="store-file">
               {step.outcome.state === "listed"
