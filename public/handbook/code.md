@@ -1538,6 +1538,17 @@ heading along), and
 `layout::wrap_lines_kerned` breaks lines of one's own as pages do, with
 the pairs `Typesetter::kern` gives (`ReadingFaces` kerns as it draws;
 `FontHandle::kern`, `unkerned` and `ligatures` for text of one's own).
+For a custom balanced layout,
+`paperpaw_text::wrap_lines_balanced_kerned_with_cost` takes an
+additional cost callback `(unused_width, spaces) -> f32` for non-final
+candidate lines. For example, `|free, spaces| free * free / (spaces.max(1)
+as f32)` adds a penalty for concentrating spare width in few gaps. The
+ordinary raggedness and hyphen costs still apply; the existing balanced
+functions keep their behavior. Readers using `PageType` and
+`layout_page` already get bounded justification and matching break
+selection. Their page indexes must use the current layout key;
+`layout::VERSION` is a cache revision, separate from the native plugin
+interface.
 `PageType::patterns` gives the patterns of the page's language with the
 letters the reader keeps before and after a hyphen (`HYPHEN_MIN_LEFT`,
 `HYPHEN_MIN_RIGHT`; 0: the table's own, see

@@ -67,7 +67,7 @@
   "title": "Checking your plugin",
   "file": "docs--checking-your-plugin.md",
   "summary": "`paperpaw-dev` ([`tools/dev`](../tools/dev/src/lib.rs)) looks at a\nplugin the way its users will meet it, before it is published.",
-  "tokens": 3023
+  "tokens": 3024
  },
  {
   "id": "docs/variants",
@@ -102,7 +102,7 @@
   "title": "What plugins contribute",
   "file": "docs--what-plugins-contribute.md",
   "summary": "| Contribution | Registrar | What it is |\n|---|---|---|\n| Actions | `add_action` | Something to do, bound to buttons and gestures, listed in menus |\n| Screens |",
-  "tokens": 16054
+  "tokens": 16236
  },
  {
   "id": "docs/what-a-slot-s-screen-does",
@@ -137,7 +137,7 @@
   "title": "What the other slots promise",
   "file": "docs--what-the-other-slots-promise.md",
   "summary": "A screen bound to one of these slots replaces the shipped one; it is\nopened with what the table says and keeps its promises, so the plugins\naround it go on work",
-  "tokens": 910
+  "tokens": 1092
  },
  {
   "id": "docs/what-every-library-offers",
@@ -256,14 +256,14 @@
   "title": "Plugins as files",
   "file": "docs--plugins-as-files.md",
   "summary": "A code plugin can also be a file, `code.ppn`, in a plugin's folder on\nthe card, which the X4 and the X4 Pro load at their\nstart (ADR 0024): from the plugin stor",
-  "tokens": 2918
+  "tokens": 2919
  },
  {
   "id": "docs/the-crate",
   "title": "The crate",
   "file": "docs--the-crate.md",
   "summary": "The plugin stays a library crate, tried in the emulator and tested as\nany other.",
-  "tokens": 587
+  "tokens": 588
  },
  {
   "id": "docs/which-build-fits",
@@ -319,7 +319,7 @@
   "title": "Publishing",
   "file": "docs--publishing.md",
   "summary": "The plugin library on paperpaw.org is what the website lists and every\nreader's store (*More plugins*) installs from (ADR 0023).",
-  "tokens": 2574
+  "tokens": 2575
  },
  {
   "id": "docs/what-is-uploaded",
@@ -424,7 +424,7 @@
   "title": "Actions for key maps",
   "file": "actions.md",
   "summary": "| Action id | Name |\n|---|---|\n| `about.open` | About PaperPaw |\n| `battery.open` | Battery |\n| `bluetooth.open` | Bluetooth |\n| `calibre.open` | Calibre connec",
-  "tokens": 1080
+  "tokens": 1082
  },
  {
   "id": "devices",
@@ -872,7 +872,7 @@
   "title": "Settings of core",
   "file": "settings--core.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] developer` | Developer options | `true`, `false` | `false` | For developers",
-  "tokens": 7052
+  "tokens": 7061
  },
  {
   "id": "settings/dictionary",
@@ -1173,7 +1173,7 @@
   "title": "Settings in the group core.group.reading-text",
   "file": "settings-group--core.group.reading-text.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] text-color` | Text colour | `core.color.black`, `core.color.dark-gray`, `co",
-  "tokens": 523
+  "tokens": 532
  },
  {
   "id": "settings-group/core.group.status",

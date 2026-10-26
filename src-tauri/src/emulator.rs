@@ -854,11 +854,9 @@ mod tests {
             let _ = frames.send(e);
         });
         emulator.start("xteink-x4", folder.path()).unwrap();
-        let frame = loop {
-            match seen.recv_timeout(ANSWER).unwrap() {
-                Event::Frame(frame) => break frame,
-                Event::Error(message) => panic!("{message}"),
-            }
+        let frame = match seen.recv_timeout(ANSWER).unwrap() {
+            Event::Frame(frame) => frame,
+            Event::Error(message) => panic!("{message}"),
         };
         assert_eq!((frame.width, frame.height), (480, 800));
         assert!(frame.buttons.iter().any(|b| b == "page-forward"));

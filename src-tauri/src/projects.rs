@@ -82,7 +82,7 @@ pub fn list(root: &Path) -> Result<Vec<Summary>, String> {
             .unwrap_or(std::time::UNIX_EPOCH);
         found.push((changed, Summary { folder: entry.file_name().to_string_lossy().into_owned(), meta: text }));
     }
-    found.sort_by(|a, b| b.0.cmp(&a.0));
+    found.sort_by_key(|a| std::cmp::Reverse(a.0));
     Ok(found.into_iter().map(|(_, s)| s).collect())
 }
 
@@ -430,7 +430,7 @@ mod tests {
         let away = archive(root, "Calm 2").unwrap();
         let names = |dir: &Path| list(dir).unwrap().into_iter().map(|s| s.folder).collect::<Vec<_>>();
         assert_eq!(names(root), ["Calm"], "the archive is no project");
-        assert_eq!(names(&root.join(ARCHIVE)), [away.clone()]);
+        assert_eq!(names(&root.join(ARCHIVE)), std::slice::from_ref(&away));
         assert_eq!(restore(root, &away).unwrap(), "Calm 2");
         assert!(names(&root.join(ARCHIVE)).is_empty());
         assert!(rename(root, "../x", "y").is_err());

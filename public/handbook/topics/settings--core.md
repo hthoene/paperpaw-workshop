@@ -50,7 +50,7 @@
 | `[core] font-size` | Font size | 6 to 16 | `9` | Size of the book text. |
 | `[core] line-spacing` | Line spacing | 80 to 250 | `135` | Space between lines, relative to the font size. |
 | `[core] font-weight` | Font weight | 0 to 4 | `0` | Darker, bolder text with any font; helps on light screens. |
-| `[core] word-spacing` | Word spacing | 50 to 200 | `100` | Space between words; at 100 % as the font has it. |
+| `[core] word-spacing` | Word spacing | 50 to 200 | `100` | Base space between words; 100 % is the font's own. Justified lines may widen it. |
 | `[core] margin` | Margins | 0 to 30 | `4` | Space between the text and the edges of the screen. |
 | `[core] margin-ends` | Top and bottom margins | 0 to 30 | `4` | Space above and below the text. As the margins at the sides until it is changed. |
 | `[core] justify` | Justify text | `true`, `false` | `true` | Align paragraphs on both sides. |

@@ -1011,7 +1011,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `news.open` | News |
 | `opds.open` | Catalogs |
 | `opds.sync` | Sync catalogs |
-| `plugin-manager.open` | Plugins |
+| `plugin-manager.open` | Manage plugins |
 | `plugin-manager.screens.open` | Screens |
 | `power.open` | Power |
 | `profiles.next` | Next profile |
