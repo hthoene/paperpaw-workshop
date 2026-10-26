@@ -1,6 +1,6 @@
 {
   "name": "paperpaw-workshop",
-  "version": "0.1.0-beta.10",
+  "version": "0.1.0-beta.11",
   "description": "Make PaperPaw plugins with AI and try them at once in an emulator",
   "license": "Apache-2.0",
   "private": true,

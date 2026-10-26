@@ -7,7 +7,7 @@
 | `[core] reading-font` | Font | `core.font.default`, `Literata`, `PaperPaw Sans` | `core.font.default` | “Book's font” is Literata, or the book's own where the device draws them. |
 | `[core] font-size` | Font size | 6 to 16 | `9` | Size of the book text. |
 | `[core] font-weight` | Font weight | 0 to 4 | `0` | Darker, bolder text with any font; helps on light screens. |
-| `[core] word-spacing` | Word spacing | 50 to 200 | `100` | Space between words; at 100 % as the font has it. |
+| `[core] word-spacing` | Word spacing | 50 to 200 | `100` | Base space between words; 100 % is the font's own. Justified lines may widen it. |
 | `[core] letter-spacing` | Letter spacing | -5 to 20 | `0` | Space between letters; at 0 % as the font has it. |
 | `[core] kerning` | Kerning | `true`, `false` | `true` | Letter pairs such as AV set closer, as the font says. |
 | `[core] ligatures` | Ligatures | `true`, `false` | `true` | fi, fl and ff joined into one letter where the font has it. |
