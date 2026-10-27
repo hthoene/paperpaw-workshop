@@ -227,17 +227,18 @@ export interface Backend extends FolderApi, PictureApi, CheckApi, HistoryApi {
   githubAccount(): Promise<GitHubAccount>;
   /** Signs in with the GitHub CLI's account. */
   githubUseGh(): Promise<GitHubAccount>;
-  /** Begins signing in through the browser (the page opened). */
-  githubDeviceStart(): Promise<DeviceCode>;
+  /** Begins signing in through the browser (the page opened); `more`:
+   *  with the access to keep a secret, which only a plugin with code needs. */
+  githubDeviceStart(more: boolean): Promise<DeviceCode>;
   /** `pending`, `slow_down`, or `done` once the code was typed. */
   githubDevicePoll(deviceCode: string): Promise<string>;
   githubSignOut(): Promise<void>;
   /** The plugin's repository laid out and checked as the store will
    *  (`source`: a plugin with code's source ZIP, as its build made it). */
-  githubPrepare(project: string, id: string, version: string, known: string | null, source: string | null): Promise<GitHubPrepared>;
+  githubPrepare(project: string, id: string, version: string, known: string | null, source: string | null, name: string | null): Promise<GitHubPrepared>;
   /** The repository made or brought up to date, listed, its key kept,
    *  the version tagged: its release workflow starts. */
-  githubPublish(project: string, id: string, version: string, description: string, known: string | null, source: string | null): Promise<GitHubPublished>;
+  githubPublish(project: string, id: string, version: string, description: string, known: string | null, source: string | null, name: string | null): Promise<GitHubPublished>;
   githubRun(repo: string, sha: string): Promise<GitHubRun>;
   /** What paperpaw.org says; `check`: asked to look now. */
   githubSite(repo: string, check: boolean): Promise<SiteStatus>;
@@ -362,12 +363,12 @@ export const appBackend: Backend = {
   publishShow: (path) => invoke("publish_show", { path }),
   githubAccount: () => invoke("github_account"),
   githubUseGh: () => invoke("github_use_gh"),
-  githubDeviceStart: () => invoke("github_device_start"),
+  githubDeviceStart: (more) => invoke("github_device_start", { more }),
   githubDevicePoll: (deviceCode) => invoke("github_device_poll", { deviceCode }),
   githubSignOut: () => invoke("github_sign_out"),
-  githubPrepare: (project, id, version, known, source) => invoke("github_prepare", { project, id, version, known, source }),
-  githubPublish: (project, id, version, description, known, source) =>
-    invoke("github_publish", { project, id, version, description, known, source }),
+  githubPrepare: (project, id, version, known, source, name) => invoke("github_prepare", { project, id, version, known, source, name }),
+  githubPublish: (project, id, version, description, known, source, name) =>
+    invoke("github_publish", { project, id, version, description, known, source, name }),
   githubRun: (repo, sha) => invoke("github_run", { repo, sha }),
   githubSite: (repo, check) => invoke("github_site", { repo, check }),
   githubOpen: (url) => invoke("github_open", { url }),
@@ -488,7 +489,7 @@ export function standInBackend(): Backend {
     // GitHub needs the app.
     githubAccount: async () => ({ login: null, expired: false, gh: false, browser: false }),
     githubUseGh: async () => { throw new Error("Publishing on GitHub needs the app."); },
-    githubDeviceStart: async () => { throw new Error("Publishing on GitHub needs the app."); },
+    githubDeviceStart: async (_more) => { throw new Error("Publishing on GitHub needs the app."); },
     githubDevicePoll: async () => "pending",
     githubSignOut: async () => {},
     githubPrepare: async () => { throw new Error("Publishing on GitHub needs the app."); },

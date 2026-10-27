@@ -48,8 +48,8 @@ export class Workshop {
   live = "";
   /** The summary of its thinking in the round running, as it comes. */
   thinking = "";
-  /** Whether the conversation has grown too long to go on in: one turn
-   *  filled fresh conversations (a long one goes on by itself). */
+  /** Whether the conversation is too large for a request to take: the
+   *  person goes on in a fresh one (a long one goes on by itself). */
   long = false;
   /** How long the conversation grows before it is made shorter
    *  ("Conversation length" in the app's Settings). */
@@ -64,9 +64,6 @@ export class Workshop {
   /** Asking the person and fetching an example, where the app can
    *  (`fetch_sample`); which addresses are the person's is said here. */
   samples?: Pick<Samples, "consent" | "fetch">;
-  /** The last turn paused, as it cost this much (dollars) without
-   *  changing the plugin: the person says whether it goes on. */
-  paused: number | null = null;
   /** A plugin with code: its last build. */
   build: BuildResult | undefined;
   /** A plugin with code: its package for the X4 is being built. */
@@ -410,8 +407,6 @@ export class Workshop {
     this.project.carried = undefined;
     this.busy = true;
     this.error = "";
-    this.paused = null;
-    const spent = this.project.usage.dollars;
     this.live = "";
     this.thinking = "";
     this.abort = new AbortController();
@@ -454,6 +449,8 @@ export class Workshop {
       );
     } catch (e) {
       this.error = message(e);
+      // Too large for one request: on in a fresh conversation.
+      if (e instanceof Anthropic.APIError && e.status === 413) this.long = true;
     } finally {
       this.busy = false;
       this.live = "";
@@ -462,13 +459,6 @@ export class Workshop {
       await this.refreshFindings();
     }
     if (end === "refusal") this.error = t("workshop.error.refusal");
-    if (end === "too_long") {
-      this.error = t("workshop.error.long");
-      this.long = true;
-    }
-    if (end === "limit") this.error = t("workshop.limit");
-    if (end === "cut") this.error = t("workshop.error.cut");
-    if (end === "paused") this.paused = this.project.usage.dollars - spent;
     this.changed();
   }
 

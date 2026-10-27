@@ -40,6 +40,19 @@ export interface Publication {
   known: string | null;
   /** A plugin with code: its source ZIP, as its build made it. */
   source: string | null;
+  /** The name the person chose for a repository to be made (the plugin's
+   *  id if none). */
+  name: string | null;
+}
+
+/** Why `name` cannot be a repository's name on GitHub, if it cannot
+ *  (src-tauri/src/github.rs, `name_problem`, says the same). */
+export function repoNameProblem(name: string): string | null {
+  if (name.length === 0 || [...name].length > 100) return "A repository's name has 1 to 100 characters.";
+  const bad = [...name].find((c) => !/[A-Za-z0-9._-]/.test(c));
+  if (bad) return `A repository's name may hold letters, digits, - _ and . only, not "${bad}".`;
+  if (name === "." || name === ".." || name.toLowerCase().endsWith(".git")) return `"${name}" cannot be a repository's name on GitHub.`;
+  return null;
 }
 
 export interface Timing {
@@ -76,7 +89,7 @@ export async function publishOnGitHub(
   told("check", "Checking it as the store will…");
   let prepared;
   try {
-    prepared = await backend.githubPrepare(p.project, p.id, p.version, p.known, p.source);
+    prepared = await backend.githubPrepare(p.project, p.id, p.version, p.known, p.source, p.name);
   } catch (e) {
     return { ok: false, stage: "check", problems: [message(e)], released: false };
   }
@@ -91,7 +104,7 @@ export async function publishOnGitHub(
   told("publish", prepared.place.exists ? `Updating ${prepared.place.repo}…` : `Making ${prepared.place.repo}…`);
   let published;
   try {
-    published = await backend.githubPublish(p.project, p.id, p.version, p.description, p.known, p.source);
+    published = await backend.githubPublish(p.project, p.id, p.version, p.description, p.known, p.source, p.name);
   } catch (e) {
     return { ok: false, stage: "publish", problems: [message(e)], released: false, repo: prepared.place.repo };
   }
@@ -146,6 +159,14 @@ export function siteVerdict(
   }
 }
 
+/** Whether the store refused the plugin's source. The workshop names it
+ *  itself, when it makes the repository (src-tauri/src/github.rs,
+ *  `with_source`: the repository and the version's tag), so this is not
+ *  the AI's to fix: it can only guess an address. */
+export function aboutSource(problems: string[]): boolean {
+  return problems.some((p) => /(^|[\s:])source:/i.test(p));
+}
+
 /** What was refused, for the AI to fix. */
 export function forAi(outcome: Extract<Outcome, { ok: false }>, version: string): string {
   const where = {
@@ -159,7 +180,8 @@ export function forAi(outcome: Extract<Outcome, { ok: false }>, version: string)
     : "";
   return (
     `Publishing version ${version} on GitHub was refused. ${where} said:\n\n${outcome.problems.join("\n")}\n\n` +
-    `Fix it in the plugin's files, change nothing else, and check it. The workshop then publishes it again by itself.${then}`
+    `Fix it in the plugin's files, change nothing else, and check it. The workshop then publishes it again by itself.${then}\n\n` +
+    `Never write a [source] section, a repository address or a revision in store.ini: the workshop sets them itself, from the repository it makes.`
   );
 }
 

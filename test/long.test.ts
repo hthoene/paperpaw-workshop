@@ -278,14 +278,17 @@ describe("a long conversation summarised", () => {
     expect(s.project.carried).toContain("Built: a clock.");
   });
 
-  it("ends a turn that alone fills fresh conversations as too long", async () => {
+  it("goes on in as many fresh conversations as one turn takes, and ends when the work is done", async () => {
     let n = 0;
-    const provider = new ScriptedProvider((request) => (summary(request) ? said("Built: a clock.") : { ...use(`l${n++}`, "list_files", {}), prompt: 95_000 }));
+    const provider = new ScriptedProvider((request) => {
+      if (summary(request)) return said("Built: a clock.");
+      return n++ < 5 ? { ...use(`l${n}`, "list_files", {}), prompt: 95_000 } : said("Done.");
+    });
     const s = session(provider);
-    expect(await runTurn(s, "Go")).toBe("too_long");
-    expect(s.project.earlier).toHaveLength(2);
+    expect(await runTurn(s, "Go")).toBe("done");
+    expect(s.project.earlier!.length).toBeGreaterThan(2);
     paired(s.project.messages);
-    expect(s.project.messages.at(-1)!.role).toBe("user");
+    expect(s.project.messages.at(-1)!.role).toBe("assistant");
   });
 });
 

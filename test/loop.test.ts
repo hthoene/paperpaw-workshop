@@ -208,18 +208,26 @@ describe("the AI loop, with a recorded conversation", () => {
     expect(String(result!.content)).toContain("not valid JSON");
   });
 
-  it("stops at its round limit, and the next words join the last results", async () => {
+  it("goes on for as many rounds as the work takes: no number of steps ends a turn", async () => {
     const call = { stop_reason: "tool_use" as const, content: [{ type: "tool_use", id: "t", name: "list_files", input: {} }] as Anthropic.ContentBlock[] };
     const end = { stop_reason: "end_turn" as const, content: [{ type: "text", text: "here", citations: null }] as Anthropic.ContentBlock[] };
-    const provider = new ReplayProvider({ title: "loops", user: [], answers: [...Array.from({ length: 25 }, () => call), end] });
+    const provider = new ReplayProvider({ title: "loops", user: [], answers: [...Array.from({ length: 60 }, () => call), end] });
     const { session: s, project } = session(provider);
-    expect(await runTurn(s, "go")).toBe("limit");
-    expect(project.messages.at(-1)!.role).toBe("user");
-    // The next turn: no second user message in a row.
-    await runTurn(s, "go on");
-    const last = project.messages.at(-2)!;
-    expect(last.role).toBe("user");
-    expect((last.content as Anthropic.ContentBlockParam[]).at(-1)).toEqual({ type: "text", text: "go on" });
+    expect(await runTurn(s, "go")).toBe("done");
+    expect(provider.requests).toHaveLength(61);
+    expect(project.messages.at(-1)!.role).toBe("assistant");
+  });
+
+  it("goes on by itself where an answer reached its length limit", async () => {
+    const cut = { stop_reason: "max_tokens" as const, content: [{ type: "text", text: "The first half", citations: null }] as Anthropic.ContentBlock[] };
+    const end = { stop_reason: "end_turn" as const, content: [{ type: "text", text: "and the rest.", citations: null }] as Anthropic.ContentBlock[] };
+    const provider = new ReplayProvider({ title: "cut", user: [], answers: [cut, end] });
+    const { session: s, project } = session(provider);
+    expect(await runTurn(s, "write it")).toBe("done");
+    expect(provider.requests).toHaveLength(2);
+    // Answer, the nudge to go on, answer: the roles still alternate.
+    expect(project.messages.map((m) => m.role)).toEqual(["user", "assistant", "user", "assistant"]);
+    expect(JSON.stringify(project.messages[2])).toContain("cut off");
   });
 
   it("takes back the person's words when the request fails", async () => {
@@ -255,14 +263,6 @@ describe("the press tool", () => {
 });
 
 describe("a turn's ends", () => {
-  const text = (t: string) => ({ type: "text" as const, text: t, citations: null });
-
-  it("says when an answer reached its length limit with nothing more to do", async () => {
-    const provider = new ReplayProvider({ title: "cut", user: ["Write a long text"], answers: [{ stop_reason: "max_tokens", content: [text("Here is the first half")] }] });
-    const { session: s } = session(provider);
-    expect(await runTurn(s, "Write a long text")).toBe("cut");
-  });
-
   it("writes a plugin with code, gives the compiler's error back, and runs the build", async () => {
     const rec = recording("quote-a-day");
     expect(rec.kind).toBe("code");
@@ -370,24 +370,24 @@ describe("the loop's guards", () => {
     expect(said[15]).not.toContain("That is enough to start");
   });
 
-  it("pauses a turn that costs more than it may without changing a file, and goes on with a change", async () => {
+  it("does not pause a turn for what it costs: only the person stops it", async () => {
     const reading = new ReplayProvider({
       title: "dear",
       user: ["A widget"],
       answers: [answer(use("t1", "lookup_docs", { topic: "Widget" })), answer(use("t2", "lookup_docs", { topic: "WidgetSpec" })), done],
     });
-    const first = session(reading);
-    expect(await runTurn({ ...first.session, pauseAfter: 0 }, "A widget")).toBe("paused");
-    expect(reading.requests).toHaveLength(1);
-    // The person's words join its tool results when it goes on.
-    expect(first.project.messages.at(-1)!.role).toBe("user");
+    const { session: s } = session(reading);
+    expect(await runTurn(s, "A widget")).toBe("done");
+    expect(reading.requests).toHaveLength(3);
 
-    const writing = new ReplayProvider({
-      title: "cheap",
+    const stopping = new AbortController();
+    const again = new ReplayProvider({
+      title: "stopped",
       user: ["A widget"],
-      answers: [answer(use("t1", "write_file", { path: "plugin.ini", content: "[plugin]\nid = calm\n" })), done],
+      answers: [answer(use("t1", "lookup_docs", { topic: "Widget" })), done],
     });
-    const second = session(writing);
-    expect(await runTurn({ ...second.session, pauseAfter: 0 }, "A widget")).toBe("done");
+    const second = session(again);
+    stopping.abort();
+    expect(await runTurn(second.session, "A widget", {}, stopping.signal)).toBe("stopped");
   });
 });

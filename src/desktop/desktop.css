@@ -379,6 +379,13 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .spent { font-size: .8rem; color: var(--ink-2); white-space: nowrap; }
 .log .cost { margin: -.6rem 0 0; font-size: .76rem; color: var(--ink-2); cursor: default; }
 
+/* Publish on GitHub: the name the repository is made with. */
+.publish-sheet .repo-name { margin: .8rem 0 .6rem; }
+.publish-sheet .repo-name label { display: block; margin: 0 0 .35rem; font-weight: 600; }
+.publish-sheet .repo-name input { width: 100%; max-width: 24rem; padding: .45rem .8rem; border: 0; border-radius: 999px; background: var(--sheet-2); box-shadow: inset 0 0 0 1px var(--field-edge); font: inherit; color: var(--ink); }
+.publish-sheet .repo-name input:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--ink); }
+.publish-sheet .repo-name p { margin: .3rem 0 0; }
+
 /* Publish: the same sheet as sending, its choices side by side. */
 .publish-sheet .choices-row { display: flex; flex-wrap: wrap; gap: .5rem; }
 .send-sheet .before .link { font-size: .86rem; }

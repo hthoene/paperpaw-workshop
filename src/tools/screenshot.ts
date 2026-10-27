@@ -22,7 +22,7 @@ const FILE = z.string().regex(/^[a-z0-9-]+\.(png|jpe?g|webp)$/);
 export const screenshot: WorkshopTool<ScreenshotInput> = {
   name: "screenshot",
   description:
-    `Keep what a device shows now as one of the store's screenshots (2 to ${MAX_SCREENSHOTS}; the store shows them in order, the first one first). Set the scene before (control, press): the plugin's best screen with realistic content. The picture comes back: look at it, and replace a weak one (replace: its file) or delete it (remove: its file, nothing else needed). alt: one sentence of what it shows. Another device starts at its home screen.`,
+    `Only when the person asked for the store's screenshots, or said yes when you offered them after finishing (never on your own): keep what a device shows now as one of the store's screenshots (2 to ${MAX_SCREENSHOTS}; the store shows them in order, the first one first). Set the scene before (control, press): the plugin's best screen with realistic content. The picture comes back: look at it, and replace a weak one (replace: its file) or delete it (remove: its file, nothing else needed). alt: one sentence of what it shows. Another device starts at its home screen.`,
   schema: z
     .object({
       device: z.string().describe('"X4", "X4 Pro" or "Boox Go 7"; the one shown if none').optional(),

@@ -72,17 +72,75 @@ rustflags = [
 /// The linker script a plugin is linked with, beside `.cargo/config.toml`.
 pub const LINKER_SCRIPT: &str = "paperpaw-plugin.x";
 
+/// The release a Cargo.toml line for the SDK names (`{ version = "=0.5.0" }`).
+fn release_of(sdk: &str) -> Option<&str> {
+    sdk.split_once("version = \"=")?.1.split('"').next()
+}
+
+/// The packages of a Cargo.lock: name, version, and whether the registry
+/// brought it.
+fn packages(lock: &str) -> Vec<(String, String, bool)> {
+    lock.split("[[package]]")
+        .skip(1)
+        .filter_map(|block| {
+            let field = |key: &str| {
+                let start = format!("{key} = \"");
+                block.lines().find_map(|l| l.strip_prefix(start.as_str())?.strip_suffix('"')).map(String::from)
+            };
+            Some((field("name")?, field("version")?, field("source").is_some_and(|s| s.starts_with("registry+"))))
+        })
+        .collect()
+}
+
+/// The version `lock` (a Cargo.lock) holds of package `name`.
+pub fn locked_version(lock: &str, name: &str) -> Option<String> {
+    packages(lock).into_iter().find(|(n, _, _)| n == name).map(|(_, v, _)| v)
+}
+
+/// The PaperPaw crates of the registry that `lock` holds in another
+/// version than the SDK's `release`: the SDK asks for its own crates
+/// loosely (`0.5.0-beta.10` takes a later beta too), so a lock made after
+/// the next release mixes them.
+fn to_pin(lock: &str, release: &str) -> Vec<String> {
+    packages(lock)
+        .into_iter()
+        .filter(|(name, version, registry)| *registry && name.starts_with("paperpaw-") && name != "paperpaw-sdk" && version != release)
+        .map(|(name, _, _)| name)
+        .collect()
+}
+
+/// Brings the PaperPaw crates in `dir`'s lock file to `release`, the
+/// SDK's, so that a plugin for a PaperPaw is built from that PaperPaw's
+/// crates whatever came after. One crate at a time, and Cargo refuses one
+/// that another still wants newer: those wait for the next pass. What
+/// cannot be brought stays as it is (the build then uses it).
+fn pin_release(rust: &crate::toolchain::Rust, dir: &Path, release: &str) {
+    let mut pending = to_pin(&std::fs::read_to_string(dir.join("Cargo.lock")).unwrap_or_default(), release);
+    for _ in 0..8 {
+        let before = pending.len();
+        pending.retain(|name| {
+            let mut update = rust.cargo();
+            update.args(["update", "-p", name, "--precise", release]).current_dir(dir).env_remove("RUSTC_WRAPPER");
+            !update.output().is_ok_and(|ran| ran.status.success())
+        });
+        if pending.is_empty() || pending.len() == before {
+            return;
+        }
+    }
+}
+
 /// The linker script of the SDK `sdk` names (a Cargo.toml line, see
 /// `code::sdk`): PaperPaw's `paperpaw-native` brings it, and since its
 /// plugin interface 2 no build script puts it where the linker looks, so
 /// the crate keeps a copy, as PaperPaw's sample does. From the checkout
 /// `repository` of an SDK on this computer, else from Cargo's registry in
-/// `cargo_home` once the SDK is fetched.
-pub fn linker_script(sdk: &str, repository: Option<&Path>, cargo_home: &Path) -> Option<Vec<u8>> {
+/// `cargo_home` once the SDK is fetched: of the `paperpaw-native` the lock
+/// file holds (`native`), else of the SDK's version.
+pub fn linker_script(sdk: &str, repository: Option<&Path>, cargo_home: &Path, native: Option<&str>) -> Option<Vec<u8>> {
     if let Some(repository) = repository {
         return std::fs::read(repository.join("crates").join("paperpaw-native").join(LINKER_SCRIPT)).ok();
     }
-    let version = sdk.split_once("version = \"=")?.1.split('"').next()?;
+    let version = native.or_else(|| release_of(sdk))?;
     let crate_dir = format!("paperpaw-native-{version}");
     std::fs::read_dir(cargo_home.join("registry").join("src"))
         .ok()?
@@ -334,9 +392,17 @@ pub fn build_x4(
             }
         }
     }
+    if let Some(release) = release_of(sdk) {
+        pin_release(rust, dir, release);
+    }
     let mut fetch = rust.cargo();
     fetch.args(["fetch", "--target", X4_TARGET]).current_dir(dir).env_remove("RUSTC_WRAPPER");
-    let _ = fetch.output();
+    // What it says is kept for the person if the linker script is missing after it.
+    let fetched = match fetch.output() {
+        Ok(ran) if ran.status.success() => String::new(),
+        Ok(ran) => crate::toolchain::last_line(&ran.stderr),
+        Err(e) => format!("cargo: {e}"),
+    };
     let args = dir.join("target").join("remap.args");
     let _ = std::fs::create_dir_all(args.parent().unwrap_or(dir));
     // The checkout around an SDK on this computer
@@ -344,8 +410,15 @@ pub fn build_x4(
     let local_sdk = crate::code::sdk_path(sdk).and_then(|sdk| Some(sdk.parent()?.parent()?.to_path_buf()));
     // The linker script beside .cargo/config.toml, in the source too, so
     // that the store's rebuild links with the very same.
-    let Some(script) = linker_script(sdk, local_sdk.as_deref(), &cargo_home) else {
-        built.problems.push(format!("{LINKER_SCRIPT} of PaperPaw's SDK is not here: it links the plugin."));
+    let lock = std::fs::read_to_string(dir.join("Cargo.lock")).unwrap_or_default();
+    let native = locked_version(&lock, "paperpaw-native");
+    let Some(script) = linker_script(sdk, local_sdk.as_deref(), &cargo_home, native.as_deref()) else {
+        let looked = native.as_deref().or_else(|| release_of(sdk)).unwrap_or("?");
+        let mut said = format!("{LINKER_SCRIPT} of PaperPaw's SDK is not here: it links the plugin. Looked for paperpaw-native {looked} in {}.", cargo_home.join("registry").join("src").display());
+        if !fetched.is_empty() {
+            said.push_str(&format!(" Cargo could not fetch it: {fetched}"));
+        }
+        built.problems.push(said);
         return built;
     };
     if let Err(e) = std::fs::write(dir.join(LINKER_SCRIPT), script) {
@@ -466,7 +539,7 @@ mod tests {
         std::fs::create_dir_all(repository.join("crates/paperpaw-native")).unwrap();
         std::fs::write(repository.join("crates/paperpaw-native").join(LINKER_SCRIPT), b"checkout").unwrap();
         let local = "{ path = \"x/crates/paperpaw-sdk\", features = [\"outline\"] }";
-        assert_eq!(linker_script(local, Some(&repository), at.path()).as_deref(), Some(&b"checkout"[..]));
+        assert_eq!(linker_script(local, Some(&repository), at.path(), None).as_deref(), Some(&b"checkout"[..]));
         // A release's: the registry's paperpaw-native of the SDK's very version.
         let home = at.path().join("cargo");
         let index = home.join("registry/src/index.crates.io-1949cf8c6b5b557f");
@@ -475,12 +548,91 @@ mod tests {
             std::fs::write(index.join(format!("paperpaw-native-{version}")).join(LINKER_SCRIPT), text).unwrap();
         }
         let released = "{ version = \"=0.5.0\", features = [\"outline\"] }";
-        assert_eq!(linker_script(released, None, &home).as_deref(), Some(&b"release"[..]));
-        assert_eq!(linker_script("{ version = \"=0.6.0\" }", None, &home), None);
+        assert_eq!(linker_script(released, None, &home, None).as_deref(), Some(&b"release"[..]));
+        assert_eq!(linker_script("{ version = \"=0.6.0\" }", None, &home, None), None);
+        // The lock file's own native crate wins: a later one than the SDK's is what is built with.
+        assert_eq!(linker_script(released, None, &home, Some("0.5.1")).as_deref(), Some(&b"next"[..]));
+        assert_eq!(linker_script("{ version = \"=0.4.0\" }", None, &home, Some("0.5.0")).as_deref(), Some(&b"release"[..]));
         assert!(CARGO_CONFIG.contains("-Tpaperpaw-plugin.x"));
         assert!(CARGO_CONFIG.contains("link-arg=--no-relax"));
         // The X4 Pro links with the release's core libraries, as PaperPaw's sample.
         assert!(!CARGO_CONFIG.contains("build-std"));
+    }
+
+    const LOCK: &str = r#"# This file is automatically @generated by Cargo.
+version = 4
+
+[[package]]
+name = "paperpaw-native"
+version = "0.5.0-beta.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aa"
+dependencies = [
+ "paperpaw-digest",
+]
+
+[[package]]
+name = "paperpaw-digest"
+version = "0.5.0-beta.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bb"
+
+[[package]]
+name = "paperpaw-sdk"
+version = "0.5.0-beta.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cc"
+dependencies = [
+ "paperpaw-native",
+ "paperpaw-digest",
+]
+
+[[package]]
+name = "paperpaw-local"
+version = "0.5.0-beta.11"
+
+[[package]]
+name = "pomodoro"
+version = "0.1.0"
+dependencies = [
+ "paperpaw-sdk",
+]
+"#;
+
+    #[test]
+    fn the_paperpaw_crates_a_lock_file_mixes_are_found_by_name_and_version() {
+        assert_eq!(locked_version(LOCK, "paperpaw-native").as_deref(), Some("0.5.0-beta.11"));
+        assert_eq!(locked_version(LOCK, "paperpaw-sdk").as_deref(), Some("0.5.0-beta.10"));
+        assert_eq!(locked_version(LOCK, "nothing"), None);
+        // Of the SDK's release only the registry's PaperPaw crates in another version.
+        assert_eq!(to_pin(LOCK, "0.5.0-beta.10"), ["paperpaw-native"]);
+        assert_eq!(to_pin(LOCK, "0.5.0-beta.11"), ["paperpaw-digest"]);
+        assert_eq!(release_of("{ version = \"=0.5.0-beta.10\" }"), Some("0.5.0-beta.10"));
+        assert_eq!(release_of("{ path = \"x\" }"), None);
+    }
+
+    /// Needs the internet and Cargo (`cargo test -- --ignored`): the SDK of an
+    /// earlier release, whose lock would take a later release's other crates.
+    #[test]
+    #[ignore = "uses crates.io"]
+    fn an_earlier_sdk_gets_the_crates_of_its_own_release() {
+        let at = tempfile::tempdir().unwrap();
+        std::fs::create_dir_all(at.path().join("src")).unwrap();
+        std::fs::write(at.path().join("src/lib.rs"), "").unwrap();
+        std::fs::write(
+            at.path().join("Cargo.toml"),
+            "[package]\nname = \"t\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[workspace]\n[dependencies]\npaperpaw-sdk = { version = \"=0.5.0-beta.10\" }\n",
+        )
+        .unwrap();
+        let rust = crate::toolchain::Rust { cargo: PathBuf::from("cargo"), version: "stable".into(), homes: None };
+        let mut lock = rust.cargo();
+        assert!(lock.args(["generate-lockfile"]).current_dir(at.path()).output().unwrap().status.success());
+        let mixed = std::fs::read_to_string(at.path().join("Cargo.lock")).unwrap();
+        assert!(!to_pin(&mixed, "0.5.0-beta.10").is_empty(), "the lock took later crates: {mixed}");
+        pin_release(&rust, at.path(), "0.5.0-beta.10");
+        let pinned = std::fs::read_to_string(at.path().join("Cargo.lock")).unwrap();
+        assert_eq!(to_pin(&pinned, "0.5.0-beta.10"), Vec::<String>::new(), "{pinned}");
+        assert_eq!(locked_version(&pinned, "paperpaw-native").as_deref(), Some("0.5.0-beta.10"));
     }
 
     #[test]

@@ -41,7 +41,7 @@ export function Conversation({ desk }: { desk: Desk }) {
     if (stick.current) setUnseen(false);
   };
   // What is shown changed: kept in view at the end, else said with "New".
-  const shown = `${project?.key}|${said.length}|${workshop?.live.length ?? 0}|${workshop?.thinking.length ?? 0}|${busy}|${desk.building}|${desk.lastTurn?.dollars ?? 0}|${workshop?.error ?? ""}|${desk.history.current}|${desk.previewing?.ready ?? ""}|${workshop?.paused ?? ""}|${desk.asking?.host ?? ""}`;
+  const shown = `${project?.key}|${said.length}|${workshop?.live.length ?? 0}|${workshop?.thinking.length ?? 0}|${busy}|${desk.building}|${desk.lastTurn?.dollars ?? 0}|${workshop?.error ?? ""}|${desk.history.current}|${desk.previewing?.ready ?? ""}|${desk.asking?.host ?? ""}`;
   useEffect(() => {
     if (stick.current) down(false);
     else setUnseen(true);
@@ -85,7 +85,6 @@ export function Conversation({ desk }: { desk: Desk }) {
           <button type="button" class="go fresh" onClick={() => workshop.freshConversation()}>Go on in a fresh conversation</button>
         )}
         {desk.buildTools && <BuildTools desk={desk} />}
-        {workshop && workshop.paused !== null && !busy && <Paused desk={desk} dollars={workshop.paused} />}
         {desk.asking && <Asking desk={desk} host={desk.asking.host} />}
         <PreviewBar desk={desk} />
       </div>
@@ -149,20 +148,6 @@ function Asking({ desk, host }: { desk: Desk; host: string }) {
         <button type="button" class="link" onClick={() => answer("always")}>Always for this project</button>
         <button type="button" class="link quiet" onClick={() => answer("no")}>No</button>
       </div>
-    </div>
-  );
-}
-
-/** A turn that cost more than it may without changing the plugin:
- *  said calmly, with what it cost, and the person decides. */
-function Paused({ desk, dollars }: { desk: Desk; dollars: number }) {
-  return (
-    <div class="offer">
-      <p>
-        This has cost {about(dollars)} so far and has not changed the plugin yet: the AI is still reading PaperPaw's
-        documentation and the files. Let it go on, or tell it what to do.
-      </p>
-      <button type="button" class="go" onClick={() => void desk.send("Go on.")}>Go on</button>
     </div>
   );
 }
