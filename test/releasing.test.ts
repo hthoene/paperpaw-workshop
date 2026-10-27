@@ -5,9 +5,9 @@
 import { describe, expect, it } from "vitest";
 
 import type { GitHubPrepared, GitHubRun, SiteStatus } from "../src/desktop/backend";
-import { aboutSource, forAi, publishOnGitHub, siteVerdict, type Publication, type Timing } from "../src/desktop/releasing";
+import { aboutSource, forAi, publishOnGitHub, repoNameProblem, siteVerdict, type Publication, type Timing } from "../src/desktop/releasing";
 
-const PLUGIN: Publication = { project: "p", id: "night-owl", version: "1.0.0", description: "Night owl", known: null, source: null };
+const PLUGIN: Publication = { project: "p", id: "night-owl", version: "1.0.0", description: "Night owl", known: null, source: null, name: null };
 const NOW: Timing = { wait: async () => {}, runEvery: 1, runFor: 20, startFor: 3, siteEvery: 1, siteFor: 10 };
 
 const ready: GitHubPrepared = { place: { repo: "ann/night-owl", exists: false, released: false }, passes: true, problems: [], files: 4 };
@@ -76,6 +76,28 @@ describe("publishing on GitHub", () => {
     expect(text).toContain("paperpaw.org said:\n\nid: taken");
     expect(text).toContain("raises the version itself");
     expect(text).toContain("Never write a [source] section");
+  });
+
+  it("says which names GitHub would take for a repository", () => {
+    for (const good of ["night-owl", "Night_Owl.2", "a"]) expect(repoNameProblem(good), good).toBeNull();
+    for (const bad of ["", "my owl", "a/b", "..", "owl.git", "a".repeat(101)]) expect(repoNameProblem(bad), bad).not.toBeNull();
+  });
+
+  it("gives the name the person chose to the check and to the publication", async () => {
+    const names: (string | null)[] = [];
+    const calls = {
+      ...backend([run("success")], [site("offered")]),
+      githubPrepare: async (_p: string, _i: string, _v: string, _k: string | null, _s: string | null, name: string | null) => {
+        names.push(name);
+        return ready;
+      },
+      githubPublish: async (_p: string, _i: string, _v: string, _d: string, _k: string | null, _s: string | null, name: string | null) => {
+        names.push(name);
+        return { repo: "ann/my-owl", tag: "v1.0.0", sha: "abc", url: "https://github.com/ann/my-owl" };
+      },
+    };
+    await publishOnGitHub(calls, { ...PLUGIN, name: "my-owl" }, () => {}, NOW);
+    expect(names).toEqual(["my-owl", "my-owl"]);
   });
 
   it("knows a refusal of the source, which the workshop names itself and the AI cannot fix", () => {

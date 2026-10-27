@@ -8,7 +8,7 @@ import { useEffect, useState } from "preact/hooks";
 
 import type { Backend, DeviceCode, GitHubAccount } from "./backend";
 import type { Desk } from "./desk";
-import { aboutSource, forAi, publishOnGitHub, type Outcome, type Publication, type Stage } from "./releasing";
+import { aboutSource, forAi, publishOnGitHub, repoNameProblem, type Outcome, type Publication, type Stage } from "./releasing";
 
 /** How often a refusal goes to the AI before the person decides. */
 const AUTO_ROUNDS = 2;
@@ -41,6 +41,13 @@ interface Props {
   done(version: string, repo: string): Promise<void>;
   /** The repository known, kept even when publishing stopped half way. */
   remember(repo: string): Promise<void>;
+  /** The project's repository (`owner/name`), once there is one: its name stays. */
+  known: string | null;
+  /** The name a repository is made with if the person chose none: the plugin's id. */
+  defaultName: string;
+  /** The name the person chose ("" for none), kept with the project. */
+  repoName: string;
+  onRepoName(name: string): Promise<void>;
 }
 
 type Step =
@@ -51,7 +58,7 @@ type Step =
   /** GitHub keeps the author key as a secret only for a sign-in with more access. */
   | { at: "more"; text: string };
 
-export function GitHub({ desk, backend, held, prepare, raise, done, remember }: Props) {
+export function GitHub({ desk, backend, held, prepare, raise, done, remember, known, defaultName, repoName, onRepoName }: Props) {
   const [account, setAccount] = useState<GitHubAccount | null>(null);
   const [device, setDevice] = useState<DeviceCode | null>(null);
   const [step, setStep] = useState<Step>({ at: "idle" });
@@ -114,8 +121,13 @@ export function GitHub({ desk, backend, held, prepare, raise, done, remember }: 
     setAccount(await backend.githubAccount());
   };
 
+  // What is typed, kept with the project as it is typed.
+  const [typed, setTyped] = useState(repoName);
+  const nameProblem = !known && typed.trim() ? repoNameProblem(typed.trim()) : null;
+
   const go = async () => {
     setSaid("");
+    if (nameProblem) return;
     // Signed in still: GitHub's sign-ins expire after some hours.
     const now = await backend.githubAccount().catch(() => null);
     if (!now?.login) return setAccount(now);
@@ -245,7 +257,35 @@ export function GitHub({ desk, backend, held, prepare, raise, done, remember }: 
               )}
             </div>
           )}
-          <button type="button" class="go" disabled={held || working || !!desk.workshop?.busy} onClick={() => void go()}>
+          <div class="repo-name">
+            <label for="repo-name">Repository name</label>
+            {known ? (
+              <p class="hint">
+                This plugin is published as <b>{known}</b>. A new version goes there too.
+              </p>
+            ) : (
+              <>
+                <input
+                  id="repo-name"
+                  type="text"
+                  value={typed}
+                  placeholder={defaultName || "my-plugin"}
+                  disabled={working}
+                  autoComplete="off"
+                  spellcheck={false}
+                  aria-invalid={!!nameProblem}
+                  onInput={(e) => {
+                    setTyped(e.currentTarget.value);
+                    void onRepoName(e.currentTarget.value);
+                  }}
+                />
+                <p class={nameProblem ? "problem" : "hint"}>
+                  {nameProblem ?? `It is made as ${account.login}/${typed.trim() || defaultName || "…"}, public. Leave it empty for the plugin's id.`}
+                </p>
+              </>
+            )}
+          </div>
+          <button type="button" class="go" disabled={held || working || !!nameProblem || !!desk.workshop?.busy} onClick={() => void go()}>
             {step.at === "failed" ? "Try again" : working ? "Publishing…" : "Publish on GitHub"}
           </button>
         </>

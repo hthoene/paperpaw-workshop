@@ -261,7 +261,7 @@ export function Publish({ desk, backend, onClose }: Props) {
       source = built.source;
     }
     const { name } = identity(project);
-    return { project: project.key, id: packed.id, version: packed.version, description: `${name ?? packed.id}, a plugin for PaperPaw`, known: project.github ?? null, source };
+    return { project: project.key, id: packed.id, version: packed.version, description: `${name ?? packed.id}, a plugin for PaperPaw`, known: project.github ?? null, source, name: project.githubName?.trim() || null };
   };
 
   /** The version after the one used up. */
@@ -456,6 +456,13 @@ export function Publish({ desk, backend, onClose }: Props) {
             raise={raiseNext}
             done={publishedOnGitHub}
             remember={rememberRepo}
+            known={project.github ?? null}
+            defaultName={identity(project).id ?? ""}
+            repoName={project.githubName ?? ""}
+            onRepoName={async (name) => {
+              project.githubName = name || undefined;
+              await desk.workspace.save();
+            }}
           />
           <section class="way">
             <h3>Or pack it for the store's form</h3>

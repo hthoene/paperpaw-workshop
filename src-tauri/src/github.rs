@@ -478,13 +478,39 @@ fn plugin_of(http: &mut dyn Http, repo: &str) -> Result<Option<String>, String> 
         .find_map(|l| l.split_once('=').filter(|(k, _)| k.trim() == "id").map(|(_, v)| v.trim().to_string())))
 }
 
+/// Why `name` cannot be a repository's name on GitHub, if it cannot.
+pub fn name_problem(name: &str) -> Option<String> {
+    let bad = |c: char| !(c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == '.');
+    if name.is_empty() || name.chars().count() > 100 {
+        Some("A repository's name has 1 to 100 characters.".into())
+    } else if let Some(c) = name.chars().find(|c| bad(*c)) {
+        Some(format!("A repository's name may hold letters, digits, - _ and . only, not {c:?}."))
+    } else if name == "." || name == ".." || name.to_ascii_lowercase().ends_with(".git") {
+        Some(format!("{name:?} cannot be a repository's name on GitHub."))
+    } else {
+        None
+    }
+}
+
 /// Where plugin `id` of `login` goes: `known` (the project's repository
-/// before), else `<login>/<id>`, else `<login>/paperpaw-<id>` where the
-/// first is another's; with whether `tag` is released there.
-pub fn place(http: &mut dyn Http, login: &str, id: &str, known: Option<&str>, tag: &str) -> Result<Place, String> {
+/// before), else the repository the person named (`wanted`), else
+/// `<login>/<id>`, else `<login>/paperpaw-<id>` where the first is
+/// another's; with whether `tag` is released there. A name the person
+/// chose is theirs alone: where it is taken, they choose another.
+pub fn place(http: &mut dyn Http, login: &str, id: &str, known: Option<&str>, wanted: Option<&str>, tag: &str) -> Result<Place, String> {
     let mut candidates: Vec<String> = known.map(String::from).into_iter().collect();
-    candidates.push(format!("{login}/{id}"));
-    candidates.push(format!("{login}/paperpaw-{id}"));
+    match wanted {
+        Some(name) => {
+            if let Some(why) = name_problem(name) {
+                return Err(why);
+            }
+            candidates.push(format!("{login}/{name}"));
+        }
+        None => {
+            candidates.push(format!("{login}/{id}"));
+            candidates.push(format!("{login}/paperpaw-{id}"));
+        }
+    }
     for repo in candidates {
         let (status, answer) = http.call("GET", &format!("{API}/repos/{repo}"), None)?;
         if status == 404 {
@@ -500,7 +526,10 @@ pub fn place(http: &mut dyn Http, login: &str, id: &str, known: Option<&str>, ta
             return Ok(Place { repo, exists: true, released: status == 200 });
         }
     }
-    Err(format!("{login}/{id} and {login}/paperpaw-{id} hold something else: rename one on GitHub, then publish again."))
+    Err(match wanted {
+        Some(name) => format!("{login}/{name} holds something else: choose another name for the repository."),
+        None => format!("{login}/{id} and {login}/paperpaw-{id} hold something else: choose a name for the repository."),
+    })
 }
 
 /// What publishing made: the repository, the tag and its commit.
@@ -842,14 +871,21 @@ fn work_dir(project: &str) -> Result<PathBuf, String> {
 }
 
 #[tauri::command]
-pub async fn github_prepare(project: String, id: String, version: String, known: Option<String>, source: Option<String>) -> Result<Prepared, String> {
+pub async fn github_prepare(
+    project: String,
+    id: String,
+    version: String,
+    known: Option<String>,
+    source: Option<String>,
+    name: Option<String>,
+) -> Result<Prepared, String> {
     tauri::async_runtime::spawn_blocking(move || {
         let work = work_dir(&project)?;
         // Where it goes first: the plugin's source is that repository's.
         let mut http = web();
         let who = login(&mut http)?;
         let tag = format!("v{version}");
-        let place = place(&mut http, &who, &id, known.as_deref(), &tag)?;
+        let place = place(&mut http, &who, &id, known.as_deref(), name.as_deref(), &tag)?;
         let files = repository(&project, &id, source.as_deref(), &work, &place, &tag)?;
         let tree = work.join("repository");
         write_tree(&tree, &files)?;
@@ -863,6 +899,7 @@ pub async fn github_prepare(project: String, id: String, version: String, known:
 }
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 pub async fn github_publish(
     app: tauri::AppHandle,
     project: String,
@@ -871,6 +908,7 @@ pub async fn github_publish(
     description: String,
     known: Option<String>,
     source: Option<String>,
+    name: Option<String>,
 ) -> Result<Published, String> {
     use tauri::Emitter;
     tauri::async_runtime::spawn_blocking(move || {
@@ -881,7 +919,7 @@ pub async fn github_publish(
         let mut http = web();
         let who = login(&mut http)?;
         let tag = format!("v{version}");
-        let place = place(&mut http, &who, &id, known.as_deref(), &tag)?;
+        let place = place(&mut http, &who, &id, known.as_deref(), name.as_deref(), &tag)?;
         let files = repository(&project, &id, source.as_deref(), &work, &place, &tag)?;
         // A plugin with code is signed in its workflow with the author's key.
         let key = match source {
@@ -1020,7 +1058,7 @@ mod tests {
     #[test]
     fn a_new_plugin_gets_a_repository_with_exactly_its_files_its_topic_and_its_tag() {
         let mut github = Fake::default();
-        let place = place(&mut github, "ann", "night-owl", None, "v1.0.0").unwrap();
+        let place = place(&mut github, "ann", "night-owl", None, None, "v1.0.0").unwrap();
         assert_eq!(place, Place { repo: "ann/night-owl".into(), exists: false, released: false });
         let done = publish(&mut github, &place, &files(), "Night owl", "v1.0.0", None, &|_| {}).unwrap();
         assert_eq!(done.repo, "ann/night-owl");
@@ -1034,7 +1072,7 @@ mod tests {
     #[test]
     fn a_plugin_with_code_keeps_the_author_key_sealed_as_the_secret() {
         let mut github = Fake::default();
-        let place = place(&mut github, "ann", "night-owl", None, "v1.0.0").unwrap();
+        let place = place(&mut github, "ann", "night-owl", None, None, "v1.0.0").unwrap();
         publish(&mut github, &place, &files(), "", "v1.0.0", Some("ab".repeat(32).as_str()), &|_| {}).unwrap();
         let sealed = STANDARD.decode(&github.secrets[0]).unwrap();
         let opened = crypto_box::SecretKey::from([7u8; 32]).unseal(&sealed).unwrap();
@@ -1044,7 +1082,7 @@ mod tests {
     #[test]
     fn a_token_that_cannot_keep_secrets_is_asked_to_sign_in_with_more_access() {
         let mut github = Fake { narrow: true, ..Fake::default() };
-        let place = place(&mut github, "ann", "night-owl", None, "v1.0.0").unwrap();
+        let place = place(&mut github, "ann", "night-owl", None, None, "v1.0.0").unwrap();
         let key = "ab".repeat(32);
         let err = publish(&mut github, &place, &files(), "", "v1.0.0", Some(key.as_str()), &|_| {}).unwrap_err();
         assert_eq!(err, MORE_ACCESS);
@@ -1061,10 +1099,34 @@ mod tests {
         github.repos.insert("ann/night-owl".into(), (true, Some("night-owl".into())));
         github.repos.insert("ann/clock".into(), (true, Some("something-else".into())));
         github.repos.insert("ann/paperpaw-clock".into(), (false, None));
-        assert!(place(&mut github, "ann", "night-owl", None, "v1.0.0").unwrap().exists);
-        assert!(place(&mut github, "ann", "clock", None, "v1.0.0").is_err(), "neither name is the plugin's");
+        assert!(place(&mut github, "ann", "night-owl", None, None, "v1.0.0").unwrap().exists);
+        assert!(place(&mut github, "ann", "clock", None, None, "v1.0.0").is_err(), "neither name is the plugin's");
         github.repos.remove("ann/paperpaw-clock");
-        assert_eq!(place(&mut github, "ann", "clock", None, "v1.0.0").unwrap().repo, "ann/paperpaw-clock");
+        assert_eq!(place(&mut github, "ann", "clock", None, None, "v1.0.0").unwrap().repo, "ann/paperpaw-clock");
+    }
+
+    #[test]
+    fn a_name_the_person_chose_is_the_repository_s_and_a_taken_one_is_not_swapped_for_another() {
+        let mut github = Fake::default();
+        let chosen = place(&mut github, "ann", "night-owl", None, Some("my-owl"), "v1.0.0").unwrap();
+        assert_eq!(chosen, Place { repo: "ann/my-owl".into(), exists: false, released: false });
+        publish(&mut github, &chosen, &files(), "", "v1.0.0", None, &|_| {}).unwrap();
+        assert!(github.repos.contains_key("ann/my-owl"));
+        // Another's repository by that name: the person chooses again.
+        github.repos.insert("ann/clock".into(), (true, Some("something-else".into())));
+        let taken = place(&mut github, "ann", "night-owl", None, Some("clock"), "v1.0.0").unwrap_err();
+        assert!(taken.contains("ann/clock") && taken.contains("choose another name"), "{taken}");
+        // The repository a project has published in stays, whatever the field says now.
+        github.repos.insert("ann/night-owl".into(), (true, Some("night-owl".into())));
+        assert_eq!(place(&mut github, "ann", "night-owl", Some("ann/night-owl"), Some("my-owl"), "v1.0.0").unwrap().repo, "ann/night-owl");
+        // A name GitHub would not take is said before anything is asked of it.
+        for bad in ["", "my owl", "a/b", "..", "x.git", &"a".repeat(101)] {
+            assert!(name_problem(bad).is_some(), "{bad:?}");
+            assert!(place(&mut github, "ann", "night-owl", None, Some(bad), "v1.0.0").is_err(), "{bad:?}");
+        }
+        for good in ["night-owl", "Night_Owl.2", "paperpaw-plugin", "a"] {
+            assert_eq!(name_problem(good), None, "{good:?}");
+        }
     }
 
     #[test]
@@ -1072,11 +1134,11 @@ mod tests {
         let mut github = Fake::default();
         github.repos.insert("ann/night-owl".into(), (true, Some("night-owl".into())));
         github.released.push("v1.0.0".into());
-        let released = place(&mut github, "ann", "night-owl", None, "v1.0.0").unwrap();
+        let released = place(&mut github, "ann", "night-owl", None, None, "v1.0.0").unwrap();
         assert!(released.released);
         assert!(publish(&mut github, &released, &files(), "", "v1.0.0", None, &|_| {}).unwrap_err().contains("raise the version"));
         github.tags.push("v1.0.1".into());
-        let again = place(&mut github, "ann", "night-owl", None, "v1.0.1").unwrap();
+        let again = place(&mut github, "ann", "night-owl", None, None, "v1.0.1").unwrap();
         publish(&mut github, &again, &files(), "", "v1.0.1", None, &|_| {}).unwrap();
         assert!(github.asked.borrow().iter().any(|a| a.starts_with("DELETE") && a.ends_with("/git/refs/tags/v1.0.1")));
         assert_eq!(github.tags, ["v1.0.1"]);
