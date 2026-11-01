@@ -114,9 +114,9 @@ pub fn store_zip(id: &str, version: &str, package: &[u8], builds: &[(&str, Vec<u
 }
 
 /// Makes the store file of `id` at `version` in `publish` from `package`
-/// and, for a plugin with code, the builds and the source made in
-/// `parts` (the package is kept there too).
-pub fn pack(publish: &Path, parts: &Path, id: &str, version: &str, package: &[u8], code: bool) -> Result<StoreFile, String> {
+/// and, for a plugin with code, the builds of `readers` and the source made
+/// in `parts` (the package is kept there too).
+pub fn pack(publish: &Path, parts: &Path, id: &str, version: &str, package: &[u8], code: bool, readers: &[&str]) -> Result<StoreFile, String> {
     let stem = format!("{id}-{version}");
     if !named(&format!("{stem}-store.zip"), "-store.zip") {
         return Err(format!("{stem}: not a plugin's id and version"));
@@ -127,8 +127,16 @@ pub fn pack(publish: &Path, parts: &Path, id: &str, version: &str, package: &[u8
     let mut source = None;
     if code {
         for device in READERS {
-            if let Ok(bytes) = std::fs::read(parts.join(format!("{stem}-{device}.ppn"))) {
-                builds.push((device, bytes));
+            if readers.contains(&device) {
+                if let Ok(bytes) = std::fs::read(parts.join(format!("{stem}-{device}.ppn"))) {
+                    builds.push((device, bytes));
+                }
+            } else {
+                // Not asked for in this publish: an earlier build of it (and its
+                // trial) is not kept, so it cannot get into this file or a later one.
+                for tail in ["", "-trial"] {
+                    let _ = std::fs::remove_file(parts.join(format!("{stem}-{device}{tail}.ppn")));
+                }
             }
         }
         if builds.is_empty() {
@@ -152,11 +160,12 @@ pub fn pack(publish: &Path, parts: &Path, id: &str, version: &str, package: &[u8
 /// Packs the store file of the project's plugin: the package the window
 /// made (in base64) and, for a plugin with code, what `device_build` made.
 #[tauri::command]
-pub async fn publish_pack(project: String, id: String, version: String, base64: String, code: bool) -> Result<StoreFile, String> {
+pub async fn publish_pack(project: String, id: String, version: String, base64: String, code: bool, readers: Vec<String>) -> Result<StoreFile, String> {
     let package = base64::engine::general_purpose::STANDARD.decode(base64).map_err(|e| e.to_string())?;
     tauri::async_runtime::spawn_blocking(move || {
         let root = paths::projects()?;
-        pack(&folder(&root, &project)?, &parts(&root, &project)?, &id, &version, &package, code)
+        let readers: Vec<&str> = readers.iter().map(String::as_str).collect();
+        pack(&folder(&root, &project)?, &parts(&root, &project)?, &id, &version, &package, code, &readers)
     })
     .await
     .map_err(|e| e.to_string())?
@@ -201,7 +210,7 @@ mod tests {
         std::fs::create_dir_all(&parts).unwrap();
         std::fs::write(parts.join("snake-0.1.0-x4.ppn"), b"PPNP x4").unwrap();
         std::fs::write(parts.join("snake-0.1.0-source.zip"), b"PK source").unwrap();
-        let made = pack(&publish, &parts, "snake", "0.1.0", b"PK package", true).unwrap();
+        let made = pack(&publish, &parts, "snake", "0.1.0", b"PK package", true, &["x4", "x4-pro"]).unwrap();
         assert_eq!(made.name, "snake-0.1.0-store.zip");
         assert_eq!(made.parts, ["package", "x4", "source"]);
         assert_eq!(PathBuf::from(&made.path), publish.join("snake-0.1.0-store.zip"));
@@ -230,8 +239,32 @@ mod tests {
             assert!(manifest.lines().any(|l| l == line), "{line} in\n{manifest}");
         }
         // The same parts make the same bytes.
-        let again = pack(&publish, &parts, "snake", "0.1.0", b"PK package", true).unwrap();
+        let again = pack(&publish, &parts, "snake", "0.1.0", b"PK package", true, &["x4", "x4-pro"]).unwrap();
         assert_eq!(std::fs::read(&again.path).unwrap(), std::fs::read(&made.path).unwrap());
+    }
+
+    #[test]
+    fn an_earlier_pro_build_is_not_taken_into_a_publish_without_the_pro() {
+        let root = tempfile::tempdir().unwrap();
+        let (publish, parts) = (root.path().join("publish"), root.path().join("publish").join("parts"));
+        std::fs::create_dir_all(&parts).unwrap();
+        for file in ["snake-0.1.0-x4.ppn", "snake-0.1.0-x4-pro.ppn", "snake-0.1.0-x4-pro-trial.ppn", "snake-0.1.0-source.zip"] {
+            std::fs::write(parts.join(file), b"PPNP").unwrap();
+        }
+        // Another version's Pro build is not this publish's to remove.
+        std::fs::write(parts.join("snake-0.2.0-x4-pro.ppn"), b"PPNP other").unwrap();
+        let made = pack(&publish, &parts, "snake", "0.1.0", b"PK package", true, &["x4"]).unwrap();
+        assert_eq!(made.parts, ["package", "x4", "source"]);
+        assert!(!parts.join("snake-0.1.0-x4-pro.ppn").exists());
+        assert!(!parts.join("snake-0.1.0-x4-pro-trial.ppn").exists());
+        assert!(parts.join("snake-0.2.0-x4-pro.ppn").exists());
+        // Nor does it come back in a later publish that asks for the Pro, unbuilt.
+        let later = pack(&publish, &parts, "snake", "0.1.0", b"PK package", true, &["x4", "x4-pro"]).unwrap();
+        assert_eq!(later.parts, ["package", "x4", "source"]);
+        // With the Pro asked for and built, it is in.
+        std::fs::write(parts.join("snake-0.1.0-x4-pro.ppn"), b"PPNP s3").unwrap();
+        let with = pack(&publish, &parts, "snake", "0.1.0", b"PK package", true, &["x4", "x4-pro"]).unwrap();
+        assert_eq!(with.parts, ["package", "x4", "x4-pro", "source"]);
     }
 
     #[test]
@@ -241,7 +274,7 @@ mod tests {
         // A build of another time is not taken into a plugin without code.
         std::fs::create_dir_all(&parts).unwrap();
         std::fs::write(parts.join("calm-1.0.0-x4.ppn"), b"PPNP old").unwrap();
-        let made = pack(&publish, &parts, "calm", "1.0.0", b"PK calm", false).unwrap();
+        let made = pack(&publish, &parts, "calm", "1.0.0", b"PK calm", false, &["x4", "x4-pro"]).unwrap();
         assert_eq!(made.parts, ["package"]);
         let found = entries(&std::fs::read(&made.path).unwrap());
         let names: Vec<&str> = found.iter().map(|(n, _, _)| n.as_str()).collect();
@@ -254,11 +287,11 @@ mod tests {
     fn what_cannot_be_packed_is_said() {
         let root = tempfile::tempdir().unwrap();
         let (publish, parts) = (root.path().join("publish"), root.path().join("parts"));
-        assert!(pack(&publish, &parts, "clock", "1.0.0", b"PK", true).unwrap_err().contains("no build"));
+        assert!(pack(&publish, &parts, "clock", "1.0.0", b"PK", true, &["x4", "x4-pro"]).unwrap_err().contains("no build"));
         std::fs::write(parts.join("clock-1.0.0-x4.ppn"), b"PPNP").unwrap();
-        assert!(pack(&publish, &parts, "clock", "1.0.0", b"PK", true).unwrap_err().contains("source"));
+        assert!(pack(&publish, &parts, "clock", "1.0.0", b"PK", true, &["x4", "x4-pro"]).unwrap_err().contains("source"));
         for (id, version) in [("../x", "1.0.0"), ("Clock", "1.0.0"), ("a/b", "1.0.0")] {
-            assert!(pack(&publish, &parts, id, version, b"PK", false).is_err(), "{id}");
+            assert!(pack(&publish, &parts, id, version, b"PK", false, &["x4"]).is_err(), "{id}");
         }
         assert!(store_zip("clock", "1.0.0", b"PK", &[("kindle", b"x".to_vec())], None).is_err());
     }

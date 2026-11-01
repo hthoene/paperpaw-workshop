@@ -331,6 +331,7 @@ export function Publish({ desk, backend, onClose }: Props) {
     const packed = uploadPackage(project);
     if (!packed.ok) return setStep({ at: "problems", problems: packed.problems });
     try {
+      const readers = ["x4"];
       if (code) {
         setStep({ at: "building" });
         const built = await backend.deviceBuild(project.key, packed.id, packed.version);
@@ -339,10 +340,11 @@ export function Publish({ desk, backend, onClose }: Props) {
         if (pro && readiness?.x4_pro) {
           const built = await backend.deviceBuild(project.key, packed.id, packed.version, "x4-pro");
           if (built.state !== "done" || !built.ppn) return setStep({ at: "problems", problems: whyFailed(built) });
+          readers.push("x4-pro");
         }
       }
       // One file for the store: the package, and the build and the source just made.
-      const file = await backend.publishPack(project.key, packed.id, packed.version, toBase64(packed.zip), !!code);
+      const file = await backend.publishPack(project.key, packed.id, packed.version, toBase64(packed.zip), !!code, readers);
       recordPublished(project, packed.version);
       await desk.workspace.save();
       // The state packed, marked in the history to go back to.

@@ -95,7 +95,8 @@ pub fn reader_plugin(project: &str) -> Result<crate::install::ReaderPlugin, Stri
 pub fn reader_plugin_for(project: &str, reader: crate::xtensa::Reader) -> Result<crate::install::ReaderPlugin, String> {
     let root = crate::paths::projects()?;
     let files = crate::projects::plugin_files(&root, project)?;
-    let builds = crate::projects::folder(&root, project)?.join(".workshop").join("publish");
+    // Where `device_build` leaves the builds.
+    let builds = crate::publish::parts(&root, project)?;
     crate::install::reader_plugin_for(files, &builds, reader)
 }
 

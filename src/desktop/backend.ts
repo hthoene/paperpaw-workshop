@@ -242,7 +242,8 @@ export interface Backend extends FolderApi, PictureApi, CheckApi, HistoryApi {
    *  `<id>-<version>-store.zip`, in the project's `.workshop/publish/`:
    *  the package (in base64) and, for a plugin with code, what
    *  `deviceBuild` made. */
-  publishPack(project: string, id: string, version: string, base64: string, code: boolean): Promise<StoreFile>;
+  /** `readers`: the builds this publish takes (`x4`, `x4-pro`); the others' are removed. */
+  publishPack(project: string, id: string, version: string, base64: string, code: boolean, readers: string[]): Promise<StoreFile>;
   /** Opens the store's upload form in the browser and shows the store
    *  file in its folder. */
   publishShow(path: string): Promise<void>;
@@ -383,7 +384,7 @@ export const appBackend: Backend = {
     return typeof chosen === "string" ? chosen : null;
   },
   saveFile: (path, base64) => invoke("save_file", { path, base64 }),
-  publishPack: (project, id, version, base64, code) => invoke("publish_pack", { project, id, version, base64, code }),
+  publishPack: (project, id, version, base64, code, readers) => invoke("publish_pack", { project, id, version, base64, code, readers }),
   publishShow: (path) => invoke("publish_show", { path }),
   githubAccount: () => invoke("github_account"),
   githubUseGh: () => invoke("github_use_gh"),
@@ -505,10 +506,10 @@ export function standInBackend(): Backend {
     askFolder: async () => null,
     saveFile: async () => {},
     // A plain browser keeps no file and opens no form.
-    publishPack: async (project, id, version, _base64, code) => ({
+    publishPack: async (project, id, version, _base64, code, readers) => ({
       path: `${project}/.workshop/publish/${id}-${version}-store.zip`,
       name: `${id}-${version}-store.zip`,
-      parts: code ? ["package", "x4", "source"] : ["package"],
+      parts: code ? ["package", ...readers, "source"] : ["package"],
     }),
     publishShow: async () => {},
     // GitHub needs the app.

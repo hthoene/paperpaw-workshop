@@ -358,6 +358,12 @@ pub fn build_for(
     plugin_version: &str,
 ) -> DeviceBuilt {
     let mut built = DeviceBuilt { state: "failed".into(), reader: reader.id().into(), ..DeviceBuilt::default() };
+    // What an earlier build of this reader left (the store's file and the
+    // trial's) goes first: a failed build leaves none, and neither can be taken
+    // for this one later.
+    for tail in ["", "-trial"] {
+        let _ = std::fs::remove_file(out.join(format!("{plugin_id}-{plugin_version}-{}{tail}.ppn", reader.id())));
+    }
     if reader == Reader::X4Pro && esp.is_none() {
         built.problems.push(crate::xtensa::how_to_get_it());
         return built;
@@ -836,6 +842,34 @@ dependencies = [
         assert!(built.fingerprint.is_some());
         // The X4's file is refused as the Pro's.
         assert!(crate::xtensa::not_for(Reader::X4, &said).is_some());
+    }
+
+    #[test]
+    fn a_new_build_clears_what_an_earlier_one_of_that_reader_left_even_when_it_fails() {
+        let dir = tempfile::tempdir().unwrap();
+        let out = dir.path().join("out");
+        std::fs::create_dir_all(&out).unwrap();
+        for file in [
+            "clock-1.0.0-x4.ppn",
+            "clock-1.0.0-x4-pro.ppn",
+            "clock-1.0.0-x4-pro-trial.ppn",
+            "clock-1.0.0-source.zip",
+            "clock-1.1.0-x4-pro.ppn",
+        ] {
+            std::fs::write(out.join(file), b"old").unwrap();
+        }
+        let rust = crate::toolchain::Rust { cargo: PathBuf::from("cargo"), version: "+none".into(), homes: None };
+        // No crate to build (no Cargo.toml): it fails, after the clearing.
+        let built = build_for(Reader::X4Pro, None, &dir.path().join("crate"), &[], &rust, "", Path::new("none"), &[7; 32], &out, "clock", "1.0.0");
+        assert_eq!(built.state, "failed");
+        let left: Vec<String> = {
+            let mut names: Vec<String> = std::fs::read_dir(&out).unwrap().map(|e| e.unwrap().file_name().into_string().unwrap()).collect();
+            names.sort();
+            names
+        };
+        // The Pro's files of this version are gone; the X4's, the source and
+        // another version's Pro file are not this build's to remove.
+        assert_eq!(left, ["clock-1.0.0-source.zip", "clock-1.0.0-x4.ppn", "clock-1.1.0-x4-pro.ppn"]);
     }
 
     #[test]
