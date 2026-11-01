@@ -6,6 +6,7 @@ import Anthropic from "@anthropic-ai/sdk";
 
 import { lengthRules, type LengthChoice } from "../ai/length";
 import { runTurn, type Said, type TurnEnd } from "../ai/loop";
+import { OpenRouterError } from "../ai/openrouter";
 import { carriedText, startFresh } from "../ai/summary";
 import { namedBy, personsUrls, type Samples } from "../tools/sample";
 import { MODELS, modelName } from "../ai/pricing";
@@ -449,7 +450,7 @@ export class Workshop {
     } catch (e) {
       this.error = message(e);
       // Too large for one request: on in a fresh conversation.
-      if (e instanceof Anthropic.APIError && e.status === 413) this.long = true;
+      if ((e instanceof Anthropic.APIError || e instanceof OpenRouterError) && e.status === 413) this.long = true;
     } finally {
       this.busy = false;
       this.live = "";
@@ -532,6 +533,11 @@ export class Workshop {
 /** What went wrong, in the person's words: Anthropic's errors each in
  *  their own, the rest as they are. */
 export function message(e: unknown): string {
+  // OpenRouter's, sorted by its provider: its own words for what the person can do.
+  if (e instanceof OpenRouterError) {
+    if (e.status === 413) return t("workshop.error.long");
+    return e.trouble === "other" ? t("workshop.error.other", { message: e.said }) : t(`workshop.error.openrouter.${e.trouble}`);
+  }
   // PaperPaw's proxy says why in its own words, for a PaperPaw key (budget used, expired).
   const said = e instanceof Anthropic.APIError ? (e.error as { error?: { message?: unknown } } | undefined)?.error?.message : undefined;
   if (typeof said === "string" && said.includes("PaperPaw key")) return said;

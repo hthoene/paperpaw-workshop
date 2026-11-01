@@ -37,5 +37,8 @@ export interface Provider {
   readonly label: string;
   /** Whether tools may stream their input as it is written. */
   readonly eagerTools: boolean;
+  /** What a request costs the person, as a multiple of the model's price
+   *  (a middleman's fee); 1 if not given. */
+  readonly costFactor?: number;
   send(request: Request, stream: Stream, signal?: AbortSignal): Promise<Anthropic.Message>;
 }

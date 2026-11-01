@@ -254,7 +254,7 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
       if (signal?.aborted) return "stopped";
       throw error;
     }
-    project.usage = addUsage(project.usage, priced(session.model, message.usage));
+    project.usage = addUsage(project.usage, priced(session.model, message.usage, provider.costFactor));
     project.lastPrompt =
       message.usage.input_tokens + (message.usage.cache_read_input_tokens ?? 0) + (message.usage.cache_creation_input_tokens ?? 0);
     project.messages.push({ role: "assistant", content: message.content });
@@ -336,7 +336,7 @@ async function goOnFresh(session: Session, midTurn: boolean, signal?: AbortSigna
   };
   try {
     const message = await provider.send(request, {}, signal);
-    project.usage = addUsage(project.usage, priced(model, message.usage));
+    project.usage = addUsage(project.usage, priced(model, message.usage, provider.costFactor));
     if (message.stop_reason !== "refusal") {
       summary = message.content
         .filter((b): b is Anthropic.TextBlock => b.type === "text")

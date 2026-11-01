@@ -10,6 +10,10 @@ export const HAIKU = "claude-haiku-5-5";
 export const SONNET = "claude-sonnet-5-5";
 export const OPUS = "claude-opus-5-5";
 
+/** Whose key is in the keychain: Claude's own, an OpenRouter one, or a
+ *  PaperPaw key (its proxy decides the models). */
+export type KeyKind = "claude" | "openrouter" | "paperpaw";
+
 export type ModelChoice = "auto" | typeof HAIKU | typeof SONNET | typeof OPUS;
 
 /** What a turn is: a data plugin or a small edit, or code. */
@@ -25,9 +29,10 @@ export const CHOICES: { choice: ModelChoice; label: string; hint: string }[] = [
 ];
 
 /** The models one may pick: with a PaperPaw key those the proxy allows it
- *  (none known yet: Automatic only), with one's own key all. */
-export function offered(key: "claude" | "paperpaw" | null, allowed: string[] = []): ModelChoice[] {
-  if (key === "claude") return CHOICES.map((c) => c.choice);
+ *  (none known yet: Automatic only), with one's own key (Claude's or
+ *  OpenRouter's) all. */
+export function offered(key: KeyKind | null, allowed: string[] = []): ModelChoice[] {
+  if (key === "claude" || key === "openrouter") return CHOICES.map((c) => c.choice);
   return ["auto", ...CHOICES.map((c) => c.choice).filter((c) => c !== "auto" && allowed.includes(c))];
 }
 

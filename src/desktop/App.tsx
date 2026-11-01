@@ -5,6 +5,8 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
 
 import { AnthropicDirect } from "../ai/anthropic";
+import { OpenRouter } from "../ai/openrouter";
+import type { Provider } from "../ai/provider";
 import type { LengthChoice } from "../ai/length";
 import { ReplayProvider, type Recording } from "../ai/replay";
 import { Handbook } from "../handbook/handbook";
@@ -14,7 +16,7 @@ import { about } from "./costs";
 import { Findings } from "./Findings";
 import { Conversation } from "./Conversation";
 import { Desk } from "./desk";
-import { CHOICES, saveChoice, savedChoice, usable, type ModelChoice } from "./models";
+import { CHOICES, saveChoice, savedChoice, usable, type KeyKind, type ModelChoice } from "./models";
 import { LENGTH_CHOICES, saveLength, savedLength } from "./length";
 import { LOOK_CHOICES, saveLooks, savedLooks, type LookChoice } from "./looks";
 import { Drawer } from "./Drawer";
@@ -30,12 +32,14 @@ interface Props {
   backend: Backend;
 }
 
-/** What a key looks like: Anthropic's (`sk-ant-...`) or a PaperPaw key for
- *  the free quota (`ppw-...`). Tried against the service when the
- *  conversation starts; this only catches what is plainly not one. */
-export function keyKind(key: string): "claude" | "paperpaw" | null {
+/** What a key looks like: Anthropic's (`sk-ant-...`), OpenRouter's
+ *  (`sk-or-...`) or a PaperPaw key for the free quota (`ppw-...`). Tried
+ *  against the service when the conversation starts; this only catches
+ *  what is plainly not one. */
+export function keyKind(key: string): KeyKind | null {
   const k = key.trim();
   if (/^sk-ant-[A-Za-z0-9_-]{20,}$/.test(k)) return "claude";
+  if (/^sk-or-[A-Za-z0-9_-]{20,}$/.test(k)) return "openrouter";
   if (/^ppw-[A-Za-z0-9_-]{16,}$/.test(k)) return "paperpaw";
   return null;
 }
@@ -60,7 +64,7 @@ function FirstStart({ onKey }: { onKey(key: string): Promise<void> }) {
   const submit = async (event: Event) => {
     event.preventDefault();
     if (!keyKind(value)) {
-      setProblem("That does not look like a Claude key (sk-ant-…) or a PaperPaw key (ppw-…).");
+      setProblem("That does not look like a Claude key (sk-ant-…), an OpenRouter key (sk-or-…) or a PaperPaw key (ppw-…).");
       return;
     }
     try {
@@ -78,8 +82,8 @@ function FirstStart({ onKey }: { onKey(key: string): Promise<void> }) {
         <div class="line">
           <input
             type="password"
-            aria-label="Claude key or PaperPaw key"
-            placeholder="Claude key or PaperPaw key"
+            aria-label="Claude, OpenRouter or PaperPaw key"
+            placeholder="Claude, OpenRouter or PaperPaw key"
             autoComplete="off"
             spellcheck={false}
             value={value}
@@ -110,10 +114,17 @@ function example(): ReplayProvider | undefined {
  *  Anthropic's API and passes on what the key allows. */
 export const PROXY = "https://workshop.paperpaw.org";
 
+/** Who answers for this key: PaperPaw's proxy, OpenRouter, or Anthropic. */
+export function providerFor(kind: KeyKind | null, apiKey: string): Provider {
+  if (kind === "paperpaw") return new AnthropicDirect(apiKey, PROXY, "provider.paperpaw");
+  if (kind === "openrouter") return new OpenRouter(apiKey);
+  return new AnthropicDirect(apiKey);
+}
+
 interface WindowProps {
   backend: Backend;
   apiKey: string;
-  keyKind: "claude" | "paperpaw" | null;
+  keyKind: KeyKind | null;
   onForgetKey(): void;
 }
 
@@ -140,7 +151,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
   }, [backend]);
   const checker = useMemo(() => new Checker(backend), [backend]);
   const desk = useMemo(() => {
-    const provider = example() ?? (keyKind === "paperpaw" ? new AnthropicDirect(apiKey, PROXY, "provider.paperpaw") : new AnthropicDirect(apiKey));
+    const provider = example() ?? providerFor(keyKind, apiKey);
     const made = new Desk(workspace, backend, checker, handbook, provider, keyKind);
     // While the workshop is worked on: its test runs drive the desk.
     if (import.meta.env.DEV) (window as unknown as { workshop?: unknown }).workshop = { desk: made };
@@ -245,7 +256,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
 }
 
 /** The app's settings: which model, for all plugins and for this one. */
-function Settings({ workspace, backend, keyKind, may, onClose }: { workspace: Workspace; backend: Backend; keyKind: "claude" | "paperpaw" | null; may: ModelChoice[]; onClose(): void }) {
+function Settings({ workspace, backend, keyKind, may, onClose }: { workspace: Workspace; backend: Backend; keyKind: KeyKind | null; may: ModelChoice[]; onClose(): void }) {
   const [choice, setChoice] = useState<ModelChoice>(usable(savedChoice(), may));
   const [looks, setLooks] = useState<LookChoice>(savedLooks());
   const [length, setLength] = useState<LengthChoice>(savedLength());
@@ -279,6 +290,7 @@ function Settings({ workspace, backend, keyKind, may, onClose }: { workspace: Wo
           </label>
         ))}
         {keyKind === "paperpaw" && <p class="hint">Your PaperPaw key decides which models you can pick.</p>}
+        {keyKind === "openrouter" && <p class="hint">Your OpenRouter key: the same Claude models, through OpenRouter. What it costs includes OpenRouter's fee, about 5.5%.</p>}
       </fieldset>
       {project && shown.length > 1 && (
         <label class="own">
@@ -356,7 +368,7 @@ function Spent({ desk }: { desk: Desk }) {
   if (plugin <= 0 && month <= 0) return null;
   const monthly = `${about(month).replace(/^about /, "")} this month`;
   return (
-    <span class="spent" title="What Anthropic charges your key, roughly, in US dollars as Anthropic counts them">
+    <span class="spent" title={desk.keyKind === "openrouter" ? "What OpenRouter charges your key, roughly, in US dollars, with its fee on credits" : "What Anthropic charges your key, roughly, in US dollars as Anthropic counts them"}>
       {plugin > 0 ? `${about(plugin)} for this plugin · ${monthly}` : `about ${monthly}`}
     </span>
   );

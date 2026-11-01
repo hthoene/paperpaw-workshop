@@ -50,8 +50,8 @@ export interface ApiUsage {
   cache_read_input_tokens?: number | null;
 }
 
-/** The usage of one request, priced. */
-export function priced(model: string, usage: ApiUsage): Usage {
+/** The usage of one request, priced; `factor`: a middleman's fee on top. */
+export function priced(model: string, usage: ApiUsage, factor = 1): Usage {
   const write = usage.cache_creation_input_tokens ?? 0;
   const read = usage.cache_read_input_tokens ?? 0;
   const base = PRICES[model] ?? PRICES["claude-sonnet-5-5"]!;
@@ -64,7 +64,7 @@ export function priced(model: string, usage: ApiUsage): Usage {
     cacheWriteTokens: write,
     cacheReadTokens: read,
     outputTokens: usage.output_tokens,
-    dollars,
+    dollars: dollars * factor,
   };
 }
 

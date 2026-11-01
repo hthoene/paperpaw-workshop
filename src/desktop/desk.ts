@@ -14,7 +14,7 @@ import { importPlugin, zipEntries } from "../project/import";
 import { identity, shownName, type Project } from "../project/project";
 import type { Backend } from "./backend";
 import { forModel, shown, type Checker } from "./checks";
-import { modelFor, offered, savedChoice, type ModelChoice } from "./models";
+import { type KeyKind, modelFor, offered, savedChoice, type ModelChoice } from "./models";
 import { LocalBuilder } from "./builder";
 import { thisMonth, turnOf } from "./costs";
 import { fromBase64 } from "./folders";
@@ -73,8 +73,8 @@ export class Desk {
     readonly checker: Checker,
     private handbook: Handbook,
     private provider: Provider,
-    /** Which key: Claude's own, or PaperPaw's (its proxy decides the models). */
-    private key: "claude" | "paperpaw" | null,
+    /** Which key: Claude's own, OpenRouter's, or PaperPaw's (its proxy decides the models). */
+    private key: KeyKind | null,
     /** The models a PaperPaw key may use, as its proxy says. */
     public allowed: string[] = [],
   ) {
@@ -118,6 +118,11 @@ export class Desk {
     } catch {
       // Not reached: Automatic, as before.
     }
+  }
+
+  /** Whose key it is. */
+  get keyKind(): KeyKind | null {
+    return this.key;
   }
 
   /** The models one may pick with this key. */

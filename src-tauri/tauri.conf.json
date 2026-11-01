@@ -22,7 +22,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; frame-src 'self'; connect-src 'self' ipc: http://ipc.localhost https://api.anthropic.com https://workshop.paperpaw.org"
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; frame-src 'self'; connect-src 'self' ipc: http://ipc.localhost https://api.anthropic.com https://openrouter.ai https://workshop.paperpaw.org"
     }
   },
   "bundle": {

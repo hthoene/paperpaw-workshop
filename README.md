@@ -55,6 +55,19 @@ Ask for a **PaperPaw key** at
 person reads every request. A PaperPaw key works for a while and up to a
 small budget, so you can try the workshop before you get a key of your own.
 
+## An OpenRouter key
+
+An **OpenRouter key** (`sk-or-…`) works too: paste it where the Claude key
+goes. The workshop uses the same Claude models through OpenRouter's
+Anthropic-compatible API, so tool use, streaming and prompt caching stay.
+The cost shown includes OpenRouter's fee on credits (about 5.5%, an
+estimate). Not with an OpenRouter key: the server-side clearing of old tool
+results and the effort setting (Anthropic-only extras; long conversations
+are summarised as before), and other vendors' models (Claude only for now).
+Errors say whether the key, the credit or the model's tool support is the
+problem. Not tried against the live OpenRouter yet: the models' names
+(`anthropic/claude-haiku-5.5` and so on) are in `src/ai/openrouter.ts`.
+
 ## What it does
 
 - Makes **looks, home screens, buttons and texts**: plugins of a few text
@@ -76,7 +89,7 @@ small budget, so you can try the workshop before you get a key of your own.
 - **It keeps nothing on our side.** Your plugins are folders in
   *Documents/PaperPaw Workshop* on your computer. Your key stays in your
   computer's keychain.
-- **It talks only to whom it must.** To Anthropic with your key, or to
+- **It talks only to whom it must.** To Anthropic with your key, to OpenRouter with an OpenRouter key, or to
   PaperPaw's key service with a PaperPaw key. To GitHub, when you open
   Settings, to see whether a newer workshop is out. To Rust's own servers
   and crates.io, the first time you make a plugin with code. To
@@ -94,7 +107,7 @@ small budget, so you can try the workshop before you get a key of your own.
 
 - Windows 10 or 11. There is no build for macOS or Linux yet; they are
   planned for later.
-- A Claude key, or a PaperPaw key.
+- A Claude key, an OpenRouter key, or a PaperPaw key.
 - For plugins with code: about 1 GB of room for Rust and the builds. The
   workshop sets up Rust by itself the first time. On Windows it also needs
   Microsoft's C++ build tools (about 3 GB); if they are missing, the
