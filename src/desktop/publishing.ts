@@ -13,14 +13,13 @@ import { zipSync } from "fflate";
 
 import { MODELS } from "../ai/pricing";
 import type { Provider } from "../ai/provider";
-import { draftEntry } from "../publish/draft";
-import type { EntryInput } from "../tools/entry";
-import type { ToolContext } from "../tools/tool";
-
 import { MAX_SCREENSHOT_BYTES } from "../project/entry";
 import { iniValue, parseIni } from "../project/ini";
 import { identity, type Project } from "../project/project";
 import { MAX_BYTES, MAX_FILES, pathProblem, validId, validVersion } from "../project/rules";
+import { draftEntry } from "../publish/draft";
+import type { EntryInput } from "../tools/entry";
+import type { ToolContext } from "../tools/tool";
 
 /** The store's upload form. */
 export const SUBMIT = "https://paperpaw.org/submit";

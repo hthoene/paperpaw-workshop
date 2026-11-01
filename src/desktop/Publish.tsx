@@ -14,6 +14,7 @@
 
 import { useEffect, useState } from "preact/hooks";
 
+import { message } from "../app/controller";
 import { MAX_SCREENSHOTS } from "../project/entry";
 import { identity } from "../project/project";
 import { moveShot, removeShot, storeShots } from "../publish/screenshots";
@@ -238,7 +239,7 @@ export function Publish({ desk, backend, onClose }: Props) {
       if (written.group && !entry.group) setGroup(written.group);
       setSaid(`Drafted: ${written.summary} It is in the store entry (store/store.ini); change it there.`);
     } catch (e) {
-      setSaid(e instanceof Error ? e.message : String(e));
+      setSaid(message(e));
     } finally {
       setDrafting(false);
       redraw((n) => n + 1);

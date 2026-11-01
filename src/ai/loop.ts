@@ -321,8 +321,8 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
 
 /** The conversation summarised (by the summariser, from a transcript)
  *  and on in a fresh one; what its first message carries. Where no
- *  summary comes (the model refused or failed), what the person asked for stands in for one. What the summary
- *  cost is the turn's. */
+ *  summary comes (the model refused or failed), what the person asked for
+ *  stands in for one. What the summary cost is the turn's. */
 async function goOnFresh(session: Session, midTurn: boolean, signal?: AbortSignal): Promise<string> {
   const { project, provider } = session;
   let summary: string | undefined;

@@ -1,6 +1,6 @@
 // The ideas to start from, shown in an empty conversation: a click puts
 // the idea's words into the message field, for the person to change and
-// send. Whether it needs code, the AI decides from the words.
+// send. What the person already typed there stays: the idea follows it. Whether it needs code, the AI decides from the words.
 
 export interface Idea {
   id: string;
@@ -19,6 +19,13 @@ export const IDEAS: Idea[] = [
   { id: "text", name: "Bigger text", what: "Larger letters everywhere, for tired eyes.", kind: "Reading", prompt: "Larger text in books and menus, with more space between lines." },
   { id: "tool", name: "A small tool of my own", what: "A new screen or widget: a timer, a quote a day, a counter.", kind: "With code", prompt: "A screen in the tools menu that shows a short quote, a different one each day." },
 ];
+
+/** The message field after a click on an idea: its words where the field is
+ *  empty, otherwise after what is there, on a line of their own. */
+export function withIdea(typed: string, prompt: string): string {
+  if (!typed.trim()) return prompt;
+  return `${typed.replace(/\s+$/, "")}\n\n${prompt}`;
+}
 
 export function Ideas({ onPick }: { onPick(prompt: string): void }) {
   return (

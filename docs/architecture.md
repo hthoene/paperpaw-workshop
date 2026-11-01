@@ -125,8 +125,9 @@ person chooses in Settings ("Conversation length": Short, Normal, Long,
    message carries the summary and the file list (`CARRIED`, shown as
    "Summarised the conversation so far"), and nothing else is sent again.
    The summary's cost is the turn's. Without a summary (the summariser
-   failed) the person's requests stand in. A turn that alone fills two fresh conversations ends
-   as `too_long`, and the person can go on in a fresh one.
+   failed) the person's requests stand in. A turn that alone fills two
+   fresh conversations ends as `too_long`, and the person can go on in a
+   fresh one.
 
 | Setting | `trimAt` | `keep` | `clearAtLeast` | `summariseAt` |
 | --- | --- | --- | --- | --- |
@@ -593,6 +594,5 @@ panel) were removed once the window in `src/desktop/` replaced them. Still
 in the repository, and not used by the app: the reader in a frame
 (`frame.html`, `src/emulator/frame/`, `Workshop.attach`), the builder's
 container (`builder/`, `Dockerfile`, `docker-compose.yml`, `local/`),
-`src/publish/draft.ts` (the AI's draft of a store entry; the window has no
-button for it yet) and the description of the store API the pages used
+and the description of the store API the pages used
 ([store-api.md](store-api.md)). They go when the app has what they did.

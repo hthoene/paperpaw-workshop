@@ -14,7 +14,7 @@ import { Markdown } from "./Markdown";
 import type { Desk } from "./desk";
 import { afterAnswers } from "./history";
 import { BackHere, PreviewBar } from "./GoBack";
-import { Ideas } from "./Ideas";
+import { Ideas, withIdea } from "./Ideas";
 
 export function Conversation({ desk }: { desk: Desk }) {
   const [draft, setDraft] = useState("");
@@ -66,7 +66,7 @@ export function Conversation({ desk }: { desk: Desk }) {
     <section class="talk" aria-label="Conversation">
       <div class="log" aria-live="polite" ref={log} onScroll={scrolled}>
         {!said.length && !busy && <p class="empty">What should your reader do? A look, a home screen, a tool: say it in your own words.</p>}
-        {!said.length && !busy && !desk.previewing && <Ideas onPick={(words) => { setDraft(words); input.current?.focus(); }} />}
+        {!said.length && !busy && !desk.previewing && <Ideas onPick={(words) => { setDraft((typed) => withIdea(typed, words)); input.current?.focus(); }} />}
         {(project?.earlier ?? []).map((earlier, n) => (
           <details class="earlier" key={`earlier-${n}`}>
             <summary>The conversation before</summary>
