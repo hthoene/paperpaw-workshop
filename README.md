@@ -24,8 +24,9 @@ Xteink X4 and X4 Pro.
 
 1. **Download** the installer from the
    [releases](https://github.com/hthoene/paperpaw-workshop/releases) and
-   run it. It is not signed with a certificate yet, so Windows may ask
-   whether you trust it.
+   run it. The installer is signed with a code-signing certificate (Certum,
+   issued to Hannes Thöne), so Windows can show the publisher. A new
+   program may still get a reminder from Windows until it is better known.
 2. **Paste your Claude key** when it starts. You get one in the
    [Claude Console](https://console.anthropic.com/).
 3. **Describe your plugin** in your own words: "A calm dark look for
