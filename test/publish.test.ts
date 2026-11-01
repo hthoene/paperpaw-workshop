@@ -1,15 +1,11 @@
-import { unzipSync } from "fflate";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import example from "../src/ai/examples/night-owl.json";
 import { ReplayProvider, type Recording } from "../src/ai/replay";
 import { entryProblems, readEntry, tagsFrom, writeEntry, EMPTY_ENTRY } from "../src/project/entry";
 import { setIniValue } from "../src/project/ini";
-import { pluginZip } from "../src/project/zip";
 import { draftEntry } from "../src/publish/draft";
-import { FakeStore } from "../src/publish/fake";
 import { plannedShots, shotsIn, takeShots } from "../src/publish/screenshots";
-import { SiteStore, StoreError } from "../src/publish/store";
 import { setEntry } from "../src/tools/entry";
 import { bench } from "./helpers";
 
@@ -117,92 +113,5 @@ describe("plugin.ini", () => {
     expect(setIniValue(PLUGIN_INI, "plugin", "name", "Owl")).toBe(PLUGIN_INI.replace("Night owl", "Owl"));
     expect(setIniValue("[plugin]\nid = a\n\n[other]\nx = 1\n", "plugin", "name", "A")).toBe("[plugin]\nid = a\nname = A\n\n[other]\nx = 1\n");
     expect(setIniValue("", "plugin", "name", "A")).toBe("[plugin]\nname = A\n");
-  });
-});
-
-describe("the site's store", () => {
-  afterEach(() => vi.unstubAllGlobals());
-
-  const answer = (status: number, body: unknown) =>
-    new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
-
-  it("is none where the site has no such address", async () => {
-    vi.stubGlobal("fetch", async () => new Response("<!doctype html>", { status: 200, headers: { "content-type": "text/html" } }));
-    expect(await new SiteStore("http://localhost:8080").state("/workshop/")).toEqual({ kind: "none" });
-    vi.stubGlobal("fetch", async () => {
-      throw new TypeError("offline");
-    });
-    expect(await new SiteStore("http://localhost:8080").state("/workshop/")).toEqual({ kind: "none" });
-  });
-
-  it("says whether it is open and who is signed in", async () => {
-    const store = new SiteStore("https://paperpaw.org");
-    vi.stubGlobal("fetch", async () => answer(200, { store: "closed" }));
-    expect(await store.state("/workshop/")).toEqual({ kind: "closed" });
-    vi.stubGlobal("fetch", async () => answer(200, { store: "open", account: null }));
-    expect(await store.state("/workshop/#/p/ab/share")).toEqual({
-      kind: "signed-out",
-      signIn: "https://paperpaw.org/account/sign-in?next=%2Fworkshop%2F%23%2Fp%2Fab%2Fshare",
-    });
-    vi.stubGlobal("fetch", async () => answer(200, { store: "open", account: { name: "Ada" }, csrf: "c" }));
-    expect(await store.state("/workshop/")).toEqual({ kind: "signed-in", name: "Ada", csrf: "c" });
-  });
-
-  it("uploads as the form does and reads the draft", async () => {
-    const calls: { url: string; init: RequestInit }[] = [];
-    vi.stubGlobal("fetch", async (url: string, init: RequestInit) => {
-      calls.push({ url, init });
-      return answer(201, { submission: 7, passed: true, checks: [{ check: "manifest", status: "pass", message: "ok" }], draft: "/submit/7", page: "/submit/7/page" });
-    });
-    const store = new SiteStore("https://paperpaw.org");
-    const draft = await store.upload({ package: pluginZip("night-owl", { "plugin.ini": new TextEncoder().encode(PLUGIN_INI) }) }, "c");
-    expect(draft).toEqual({
-      submission: 7,
-      passed: true,
-      checks: [{ check: "manifest", status: "pass", message: "ok" }],
-      draftUrl: "https://paperpaw.org/submit/7",
-      pageUrl: "https://paperpaw.org/submit/7/page",
-    });
-    const { url, init } = calls[0]!;
-    expect(url).toBe("https://paperpaw.org/submit");
-    expect(init.method).toBe("POST");
-    expect((init.headers as Record<string, string>).Accept).toBe("application/json");
-    const form = init.body as FormData;
-    expect(form.get("csrf")).toBe("c");
-    const zip = unzipSync(new Uint8Array(await (form.get("package") as Blob).arrayBuffer()));
-    expect(Object.keys(zip)).toEqual(["night-owl/plugin.ini"]);
-  });
-
-  it("turns a refusal into the workshop's words, with the store's checks", async () => {
-    vi.stubGlobal("fetch", async () =>
-      answer(422, { error: "refused", message: "plugin.ini names no version.", checks: [{ check: "manifest", status: "fail", message: "no version" }] }),
-    );
-    const error = await new SiteStore("https://paperpaw.org").upload({ package: new Uint8Array() }, "c").catch((e: unknown) => e);
-    expect(error).toBeInstanceOf(StoreError);
-    expect((error as StoreError).code).toBe("refused");
-    expect((error as StoreError).checks).toEqual([{ check: "manifest", status: "fail", message: "no version" }]);
-  });
-
-  it("sends a draft with the session's token", async () => {
-    let sent: { url: string; body: string } | undefined;
-    vi.stubGlobal("fetch", async (url: string, init: RequestInit) => {
-      sent = { url, body: String(init.body) };
-      return answer(200, { submission: 7, state: "pending" });
-    });
-    await new SiteStore("https://paperpaw.org").send(7, "c");
-    expect(sent).toEqual({ url: "https://paperpaw.org/submit/7/send", body: "csrf=c" });
-  });
-});
-
-describe("the pretend store", () => {
-  it("takes a package with plugin.ini from the signed-in author only", async () => {
-    const store = new FakeStore();
-    const pkg = pluginZip("night-owl", { "plugin.ini": new TextEncoder().encode(PLUGIN_INI) });
-    await expect(store.upload({ package: pkg }, "wrong")).rejects.toMatchObject({ code: "expired" });
-    const draft = await store.upload({ package: pkg }, "test-csrf");
-    expect(draft.passed).toBe(true);
-    await store.send(draft.submission, "test-csrf");
-    expect(store.sent).toEqual([1]);
-    await expect(store.upload({ package: pluginZip("x", {}) }, "test-csrf")).rejects.toMatchObject({ code: "refused" });
   });
 });

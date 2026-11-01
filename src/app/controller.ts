@@ -71,7 +71,7 @@ export class Workshop {
   findings: Finding[] = [];
   stub = true;
   /** Whether plugins' requests may go to the internet here (one's own
-   *  computer: hosting.ts), and whether the person lets them (the switch). */
+   *  computer), and whether the person lets them (the switch). */
   realNetworkAllowed = false;
   realNetwork = true;
   private emulator: Emulator | undefined;
@@ -293,7 +293,7 @@ export class Workshop {
     return !!this.emulator;
   }
 
-  /** Who answers the AI's requests, for the share page's draft. */
+  /** Who answers the AI's requests, for the store entry's draft (src/publish/draft.ts). */
   get ai(): Provider {
     return this.provider;
   }

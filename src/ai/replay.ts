@@ -20,7 +20,7 @@ export interface Recording {
    *  `public/examples/`. */
   attach?: string[];
   answers: Answer[];
-  /** The answer to the share page's request for a store entry (the one
+  /** The answer to a request for a store entry (the one
    *  request that offers `set_entry` alone), if the recording goes that
    *  far. */
   entry?: Answer;
