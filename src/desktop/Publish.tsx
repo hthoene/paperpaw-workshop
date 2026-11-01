@@ -9,8 +9,9 @@
 // A plugin with code also needs its build for each reader, signed with
 // the author's key (whose backup is saved first), and its source, both
 // inside the store file: the X4's is made here (its part of Rust fetched
-// once, its size said first); the X4 Pro's comes once a PaperPaw release
-// brings what it needs.
+// once, its size said first); the X4 Pro's too, with espup's Xtensa tools if
+// they are there: until a PaperPaw release brings the Pro's core libraries it
+// is a trial build (not in the store file).
 
 import { useEffect, useState } from "preact/hooks";
 
@@ -34,6 +35,7 @@ import {
   recordPublished,
   sdkOf,
   draftStoreEntry,
+  proState,
   storeEntry,
   storeIniPath,
   uploadPackage,
@@ -151,6 +153,7 @@ export function Publish({ desk, backend, onClose }: Props) {
   const [readiness, setReadiness] = useState<DeviceReadiness | null>(null);
   const [fetching, setFetching] = useState(false);
   const [drafting, setDrafting] = useState(false);
+  const [pro, setPro] = useState(false);
   const id = project ? identity(project).id : undefined;
   const code = project?.kind === "code";
   const entry = project ? storeEntry(project) : {};
@@ -328,13 +331,20 @@ export function Publish({ desk, backend, onClose }: Props) {
     const packed = uploadPackage(project);
     if (!packed.ok) return setStep({ at: "problems", problems: packed.problems });
     try {
+      const readers = ["x4"];
       if (code) {
         setStep({ at: "building" });
         const built = await backend.deviceBuild(project.key, packed.id, packed.version);
         if (built.state !== "done" || !built.ppn || !built.source) return setStep({ at: "problems", problems: whyFailed(built) });
+        // The Pro's build too, if asked: the store file takes it unless it is a trial.
+        if (pro && readiness?.x4_pro) {
+          const built = await backend.deviceBuild(project.key, packed.id, packed.version, "x4-pro");
+          if (built.state !== "done" || !built.ppn) return setStep({ at: "problems", problems: whyFailed(built) });
+          readers.push("x4-pro");
+        }
       }
       // One file for the store: the package, and the build and the source just made.
-      const file = await backend.publishPack(project.key, packed.id, packed.version, toBase64(packed.zip), !!code);
+      const file = await backend.publishPack(project.key, packed.id, packed.version, toBase64(packed.zip), !!code, readers);
       recordPublished(project, packed.version);
       await desk.workspace.save();
       // The state packed, marked in the history to go back to.
@@ -420,14 +430,26 @@ export function Publish({ desk, backend, onClose }: Props) {
                   {fetching ? "Fetching…" : `Fetch it (${readiness.x4_mb} MB)`}
                 </button>
               )}
-              <p class="hint">
-                <b>X4 Pro</b>: plugins with code for it come once a PaperPaw release brings what its builds need. Until then
-                the store offers this plugin for the X4.
-              </p>
+              {(() => {
+                const state = proState(readiness);
+                return (
+                  <>
+                    <p class="hint">
+                      <b>X4 Pro</b> (the X4 Classic takes the same file, experimental) {state.text}
+                    </p>
+                    {state.can && (
+                      <label class="check">
+                        <input type="checkbox" checked={pro} onChange={(e) => setPro(e.currentTarget.checked)} />
+                        <span>Also build for the X4 Pro</span>
+                      </label>
+                    )}
+                  </>
+                );
+              })()}
               {!readiness.sign && <p>PaperPaw's paperpaw-sign is missing beside its emulator: it packs the file for the readers.</p>}
             </div>
           )}
-          {step.at === "building" && <p class="hint" role="status">Building it for the X4, then signing it…</p>}
+          {step.at === "building" && <p class="hint" role="status">Building it for the X4{pro && readiness?.x4_pro ? " and the X4 Pro" : ""}, then signing it…</p>}
           {step.at === "problems" && (
             <div class="before">
               <p>The store's form would refuse it:</p>

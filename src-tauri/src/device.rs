@@ -21,6 +21,7 @@ use std::path::{Path, PathBuf};
 use serde::Serialize;
 
 use crate::code::Crate;
+use crate::xtensa::Reader;
 
 /// The X4's target.
 pub const X4_TARGET: &str = "riscv32imc-unknown-none-elf";
@@ -309,6 +310,12 @@ pub struct DeviceBuilt {
     /// As `paperpaw-sign plugin` reads the file.
     pub fingerprint: Option<String>,
     pub size: u64,
+    /// The reader it is for (`x4`, `x4-pro`).
+    pub reader: String,
+    /// Built without the release's core libraries (X4 Pro): it runs on a
+    /// reader, but is not what the store's rebuild makes, so it stays out
+    /// of a store file.
+    pub trial: bool,
 }
 
 /// `paperpaw-sign`, beside the emulator, as the release puts it.
@@ -330,11 +337,16 @@ fn fingerprint(sign: &Path, file: &Path) -> Option<String> {
         .find_map(|l| l.strip_prefix("fingerprint:").map(|f| f.trim().to_string()))
 }
 
-/// Writes the crate of `files` into `dir`, builds it for the X4 with
-/// `rust` as the store rebuilds it, packs it with `sign` and signs it with
-/// `seed`; the plugin file and the source ZIP go to `out`.
+/// Writes the crate of `files` into `dir`, builds it for `reader` as the
+/// store rebuilds it, packs it with `sign` and signs it with `seed`; the
+/// plugin file and the source ZIP go to `out`. The X4 builds with `rust`
+/// (the emulator's compiler); the X4 Pro (and the Classic) with `esp`,
+/// espup's toolchain, linked with the same script and flags; the file's chip
+/// is checked to be the reader's.
 #[allow(clippy::too_many_arguments)]
-pub fn build_x4(
+pub fn build_for(
+    reader: Reader,
+    esp: Option<&crate::xtensa::Esp>,
     dir: &Path,
     files: &[(String, Vec<u8>)],
     rust: &crate::toolchain::Rust,
@@ -345,7 +357,17 @@ pub fn build_x4(
     plugin_id: &str,
     plugin_version: &str,
 ) -> DeviceBuilt {
-    let mut built = DeviceBuilt { state: "failed".into(), ..DeviceBuilt::default() };
+    let mut built = DeviceBuilt { state: "failed".into(), reader: reader.id().into(), ..DeviceBuilt::default() };
+    // What an earlier build of this reader left (the store's file and the
+    // trial's) goes first: a failed build leaves none, and neither can be taken
+    // for this one later.
+    for tail in ["", "-trial"] {
+        let _ = std::fs::remove_file(out.join(format!("{plugin_id}-{plugin_version}-{}{tail}.ppn", reader.id())));
+    }
+    if reader == Reader::X4Pro && esp.is_none() {
+        built.problems.push(crate::xtensa::how_to_get_it());
+        return built;
+    }
     let manifest = files.iter().find(|(p, _)| p == "Cargo.toml").map(|(_, b)| String::from_utf8_lossy(b).into_owned()).unwrap_or_default();
     let Some(krate) = crate::code::cargo(&manifest).0 else {
         built.problems = crate::code::problems(files);
@@ -395,14 +417,23 @@ pub fn build_x4(
     if let Some(release) = release_of(sdk) {
         pin_release(rust, dir, release);
     }
-    let mut fetch = rust.cargo();
-    fetch.args(["fetch", "--target", X4_TARGET]).current_dir(dir).env_remove("RUSTC_WRAPPER");
-    // What it says is kept for the person if the linker script is missing after it.
-    let fetched = match fetch.output() {
-        Ok(ran) if ran.status.success() => String::new(),
-        Ok(ran) => crate::toolchain::last_line(&ran.stderr),
-        Err(e) => format!("cargo: {e}"),
-    };
+    // The crates of the X4 first (the source is the same for both readers),
+    // then of the Pro's target. What it says is kept for the person if the
+    // linker script is missing after it.
+    let mut fetched = String::new();
+    let mut targets = vec![X4_TARGET];
+    if reader == Reader::X4Pro {
+        targets.push(crate::xtensa::TARGET);
+    }
+    for target in targets {
+        let mut fetch = rust.cargo();
+        fetch.args(["fetch", "--target", target]).current_dir(dir).env_remove("RUSTC_WRAPPER");
+        fetched = match fetch.output() {
+            Ok(ran) if ran.status.success() => String::new(),
+            Ok(ran) => crate::toolchain::last_line(&ran.stderr),
+            Err(e) => format!("cargo: {e}"),
+        };
+    }
     let args = dir.join("target").join("remap.args");
     let _ = std::fs::create_dir_all(args.parent().unwrap_or(dir));
     // The checkout around an SDK on this computer
@@ -430,17 +461,30 @@ pub fn build_x4(
         built.problems.push(e.to_string());
         return built;
     }
-    let mut command = rust.cargo();
+    let (target, alias) = match reader {
+        Reader::X4 => (X4_TARGET, "x4"),
+        Reader::X4Pro => (crate::xtensa::TARGET, "x4pro"),
+    };
+    let libraries = esp.is_none_or(|e| e.libraries);
+    let mut command = match (reader, esp) {
+        (Reader::X4Pro, Some(esp)) => esp.cargo(Some(&cargo_home)),
+        _ => rust.cargo(),
+    };
     command
-        .args(["x4", "--locked", "--message-format=json-diagnostic-rendered-ansi"])
+        .args([alias, "--locked", "--message-format=json-diagnostic-rendered-ansi"])
         .args(["--config", "term.color='never'"])
-        .args(["--config", &format!("target.{X4_TARGET}.rustflags = ['@{}']", forward(&args))])
+        .args(["--config", &format!("target.{target}.rustflags = ['@{}']", forward(&args))])
         // A wrapper (sccache), from the environment or Cargo's settings,
         // takes no argument file, and caches nothing here.
         .args(["--config", "build.rustc-wrapper=''"])
         .current_dir(dir)
         .env_remove("RUSTC_WRAPPER")
         .env_remove("RUSTFLAGS");
+    // Without the release's core libraries the Pro builds its own, as the hosted builder does.
+    if reader == Reader::X4Pro && !libraries {
+        command.arg("-Zbuild-std=core,alloc");
+        built.trial = true;
+    }
     let ran = match command.output() {
         Ok(ran) => ran,
         Err(e) => {
@@ -452,7 +496,7 @@ pub fn build_x4(
     built.diagnostics = crate::code::diagnostics(&stdout, &dir.to_string_lossy());
     let stderr = String::from_utf8_lossy(&ran.stderr);
     built.log_tail = stderr.lines().rev().take(20).collect::<Vec<_>>().into_iter().rev().collect::<Vec<_>>().join("\n");
-    let elf = dir.join("target").join(X4_TARGET).join("release").join(&krate.name);
+    let elf = dir.join("target").join(target).join("release").join(&krate.name);
     if !ran.status.success() || !elf.exists() {
         return built;
     }
@@ -473,13 +517,23 @@ pub fn build_x4(
             return built;
         }
     }
+    // The file names the chip it runs on, and a wrong one would be refused by the reader.
+    let mut shown = std::process::Command::new(sign);
+    shown.arg("plugin").arg(&unsigned);
+    crate::toolchain::quiet(&mut shown);
+    let said = shown.output().map(|o| String::from_utf8_lossy(&o.stdout).into_owned()).unwrap_or_default();
+    if let Some(why) = crate::xtensa::not_for(reader, &said) {
+        built.problems.push(why);
+        return built;
+    }
     let Ok(mut file) = std::fs::read(&unsigned) else {
         built.problems.push("paperpaw-sign wrote no file".into());
         return built;
     };
     let trailer = crate::author::sign(&file, seed);
     file.extend_from_slice(&trailer);
-    let ppn = out.join(format!("{plugin_id}-{plugin_version}-x4.ppn"));
+    // A trial build has a name of its own: the store file takes only `-x4-pro.ppn`.
+    let ppn = out.join(format!("{plugin_id}-{plugin_version}-{}{}.ppn", reader.id(), if built.trial { "-trial" } else { "" }));
     if let Err(e) = std::fs::write(&ppn, &file) {
         built.problems.push(e.to_string());
         return built;
@@ -722,7 +776,7 @@ dependencies = [
         let dir = tempfile::tempdir().unwrap();
         let (work, out) = (dir.path().join("crate"), dir.path().join("out"));
         let sdk = format!("{{ path = {:?} }}", sdk.to_string_lossy().replace('\\', "/"));
-        let built = build_x4(&work, &files, &rust, &sdk, Path::new(&sign), &[7; 32], &out, "hello", "1.0.0");
+        let built = build_for(Reader::X4, None, &work, &files, &rust, &sdk, Path::new(&sign), &[7; 32], &out, "hello", "1.0.0");
         assert_eq!(built.state, "done", "{built:?}");
         let ppn = PathBuf::from(built.ppn.unwrap());
         let check = std::process::Command::new(&sign).arg("check-plugin").arg(&ppn).output().unwrap();
@@ -744,6 +798,78 @@ dependencies = [
         let paths: Vec<&str> = text.split(|c: char| c.is_control()).filter(|s| s.contains(".rs")).collect();
         eprintln!("paths in the build: {paths:#?}");
         assert!(!paths.iter().any(|p| p.contains('\\')), "a Windows separator in the build: {paths:#?}");
+    }
+
+    /// Needs espup's `esp` toolchain (`~/export-esp.sh`), `PAPERPAW_SDK` (a
+    /// checkout's SDK) and `PAPERPAW_SIGN` (its paperpaw-sign), and the
+    /// internet for the registry: builds the sample for the X4 Pro and
+    /// reads the chip from the file.
+    #[test]
+    #[ignore = "builds for the X4 Pro: esp toolchain, PAPERPAW_SDK, PAPERPAW_SIGN, cargo test -- --ignored"]
+    fn the_sample_is_built_for_the_x4_pro_with_chip_9() {
+        let (Some(sdk), Some(sign)) = (std::env::var_os("PAPERPAW_SDK"), std::env::var_os("PAPERPAW_SIGN")) else {
+            panic!("PAPERPAW_SDK and PAPERPAW_SIGN name no PaperPaw");
+        };
+        let esp = crate::xtensa::find().expect("espup's esp toolchain");
+        let samples = PathBuf::from(&sdk).join("../../samples/hello-plugin");
+        let read = |p: &str| std::fs::read(samples.join(p)).unwrap();
+        let manifest = "[package]\nname = \"hello\"\nversion = \"1.0.0\"\n\n[package.metadata.paperpaw]\nplugin = \"Hello\"\n\n[dependencies]\npaperpaw-sdk = \"0.5\"\n";
+        let files: Vec<(String, Vec<u8>)> = vec![
+            ("Cargo.toml".into(), manifest.as_bytes().to_vec()),
+            ("src/lib.rs".into(), read("src/lib.rs")),
+            ("how/en.txt".into(), read("how/en.txt")),
+            ("how/de.txt".into(), read("how/de.txt")),
+            ("i18n/en.ini".into(), read("i18n/en.ini")),
+            ("i18n/de.ini".into(), read("i18n/de.ini")),
+            ("plugin/plugin.ini".into(), b"[plugin]\nid = hello\nversion = 1.0.0\n".to_vec()),
+        ];
+        let rust = crate::toolchain::Rust { cargo: PathBuf::from("cargo"), version: "1.99.0".into(), homes: None };
+        let dir = tempfile::tempdir().unwrap();
+        let (work, out) = (dir.path().join("crate"), dir.path().join("out"));
+        let sdk = format!("{{ path = {:?} }}", sdk.to_string_lossy().replace('\\', "/"));
+        let built = build_for(Reader::X4Pro, Some(&esp), &work, &files, &rust, &sdk, Path::new(&sign), &[7; 32], &out, "hello", "1.0.0");
+        assert_eq!(built.state, "done", "{built:?}");
+        assert_eq!(built.reader, "x4-pro");
+        let ppn = PathBuf::from(built.ppn.clone().unwrap());
+        // Without the release's core libraries it is a trial build, named so.
+        assert_eq!(built.trial, !esp.libraries);
+        assert!(ppn.file_name().unwrap().to_string_lossy().ends_with(if built.trial { "-x4-pro-trial.ppn" } else { "-x4-pro.ppn" }));
+        let shown = std::process::Command::new(&sign).arg("plugin").arg(&ppn).output().unwrap();
+        let said = String::from_utf8_lossy(&shown.stdout);
+        assert!(said.contains("ESP32-S3 (9)"), "{said}");
+        assert_eq!(crate::xtensa::chip_in(&said), Some(9));
+        assert!(said.contains("holds"), "{said}");
+        assert!(built.fingerprint.is_some());
+        // The X4's file is refused as the Pro's.
+        assert!(crate::xtensa::not_for(Reader::X4, &said).is_some());
+    }
+
+    #[test]
+    fn a_new_build_clears_what_an_earlier_one_of_that_reader_left_even_when_it_fails() {
+        let dir = tempfile::tempdir().unwrap();
+        let out = dir.path().join("out");
+        std::fs::create_dir_all(&out).unwrap();
+        for file in [
+            "clock-1.0.0-x4.ppn",
+            "clock-1.0.0-x4-pro.ppn",
+            "clock-1.0.0-x4-pro-trial.ppn",
+            "clock-1.0.0-source.zip",
+            "clock-1.1.0-x4-pro.ppn",
+        ] {
+            std::fs::write(out.join(file), b"old").unwrap();
+        }
+        let rust = crate::toolchain::Rust { cargo: PathBuf::from("cargo"), version: "+none".into(), homes: None };
+        // No crate to build (no Cargo.toml): it fails, after the clearing.
+        let built = build_for(Reader::X4Pro, None, &dir.path().join("crate"), &[], &rust, "", Path::new("none"), &[7; 32], &out, "clock", "1.0.0");
+        assert_eq!(built.state, "failed");
+        let left: Vec<String> = {
+            let mut names: Vec<String> = std::fs::read_dir(&out).unwrap().map(|e| e.unwrap().file_name().into_string().unwrap()).collect();
+            names.sort();
+            names
+        };
+        // The Pro's files of this version are gone; the X4's, the source and
+        // another version's Pro file are not this build's to remove.
+        assert_eq!(left, ["clock-1.0.0-source.zip", "clock-1.0.0-x4.ppn", "clock-1.1.0-x4-pro.ppn"]);
     }
 
     #[test]
@@ -769,8 +895,13 @@ pub struct Readiness {
     pub x4: bool,
     /// About how much it takes, if not.
     pub x4_mb: u32,
-    /// The X4 Pro: not yet (its `core` and `alloc` come with a release).
+    /// The X4 Pro (and the Classic): espup's `esp` toolchain is there and fits.
     pub x4_pro: bool,
+    /// ... but the release's core libraries are not installed: its builds are
+    /// for trying on a reader, not for the store.
+    pub x4_pro_trial: bool,
+    /// What to do about it, where it is not there.
+    pub x4_pro_help: Option<String>,
     /// paperpaw-sign beside the emulator.
     pub sign: bool,
 }
@@ -787,7 +918,11 @@ pub async fn device_readiness(emulator: tauri::State<'_, crate::emulator::Emulat
     tauri::async_runtime::spawn_blocking(move || {
         let rust = rust_for(&ready, &|_| {})?;
         let program = crate::paths::emulator_program()?;
-        Ok(Readiness { x4: rust.has_target(X4_TARGET), x4_mb: X4_TARGET_MB, x4_pro: false, sign: sign_program(&program).exists() })
+        let (x4_pro, x4_pro_trial, x4_pro_help) = match crate::xtensa::find() {
+            Ok(esp) => (true, !esp.libraries, None),
+            Err(help) => (false, false, Some(help)),
+        };
+        Ok(Readiness { x4: rust.has_target(X4_TARGET), x4_mb: X4_TARGET_MB, x4_pro, x4_pro_trial, x4_pro_help, sign: sign_program(&program).exists() })
     })
     .await
     .map_err(|e| e.to_string())?
@@ -813,8 +948,13 @@ pub async fn device_build(
     project: String,
     id: String,
     version: String,
+    reader: Option<String>,
 ) -> Result<DeviceBuilt, String> {
     use tauri::Emitter;
+    let reader = match reader.as_deref() {
+        None => Reader::X4,
+        Some(id) => Reader::from_id(id).ok_or_else(|| format!("{id}: no reader the workshop builds for."))?,
+    };
     let ready = emulator.ready().ok_or("PaperPaw's emulator has not started yet.")?;
     let names = |s: &str| !s.is_empty() && s.len() <= 40 && s.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'.');
     if !names(&id) || !names(&version) {
@@ -831,17 +971,18 @@ pub async fn device_build(
             let _ = app.emit("build-progress", text.to_string());
         };
         let rust = rust_for(&ready, &told)?;
-        if !rust.has_target(X4_TARGET) {
+        if reader == Reader::X4 && !rust.has_target(X4_TARGET) {
             return Err("The X4's part of Rust is not set up yet.".into());
         }
+        let esp = if reader == Reader::X4Pro { Some(crate::xtensa::find()?) } else { None };
         let root = crate::paths::projects()?;
         let files = crate::projects::plugin_files(&root, &project)?;
-        let dir = crate::paths::app_data()?.join("builds").join(&project).join("x4");
+        let dir = crate::paths::app_data()?.join("builds").join(&project).join(reader.id());
         std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
         let out = crate::publish::parts(&root, &project)?;
         let sign = sign_program(&crate::paths::emulator_program()?);
-        told("Building for the X4…");
-        Ok(build_x4(&dir, &files, &rust, &crate::code::device_sdk(&ready.paperpaw), &sign, &seed, &out, &id, &version))
+        told(if reader == Reader::X4Pro { "Building for the X4 Pro…" } else { "Building for the X4…" });
+        Ok(build_for(reader, esp.as_ref(), &dir, &files, &rust, &crate::code::device_sdk(&ready.paperpaw), &sign, &seed, &out, &id, &version))
     })
     .await
     .map_err(|e| e.to_string())?

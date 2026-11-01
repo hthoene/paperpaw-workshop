@@ -7,6 +7,7 @@ import {
   GROUPS,
   higher,
   holds,
+  proState,
   raised,
   recordPublished,
   sdkOf,
@@ -148,5 +149,17 @@ describe("the store entry", () => {
     ]);
     // The same as the store entry the AI drafts knows.
     expect(GROUPS.map((g) => g.id).sort()).toEqual([...ENTRY_GROUPS].sort());
+  });
+});
+
+describe("building for the X4 Pro", () => {
+  it("says what is missing and how to get it, or what a trial build is", () => {
+    const missing = proState({ x4_pro: false, x4_pro_trial: false, x4_pro_help: "Install espup." });
+    expect(missing).toEqual({ can: false, text: "Install espup." });
+    expect(proState({ x4_pro: false, x4_pro_trial: false, x4_pro_help: null }).can).toBe(false);
+    const trial = proState({ x4_pro: true, x4_pro_trial: true, x4_pro_help: null });
+    expect(trial.can).toBe(true);
+    expect(trial.text).toContain("stays out of the store file");
+    expect(proState({ x4_pro: true, x4_pro_trial: false, x4_pro_help: null })).toEqual({ can: true, text: "is ready to build for." });
   });
 });

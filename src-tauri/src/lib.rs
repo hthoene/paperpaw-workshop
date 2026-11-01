@@ -20,6 +20,7 @@ mod sample;
 mod send;
 mod toolchain;
 mod usb;
+mod xtensa;
 
 use tauri::Manager;
 

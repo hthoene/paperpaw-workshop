@@ -67,7 +67,14 @@ pub enum Step {
 /// The plugin of a project's `files` as a reader installs it; for one
 /// with code, `builds` is the project's `.workshop/publish/` where its
 /// build for the X4 lies.
+#[cfg(test)]
 pub fn reader_plugin(files: Vec<(String, Vec<u8>)>, builds: &Path) -> Result<ReaderPlugin, String> {
+    reader_plugin_for(files, builds, crate::xtensa::Reader::X4)
+}
+
+/// As [`reader_plugin`], with the build for `reader`: the X4 Pro's (and the
+/// Classic's) is the one for the store, or else the trial build.
+pub fn reader_plugin_for(files: Vec<(String, Vec<u8>)>, builds: &Path, reader: crate::xtensa::Reader) -> Result<ReaderPlugin, String> {
     let code = files.iter().any(|(p, _)| p == "Cargo.toml") && files.iter().any(|(p, _)| p == "plugin/plugin.ini");
     let files: Vec<(String, Vec<u8>)> = if code {
         files
@@ -82,9 +89,25 @@ pub fn reader_plugin(files: Vec<(String, Vec<u8>)>, builds: &Path) -> Result<Rea
     let id = crate::emulator::plugin_id(&files).ok_or("The plugin has no plugin.ini with an id yet.")?;
     if code {
         let version = ini_value(&files, "version").ok_or("plugin.ini names no version.")?;
-        let build = builds.join(format!("{id}-{version}-x4.ppn"));
-        let bytes = std::fs::read(&build).map_err(|_| {
-            format!("There is no build of version {version} for the reader yet: Publish… makes it.")
+        let named = |tail: &str| builds.join(format!("{id}-{version}-{}{tail}.ppn", reader.id()));
+        // The newest of the reader's builds: the store's, or for the Pro a
+        // trial one, whichever was made last (the store's if both are as new).
+        let tails: &[&str] = match reader {
+            crate::xtensa::Reader::X4Pro => &["", "-trial"],
+            crate::xtensa::Reader::X4 => &[""],
+        };
+        let newest = tails
+            .iter()
+            .filter_map(|tail| {
+                let path = named(tail);
+                let made = std::fs::metadata(&path).and_then(|m| m.modified()).ok()?;
+                Some((made, std::cmp::Reverse(*tail), path))
+            })
+            .max()
+            .map(|(_, _, path)| path);
+        let bytes = newest.ok_or(()).and_then(|path| std::fs::read(path).map_err(|_| ()));
+        let bytes = bytes.map_err(|_| {
+            format!("There is no build of version {version} for the {} yet: Publish… makes it.", if reader == crate::xtensa::Reader::X4Pro { "X4 Pro" } else { "reader" })
         })?;
         files.push(("code.ppn".into(), bytes));
     }
@@ -286,6 +309,55 @@ mod tests {
         assert!(!plugin.code);
         let paths: Vec<&str> = plugin.files.iter().map(|(p, _)| p.as_str()).collect();
         assert_eq!(paths, ["i18n/de.ini", "plugin.ini"]);
+    }
+
+    #[test]
+    fn the_x4_pros_plugin_has_its_own_build_and_a_trial_build_serves_when_it_is_all_there_is() {
+        use crate::xtensa::Reader;
+        let builds = tempfile::tempdir().unwrap();
+        let files = vec![
+            ("Cargo.toml".into(), b"[package]".to_vec()),
+            ("plugin/plugin.ini".into(), b"[plugin]\nid = clock\nversion = 1.2.0\n".to_vec()),
+        ];
+        std::fs::write(builds.path().join("clock-1.2.0-x4.ppn"), b"c3").unwrap();
+        // The X4's file is not the Pro's.
+        let err = reader_plugin_for(files.clone(), builds.path(), Reader::X4Pro).unwrap_err();
+        assert!(err.contains("X4 Pro"), "{err}");
+        std::fs::write(builds.path().join("clock-1.2.0-x4-pro-trial.ppn"), b"s3 trial").unwrap();
+        let trial = reader_plugin_for(files.clone(), builds.path(), Reader::X4Pro).unwrap();
+        assert_eq!(trial.files[0], ("code.ppn".to_string(), b"s3 trial".to_vec()));
+        // The store's build, where there is one, is preferred.
+        std::fs::write(builds.path().join("clock-1.2.0-x4-pro.ppn"), b"s3").unwrap();
+        let store = reader_plugin_for(files.clone(), builds.path(), Reader::X4Pro).unwrap();
+        assert_eq!(store.files[0], ("code.ppn".to_string(), b"s3".to_vec()));
+        // And the X4 still gets its own.
+        assert_eq!(reader_plugin_for(files, builds.path(), Reader::X4).unwrap().files[0].1, b"c3".to_vec());
+    }
+
+    #[test]
+    fn the_newest_build_of_the_pro_is_the_one_sent() {
+        use crate::xtensa::Reader;
+        use std::time::{Duration, SystemTime};
+        let builds = tempfile::tempdir().unwrap();
+        let files = vec![
+            ("Cargo.toml".into(), b"[package]".to_vec()),
+            ("plugin/plugin.ini".into(), b"[plugin]\nid = clock\nversion = 1.2.0\n".to_vec()),
+        ];
+        let write = |name: &str, bytes: &[u8], age: u64| {
+            let path = builds.path().join(name);
+            std::fs::write(&path, bytes).unwrap();
+            let file = std::fs::OpenOptions::new().write(true).open(&path).unwrap();
+            file.set_modified(SystemTime::now() - Duration::from_secs(age)).unwrap();
+        };
+        // An old store build and a newer trial one: the trial is the reader's.
+        write("clock-1.2.0-x4-pro.ppn", b"s3 old", 3600);
+        write("clock-1.2.0-x4-pro-trial.ppn", b"s3 trial new", 10);
+        let sent = reader_plugin_for(files.clone(), builds.path(), Reader::X4Pro).unwrap();
+        assert_eq!(sent.files[0].1, b"s3 trial new".to_vec());
+        // The other way round, the store's newer build.
+        write("clock-1.2.0-x4-pro.ppn", b"s3 new", 5);
+        let sent = reader_plugin_for(files, builds.path(), Reader::X4Pro).unwrap();
+        assert_eq!(sent.files[0].1, b"s3 new".to_vec());
     }
 
     #[test]

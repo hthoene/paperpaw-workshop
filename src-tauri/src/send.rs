@@ -87,10 +87,17 @@ pub fn onto_card(card: &Path, files: &[(String, Vec<u8>)]) -> Result<PathBuf, St
 
 /// The project's plugin as a reader installs it (install.rs).
 pub fn reader_plugin(project: &str) -> Result<crate::install::ReaderPlugin, String> {
+    reader_plugin_for(project, crate::xtensa::Reader::X4)
+}
+
+/// As [`reader_plugin`], with the code built for `reader`. (Over Wi-Fi and
+/// onto a card the reader is not known: the X4's. The cable asks it.)
+pub fn reader_plugin_for(project: &str, reader: crate::xtensa::Reader) -> Result<crate::install::ReaderPlugin, String> {
     let root = crate::paths::projects()?;
     let files = crate::projects::plugin_files(&root, project)?;
-    let builds = crate::projects::folder(&root, project)?.join(".workshop").join("publish");
-    crate::install::reader_plugin(files, &builds)
+    // Where `device_build` leaves the builds.
+    let builds = crate::publish::parts(&root, project)?;
+    crate::install::reader_plugin_for(files, &builds, reader)
 }
 
 /// Tells the window how sending goes (`send-progress`): `asking` while
