@@ -8,7 +8,7 @@
 //! of its own if one is taken: an import never overwrites.
 
 use std::io::{Read, Write};
-use std::path::{Component, Path, PathBuf};
+use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
@@ -165,12 +165,7 @@ pub fn export(root: &Path, projects: &[(String, bool)], to: &Path) -> Result<usi
 /// A path in the ZIP as a path below `dir`, if it is a plain one.
 fn below(dir: &Path, path: &str) -> Option<PathBuf> {
     let relative = Path::new(path);
-    let plain = !path.is_empty()
-        && !path.contains('\\')
-        && relative
-            .components()
-            .all(|c| matches!(c, Component::Normal(_)));
-    plain.then(|| dir.join(relative))
+    crate::paths::plain(path).then(|| dir.join(relative))
 }
 
 /// Brings the projects of the file at `from` into `root`, each beside
@@ -290,6 +285,14 @@ pub fn import_read(path: String) -> Result<String, String> {
 mod tests {
     use super::*;
     use crate::history::{self, Note};
+
+    #[test]
+    fn a_path_with_a_colon_is_not_one_below_the_folder() {
+        let dir = Path::new("/p");
+        assert!(below(dir, "C:/x").is_none());
+        assert!(below(dir, "a:b").is_none());
+        assert!(below(dir, "src/lib.rs").is_some());
+    }
 
     fn put(dir: &Path, path: &str, bytes: &[u8]) {
         let file = dir.join(path);

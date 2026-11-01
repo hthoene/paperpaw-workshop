@@ -15,7 +15,7 @@
 //! author key never goes into a project's history.
 
 use std::collections::BTreeMap;
-use std::path::{Component, Path, PathBuf};
+use std::path::{Path, PathBuf};
 
 use git2::{ObjectType, Oid, Repository, Signature, TreeWalkMode, TreeWalkResult};
 use serde::Serialize;
@@ -318,11 +318,7 @@ pub fn files_at(dir: &Path, id: &str) -> Result<Vec<(String, Vec<u8>)>, String> 
 /// A path of a snapshot as a path in the project, if it is a plain one.
 fn inside(dir: &Path, path: &str) -> Option<PathBuf> {
     let relative = Path::new(path);
-    let plain = !path.contains('\\')
-        && relative
-            .components()
-            .all(|c| matches!(c, Component::Normal(_)));
-    (plain && kept(path)).then(|| dir.join(relative))
+    (crate::paths::plain(path) && kept(path)).then(|| dir.join(relative))
 }
 
 /// Puts the project's files back as snapshot `id` has them (the files
@@ -550,6 +546,14 @@ pub async fn history_preview(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_path_with_a_colon_is_not_one_of_the_project() {
+        let dir = Path::new("/p");
+        assert!(inside(dir, "C:/x").is_none());
+        assert!(inside(dir, "a:b").is_none());
+        assert!(inside(dir, "src/lib.rs").is_some());
+    }
 
     fn put(dir: &Path, path: &str, bytes: &[u8]) {
         let file = dir.join(path);

@@ -3,7 +3,19 @@
 //! app's own (the emulated readers' folders, later the toolchains) in the
 //! system's place for app data.
 
-use std::path::PathBuf;
+use std::path::{Component, Path, PathBuf};
+
+/// Whether `path` is a plain relative path: not empty, only names (no `..`,
+/// no root), no `\`, and no `:`. A drive (`C:/x`) is a plain name on Linux
+/// and macOS, but no file name on Windows, where the projects are opened too.
+/// Every path the window, a snapshot or a ZIP names goes through this.
+pub fn plain(path: &str) -> bool {
+    !path.is_empty()
+        && !path.contains(['\\', ':'])
+        && Path::new(path)
+            .components()
+            .all(|c| matches!(c, Component::Normal(_)))
+}
 
 /// The folder of the projects, one folder each.
 pub fn projects() -> Result<PathBuf, String> {
@@ -42,5 +54,20 @@ pub fn emulator_program() -> Result<PathBuf, String> {
     match installed {
         Some(program) if program.exists() => Ok(program),
         _ => Err(format!("PaperPaw's emulator is not here yet ({}).", chosen.display())),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::plain;
+
+    #[test]
+    fn only_plain_relative_paths_are_plain() {
+        for ok in ["a", "src/lib.rs", "a b/c.txt", ".workshop/x"] {
+            assert!(plain(ok), "{ok}");
+        }
+        for bad in ["", "/a", "../a", "a/../b", "a\\b", "C:/x", "C:x", "a:b", "a/b:c", "./"] {
+            assert!(!plain(bad), "{bad}");
+        }
     }
 }
