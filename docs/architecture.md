@@ -125,8 +125,7 @@ person chooses in Settings ("Conversation length": Short, Normal, Long,
    message carries the summary and the file list (`CARRIED`, shown as
    "Summarised the conversation so far"), and nothing else is sent again.
    The summary's cost is the turn's. Without a summary (the summariser
-   failed, or the quota proxy, which sends its own prompt) the person's
-   requests stand in. A turn that alone fills two fresh conversations ends
+   failed) the person's requests stand in. A turn that alone fills two fresh conversations ends
    as `too_long`, and the person can go on in a fresh one.
 
 | Setting | `trimAt` | `keep` | `clearAtLeast` | `summariseAt` |

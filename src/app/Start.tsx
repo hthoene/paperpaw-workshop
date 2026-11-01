@@ -4,7 +4,6 @@
 import { useEffect, useState } from "preact/hooks";
 
 import { STRONGER } from "../ai/pricing";
-import { quotaStanding, type QuotaStanding } from "../ai/quota";
 import { t } from "../i18n";
 import { folderEntries, ImportProblem, MAX_IMPORT } from "../project/import";
 import { identity, type Kind, type Project } from "../project/project";
@@ -14,10 +13,6 @@ import { Steps } from "./Header";
 /** The ideas to start from; `tool` needs code. */
 const IDEAS = ["look", "home", "keys", "text", "tool"];
 const CODE_IDEAS = ["tool"];
-
-/** Who pays for the AI: the person's own key, or paperpaw.org's free
- *  quota (whose model the site chooses). */
-export type Payer = "key" | "quota";
 
 /** What an import made: the new project and what it took and left out,
  *  or why it took nothing. */
@@ -29,9 +24,7 @@ interface Props {
   apiKey: string;
   remembered: boolean;
   needsKey: boolean;
-  payer: Payer;
   onKey(key: string, remember: boolean): void;
-  onPayer(payer: Payer): void;
   /** `model` instead of the kind's: Opus, with one's own key. */
   onStart(idea: string, kind: Kind, model?: string): void;
   imported: ImportResult | null;
@@ -40,7 +33,7 @@ interface Props {
   onImportZip(bytes: Uint8Array): void;
 }
 
-export function Start({ apiKey, remembered, needsKey, payer, onKey, onPayer, onStart, imported, onImport, onImportZip }: Props) {
+export function Start({ apiKey, remembered, needsKey, onKey, onStart, imported, onImport, onImportZip }: Props) {
   const [idea, setIdea] = useState("");
   const [key, setKey] = useState(apiKey);
   const [remember, setRemember] = useState(remembered);
@@ -48,22 +41,13 @@ export function Start({ apiKey, remembered, needsKey, payer, onKey, onPayer, onS
   const [warn, setWarn] = useState(needsKey);
   const [code, setCode] = useState(false);
   const [stronger, setStronger] = useState(false);
-  const [quota, setQuota] = useState<QuotaStanding>({ kind: "none" });
 
   useEffect(() => {
     listProjects().then(setProjects, () => setProjects([]));
-    void quotaStanding().then(setQuota);
   }, []);
-
-  const quotaOpen = quota.kind === "signed-in" && quota.state === "accepted" && !quota.refusal;
-  const onQuota = payer === "quota" && quotaOpen;
 
   const go = () => {
     const kind = code ? "code" : "data";
-    if (onQuota) {
-      if (idea.trim()) onStart(idea.trim(), kind);
-      return;
-    }
     if (!key.trim()) {
       setWarn(true);
       document.getElementById("key")?.focus();
@@ -133,15 +117,8 @@ export function Start({ apiKey, remembered, needsKey, payer, onKey, onPayer, onS
       <section class="pay" aria-labelledby="pay-head">
         <h2 id="pay-head">{t("start.pay.title")}</h2>
         <div class="ways">
-          <div class={`box way${onQuota ? "" : " on"}`}>
-            {quotaOpen ? (
-              <label class="check">
-                <input type="radio" name="payer" checked={!onQuota} onChange={() => onPayer("key")} />
-                <b>{t("start.pay.key")}</b>
-              </label>
-            ) : (
-              <b>{t("start.pay.key")}</b>
-            )}
+          <div class="box way on">
+            <b>{t("start.pay.key")}</b>
             <p>{t("start.pay.key.text")}</p>
             <div class="key">
               <label for="key">{t("start.pay.key.label")}</label>
@@ -168,18 +145,6 @@ export function Start({ apiKey, remembered, needsKey, payer, onKey, onPayer, onS
               </label>
               {warn && <span class="error">{t("start.needs-key")}</span>}
             </div>
-          </div>
-          <div class={`box way${onQuota ? " on" : quotaOpen ? "" : " off"}`} aria-disabled={!quotaOpen}>
-            {quotaOpen ? (
-              <label class="check">
-                <input type="radio" name="payer" checked={onQuota} onChange={() => onPayer("quota")} />
-                <b>{t("start.pay.quota")}</b>
-              </label>
-            ) : (
-              <b>{t("start.pay.quota")}</b>
-            )}
-            <p>{t("start.pay.quota.text")}</p>
-            <QuotaLine quota={quota} />
           </div>
           <div class="box way">
             <b>{t("start.pay.local")}</b>
@@ -218,37 +183,6 @@ export function Start({ apiKey, remembered, needsKey, payer, onKey, onPayer, onS
         )}
       </section>
     </>
-  );
-}
-
-/** Where the free quota stands, in a line: how to get it, or what is left. */
-function QuotaLine({ quota }: { quota: QuotaStanding }) {
-  if (quota.kind === "none") return <p class="small">{t("start.pay.quota.none")}</p>;
-  if (quota.kind === "signed-out") {
-    return (
-      <p class="small">
-        <a href={quota.signIn}>{t("start.pay.quota.sign-in")}</a>
-      </p>
-    );
-  }
-  if (quota.state === "waiting") return <p class="small">{t("start.pay.quota.waiting")}</p>;
-  if (quota.state !== "accepted") {
-    return (
-      <p class="small">
-        {quota.state === "none" ? "" : `${t(`start.pay.quota.${quota.state}`)} `}
-        <a href="/account/workshop">{t("start.pay.quota.apply")}</a>
-      </p>
-    );
-  }
-  if (quota.refusal) return <p class="small">{t(`start.pay.quota.${quota.refusal}`)}</p>;
-  return (
-    <p class="small">
-      {t("start.pay.quota.left", {
-        left: quota.left.toFixed(2),
-        budget: quota.budget.toFixed(2),
-        euros: (quota.left * quota.eurosPerDollar).toFixed(2),
-      })}
-    </p>
   );
 }
 

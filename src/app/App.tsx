@@ -8,7 +8,6 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
 
 import { AnthropicDirect } from "../ai/anthropic";
-import { QuotaProxy } from "../ai/quota";
 import nightOwl from "../ai/examples/night-owl.json";
 import quoteADay from "../ai/examples/quote-a-day.json";
 import sleepPicture from "../ai/examples/sleep-picture.json";
@@ -23,20 +22,10 @@ import { FakeStore } from "../publish/fake";
 import { SiteStore, type StoreApi } from "../publish/store";
 import { Header } from "./Header";
 import { loadHosting, type Hosting } from "./hosting";
-import { Start, type ImportResult, type Payer } from "./Start";
+import { Start, type ImportResult } from "./Start";
 import { WorkshopPage } from "./WorkshopPage";
 
 const KEY_STORE = "paperpaw-workshop.key";
-const PAYER_STORE = "paperpaw-workshop.payer";
-
-function rememberedPayer(): Payer {
-  try {
-    return localStorage.getItem(PAYER_STORE) === "quota" ? "quota" : "key";
-  } catch {
-    return "key";
-  }
-}
-
 function rememberedKey(): string {
   try {
     return localStorage.getItem(KEY_STORE) ?? "";
@@ -91,7 +80,6 @@ export function App() {
   const [hosting, setHosting] = useState<Hosting | null>(null);
   const [failed, setFailed] = useState("");
   const [key, setKey] = useState(rememberedKey);
-  const [payer, setPayer] = useState<Payer>(rememberedPayer);
   const [where, setWhere] = useState<Route>(route);
   const [project, setProject] = useState<Project | null>(null);
   const [first, setFirst] = useState("");
@@ -135,14 +123,10 @@ export function App() {
       .catch((e) => setImported({ error: e instanceof Error ? e.message : String(e) }));
   }, [where.page === "import" ? where.from : ""]);
 
-  // The free quota pays for both kinds, with the model the site chooses;
-  // a project started with another model (Opus) goes on with the key.
-  const quota = payer === "quota" && !!project && !project.model;
   const provider: Provider | null = useMemo(() => {
     if (where.page === "example") return new ReplayProvider(EXAMPLES[where.name]!, 900);
-    if (quota) return new QuotaProxy(project!.kind);
     return key ? new AnthropicDirect(key) : null;
-  }, [shown(where), key, quota, project?.kind]);
+  }, [shown(where), key]);
 
   // The store: paperpaw.org's own where the workshop runs there; a pretend
   // one for the example (nothing of it is sent) and in development.
@@ -151,15 +135,6 @@ export function App() {
     () => (pretend ? new FakeStore(undefined, 700) : new SiteStore(location.origin)),
     [pretend],
   );
-
-  const choosePayer = (value: Payer) => {
-    setPayer(value);
-    try {
-      localStorage.setItem(PAYER_STORE, value);
-    } catch {
-      // Storage may be off: the choice lives for this tab only.
-    }
-  };
 
   const useKey = (value: string, remember: boolean) => {
     setKey(value);
@@ -228,14 +203,12 @@ export function App() {
             <Start
               apiKey={key}
               remembered={!!rememberedKey()}
-              payer={payer}
-              onPayer={choosePayer}
               onKey={useKey}
               onStart={start}
               imported={imported}
               onImport={(entries) => void importEntries(entries)}
               onImportZip={(bytes) => void importZip(bytes)}
-              needsKey={where.page === "project" && !key && !quota}
+              needsKey={where.page === "project" && !key}
             />
           )
         )}
