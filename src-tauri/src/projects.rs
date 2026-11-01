@@ -57,6 +57,9 @@ fn inside(project: &Path, path: &str, workshop: bool) -> Result<PathBuf, String>
     let relative = Path::new(path);
     let plain = !path.is_empty()
         && !path.contains('\\')
+        // A drive (`C:/x`) is a plain name on Linux and macOS, but no file name on Windows,
+        // where the project is opened too.
+        && !path.contains(':')
         && relative.components().all(|c| matches!(c, Component::Normal(_)));
     let hidden = relative
         .components()

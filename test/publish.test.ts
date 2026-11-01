@@ -4,6 +4,7 @@ import example from "../src/ai/examples/night-owl.json";
 import { ReplayProvider, type Recording } from "../src/ai/replay";
 import { entryProblems, readEntry, tagsFrom, writeEntry, EMPTY_ENTRY } from "../src/project/entry";
 import { setIniValue } from "../src/project/ini";
+import { draftStoreEntry } from "../src/desktop/publishing";
 import { draftEntry } from "../src/publish/draft";
 import { plannedShots, shotsIn, takeShots } from "../src/publish/screenshots";
 import { setEntry } from "../src/tools/entry";
@@ -52,6 +53,18 @@ describe("the store entry", () => {
     const result = await setEntry.run({ summary: "Calm.", group: "look" }, context);
     expect(result.isError).toBeFalsy();
     expect(readEntry(files)).toMatchObject({ summary: "Calm.", group: "look", licence: "MIT", alts: { "1-x4.png": "Mine" } });
+  });
+
+  it("is drafted from the desktop's Publish view with the workshop's AI and the data model", async () => {
+    const { project, files, context } = bench();
+    files.write("plugin.ini", PLUGIN_INI);
+    project.messages.push({ role: "user", content: "A calm dark look for reading at night." });
+    const provider = new ReplayProvider(example as Recording);
+    const input = await draftStoreEntry({ ai: provider, project, toolContext: () => context });
+    expect(input.group).toBe("look");
+    expect(readEntry(files).summary).toMatch(/^A calm dark look/);
+    expect(provider.requests).toHaveLength(1);
+    expect(provider.requests[0]!.model).toBe("claude-haiku-5-5");
   });
 
   it("is drafted from the conversation in one request that offers set_entry alone", async () => {

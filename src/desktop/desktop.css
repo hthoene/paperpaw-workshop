@@ -185,6 +185,11 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .to-new:hover { background: var(--sheet-2); }
 .log { overflow: auto; padding: 1.6rem 2rem; display: grid; align-content: start; gap: 1.1rem; }
 .empty { margin: 18vh auto 0; max-width: 26rem; text-align: center; color: var(--ink-2); font: 400 1.15rem/1.55 var(--display); }
+.ideas { list-style: none; margin: 1.6rem auto 0; padding: 0; max-width: 34rem; display: grid; gap: .5rem; }
+.idea { display: grid; gap: .1rem; width: 100%; text-align: left; padding: .65rem .85rem; border: 1px solid var(--field-edge); border-radius: 8px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.idea:hover, .idea:focus-visible { border-color: var(--ink-2); }
+.idea span { color: var(--ink-2); font-size: .9em; }
+.idea em { font-style: normal; font-size: .8em; color: var(--ink-2); }
 .ask { padding: .9rem 1.2rem 1.1rem; min-height: 4.7rem; align-items: flex-end; }
 /* The room above and below the words is a clear border, not padding: it
    does not scroll away, so lines never run into the field's edge, which

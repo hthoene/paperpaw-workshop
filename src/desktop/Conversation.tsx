@@ -14,10 +14,12 @@ import { Markdown } from "./Markdown";
 import type { Desk } from "./desk";
 import { afterAnswers } from "./history";
 import { BackHere, PreviewBar } from "./GoBack";
+import { Ideas } from "./Ideas";
 
 export function Conversation({ desk }: { desk: Desk }) {
   const [draft, setDraft] = useState("");
   const log = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLTextAreaElement>(null);
   // Whether the person is at the end (then what comes keeps in view), and
   // whether something came while they read further up.
   const stick = useRef(true);
@@ -64,6 +66,7 @@ export function Conversation({ desk }: { desk: Desk }) {
     <section class="talk" aria-label="Conversation">
       <div class="log" aria-live="polite" ref={log} onScroll={scrolled}>
         {!said.length && !busy && <p class="empty">What should your reader do? A look, a home screen, a tool: say it in your own words.</p>}
+        {!said.length && !busy && !desk.previewing && <Ideas onPick={(words) => { setDraft(words); input.current?.focus(); }} />}
         {(project?.earlier ?? []).map((earlier, n) => (
           <details class="earlier" key={`earlier-${n}`}>
             <summary>The conversation before</summary>
@@ -96,6 +99,7 @@ export function Conversation({ desk }: { desk: Desk }) {
       )}
       <form class="line ask" onSubmit={(e) => { e.preventDefault(); send(); }}>
         <textarea
+          ref={input}
           aria-label="Your message"
           placeholder="What should your reader do?"
           rows={1}
