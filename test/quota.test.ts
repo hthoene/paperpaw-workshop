@@ -75,6 +75,39 @@ describe("the free quota's provider", () => {
     expect(answer.content[2]).toMatchObject({ name: "look", input: { device: "X4" } });
   });
 
+  it("asks for a summary with the transcript alone, and the site's refusal is the loop's cue to go without", async () => {
+    const sent: { url: string; init: RequestInit }[] = [];
+    const reply = sse([
+      { type: "message_start", message: { id: "msg_2", type: "message", role: "assistant", model: "claude-haiku-5-5", content: [], stop_reason: null, stop_sequence: null, usage: { input_tokens: 5, output_tokens: 1 } } },
+      { type: "content_block_start", index: 0, content_block: { type: "text", text: "" } },
+      { type: "content_block_delta", index: 0, delta: { type: "text_delta", text: "Built: a clock." } },
+      { type: "content_block_stop", index: 0 },
+      { type: "message_delta", delta: { stop_reason: "end_turn", stop_sequence: null }, usage: { output_tokens: 6 } },
+      { type: "message_stop" },
+    ]);
+    const answers = [session(), new Response(reply, { status: 200, headers: { "content-type": "text/event-stream" } })];
+    vi.stubGlobal("fetch", async (url: string, init: RequestInit) => {
+      sent.push({ url, init: init ?? {} });
+      return answers.shift()!;
+    });
+    const asked = {
+      model: "claude-haiku-5-5",
+      max_tokens: 4_000,
+      system: [{ type: "text", text: "Summarise." }],
+      messages: [{ role: "user", content: "Person: Make a clock\n\nAI: Done." }],
+    } as unknown as Request;
+    const answer = await new QuotaProxy("code").summarise(asked, {});
+    // The kind summary, and the transcript: not the prompt, model or limit.
+    expect(sent[1]!.url).toBe("/api/v1/workshop/messages?kind=summary");
+    expect(JSON.parse(sent[1]!.init.body as string)).toEqual({ kind: "summary", transcript: "Person: Make a clock\n\nAI: Done." });
+    expect(answer.content[0]).toMatchObject({ type: "text", text: "Built: a clock." });
+
+    // A site that does not know the kind refuses; the error is the caller's.
+    const refused = [session(), new Response(JSON.stringify({ error: "kind", message: "Unknown kind." }), { status: 400 })];
+    vi.stubGlobal("fetch", async () => refused.shift()!);
+    expect(await new QuotaProxy("code").summarise(asked, {}).catch((e) => e)).toBeInstanceOf(QuotaRefused);
+  });
+
   it("tells the site's refusals in its words, and Anthropic's errors as Anthropic's", async () => {
     const answers = [session(), new Response(JSON.stringify({ error: "budget", message: "This month's budget is used up." }), { status: 429 })];
     vi.stubGlobal("fetch", async () => answers.shift()!);

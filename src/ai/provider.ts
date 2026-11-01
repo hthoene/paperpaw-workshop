@@ -42,4 +42,10 @@ export interface Provider {
    *  summary of a long conversation, is not asked of it. */
   readonly ownPrompt?: boolean;
   send(request: Request, stream: Stream, signal?: AbortSignal): Promise<Anthropic.Message>;
+  /** For a provider that sends its own prompt: the summary of a long
+   *  conversation, asked for apart from `send`, by the transcript alone
+   *  (the first message of `request`); the provider's service has the
+   *  summary prompt and the model. Without it no summary is asked of such
+   *  a provider and what the person asked for stands in for one. */
+  summarise?(request: Request, stream: Stream, signal?: AbortSignal): Promise<Anthropic.Message>;
 }

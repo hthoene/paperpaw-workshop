@@ -327,7 +327,9 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
 async function goOnFresh(session: Session, midTurn: boolean, signal?: AbortSignal): Promise<string> {
   const { project, provider } = session;
   let summary: string | undefined;
-  if (!provider.ownPrompt) {
+  // A provider with a prompt of its own is asked apart, by its own call.
+  const ask = provider.ownPrompt ? provider.summarise?.bind(provider) : provider.send.bind(provider);
+  if (ask) {
     const model = session.summariser ?? MODELS.data;
     const request: Request = {
       model,
@@ -337,7 +339,7 @@ async function goOnFresh(session: Session, midTurn: boolean, signal?: AbortSigna
       ...thinkingFor(model, "data", false),
     };
     try {
-      const message = await provider.send(request, {}, signal);
+      const message = await ask(request, {}, signal);
       project.usage = addUsage(project.usage, priced(model, message.usage));
       if (message.stop_reason !== "refusal") {
         summary = message.content

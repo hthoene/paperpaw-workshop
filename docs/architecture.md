@@ -125,8 +125,17 @@ person chooses in Settings ("Conversation length": Short, Normal, Long,
    message carries the summary and the file list (`CARRIED`, shown as
    "Summarised the conversation so far"), and nothing else is sent again.
    The summary's cost is the turn's. Without a summary (the summariser
-   failed, or the quota proxy, which sends its own prompt) the person's
-   requests stand in. A turn that alone fills two fresh conversations ends
+   failed, or the provider sends its own prompt and has no way to ask
+   for one) the person's requests stand in. A PaperPaw key (`ppw-…`, the
+   Node proxy in `proxy/`) passes any request on, so it summarises as a
+   Claude key does. The browser workshop's quota (`QuotaProxy`) sends its
+   own prompt, so the summary is asked apart (`Provider.summarise`):
+   `POST /api/v1/workshop/messages?kind=summary` with `{ "kind":
+   "summary", "transcript": "…" }`, answered as a conversation request is
+   (the stream); the site holds the summary prompt, the model (Haiku) and
+   the limit, and counts it against the budget. paperpaw.org no longer
+   has that route (the browser workshop was removed from the site on
+   2026-10-22), so there the call fails and the requests stand in. A turn that alone fills two fresh conversations ends
    as `too_long`, and the person can go on in a fresh one.
 
 | Setting | `trimAt` | `keep` | `clearAtLeast` | `summariseAt` |

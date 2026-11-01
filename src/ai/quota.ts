@@ -37,10 +37,21 @@ export class QuotaProxy implements Provider {
   ) {}
 
   async send(request: Request, stream: Stream, signal?: AbortSignal): Promise<Anthropic.Message> {
-    let answer = await this.post(request, signal);
+    return this.ask("conversation", request, stream, signal);
+  }
+
+  /** The summary of a long conversation: the transcript alone goes to the
+   *  site (`kind: "summary"`), which has the summary prompt, the model and
+   *  the budget's count; nothing else of the request leaves the page. */
+  async summarise(request: Request, stream: Stream, signal?: AbortSignal): Promise<Anthropic.Message> {
+    return this.ask("summary", request, stream, signal);
+  }
+
+  private async ask(what: "conversation" | "summary", request: Request, stream: Stream, signal?: AbortSignal): Promise<Anthropic.Message> {
+    let answer = await this.post(what, request, signal);
     if (answer.status === 403 && (await errorOf(answer.clone()))?.error === "expired") {
       this.csrf = null;
-      answer = await this.post(request, signal);
+      answer = await this.post(what, request, signal);
     }
     if (!answer.ok || !answer.body) {
       const body = await errorOf(answer);
@@ -55,14 +66,20 @@ export class QuotaProxy implements Provider {
     return s.finalMessage();
   }
 
-  private async post(request: Request, signal?: AbortSignal): Promise<Response> {
+  private async post(what: "conversation" | "summary", request: Request, signal?: AbortSignal): Promise<Response> {
     const csrf = await this.token();
     // The kind in the address too: the site reserves what a request may
     // cost before it reads the body.
-    return fetch(`${this.base}/api/v1/workshop/messages?kind=${this.kind}`, {
+    const kind = what === "summary" ? "summary" : this.kind;
+    const first = request.messages[0]?.content;
+    const body =
+      what === "summary"
+        ? { kind, transcript: typeof first === "string" ? first : "" }
+        : { kind, messages: request.messages };
+    return fetch(`${this.base}/api/v1/workshop/messages?kind=${kind}`, {
       method: "POST",
       headers: { "content-type": "application/json", accept: "text/event-stream", ...(csrf ? { "x-paperpaw-csrf": csrf } : {}) },
-      body: JSON.stringify({ kind: this.kind, messages: request.messages }),
+      body: JSON.stringify(body),
       signal,
     });
   }

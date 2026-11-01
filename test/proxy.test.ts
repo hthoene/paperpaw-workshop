@@ -4,7 +4,11 @@ import type { AddressInfo } from "node:net";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { PRICES as WORKSHOP_PRICES } from "../src/ai/pricing";
+import { AnthropicDirect } from "../src/ai/anthropic";
+import { thinkingFor } from "../src/ai/loop";
+import type { Provider } from "../src/ai/provider";
+import { MODELS, PRICES as WORKSHOP_PRICES } from "../src/ai/pricing";
+import { SUMMARY_PROMPT, SUMMARY_TOKENS } from "../src/ai/summary";
 // @ts-expect-error: the proxy is plain JavaScript (proxy/), run by Node.
 import { run } from "../proxy/src/admin.mjs";
 // @ts-expect-error: as above.
@@ -71,6 +75,33 @@ describe("the proxy", () => {
     expect(sent.body.max_tokens).toBe(32_000);
     const row = store.keys().find((k: { id: number }) => k.id === id);
     expect(row.spent).toBeCloseTo(cost("claude-haiku-5-5", { input_tokens: 2000, output_tokens: 1000 }), 10);
+  });
+
+  it("takes the summary of a long conversation like any request, on the key's default models", async () => {
+    // A PaperPaw key's provider sends the workshop's own prompt and tools
+    // through the proxy (it is not the site's quota proxy, which has a
+    // prompt of its own), so goOnFresh asks it for a summary as it asks a
+    // person's own key.
+    const provider: Provider = new AnthropicDirect("ppw-0123456789abcdefghij", "https://workshop.paperpaw.example", "provider.paperpaw");
+    expect(provider.ownPrompt).toBeFalsy();
+    const store = new Store(":memory:");
+    const { key } = store.addKey({ email: "a@b.test", budget: 1 });
+    const up = await anthropic();
+    const base = await proxy(store, up.url);
+    // The request goOnFresh makes, with the summariser's model and limit.
+    const answer = await ask(base, key, {
+      model: MODELS.data,
+      max_tokens: SUMMARY_TOKENS,
+      system: [{ type: "text", text: SUMMARY_PROMPT }],
+      messages: [{ role: "user", content: "Person: Make a clock" }],
+      ...thinkingFor(MODELS.data, "data", false),
+    });
+    expect(answer.status).toBe(200);
+    const sent = up.seen[0]!.body;
+    expect(sent.model).toBe("claude-haiku-5-5");
+    expect(sent.max_tokens).toBe(SUMMARY_TOKENS);
+    expect((sent.system as { text: string }[])[0]!.text).toBe(SUMMARY_PROMPT);
+    expect(store.keys()[0].spent).toBeGreaterThan(0);
   });
 
   it("reads what a streamed answer used, and streams it on", async () => {

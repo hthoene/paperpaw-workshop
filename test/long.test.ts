@@ -36,6 +36,7 @@ class ScriptedProvider implements Provider {
   readonly eagerTools = false;
   readonly requests: Request[] = [];
   ownPrompt = false;
+  summarise?: Provider["summarise"];
 
   constructor(private script: (request: Request) => Scripted) {}
 
@@ -261,6 +262,47 @@ describe("a long conversation summarised", () => {
     await runTurn(p, "Make it bigger");
     expect(proxied.requests.some(summary)).toBe(false);
     expect(p.project.earlier).toHaveLength(1);
+  });
+
+  it("a provider with a prompt of its own is asked for the summary apart, by its own call", async () => {
+    const asked: Request[] = [];
+    const proxied = new ScriptedProvider(inOrder([said("Here is your clock.", 95_000), said("Bigger now.")]));
+    proxied.ownPrompt = true;
+    // Not `send`: the summary has a route of its own, and `send` is not asked.
+    proxied.summarise = async (request) => {
+      asked.push(structuredClone(request));
+      return {
+        id: "msg_s",
+        type: "message",
+        role: "assistant",
+        model: request.model,
+        content: [{ type: "text", text: "Built: a clock." }],
+        stop_reason: "end_turn",
+        stop_sequence: null,
+        usage: { input_tokens: 800, output_tokens: 40, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 },
+      } as unknown as Anthropic.Message;
+    };
+    const s = session(proxied);
+    await runTurn(s, "Make a clock");
+    expect(await runTurn(s, "Make it bigger")).toBe("done");
+    expect(proxied.requests.some(summary)).toBe(false);
+    expect(asked).toHaveLength(1);
+    expect(summary(asked[0]!)).toBe(true);
+    const carried = texts(proxied.main.at(-1)!.messages[0]!)[1]!;
+    expect(carried).toContain("Built: a clock.");
+    expect(carried).not.toContain("What the person asked for in it:");
+    expect(s.project.earlier).toHaveLength(1);
+
+    // Its summary failing (a site that has none): the requests stand in.
+    const failing = new ScriptedProvider(inOrder([said("Here is your clock.", 95_000), said("Bigger now.")]));
+    failing.ownPrompt = true;
+    failing.summarise = async () => {
+      throw new Error("Unknown kind.");
+    };
+    const f = session(failing);
+    await runTurn(f, "Make a clock");
+    expect(await runTurn(f, "Make it bigger")).toBe("done");
+    expect(texts(failing.main.at(-1)!.messages[0]!)[1]!).toContain("- Make a clock");
   });
 
   it("keeps a summary the first request did not take, for the person's next words", async () => {
