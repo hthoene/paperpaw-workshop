@@ -74,7 +74,12 @@ export interface Body {
 export interface DeviceReadiness {
   x4: boolean;
   x4_mb: number;
+  /** The X4 Pro (and the Classic): espup's `esp` toolchain is there and fits. */
   x4_pro: boolean;
+  /** ... but the release's core libraries are not: its builds are trials. */
+  x4_pro_trial: boolean;
+  /** What to do about it where it is not there. */
+  x4_pro_help: string | null;
   sign: boolean;
 }
 
@@ -88,6 +93,11 @@ export interface DeviceBuilt {
   source: string | null;
   fingerprint: string | null;
   size: number;
+  /** The reader it is for (`x4`, `x4-pro`). */
+  reader: string;
+  /** Built without the release's core libraries (X4 Pro): it runs on a
+   *  reader but stays out of the store file. */
+  trial: boolean;
 }
 
 /** The one file for the store's form and what it holds: `package`, each
@@ -265,7 +275,7 @@ export interface Backend extends FolderApi, PictureApi, CheckApi, HistoryApi {
   deviceToolchainInstall(): Promise<void>;
   /** Builds the project's plugin with code for the X4, signed, with its
    *  source as a ZIP, into the project's `.workshop/publish/parts/`. */
-  deviceBuild(project: string, id: string, version: string): Promise<DeviceBuilt>;
+  deviceBuild(project: string, id: string, version: string, reader?: "x4" | "x4-pro"): Promise<DeviceBuilt>;
   /** The author key that signs plugins with code: never its secret. */
   authorStatus(): Promise<AuthorStatus>;
   /** Makes the author key, if there is none yet. */
@@ -389,7 +399,7 @@ export const appBackend: Backend = {
   onGitHubProgress: async (told) => listen<string>("github-progress", (event) => told(event.payload)),
   deviceReadiness: () => invoke("device_readiness"),
   deviceToolchainInstall: () => invoke("device_toolchain_install"),
-  deviceBuild: (project, id, version) => invoke("device_build", { project, id, version }),
+  deviceBuild: (project, id, version, reader) => invoke("device_build", { project, id, version, reader: reader ?? null }),
   authorStatus: () => invoke("author_status"),
   authorCreate: () => invoke("author_create"),
   authorBackup: (path) => invoke("author_backup", { path }),
@@ -514,7 +524,7 @@ export function standInBackend(): Backend {
     githubOpen: async (url) => void window.open(url, "_blank"),
     onGitHubProgress: async () => () => {},
     // No builds for the readers in a plain browser.
-    deviceReadiness: async () => ({ x4: false, x4_mb: 62, x4_pro: false, sign: false }),
+    deviceReadiness: async () => ({ x4: false, x4_mb: 62, x4_pro: false, x4_pro_trial: false, x4_pro_help: null, sign: false }),
     deviceToolchainInstall: async () => { throw new Error("Building for the readers needs the app."); },
     deviceBuild: async () => { throw new Error("Building for the readers needs the app."); },
     // An author key in memory, its backup said done when asked.

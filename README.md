@@ -58,8 +58,11 @@ small budget, so you can try the workshop before you get a key of your own.
 ## What it does
 
 - Makes **looks, home screens, buttons and texts**: plugins of a few text
-  files. And **plugins with code**, such as new screens and tools. For
-  now these are built for the X4 only; the X4 Pro's come later.
+  files. And **plugins with code**, such as new screens and tools. They
+  are built for the X4, and for the X4 Pro (and the experimental X4
+  Classic) once espup's Xtensa tools are on the computer; until a PaperPaw
+  release brings the Pro's core libraries, its builds are for your own
+  reader, not for the store.
 - Shows the plugin on an **X4 Pro, an X4 and a Boox Go 7**, drawn by
   PaperPaw itself. Tap the screen or use the arrow keys.
 - **Checks** the plugin as PaperPaw checks plugins, on every reader and in

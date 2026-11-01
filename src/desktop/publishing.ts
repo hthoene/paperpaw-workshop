@@ -20,6 +20,7 @@ import { MAX_BYTES, MAX_FILES, pathProblem, validId, validVersion } from "../pro
 import { draftEntry } from "../publish/draft";
 import type { EntryInput } from "../tools/entry";
 import type { ToolContext } from "../tools/tool";
+import type { DeviceReadiness } from "./backend";
 
 /** The store's upload form. */
 export const SUBMIT = "https://paperpaw.org/submit";
@@ -262,4 +263,19 @@ export interface DraftSource {
  *  alternative texts). One cheap request, paid like the conversation. */
 export async function draftStoreEntry(workshop: DraftSource, signal?: AbortSignal): Promise<EntryInput> {
   return draftEntry(workshop.ai, MODELS.data, workshop.project, workshop.toolContext(), signal);
+}
+
+/** What the window says of building for the X4 Pro (and the Classic, which
+ *  takes the Pro's file): whether it can, and in words what that is. */
+export function proState(readiness: Pick<DeviceReadiness, "x4_pro" | "x4_pro_trial" | "x4_pro_help">): { can: boolean; text: string } {
+  if (!readiness.x4_pro) {
+    return { can: false, text: readiness.x4_pro_help ?? "needs espup's Xtensa tools first." };
+  }
+  if (readiness.x4_pro_trial) {
+    return {
+      can: true,
+      text: "can be built here. Until a PaperPaw release brings what its builds need, such a build is for trying on your own reader: it stays out of the store file.",
+    };
+  }
+  return { can: true, text: "is ready to build for." };
 }

@@ -182,15 +182,23 @@ pub fn hello(port: &str) -> Found {
 }
 
 /// Installs `plugin` on the reader on `port`.
-pub fn send(port: &str, plugin: &crate::install::ReaderPlugin, told: &dyn Fn(crate::install::Step)) -> Result<crate::install::Installed, String> {
+pub fn send(
+    port: &str,
+    plugin_for: &dyn Fn(crate::xtensa::Reader) -> Result<crate::install::ReaderPlugin, String>,
+    told: &dyn Fn(crate::install::Step),
+) -> Result<crate::install::Installed, String> {
     let reader = hello(port);
     if let Some(problem) = reader.problem {
         return Err(problem);
     }
-    // The workshop builds plugins with code for the X4 alone for now.
-    if plugin.code && reader.device.as_deref() != Some("xteink-x4") {
-        return Err("Plugins with code go to the X4 for now; the X4 Pro's builds come with a later PaperPaw.".into());
+    // The build for the reader that answered: the X4's for an X4 (or X3), the
+    // Pro's for a Pro or a Classic; no code for a reader the workshop does not know.
+    let known = reader.device.as_deref().and_then(crate::xtensa::Reader::of_device);
+    let plugin = plugin_for(known.unwrap_or(crate::xtensa::Reader::X4))?;
+    if plugin.code && known.is_none() {
+        return Err(format!("{} is not a reader the workshop builds plugins with code for.", reader.device.as_deref().unwrap_or("This reader")));
     }
+    let plugin = &plugin;
     let mut cable = Cable::new(open(port)?, ANSWER);
     crate::install::over_usb(&mut cable, plugin, told, &std::thread::sleep)
 }
@@ -207,8 +215,7 @@ pub async fn usb_readers() -> Result<Vec<Found>, String> {
 #[tauri::command]
 pub async fn send_usb(app: tauri::AppHandle, project: String, port: String) -> Result<crate::install::Installed, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        let plugin = crate::send::reader_plugin(&project)?;
-        send(&port, &plugin, &crate::send::progress(&app))
+        send(&port, &|reader| crate::send::reader_plugin_for(&project, reader), &crate::send::progress(&app))
     })
     .await
     .map_err(|e| e.to_string())?
@@ -413,7 +420,7 @@ mod tests {
         let found = hello(&port);
         println!("{found:?}");
         assert!(found.problem.is_none(), "{found:?}");
-        let done = send(&port, &trial_plugin(), &|step| println!("{step:?}")).unwrap();
+        let done = send(&port, &|_| Ok(trial_plugin()), &|step| println!("{step:?}")).unwrap();
         println!("{done:?}");
         assert_eq!(done.id, "workshop-trial");
     }
