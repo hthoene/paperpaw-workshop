@@ -18,7 +18,6 @@
     "handbook": "node handbook/generate.mjs",
     "emulator": "node scripts/emulator.mjs",
     "builder-source": "node scripts/builder-source.mjs",
-    "quota-copy": "node scripts/quota-copy.mjs",
     "notices": "node scripts/notices.mjs",
     "notices:check": "node scripts/notices.mjs --check"
   },

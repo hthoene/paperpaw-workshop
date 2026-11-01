@@ -10,7 +10,7 @@ import type { Emulator } from "../emulator/emulator";
 import type { Fixture, InputEvent, NetworkMode, PluginFiles, ScreenshotResult, Screen, SeenRequest } from "../emulator/protocol";
 import type { Profile } from "../handbook/handbook";
 import type { Project } from "../project/project";
-import type { Backend, Part } from "./backend";
+import type { Backend, Part, RecordedAnswer } from "./backend";
 import type { Checker } from "./checks";
 
 /** How long a long press is held. */
@@ -166,8 +166,11 @@ export class NativeEmulator implements Emulator {
     }
   }
 
-  async setNetwork(fixtures: Fixture[], _mode: NetworkMode): Promise<void> {
-    if (fixtures.length) throw new NotYet("Recorded answers for a plugin's requests");
+  /** `real`: the internet, as a reader has it. `fixtures`: the answers
+   *  recorded alone (a request with none fails). A delay or headers of an
+   *  answer other than its content type are not in the emulator. */
+  async setNetwork(fixtures: Fixture[], mode: NetworkMode): Promise<void> {
+    await this.backend.emulatorNetwork(mode === "real" ? "real" : "recorded", fixtures.map(recorded));
   }
 
   /** The requests the plugin made since asked last, as PaperPaw tells them. */
@@ -206,4 +209,20 @@ function unpair(word: string): [string, string] {
 /** A moment for the reader to draw what was opened. */
 function settle(): Promise<void> {
   return new Promise((r) => setTimeout(r, 300));
+}
+
+/** An answer for the emulator: its body as text, its content type from
+ *  the headers (or JSON, for a body that is not text). */
+export function recorded(fixture: Fixture): RecordedAnswer {
+  const answer: RecordedAnswer = { url: fixture.url };
+  if (fixture.method) answer.method = fixture.method;
+  if (fixture.status !== undefined) answer.status = fixture.status;
+  const type = Object.entries(fixture.headers ?? {}).find(([name]) => name.toLowerCase() === "content-type")?.[1];
+  if (fixture.body !== undefined) {
+    const text = typeof fixture.body === "string";
+    answer.body = text ? (fixture.body as string) : JSON.stringify(fixture.body);
+    answer.content_type = type ?? (text ? undefined : "application/json");
+  } else if (type) answer.content_type = type;
+  if (answer.content_type === undefined) delete answer.content_type;
+  return answer;
 }

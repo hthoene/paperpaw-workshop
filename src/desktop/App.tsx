@@ -224,6 +224,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
           shown={desk.shown}
           onChoose={(id) => void desk.choose(id)}
           onShot={workspace.project ? (id, dark) => desk.storeShot(id, dark) : undefined}
+          internet={desk.workshop ? { on: desk.workshop.realNetwork, set: (on) => void desk.workshop?.setRealNetwork(on) } : undefined}
         />
         {notice && (
           <p class="notice" role="status">

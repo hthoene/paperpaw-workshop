@@ -24,7 +24,7 @@ src/
               to its workshop, the project list, the files drawer, the
               reader, the checks, sending, costs, models
   app/        the workshop of one project (controller.ts) and how its
-              conversation is shown; shared with the web workshop
+              conversation is shown; used by the window (desktop/)
   ai/         the conversation loop, who answers it (providers), prices
   tools/      what the AI can do: files, docs, look, press, build, and the
               person's uploads (list, view, convert a picture, place a file)
@@ -125,9 +125,9 @@ person chooses in Settings ("Conversation length": Short, Normal, Long,
    message carries the summary and the file list (`CARRIED`, shown as
    "Summarised the conversation so far"), and nothing else is sent again.
    The summary's cost is the turn's. Without a summary (the summariser
-   failed, or the quota proxy, which sends its own prompt) the person's
-   requests stand in. A turn that alone fills two fresh conversations ends
-   as `too_long`, and the person can go on in a fresh one.
+   failed) the person's requests stand in. A turn that alone fills two
+   fresh conversations ends as `too_long`, and the person can go on in a
+   fresh one.
 
 | Setting | `trimAt` | `keep` | `clearAtLeast` | `summariseAt` |
 | --- | --- | --- | --- | --- |
@@ -589,9 +589,10 @@ results) are English in the code, since they are prompt, not interface.
 
 ## Left from the web workshop
 
-The workshop began as a web page. Its parts the app does not use are still
-in the repository: the reader in a frame (`frame.html`,
-`src/emulator/frame/`), the builder's container (`builder/`, `Dockerfile`,
-`docker-compose.yml`, `local/`), sharing in the store (`src/publish/`,
-[store-api.md](store-api.md)) and the web pages in `src/app/`. They go
-when the app has what they did.
+The workshop began as a web page. Its pages (start, conversation, share
+panel) were removed once the window in `src/desktop/` replaced them. Still
+in the repository, and not used by the app: the reader in a frame
+(`frame.html`, `src/emulator/frame/`, `Workshop.attach`), the builder's
+container (`builder/`, `Dockerfile`, `docker-compose.yml`, `local/`),
+and the description of the store API the pages used
+([store-api.md](store-api.md)). They go when the app has what they did.

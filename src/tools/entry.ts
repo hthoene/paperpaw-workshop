@@ -1,6 +1,6 @@
 // The plugin's entry in the store (`store/store.ini`): what the store
 // shows of it, written from the conversation for the person to change.
-// The share page asks for it with this tool too (src/publish/draft.ts).
+// src/publish/draft.ts asks for it with this tool too.
 
 import { z } from "zod";
 

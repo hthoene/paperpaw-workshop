@@ -11,10 +11,15 @@
 
 import { zipSync } from "fflate";
 
+import { MODELS } from "../ai/pricing";
+import type { Provider } from "../ai/provider";
 import { MAX_SCREENSHOT_BYTES } from "../project/entry";
 import { iniValue, parseIni } from "../project/ini";
 import { identity, type Project } from "../project/project";
 import { MAX_BYTES, MAX_FILES, pathProblem, validId, validVersion } from "../project/rules";
+import { draftEntry } from "../publish/draft";
+import type { EntryInput } from "../tools/entry";
+import type { ToolContext } from "../tools/tool";
 
 /** The store's upload form. */
 export const SUBMIT = "https://paperpaw.org/submit";
@@ -243,4 +248,18 @@ export function withStore(ini: string, values: Record<string, string>): string {
 export function sdkOf(paperpaw: string): string {
   const [major, minor] = paperpaw.trim().split(/[.-]/);
   return `${major ?? "0"}.${minor ?? "0"}`;
+}
+
+/** What the AI's draft of the store entry needs of the workshop. */
+export interface DraftSource {
+  readonly ai: Provider;
+  readonly project: Project;
+  toolContext(): ToolContext;
+}
+
+/** The store entry drafted by the AI from the conversation into
+ *  `store/store.ini`, as the author's own choices stay (the licence, the
+ *  alternative texts). One cheap request, paid like the conversation. */
+export async function draftStoreEntry(workshop: DraftSource, signal?: AbortSignal): Promise<EntryInput> {
+  return draftEntry(workshop.ai, MODELS.data, workshop.project, workshop.toolContext(), signal);
 }

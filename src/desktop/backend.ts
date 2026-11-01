@@ -162,6 +162,15 @@ export interface AuthorStatus {
   backed_up: number | null;
 }
 
+/** An answer recorded for a plugin's request, as the emulator takes it. */
+export interface RecordedAnswer {
+  url: string;
+  method?: string;
+  status?: number;
+  body?: string;
+  content_type?: string;
+}
+
 export interface Backend extends FolderApi, PictureApi, CheckApi, HistoryApi {
   keyGet(): Promise<string | null>;
   keySet(key: string): Promise<void>;
@@ -169,6 +178,10 @@ export interface Backend extends FolderApi, PictureApi, CheckApi, HistoryApi {
   emulatorStart(profile: string): Promise<void>;
   emulatorButton(name: string, pressed: boolean): Promise<void>;
   emulatorPointer(phase: Phase, x: number, y: number): Promise<void>;
+  /** Where plugins' requests go (`real`, `recorded`, `offline`) and the
+   *  answers recorded for them (`url`, `method`, `status`, `body` as text,
+   *  `content_type`). */
+  emulatorNetwork(mode: "real" | "recorded" | "offline", fixtures: RecordedAnswer[]): Promise<void>;
   /** Calls `seen` with each new frame; returns how to stop. */
   onFrame(seen: (frame: Frame) => void): Promise<() => void>;
   onError(said: (message: string) => void): Promise<() => void>;
@@ -321,6 +334,7 @@ export const appBackend: Backend = {
   emulatorStart: (profile) => invoke("emulator_start", { profile }),
   emulatorButton: (name, pressed) => invoke("emulator_button", { name, pressed }),
   emulatorPointer: (phase, x, y) => invoke("emulator_pointer", { phase, x, y }),
+  emulatorNetwork: (mode, fixtures) => invoke("emulator_network", { mode, fixtures }),
   onFrame: async (seen) => listen<Frame>("emulator-frame", (event) => seen(event.payload)),
   onError: async (said) => listen<string>("emulator-error", (event) => said(event.payload)),
   emulatorSync: (project) => invoke("emulator_sync", { project }),
@@ -454,6 +468,7 @@ export function standInBackend(): Backend {
     },
     emulatorButton: async () => {},
     emulatorPointer: async () => {},
+    emulatorNetwork: async () => {},
     onFrame: async (seen) => {
       frames.add(seen);
       return () => frames.delete(seen);

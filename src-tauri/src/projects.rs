@@ -8,7 +8,7 @@
 //! relative, `/` between parts, no `..`, nothing into `.workshop/` through
 //! the plugin's file calls.
 
-use std::path::{Component, Path, PathBuf};
+use std::path::{Path, PathBuf};
 
 use base64::Engine;
 use serde::Serialize;
@@ -55,9 +55,7 @@ pub fn folder(root: &Path, name: &str) -> Result<PathBuf, String> {
 /// calls).
 fn inside(project: &Path, path: &str, workshop: bool) -> Result<PathBuf, String> {
     let relative = Path::new(path);
-    let plain = !path.is_empty()
-        && !path.contains('\\')
-        && relative.components().all(|c| matches!(c, Component::Normal(_)));
+    let plain = crate::paths::plain(path);
     let hidden = relative
         .components()
         .next()

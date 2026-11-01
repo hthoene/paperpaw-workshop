@@ -321,34 +321,31 @@ export async function runTurn(session: Session, said: Said, events: TurnEvents =
 
 /** The conversation summarised (by the summariser, from a transcript)
  *  and on in a fresh one; what its first message carries. Where no
- *  summary comes (the provider sends its own prompt, the model refused or
- *  failed), what the person asked for stands in for one. What the summary
- *  cost is the turn's. */
+ *  summary comes (the model refused or failed), what the person asked for
+ *  stands in for one. What the summary cost is the turn's. */
 async function goOnFresh(session: Session, midTurn: boolean, signal?: AbortSignal): Promise<string> {
   const { project, provider } = session;
   let summary: string | undefined;
-  if (!provider.ownPrompt) {
-    const model = session.summariser ?? MODELS.data;
-    const request: Request = {
-      model,
-      max_tokens: SUMMARY_TOKENS,
-      system: [{ type: "text", text: SUMMARY_PROMPT }],
-      messages: [{ role: "user", content: transcript(project.messages) }],
-      ...thinkingFor(model, "data", false),
-    };
-    try {
-      const message = await provider.send(request, {}, signal);
-      project.usage = addUsage(project.usage, priced(model, message.usage));
-      if (message.stop_reason !== "refusal") {
-        summary = message.content
-          .filter((b): b is Anthropic.TextBlock => b.type === "text")
-          .map((b) => b.text)
-          .join("");
-      }
-    } catch (error) {
-      if (signal?.aborted) throw error;
-      // No summary: the person's requests stand in for one.
+  const model = session.summariser ?? MODELS.data;
+  const request: Request = {
+    model,
+    max_tokens: SUMMARY_TOKENS,
+    system: [{ type: "text", text: SUMMARY_PROMPT }],
+    messages: [{ role: "user", content: transcript(project.messages) }],
+    ...thinkingFor(model, "data", false),
+  };
+  try {
+    const message = await provider.send(request, {}, signal);
+    project.usage = addUsage(project.usage, priced(model, message.usage));
+    if (message.stop_reason !== "refusal") {
+      summary = message.content
+        .filter((b): b is Anthropic.TextBlock => b.type === "text")
+        .map((b) => b.text)
+        .join("");
     }
+  } catch (error) {
+    if (signal?.aborted) throw error;
+    // No summary: the person's requests stand in for one.
   }
   const carried = carriedText(project, summary, midTurn);
   startFresh(project);

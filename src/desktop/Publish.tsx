@@ -14,6 +14,7 @@
 
 import { useEffect, useState } from "preact/hooks";
 
+import { message } from "../app/controller";
 import { MAX_SCREENSHOTS } from "../project/entry";
 import { identity } from "../project/project";
 import { moveShot, removeShot, storeShots } from "../publish/screenshots";
@@ -32,6 +33,7 @@ import {
   raised,
   recordPublished,
   sdkOf,
+  draftStoreEntry,
   storeEntry,
   storeIniPath,
   uploadPackage,
@@ -148,6 +150,7 @@ export function Publish({ desk, backend, onClose }: Props) {
   const [key, setKey] = useState<AuthorStatus | null>(null);
   const [readiness, setReadiness] = useState<DeviceReadiness | null>(null);
   const [fetching, setFetching] = useState(false);
+  const [drafting, setDrafting] = useState(false);
   const id = project ? identity(project).id : undefined;
   const code = project?.kind === "code";
   const entry = project ? storeEntry(project) : {};
@@ -222,6 +225,25 @@ export function Publish({ desk, backend, onClose }: Props) {
       `Choose this plugin's group in the store and write it as group in the [store] section of ${storeIniPath(project)} ` +
         `(make the file if there is none), one of: ${GROUPS.map((g) => `${g.id} (${g.what})`).join(", ")}. Change nothing else.`,
     );
+  };
+
+  /** The AI drafts the store entry (summary, description, group, tags)
+   *  from the conversation; what the author chose stays. */
+  const draft = async () => {
+    if (!desk.workshop) return;
+    setDrafting(true);
+    setSaid("");
+    try {
+      const written = await draftStoreEntry(desk.workshop);
+      await desk.workspace.save();
+      if (written.group && !entry.group) setGroup(written.group);
+      setSaid(`Drafted: ${written.summary} It is in the store entry (store/store.ini); change it there.`);
+    } catch (e) {
+      setSaid(message(e));
+    } finally {
+      setDrafting(false);
+      redraw((n) => n + 1);
+    }
   };
 
   /** Sets the plugin's version to `next`: why not, if it could not. */
@@ -447,6 +469,13 @@ export function Publish({ desk, backend, onClose }: Props) {
                 ))}
             </div>
           )}
+          <section class="way">
+            <h3>The store entry</h3>
+            <p class="hint">Its summary, description, group and tags, as people read them in the store.</p>
+            <button type="button" class="link" disabled={!desk.workshop || !!desk.workshop.busy || drafting} onClick={() => void draft()}>
+              {drafting ? "Drafting…" : "Draft with AI"}
+            </button>
+          </section>
           <Screenshots desk={desk} onClose={onClose} />
           <GitHub
             desk={desk}

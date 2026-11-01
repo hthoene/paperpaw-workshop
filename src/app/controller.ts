@@ -10,7 +10,6 @@ import { carriedText, startFresh } from "../ai/summary";
 import { namedBy, personsUrls, type Samples } from "../tools/sample";
 import { MODELS, modelName } from "../ai/pricing";
 import type { Provider } from "../ai/provider";
-import { QuotaRefused } from "../ai/quota";
 import { BuilderUnavailable, HttpBuilder, projectFiles, type BuildResult, type Builder, type Target } from "../build/client";
 import type { Finding } from "../checks/data";
 import type { Emulator } from "../emulator/emulator";
@@ -72,7 +71,7 @@ export class Workshop {
   findings: Finding[] = [];
   stub = true;
   /** Whether plugins' requests may go to the internet here (one's own
-   *  computer: hosting.ts), and whether the person lets them (the switch). */
+   *  computer), and whether the person lets them (the switch). */
   realNetworkAllowed = false;
   realNetwork = true;
   private emulator: Emulator | undefined;
@@ -294,7 +293,7 @@ export class Workshop {
     return !!this.emulator;
   }
 
-  /** Who answers the AI's requests, for the share page's draft. */
+  /** Who answers the AI's requests, for the store entry's draft (src/publish/draft.ts). */
   get ai(): Provider {
     return this.provider;
   }
@@ -533,9 +532,7 @@ export class Workshop {
 /** What went wrong, in the person's words: Anthropic's errors each in
  *  their own, the rest as they are. */
 export function message(e: unknown): string {
-  // paperpaw.org's refusals say why in their own words.
-  if (e instanceof QuotaRefused) return e.message;
-  // So do PaperPaw's proxy's, for a PaperPaw key (budget used, expired).
+  // PaperPaw's proxy says why in its own words, for a PaperPaw key (budget used, expired).
   const said = e instanceof Anthropic.APIError ? (e.error as { error?: { message?: unknown } } | undefined)?.error?.message : undefined;
   if (typeof said === "string" && said.includes("PaperPaw key")) return said;
   if (e instanceof Anthropic.AuthenticationError || e instanceof Anthropic.PermissionDeniedError) return t("workshop.error.key");

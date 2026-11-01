@@ -1,15 +1,15 @@
 # The store's API for the workshop
 
-> This describes how the web workshop (`src/app/`, `src/publish/`) sent
-> plugins to the store. The desktop app does not use it: its **Publish…**
+> This describes how the former web workshop (its pages and
+> `src/publish/store.ts`, both removed) sent plugins to the store. The
+> desktop app does not use it: its **Publish…**
 > packs the plugin and opens paperpaw.org's upload form in the browser, and
 > nothing is uploaded from the app. Whether paperpaw.org still answers these
 > requests is paperpaw.org's to say.
 
 The workshop sends plugins to the store on paperpaw.org the way its form
 at `/submit` does, as the signed-in author. These are the requests it
-makes ([src/publish/store.ts](../src/publish/store.ts)) and the answers
-it expects. The site's form stays as it is; the API is the same routes
+made and the answers it expected. The site's form stays as it is; the API is the same routes
 answering JSON when the request asks for it (`Accept: application/json`),
 plus one new address that says where the store stands.
 

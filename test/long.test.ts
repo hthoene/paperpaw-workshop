@@ -35,7 +35,6 @@ class ScriptedProvider implements Provider {
   readonly label = "provider.key";
   readonly eagerTools = false;
   readonly requests: Request[] = [];
-  ownPrompt = false;
 
   constructor(private script: (request: Request) => Scripted) {}
 
@@ -253,14 +252,6 @@ describe("a long conversation summarised", () => {
     const carried = texts(failing.main.at(-1)!.messages[0]!)[1]!;
     expect(carried).toContain("What the person asked for in it:");
     expect(carried).toContain("- Make a clock");
-
-    const proxied = new ScriptedProvider(inOrder([said("Here is your clock.", 95_000), said("Bigger now.")]));
-    proxied.ownPrompt = true;
-    const p = session(proxied);
-    await runTurn(p, "Make a clock");
-    await runTurn(p, "Make it bigger");
-    expect(proxied.requests.some(summary)).toBe(false);
-    expect(p.project.earlier).toHaveLength(1);
   });
 
   it("keeps a summary the first request did not take, for the person's next words", async () => {
