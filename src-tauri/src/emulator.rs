@@ -144,6 +144,9 @@ pub struct Emulator {
     shared: Arc<Mutex<Shared>>,
     /// The last `start`, sent again when the program had to start again.
     last_start: Mutex<Option<Value>>,
+    /// Where plugins' requests go, with the answers recorded for them
+    /// (`network`): sent again to a program started anew.
+    network: Mutex<Option<(String, Vec<Value>)>>,
     /// The widget shown alone on the first page of the home screen, if
     /// one is (`show_widget`).
     home: Mutex<Option<String>>,
@@ -174,6 +177,7 @@ impl Emulator {
             running: Mutex::new(None),
             shared: Arc::new(Mutex::new(Shared::default())),
             last_start: Mutex::new(None),
+            network: Mutex::new(None),
             home: Mutex::new(None),
             plugin: Mutex::new(None),
             project: Mutex::new(None),
@@ -192,6 +196,12 @@ impl Emulator {
             let again = self.last_start.lock().ok().and_then(|s| s.clone());
             if let Some(start) = again.filter(|_| request["op"] != "start") {
                 write_line(&mut running.as_mut().unwrap().stdin, &start)?;
+            }
+            // The network as the person chose it, not the program's default.
+            if let Some((mode, fixtures)) = self.network.lock().ok().and_then(|n| n.clone()) {
+                for line in network_lines(&mode, &fixtures)? {
+                    write_line(&mut running.as_mut().unwrap().stdin, &line)?;
+                }
             }
         }
         let stdin = &mut running.as_mut().unwrap().stdin;
@@ -311,6 +321,27 @@ impl Emulator {
         self.ask(request, "started", "start").map(|_| ())
     }
 
+    /// Where plugins' requests go (`real`, `recorded`: the answers given
+    /// alone, or `offline`), with the answers recorded for them. Kept for
+    /// a program started anew.
+    pub fn set_network(&self, mode: &str, fixtures: Vec<Value>) -> Result<(), String> {
+        let lines = network_lines(mode, &fixtures)?;
+        // `network` and `fixture` are protocol 2's; an older program keeps its
+        // real network, which is what `real` asks for.
+        if !self.ready().is_none_or(|r| r.protocol >= 2) {
+            return if mode == "real" && fixtures.is_empty() {
+                Ok(())
+            } else {
+                Err("Where a plugin's requests go is not in this PaperPaw's emulator yet (protocol 2).".into())
+            };
+        }
+        for line in &lines {
+            self.send(line)?;
+        }
+        *self.network.lock().map_err(|e| e.to_string())? = Some((mode.to_string(), fixtures));
+        Ok(())
+    }
+
     pub fn button(&self, name: &str, pressed: bool) -> Result<(), String> {
         self.send(&json!({"op": "button", "name": name, "pressed": pressed}))
     }
@@ -403,6 +434,37 @@ impl Drop for Emulator {
     fn drop(&mut self) {
         self.quit();
     }
+}
+
+/// The requests that put the network as `mode` with `fixtures` (PROTOCOL 2):
+/// the recorded answers cleared and given anew, then the mode. A fixture
+/// keeps what the emulator reads of it (`url`, `method`, `status`, `body` as
+/// text, `content_type`); anything else is left out.
+fn network_lines(mode: &str, fixtures: &[Value]) -> Result<Vec<Value>, String> {
+    if !["real", "recorded", "offline"].contains(&mode) {
+        return Err(format!("no network mode `{mode}`"));
+    }
+    let mut lines = vec![json!({"op": "fixture", "clear": true})];
+    for fixture in fixtures {
+        let url = fixture["url"].as_str().filter(|u| !u.is_empty()).ok_or("a recorded answer needs a url")?;
+        let mut line = json!({"op": "fixture", "url": url});
+        for key in ["method", "content_type"] {
+            if let Some(text) = fixture[key].as_str() {
+                line[key] = json!(text);
+            }
+        }
+        if let Some(status) = fixture["status"].as_u64().filter(|s| (100..600).contains(s)) {
+            line["status"] = json!(status);
+        }
+        match &fixture["body"] {
+            Value::Null => {}
+            Value::String(body) => line["body"] = json!(body),
+            _ => return Err(format!("the body of the answer for {url} must be text")),
+        }
+        lines.push(line);
+    }
+    lines.push(json!({"op": "network", "mode": mode}));
+    Ok(lines)
 }
 
 fn write_line(stdin: &mut ChildStdin, request: &Value) -> Result<(), String> {
@@ -592,6 +654,12 @@ pub fn emulator_button(emulator: State<'_, Emulator>, name: String, pressed: boo
     emulator.button(&name, pressed)
 }
 
+/// Where plugins' requests go in the preview, and the answers recorded for them.
+#[tauri::command]
+pub fn emulator_network(emulator: State<'_, Emulator>, mode: String, fixtures: Vec<Value>) -> Result<(), String> {
+    emulator.set_network(&mode, fixtures)
+}
+
 /// A finger on a touch screen, at the panel's own pixels.
 #[tauri::command]
 pub fn emulator_pointer(emulator: State<'_, Emulator>, phase: String, x: i32, y: i32) -> Result<(), String> {
@@ -720,6 +788,34 @@ mod tests {
     /// that need it are skipped (they say so).
     fn program() -> Option<PathBuf> {
         std::env::var_os("PAPERPAW_EMU").map(PathBuf::from).filter(|p| p.exists())
+    }
+
+    #[test]
+    fn the_network_is_put_as_a_clear_the_answers_and_the_mode() {
+        let lines = network_lines(
+            "recorded",
+            &[json!({"url": "https://a.example/x", "method": "GET", "status": 404, "body": "no", "content_type": "text/plain", "delay": 5, "headers": {}})],
+        )
+        .unwrap();
+        assert_eq!(
+            lines,
+            [
+                json!({"op": "fixture", "clear": true}),
+                json!({"op": "fixture", "url": "https://a.example/x", "method": "GET", "content_type": "text/plain", "status": 404, "body": "no"}),
+                json!({"op": "network", "mode": "recorded"}),
+            ]
+        );
+        assert_eq!(network_lines("real", &[]).unwrap(), [json!({"op": "fixture", "clear": true}), json!({"op": "network", "mode": "real"})]);
+    }
+
+    #[test]
+    fn a_network_mode_or_answer_the_emulator_would_refuse_is_refused_here() {
+        assert!(network_lines("fixtures", &[]).unwrap_err().contains("no network mode"));
+        assert!(network_lines("recorded", &[json!({"status": 200})]).is_err());
+        assert!(network_lines("recorded", &[json!({"url": "https://a.example/", "body": {"a": 1}})]).unwrap_err().contains("must be text"));
+        // A status out of range is left out, so the emulator's 200 stands.
+        let lines = network_lines("recorded", &[json!({"url": "https://a.example/", "status": 7})]).unwrap();
+        assert!(lines[1].get("status").is_none());
     }
 
     #[test]

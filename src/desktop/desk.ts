@@ -157,6 +157,8 @@ export class Desk {
     workshop.chooseModel = (p) => modelFor(savedChoice(), p, p.kind, this.may);
     // PaperPaw's emulator here fetches from the internet as a reader does.
     workshop.withoutTools = ["set_fixtures"];
+    // The person decides whether plugins reach the internet (the reader's switch).
+    workshop.realNetworkAllowed = true;
     workshop.samples = { consent: (host) => this.consent(project, host), fetch: (url) => this.backend.sampleFetch(url) };
     workshop.optimise = (upload, to, shape) => pictureOf(project, workshop.uploads, upload, to, WORKSHOP_SCREENS, this.backend, { shape });
     const shown = this.handbook.profile(this.profile);

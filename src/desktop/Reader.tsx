@@ -47,6 +47,10 @@ interface Props {
   /** Keeps what reader `id` shows (`dark`: in night mode) as a store
    *  screenshot; what to say. None where there is no plugin yet. */
   onShot?(id: string, dark: boolean): Promise<string>;
+  /** Whether plugins' requests reach the internet (else only the answers
+   *  recorded for them), and the person's change. None where there is no
+   *  workshop yet. */
+  internet?: { on: boolean; set(on: boolean): void };
 }
 
 /** The camera: which reader, light or dark, then the picture. */
@@ -117,7 +121,7 @@ function Icon({ name }: { name: NonNullable<Label["icon"]> }) {
   );
 }
 
-export function Reader({ backend, shown, onChoose, onShot }: Props) {
+export function Reader({ backend, shown, onChoose, onShot, internet }: Props) {
   const profile = shown;
   const [frame, setFrame] = useState<Frame | null>(null);
   const [error, setError] = useState("");
@@ -214,6 +218,12 @@ export function Reader({ backend, shown, onChoose, onShot }: Props) {
       </div>
       {onShot && <Camera shown={profile} onShot={onShot} />}
       </div>
+      {internet && (
+        <label class="internet">
+          <input type="checkbox" checked={internet.on} onChange={(e) => internet.set(e.currentTarget.checked)} />
+          <span>Plugins may use the internet</span>
+        </label>
+      )}
       <div class="stage" ref={stage}>
       <div class="body-room" style={edges ? { padding: edges.map((n) => `${n}px`).join(" ") } : undefined}>
         <div

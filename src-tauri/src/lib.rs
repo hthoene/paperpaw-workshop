@@ -41,6 +41,7 @@ pub fn run() {
             emulator::emulator_start,
             emulator::emulator_button,
             emulator::emulator_pointer,
+            emulator::emulator_network,
             emulator::emulator_sync,
             emulator::emulator_describe,
             emulator::emulator_shot,
