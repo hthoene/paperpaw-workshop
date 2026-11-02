@@ -256,7 +256,7 @@
   "title": "Plugins as files",
   "file": "docs--plugins-as-files.md",
   "summary": "A code plugin can also be a file, `code.ppn`, in a plugin's folder on\nthe card, which the X4 and the X4 Pro load at their\nstart (ADR 0024): from the plugin stor",
-  "tokens": 2919
+  "tokens": 2951
  },
  {
   "id": "docs/the-crate",
@@ -305,7 +305,7 @@
   "title": "Publishing a code plugin",
   "file": "docs--publishing-a-code-plugin.md",
   "summary": "The plugin library (paperpaw.org) lists a code plugin with its folder\nand a build per reader (`x4`, `x4-pro`), each a signed\n`.ppn` with the fingerprint it was ",
-  "tokens": 152
+  "tokens": 184
  },
  {
   "id": "docs/plugins-without-code",
@@ -319,7 +319,7 @@
   "title": "Publishing",
   "file": "docs--publishing.md",
   "summary": "The plugin library on paperpaw.org is what the website lists and every\nreader's store (*More plugins*) installs from (ADR 0023).",
-  "tokens": 2575
+  "tokens": 3141
  },
  {
   "id": "docs/what-is-uploaded",
@@ -327,6 +327,13 @@
   "file": "docs--what-is-uploaded.md",
   "summary": "The plugin's folder as a ZIP, `plugin.ini` at its top (or inside one\nfolder at its top), its `id` and `version` the ones published.",
   "tokens": 409
+ },
+ {
+  "id": "docs/which-devices-your-plugin-is-for",
+  "title": "Which devices your plugin is for",
+  "file": "docs--which-devices-your-plugin-is-for.md",
+  "summary": "A plugin does not have to be for every device.",
+  "tokens": 566
  },
  {
   "id": "docs/the-author-s-key",

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import example from "../src/ai/examples/night-owl.json";
 import { ReplayProvider, type Recording } from "../src/ai/replay";
 import { entryProblems, readEntry, tagsFrom, writeEntry, EMPTY_ENTRY } from "../src/project/entry";
+import { newProject } from "../src/project/project";
 import { setIniValue } from "../src/project/ini";
 import { draftStoreEntry } from "../src/desktop/publishing";
 import { draftEntry } from "../src/publish/draft";
@@ -22,6 +23,7 @@ describe("the store entry", () => {
       tags: ["dark", "night"],
       licence: "CC0-1.0",
       source: "",
+      devices: [] as never[],
       alts: { "1-x4.png": "Night owl on the X4" },
     };
     expect(writeEntry(files, entry)).toBeNull();
@@ -53,6 +55,31 @@ describe("the store entry", () => {
     const result = await setEntry.run({ summary: "Calm.", group: "look" }, context);
     expect(result.isError).toBeFalsy();
     expect(readEntry(files)).toMatchObject({ summary: "Calm.", group: "look", licence: "MIT", alts: { "1-x4.png": "Mine" } });
+  });
+
+  it("names the devices a plugin is for, as the store's form takes them, and keeps them", async () => {
+    const { files, context } = bench();
+    const result = await setEntry.run({ summary: "Calm.", group: "look", devices: ["x4", "x4-pro"] }, context);
+    expect(result.isError).toBeFalsy();
+    expect(files.read("store/store.ini")).toContain("devices = x4, x4-pro\n");
+    expect(readEntry(files).devices).toEqual(["x4", "x4-pro"]);
+    // Drafting again without devices leaves them; every device is none named.
+    await setEntry.run({ summary: "Calmer.", group: "look" }, context);
+    expect(readEntry(files).devices).toEqual(["x4", "x4-pro"]);
+    await setEntry.run({ summary: "Calmer.", group: "look", devices: ["android", "x4", "x4-pro", "x4-classic"] }, context);
+    expect(readEntry(files).devices).toEqual([]);
+    expect(files.read("store/store.ini")).not.toContain("devices");
+    // A name the store does not know is not kept.
+    files.write("store/store.ini", "[store]\nsummary = A.\ngroup = look\ndevices = x4, x9, android\n");
+    expect(readEntry(files).devices).toEqual(["x4", "android"]);
+  });
+
+  it("refuses devices for a plugin with code: it is for the readers it has builds for", async () => {
+    const { files, context } = bench(newProject("code"));
+    const result = await setEntry.run({ summary: "Calm.", group: "look", devices: ["x4"] }, context);
+    expect(result.isError).toBe(true);
+    expect(result.content).toMatch(/builds/);
+    expect(files.read("plugin/store/store.ini")).toBeUndefined();
   });
 
   it("is drafted from the desktop's Publish view with the workshop's AI and the data model", async () => {

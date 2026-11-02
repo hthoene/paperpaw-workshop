@@ -20,6 +20,11 @@ export type Group = (typeof GROUPS)[number];
  *  taken by the store; these are the ones a beginner needs. */
 export const LICENCES = ["CC0-1.0", "CC-BY-4.0", "MIT", "Apache-2.0", "GPL-3.0-or-later"] as const;
 
+/** The devices a data plugin can be limited to, as the store names them
+ *  (paperpaw.org's `Device::named`). The X3 is served as `x4`. */
+export const DEVICES = ["android", "x4", "x4-pro", "x4-classic"] as const;
+export type DeviceId = (typeof DEVICES)[number];
+
 export const MAX_NAME = 60;
 export const MAX_SUMMARY = 160;
 export const MAX_DESCRIPTION = 2000;
@@ -38,11 +43,14 @@ export interface Entry {
   licence: string;
   /** A home page or repository, if there is one. */
   source: string;
+  /** The devices a data plugin is for; none named is every device. A
+   *  plugin with code is for the readers it has builds for. */
+  devices: DeviceId[];
   /** What each screenshot shows, by its file name in `store/`. */
   alts: Record<string, string>;
 }
 
-export const EMPTY_ENTRY: Entry = { summary: "", description: "", group: "", tags: [], licence: "", source: "", alts: {} };
+export const EMPTY_ENTRY: Entry = { summary: "", description: "", group: "", tags: [], licence: "", source: "", devices: [], alts: {} };
 
 export function readEntry(files: Files): Entry {
   const text = files.read(entryPath(files.kind));
@@ -62,6 +70,10 @@ export function readEntry(files: Files): Entry {
       .filter(Boolean),
     licence: said("licence"),
     source: said("source"),
+    devices: said("devices")
+      .split(",")
+      .map((d) => d.trim())
+      .filter((d): d is DeviceId => (DEVICES as readonly string[]).includes(d)),
     alts,
   };
 }
@@ -78,6 +90,7 @@ export function writeEntry(files: Files, entry: Entry): string | null {
   put("tags", entry.tags.join(", "));
   put("licence", entry.licence);
   put("source", entry.source);
+  put("devices", entry.devices.join(", "));
   const shots = Object.entries(entry.alts).filter(([, alt]) => alt.trim());
   if (shots.length) {
     lines.push("", "[screenshots]");
