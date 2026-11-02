@@ -32,3 +32,39 @@ describe("what went wrong, in the person's words", () => {
     expect(message(overloaded).length).toBeGreaterThan(0);
   });
 });
+
+describe("with a PaperPaw key, the failure is PaperPaw's key service's, not Anthropic's", () => {
+  const unreached = () => new Anthropic.APIConnectionError({ message: "Connection error." });
+
+  it("names the key service when it is not reached (no DNS, no route, blocked)", () => {
+    const said = message(unreached(), true);
+    expect(said).toContain("workshop.paperpaw.org");
+    expect(said).not.toContain("Anthropic");
+  });
+
+  it("keeps Anthropic's wording for a key of one's own", () => {
+    expect(message(unreached())).toContain("Anthropic could not be reached");
+  });
+
+  it("does not blame Anthropic for a gateway's error page", () => {
+    const gateway = Anthropic.APIError.generate(502, undefined, "502 Bad Gateway", new Headers());
+    expect(message(gateway, true)).toContain("PaperPaw's key service");
+    expect(message(gateway, true)).not.toContain("Anthropic");
+    expect(message(gateway)).toContain("Anthropic");
+  });
+
+  it("says a refusal without the proxy's words as the key service's", () => {
+    const refused = Anthropic.APIError.generate(401, undefined, "401", new Headers());
+    expect(message(refused, true)).toContain("PaperPaw's key service did not accept");
+  });
+
+  it("still tells the proxy's own words first", () => {
+    const refused = Anthropic.APIError.generate(
+      502,
+      { type: "error", error: { type: "api_error", message: "Anthropic could not be reached through the PaperPaw key's proxy; try again in a while." } },
+      "502",
+      new Headers(),
+    );
+    expect(message(refused, true)).toContain("through the PaperPaw key's proxy");
+  });
+});

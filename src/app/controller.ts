@@ -447,7 +447,7 @@ export class Workshop {
         this.abort.signal,
       );
     } catch (e) {
-      this.error = message(e);
+      this.error = message(e, this.provider.label === "provider.paperpaw");
       // Too large for one request: on in a fresh conversation.
       if (e instanceof Anthropic.APIError && e.status === 413) this.long = true;
     } finally {
@@ -531,10 +531,18 @@ export class Workshop {
 
 /** What went wrong, in the person's words: Anthropic's errors each in
  *  their own, the rest as they are. */
-export function message(e: unknown): string {
+export function message(e: unknown, paperpaw = false): string {
   // PaperPaw's proxy says why in its own words, for a PaperPaw key (budget used, expired).
   const said = e instanceof Anthropic.APIError ? (e.error as { error?: { message?: unknown } } | undefined)?.error?.message : undefined;
   if (typeof said === "string" && said.includes("PaperPaw key")) return said;
+  // With a PaperPaw key the request goes to PaperPaw's key service, not to
+  // Anthropic: what it did not answer (not reached, a gateway's error
+  // page) is not Anthropic's, and is not told as Anthropic's.
+  if (paperpaw) {
+    if (e instanceof Anthropic.APIConnectionError) return t("workshop.error.network.paperpaw");
+    if (e instanceof Anthropic.AuthenticationError || e instanceof Anthropic.PermissionDeniedError) return t("workshop.error.key.paperpaw");
+    if (e instanceof Anthropic.APIError && e.status !== undefined && e.status >= 500) return t("workshop.error.server.paperpaw");
+  }
   if (e instanceof Anthropic.AuthenticationError || e instanceof Anthropic.PermissionDeniedError) return t("workshop.error.key");
   if (e instanceof Anthropic.RateLimitError) return t("workshop.error.rate");
   if (e instanceof Anthropic.APIConnectionError) return t("workshop.error.network");
