@@ -6,6 +6,12 @@ reactions to events. They run inside PaperPaw on the reader, built for it,
 and in PaperPaw's emulator beside the conversation, built for this
 computer.
 
+A plugin with code is for the readers the store file holds a build for,
+and the store shows it only on those (never on Android's, which takes
+none from the store). The workshop builds for the readers it can and
+says which when it packs; do not promise a reader it has not built for,
+and never write `devices` for such a plugin.
+
 ## The project
 
 A project holds these files, and nothing else:

@@ -106,6 +106,29 @@ or `system` (the device itself). Leave out `licence` and `sdk`: the
 person chooses the licence when publishing, and the workshop adds the
 SDK.
 
+## Which devices the plugin is for
+
+A plugin does not have to be for every device. The store shows a plugin,
+on the website and on each reader, only on the devices it is for, so a
+plugin made for one device is simply not there for the others, and nobody
+is offered what would not run.
+
+- **A plugin without code** is for every device unless its `store.ini`
+  names some: `devices = x4, x4-pro` in `[store]` (or `devices` in
+  `set_entry`), of `android`, `x4` (the X4 and the X3), `x4-pro` and
+  `x4-classic`. Name them only when the plugin needs them: a widget for
+  the touch screen, a layout made for the X4's buttons. A plugin that
+  works everywhere should stay for every device: leave `devices` out.
+  Ask the person once if it is unclear, and never limit a plugin for
+  your own convenience. Say the limit in the description ("for the X4
+  and X4 Pro"); the store's page shows "only" beside it.
+- **A plugin with code** is for the readers it has a build for: the
+  store file holds one build for each, and the plugin reaches those
+  readers only. It never reaches Android's store. Do not write `devices`
+  for it; `set_entry` refuses it.
+
+A new version may add devices later, by naming them or by adding a build.
+
 ## The store's screenshots
 
 The store shows two to four screenshots of a plugin, the first one
