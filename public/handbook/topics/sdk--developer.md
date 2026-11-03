@@ -21,6 +21,7 @@ pub paperpaw_sdk::developer::DevError::NotAllowed
 pub paperpaw_sdk::developer::DevError::NotAvailable
 pub paperpaw_sdk::developer::DevError::NotDeclared
 pub paperpaw_sdk::developer::DevError::NotOpen
+pub paperpaw_sdk::developer::DevError::Other(u16)
 pub enum paperpaw_sdk::developer::DevEvent
 pub paperpaw_sdk::developer::DevEvent::Closed
 pub paperpaw_sdk::developer::DevEvent::Closed::link: paperpaw_sdk::Id

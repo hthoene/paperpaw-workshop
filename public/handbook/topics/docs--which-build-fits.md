@@ -20,5 +20,7 @@ format's linker script keeps, and a device loads the file only where
 that compiler built the firmware too. A beta or a release that keeps
 the interface runs the plugin as it is. The store and the update check
 show which plugins wait for a build. Interface 4 came with 0.5.0-beta.8
-(reading, settings and real-time screens): a plugin built for an earlier
-release is to be built again for it.
+(reading, settings and real-time screens), interface 6 with 0.6.0-beta.1
+(right-to-left text, shared functions, plugin files of format 4, TLS
+sockets, screens that fit another size; interface 5 was never released): a plugin
+built for an earlier interface is to be built again for it.

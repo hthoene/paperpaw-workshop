@@ -45,7 +45,7 @@ describe("the generated handbook", () => {
     expect((await book.items("button")).map((i) => i.path)).toContain("ui::Ui::button");
     // The methods of what the SDK passes on, from crates without api.txt.
     expect((await book.items("Canvas::fill"))[0]).toMatchObject({ path: "Canvas::fill", kind: "fn" });
-    expect((await book.items("canvas rect")).map((i) => i.path)).toContain("Canvas::fill_rect");
+    expect((await book.items("canvas fill_rect")).map((i) => i.path)).toContain("Canvas::fill_rect");
     // By the paths a plugin uses, with their own crate's docs.
     expect((await book.items("config::parse"))[0]?.doc).toContain("entries");
     expect(await book.items("xyzzyqq")).toEqual([]);

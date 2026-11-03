@@ -326,6 +326,7 @@ A data plugin is a folder:
 plugins/large-print/
   plugin.ini     [plugin] id, name, description, version, formats
   i18n/*.ini     translation catalogs (also whole new languages)
+  i18n/*.ppcat   the same compiled (paperpaw-sign catalog), read as needed
   keymap.ini     key bindings
   settings.ini   new defaults for any plugin's settings ([core] font-size = 14)
   fonts/*.ttf    fonts to read with (also .otf, .ttc), by family
@@ -419,14 +420,40 @@ change a setting that keeps the device safe, such as the lock's.
 
 Packs for other scripts are read a glyph at a time, so devices with
 little memory can use them ([ADR 0018](adr/0018-font-packs-for-other-scripts.md)).
-`tools/script-pack.py` builds Cyrillic and Greek for Literata.
-A pack that extends a face with sizes larger than its own draws text
-asked that large, and the font size goes as far: the X4's firmware has
-Literata up to 32 px, and `tools/literata-packs.py` builds its larger
-sizes (and its bold italic face) as plugins for the font library.
+`tools/script-pack.py` builds Cyrillic and Greek for Literata (the data plugins
+`script-cyrillic` and `script-greek`), and
+Arabic and Hebrew (with where their marks sit) and Korean (the Hangul
+of KS X 1001, ready as `script-korean`, and the other 8,822 syllables as
+`script-korean-extra`, about 30 MiB; neither offered yet) from the fonts
+in `tools/fonts`. A pack that extends a face with sizes larger than its own,
+and has its letters (at least those of `aenoAEO0` the face has), draws
+text asked that large, and the font size goes as far; a pack of another
+script's letters adds those letters only, in whatever sizes: the X4's firmware has
+Literata's regular face up to 32 px, and `tools/literata-packs.py` builds its
+bold and italic faces (`literata-styles`, which the store fetches by itself
+where they are missing), its larger sizes and its bold italic face as plugins.
 Icon packs are such packs for the icon font: `tools/icons/pack.py` builds
 one with the Tabler icons named
 (`[extends] icons.ppfp = fonts-default.icons`).
+
+A font of your own, for the X4 and the other devices that draw packs
+only, is made on a computer with `paperpaw-fontgen`:
+
+```sh
+paperpaw-fontgen --family "My Font" --regular MyFont-Regular.ttf \
+    --bold MyFont-Bold.ttf --italic MyFont-Italic.ttf plugins
+```
+
+It writes `plugins/font-my-font` (a `plugin.ini` with the family and a
+pack for each face; only the regular one is needed, the others are drawn in
+it), says how large each pack is and how many of the characters asked for
+(`--chars latin,cyrillic,greek`, else Latin) the font has, and warns where
+it has none. Copy the folder into the card's `plugins` folder and choose the
+font in *Settings > Reading > Font*. Devices that draw font files read a
+`.ttf` or `.otf` copied into the `fonts` folder (on Android
+`PaperPaw/fonts` of the shared storage) instead. The fonts browser's
+*Your own fonts* entry, beside *More fonts* where a font is chosen, says
+this in the reader's language.
 
 A family needs a name and a face, a family of its own a regular face;
 its faces are packs, drawn on every device and read a glyph at a time,
@@ -441,17 +468,25 @@ bold = bold.ppfp
 ```
 
 A plugin may also bring a face of a family that is there without it,
-bound to its role: the X4's firmware has no Literata Bold Italic, which
-such a plugin brings back:
+bound to its role: the X4's firmware has Literata's regular face alone
+(no bold, italic or bold italic), which such plugins bring back (bold and
+italic in `literata-styles`, which the store fetches by itself at the first
+start where they are missing). Until they are there, bold and italic text
+is set in the regular face:
 
 ```ini
 [family]
 name = Literata
-bold-italic = literata-bold-italic.ppfp
+bold = literata-bold.ppfp
+italic = literata-italic.ppfp
 
 [fonts]
-core.font-reading-bold-italic = literata-bold-italic.bold-italic
+core.font-reading-bold = literata-styles.bold
+core.font-reading-italic = literata-styles.italic
 ```
+
+Packs that extend a face the plugin brings name it as
+`<plugin>.<style>` (`[extends] literata-bold-large.ppfp = literata-styles.bold`).
 
 A logo of its own takes the place of PaperPaw's (on the sleep screen,
 the About page and the logo widget): a picture in the folder, named in
@@ -885,7 +920,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
-| `[core] ui-size` | Menu text size | 7 to 24 | `9` | Size of menus, lists and the status line. |
+| `[core] ui-size` | Menu text size | 7 to 24 | `8` | Size of menus, lists and the status line. |
 | `[core] ui-contrast` | Contrast | `core.contrast.normal`, `core.contrast.strong` | `core.contrast.normal` | Strong draws gray hints and notes in black. |
 | `[core] ui-header` | Headers | `core.header.plain`, `core.header.light`, `core.header.dark` | `core.header.plain` | How the title at the top of menus and lists looks. |
 | `[core] ui-corners` | Corners | `core.corners.square`, `core.corners.small`, `core.corners.round`, `core.corners.soft` | `core.corners.soft` | Of highlighted rows, buttons and boxes. |
@@ -896,7 +931,8 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `[core] ui-margin` | Margins of menus | 0 to 15 | `4` | Space at the left and right of menus and lists. |
 | `[core] ui-row` | Row height | 120 to 300 | `160` | Height of the rows of menus and lists, relative to their text. |
 | `[core] ui-lines` | Line thickness | 1 to 10 | `3` | How thick lines and frames are drawn. |
-| `[core] ui-palette` | Grays | text | `` | Grays by purpose, e.g. muted=60 line=170 (0 black, 255 white). |
+| `[core] ui-palette` | Grays | text | `` | Colours by purpose, e.g. muted=60 line=170 link=#2a6f97 (0 black, 255 white). |
+| `[core] ui-text-curve` | Interface text tone curve | text | `` | Advanced. The same for menus and lists. |
 | `[core] notice-seconds` | Message time | 1 to 60 | `4` | How long short messages such as “Sync done” stay on the screen. |
 | `[menu] style` | Menus | `menu.style.list`, `menu.style.tiles` | `menu.style.list` | Menus as a list, or as tiles with their icons at the top of the screen. |
 
@@ -912,6 +948,8 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `[vocabulary] retention` | Retention wanted | 70 to 97 | `90` | The chance you still know a card when due. Higher means more reviews. |
 | `[vocabulary] cards-from-lookups` | Make cards of words looked up | `true`, `false` | `false` | Each word you look up becomes a card in the deck Looked up. |
 | `[vocabulary] review-on-wake` | Review on waking | `true`, `false` | `false` | The review opens as the device wakes, where flash cards are due. |
+| `[vocabulary] sd-auto` | Update decks from the card when opened | `true`, `false` | `true` | Flash cards read the files in the folder that are new or changed. |
+| `[vocabulary] sd-folder` | Folder for the files of decks | text | `Flashcards` | On the SD card: a CSV, TSV or Anki file in it is a deck. |
 | `[translate] to` | Translate into | `translate.to.auto`, `translate.to.ar`, `translate.to.bg`, `translate.to.cs`, `translate.to.da`, `translate.to.de`, `translate.to.el`, `translate.to.en-gb`, `translate.to.en-us`, `translate.to.es`, `translate.to.et`, `translate.to.fi`, `translate.to.fr`, `translate.to.hu`, `translate.to.id`, `translate.to.it`, `translate.to.ja`, `translate.to.ko`, `translate.to.lt`, `translate.to.lv`, `translate.to.nb`, `translate.to.nl`, `translate.to.pl`, `translate.to.pt-br`, `translate.to.pt-pt`, `translate.to.ro`, `translate.to.ru`, `translate.to.sk`, `translate.to.sl`, `translate.to.sv`, `translate.to.tr`, `translate.to.uk`, `translate.to.zh-hans` | `translate.to.auto` | The language selected text is translated into. |
 
 ## Widgets for home screen layouts
@@ -932,6 +970,12 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `stats.widget.year` | Books this year |
 | `stats.widget.streak` | Reading streak |
 | `reading-goal.widget` | Reading cat |
+| `notes-vault.recent` | Recent notes |
+| `notes-vault.pinned` | Pinned note |
+| `notes-vault.day` | Note of the day |
+| `notes-vault.random` | Random note |
+| `notes-vault.tags` | Tags |
+| `notes-vault.search` | Search notes |
 | `vocabulary.widget.word` | Word of the day |
 | `vocabulary.widget.saved` | Words saved |
 | `vocabulary.widget.due` | Cards due |
@@ -969,7 +1013,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `about.open` | About PaperPaw |
 | `battery.open` | Battery |
 | `bluetooth.open` | Bluetooth |
-| `calibre.open` | Calibre connection |
+| `calibre.open` | Wireless library |
 | `core.apps` | Apps |
 | `core.back` | Back |
 | `core.clean-up` | Clean up storage |
@@ -1007,9 +1051,11 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `files.by-tag` | By tag |
 | `files.favourites` | Favourites |
 | `files.list.find` | Find |
+| `files.look-again` | Look for new books |
 | `files.search` | Search the library |
 | `files.shelves` | Shelves |
 | `fonts-browser.open` | More fonts |
+| `fonts-browser.own` | Your own fonts |
 | `home.all-tools` | All tools |
 | `home.edit-pages` | Edit home screen |
 | `keyboard.done` | Finish typing |
@@ -1021,10 +1067,13 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `menu-editor.open` | Customise menus |
 | `news.fetch` | Fetch the news |
 | `news.open` | News |
+| `notes-overview.open` | All notes |
+| `notes-vault.open` | Notes vault |
 | `opds.open` | Catalogs |
 | `opds.sync` | Sync catalogs |
 | `plugin-manager.open` | Manage plugins |
 | `plugin-manager.screens.open` | Screens |
+| `power.menu` | Power |
 | `power.open` | Power |
 | `profiles.next` | Next profile |
 | `profiles.open` | Profiles |
@@ -1068,6 +1117,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `update.open` | Update |
 | `vocabulary.flash-cards` | Flash cards |
 | `vocabulary.open` | Vocabulary |
+| `vocabulary.scan-card` | Scan the SD card for cards |
 | `weather.choose-place` | Place |
 | `weather.refresh` | Fetch the weather |
 | `widgets.todo.open` | To do |

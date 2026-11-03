@@ -51,6 +51,20 @@ next wake. `on_close_request` may keep a screen open, for example to
 ask first. `on_pointer` takes a finger whole, for drawing or moving
 rows.
 
+When its part of the screen changes size (the device turned, a window
+resized, the row of hints or a bar came or went), a screen is made anew
+by its factory for the new size, after `on_close`, which keeps what it
+would lose. A screen that has much to keep (a book open, a long list
+scrolled, a connection) lays itself out anew in `on_resize` instead,
+from `cx.env().content()`, and answers `Handled::Yes`: it stays as it
+is. A screen that shows one thing of the list below it (a book's
+details, a message) says `Pane::DETAIL` in `pane`; where the screen is
+wide that will show it beside the list. `Screen::revision` is never
+implemented: the kernel calls items added later only on screens built
+with them. A screen that shows another inside it (`host::ScreenHost`)
+answers `ScreenHost::revision` there, and calls the newer items of the
+one it holds through `call_since`.
+
 Some rules every screen should follow:
 
 - **Touch and buttons alike.** Some devices have only buttons (the

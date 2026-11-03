@@ -48,4 +48,35 @@ it comes (`SocketRead::File`), so files of any size never need to fit in
 memory. `Command::Broadcast` finds services in the local network by a
 UDP datagram and their answers. Everything comes back as events
 (`SocketNotice`s); a socket closes when the screen
-that was open as it opened closes.
+that was open as it opened closes. One that background work opens (its
+event's handlers, a job's step) is the run's instead: it closes when the
+run ends (the job done or failed, the work run again, taken back or
+refused, or its plugin gone), whatever screens open and close meanwhile.
+One connected from a socket's event is the screens': several connections
+in the background are a job's steps. A secure one of background work
+ends when idle: `idle_ms(0)` is refused for it (`SocketError::Options`),
+at most 30 minutes (`MAX_TLS_IDLE_MS`, as long as IMAP IDLE waits).
+
+A socket may be secure (TLS): `Command::connect_tls(socket, host, 993,
+events, Tls::new())` connects and says `SocketNotice::Secured` once the
+handshake is done (no `Connected` before). Send and read nothing before:
+until `Secured` that fails the socket (`SocketError::NotReady`) and
+closes it. For STARTTLS, connect plainly, send the server's command, read
+its go-ahead, then `Command::start_tls(socket, Tls::new())`: with a read
+under way or bytes come unread it fails and closes, as they would pass as
+secure. `Tls::new()` trusts the authorities PaperPaw ships; a server of
+one's own with a certificate no authority signed is trusted by
+`Tls::pinned_keys(vec![key])` (its key, which a renewed certificate
+usually keeps) or `Tls::pinned(vec![hash])` (that certificate alone).
+The first connection to it says `SocketNotice::Untrusted` with the
+certificate's `CertificateHash` and `KeyHash`: show one to the reader to
+compare, and keep it in the plugin's settings once they agree.
+`Secured`'s `time_checked` is false where the device did not know the
+time yet (an X4 just after a cold start): the certificate's dates were
+not checked, so a plugin that must be sure closes and tries again later.
+`SocketRead::Bytes` reads what came as bytes (`SocketNotice::Bytes`), for
+lines that are no UTF-8. `Capabilities::tls_sessions` says how many TLS connections fit
+at once (one on the X4, HTTPS counted): a socket waits for one up to its
+`Tls::timeout_ms`, then fails `SocketError::Busy`. A TLS connection holds
+about 40 KiB on the X4 and keeps the radio awake, so connect, fetch and
+close; `Tls::idle_ms` (60 s) closes a forgotten one.

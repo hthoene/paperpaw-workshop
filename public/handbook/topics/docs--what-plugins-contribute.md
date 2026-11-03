@@ -30,7 +30,7 @@
 | Services | `provide` | Anything one plugin offers others, found with `env.services().get` |
 | Contributions | `contribute` | Additions to a point another plugin defined |
 | Translations | `add_translations` | Catalogs for any language |
-| Book data | `add_book_data`, `add_book_cache` | Where the plugin keeps something for each book (named by `library::key`): moved and removed with the book. What `add_book_cache` names (made again from the book when needed) is cleaned up by itself when the book is gone; what `add_book_data` names (the reader's own: notes, places) only when the reader agrees, in *Clean up storage* |
+| Book data | `add_book_data`, `add_book_cache` | Where the plugin keeps something for each book (named by `library::key`, in the folder itself or in its subfolder of the key's first two digits, `<folder>/<2 hex>/<prefix><key>…`, so that no folder holds thousands of entries): moved and removed with the book. What `add_book_cache` names (made again from the book when needed) is cleaned up by itself when the book is gone; what `add_book_data` names (the reader's own: notes, places) only when the reader agrees, in *Clean up storage* |
 | Book fields | `add_book_field` | A value kept with books (`library::set_field`), shown on their information page and, where `in_catalog`, kept in the catalog to filter by |
 | Book badges | `add_book_badge` | A few letters or an icon on books' rows in views of the library |
 | Actions of others | `override_action` | Runs in place of any action's own handler; of several, the highest priority wins |
@@ -92,6 +92,25 @@ The documentation of `builtin::slots` says the same for every slot.
 - **Menus.** Entries in their `order`, equal orders in the order they
   were added; a menu the user redefined in their order, with entries
   contributed since after their neighbour.
+
+### Pressing twice
+
+A button, or a tap zone, can do one thing when pressed once and another
+when pressed twice: bind the second as `double.<button>` (or
+`double-tap.<zone>`) in a key map, in `paperpaw.ini` or on the device
+(*Buttons and gestures*, "Buttons pressed twice"):
+
+```ini
+[keymap.global]
+double.confirm = core.home
+```
+
+How quickly the second press must follow the first is the setting
+*Double tap* (`core.double-tap-ms`, 300 ms; advanced). A button waits for
+a second press only if something is bound to its double press, so the
+buttons that have none respond at once. Where one is bound, the single
+press is answered after that time instead of at once, as the second press
+might still come. Chords (two buttons at once) are not built.
 
 ### Examples
 
@@ -182,12 +201,12 @@ that their choices go along; a shell opens a book with
 | Text chosen, and the action chosen for it | `menus::SELECTION`, `events::TEXT_CHOSEN` | add an action to the menu, hear the event |
 | Notes exported as Markdown | `events::NOTES_EXPORTED` | for notes apps and syncs |
 | The reader's menus | `menus::READER`, `READER_MORE`, `READER_PANEL` | add entries there |
-| The type of pages | `settings::FONT_SIZE`, `FONT_WEIGHT`, `TEXT_CONTRAST`, `SMOOTH_TEXT`, `WORD_SPACING`, `LETTER_SPACING`, `KERNING`, `LIGATURES`, `LINE_SPACING`, `LINE_BREAKING`, `MARGIN`, `MARGIN_ENDS`, `JUSTIFY`, `HYPHENATE`, `HYPHEN_MIN_LEFT`, `HYPHEN_MIN_RIGHT`, `INDENT`, `INDENT_SIZE`, `PARAGRAPH_SPACING`, `PARAGRAPH_SPACE`, `WIDOWS`, `ORPHANS`, `PUBLISHER_STYLES`, `BOOK_ALIGN` and the other `BOOK_*`, `FOOTNOTES` | the kernel's settings (each book may have its own), which readers read |
+| The type of pages | `settings::FONT_SIZE`, `FONT_WEIGHT`, `TEXT_CONTRAST`, `SMOOTH_TEXT`, `WORD_SPACING`, `LETTER_SPACING`, `KERNING`, `LIGATURES`, `LINE_SPACING`, `LINE_BREAKING`, `KOREAN_BREAKS`, `MARGIN`, `MARGIN_ENDS`, `JUSTIFY`, `HYPHENATE`, `HYPHEN_MIN_LEFT`, `HYPHEN_MIN_RIGHT`, `INDENT`, `INDENT_SIZE`, `PARAGRAPH_SPACING`, `PARAGRAPH_SPACE`, `WIDOWS`, `ORPHANS`, `PUBLISHER_STYLES`, `BOOK_ALIGN` and the other `BOOK_*`, `FOOTNOTES` | the kernel's settings (each book may have its own), which readers read |
 | The page's words | `events::PAGE_WORDS_WANTED`, `reading::PageWords` | readers answer `reading::ask_page_words` |
 | Where a book was left | `positions::{load, save}`, `Reading::xpointer` with `BOOK_CLOSED` | readers keep it; syncs and lists read it without opening the book |
 | The contents, search, the marks, a footnote, skimming | `slots::TOC`, `SEARCH`, `ANNOTATIONS`, `FOOTNOTE`, `SKIM`, `events::FOLLOW_LINK`, `SKIM`, `SKIMMED` | bind a screen of one's own; readers open the slots, follow the links and go where skimming asks |
 | A book opened as the reader opens it | `reading::open_options`, `reading::conversion` | its places fit the reader's (a search, contents, an XPointer) |
-| Pages that go right to left | `Metadata::direction` (`PageProgression`), `Screen::mirrored` | readers mirror taps and swipes (an EPUB's `page-progression-direction`) |
+| Pages that go right to left | `Metadata::direction` (`PageProgression`), `Screen::direction` | readers mirror taps and swipes (an EPUB's `page-progression-direction`); other screens follow the interface (`Direction::Auto`) |
 | Status lines' settings | `groups::STATUS_LINES` | the group readers put them in |
 | Reading aloud's settings | `group_sections::ALOUD` | the section readers and shells put them in |
 | Key bindings while reading | the layer `[keymap.core.reader]` | the slot's layer, whichever screen fills it |
@@ -727,7 +746,10 @@ Plugins keep passwords, API keys and tokens with
 with `env.secrets().get(id)`. They are all listed in *Settings, Passwords
 and keys*, where the user changes or removes them. Ask for one on the
 keyboard in password mode (`ask::text(…).password()`); the keyboard
-offers to type it on a phone. Ask for web and e-mail addresses with
+offers to type it on a phone. Ask for a message or a note of several
+lines with `.multiline()`: the keyboard gets a key for the line break, shows
+the text on as many wrapped lines as fit above the keys, and the answer
+has `\n` between its lines. Ask for web and e-mail addresses with
 `.url()` and `.email()`: the keyboard types them as they are, without
 capitals of its own. They are kept apart from the settings and
 not readable at a glance, but not encrypted: the devices have no safe
@@ -875,6 +897,55 @@ script presses with `ble-key:right` (or `left`, `page-down`,
 heart-rate belt that answers the example above, notifying a rate each
 second.
 
+### Looking different: tone, look, hooks
+
+Three ways to change how things look, from the least to the most code. Each
+changes how a thing *looks*, never where it goes or how wide it is.
+
+- **Numbers (no code).** A theme or a reader sets `core.text-curve` (book
+  text; in place of *Text contrast* when set) or `core.ui-text-curve` (the
+  interface) to a list of `[script=]curve` entries separated by `;`, e.g.
+  `smooth; arab=contrast:1`. A curve is `smooth`, `contrast:-1` to
+  `contrast:2`, `sharp:128` or 16 numbers from 0 to 255 (the opacity of
+  each of the 16 coverage levels of a letter's edge). On a black-and-white
+  panel the curve decides which edge pixels turn black, so it is also the
+  knob for thicker or thinner letters. In code: `ToneCurve::parse_for`,
+  `FontHandle::inked(TextInk::new(curve))`.
+- **A look.** `Painters::text` paints the text that `ui::Label` draws (a
+  shadow, an outline): draw with `part.font.draw(..)` and return `true`; the
+  width stays the stock one. `Painters::extras` takes a `static` list of
+  `ExtraPaint`s for parts of kinds that come later (scrollbars, tabs): a
+  look made now works when the SDK learns to ask
+  (`Capability::LOOK_EXTRAS`). The SDK's own rows, headers,
+  buttons, hints and widgets' captions pass it too, with their role
+  (`TextRole::BUTTON`, `HINT`, …); text a plugin draws itself does so with
+  `ui::draw_label_in(canvas, font, style, role, ..)`. `ui::draw_label` is the
+  stock look.
+- **A render hook.** `Registrar::add_render_hook` with a `RenderHookSpec`
+  changes each finished band (night or sepia tint, grain, a better dither of
+  the four-gray pass). **Check `Capability::RENDER_HOOK`:** without it the
+  hook is accepted and never run (today's firmware). A hook sees pixels, not
+  coverage, so it cannot make letter edges softer (use the tone curve for
+  that); it must give the same rows for the same band and carry (no clock or
+  random: `HookCx` has none); state across bands goes in `BandView::carry`,
+  which the kernel zeroes at the start of each pass; a panic aborts the
+  device.
+
+**Colour roles.** `style.ink(Ink::MUTED)` gives the colour of a role of the
+interface; a theme sets them in `core.ui-palette` (`muted=60 link=#2a6f97`,
+a gray or `#rrggbb`; a gray panel uses the brightness). `Ink` is a number
+with constants, so roles can be added: `ACCENT`, `ON_ACCENT`, `LINK`,
+`SELECTION` and `WARNING` exist (14 to 18, 19 to 31 are free). A role a theme
+does not set reads the colour of `Ink::fallback()` (`LINK` reads `TEXT`), so
+draw with the role that says what a thing *is* and a theme made for fewer
+roles still looks right; a role you do not know the name of also works.
+Do not mix this up with `TextInk`: that is *how text is inked* (its tone), an
+`Ink` is a colour role.
+
+`Canvas::pixel` and `gray_at` read back what *this band* drew, to composite
+pixels you drew, never to decide what to draw (a point in another band is
+`None`, and decisions would show seams).
+
 ### Screens that run in real time
 
 Games, emulators and animations draw many frames a second and want
@@ -994,7 +1065,38 @@ it comes (`SocketRead::File`), so files of any size never need to fit in
 memory. `Command::Broadcast` finds services in the local network by a
 UDP datagram and their answers. Everything comes back as events
 (`SocketNotice`s); a socket closes when the screen
-that was open as it opened closes.
+that was open as it opened closes. One that background work opens (its
+event's handlers, a job's step) is the run's instead: it closes when the
+run ends (the job done or failed, the work run again, taken back or
+refused, or its plugin gone), whatever screens open and close meanwhile.
+One connected from a socket's event is the screens': several connections
+in the background are a job's steps. A secure one of background work
+ends when idle: `idle_ms(0)` is refused for it (`SocketError::Options`),
+at most 30 minutes (`MAX_TLS_IDLE_MS`, as long as IMAP IDLE waits).
+
+A socket may be secure (TLS): `Command::connect_tls(socket, host, 993,
+events, Tls::new())` connects and says `SocketNotice::Secured` once the
+handshake is done (no `Connected` before). Send and read nothing before:
+until `Secured` that fails the socket (`SocketError::NotReady`) and
+closes it. For STARTTLS, connect plainly, send the server's command, read
+its go-ahead, then `Command::start_tls(socket, Tls::new())`: with a read
+under way or bytes come unread it fails and closes, as they would pass as
+secure. `Tls::new()` trusts the authorities PaperPaw ships; a server of
+one's own with a certificate no authority signed is trusted by
+`Tls::pinned_keys(vec![key])` (its key, which a renewed certificate
+usually keeps) or `Tls::pinned(vec![hash])` (that certificate alone).
+The first connection to it says `SocketNotice::Untrusted` with the
+certificate's `CertificateHash` and `KeyHash`: show one to the reader to
+compare, and keep it in the plugin's settings once they agree.
+`Secured`'s `time_checked` is false where the device did not know the
+time yet (an X4 just after a cold start): the certificate's dates were
+not checked, so a plugin that must be sure closes and tries again later.
+`SocketRead::Bytes` reads what came as bytes (`SocketNotice::Bytes`), for
+lines that are no UTF-8. `Capabilities::tls_sessions` says how many TLS connections fit
+at once (one on the X4, HTTPS counted): a socket waits for one up to its
+`Tls::timeout_ms`, then fails `SocketError::Busy`. A TLS connection holds
+about 40 KiB on the X4 and keeps the radio awake, so connect, fetch and
+close; `Tls::idle_ms` (60 s) closes a forgotten one.
 
 ### Firmware updates
 

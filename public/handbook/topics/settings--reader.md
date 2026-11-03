@@ -13,7 +13,7 @@
 | `[reader] status.battery-percent` | Battery in percent | `true`, `false` | `true` | The charge as a number beside the battery symbol. |
 | `[reader] open-last` | Open last book at start | `true`, `false` | `true` | Start with the last book instead of the home screen. |
 | `[reader] corner-bookmark` | Bookmark corner | `true`, `false` | `true` | A tap on the top right corner of a page sets or removes its bookmark. |
-| `[reader] hold-chapters` | Hold for next chapter | `true`, `false` | `true` | Off: a page turns as soon as its button goes down, not when let go. |
+| `[reader] hold-chapters` | Hold for next chapter | `true`, `false` | `false` | On: holding a page button changes the chapter; a page turns when its button is let go. |
 | `[reader] auto-turn-seconds` | Turn pages every | 5 to 600 | `30` | For “Turn pages automatically” in the reader’s menu. |
 | `[reader] aloud-speed` | Speed | 50 to 300 | `100` | How fast books are read aloud. |
 | `[reader] aloud-highlight` | Underline the sentence | `true`, `false` | `true` | Shows which sentence is being read. |

@@ -65,6 +65,7 @@ pub enum paperpaw_sdk::decorations::LineKind
 pub paperpaw_sdk::decorations::LineKind::Dashed
 pub paperpaw_sdk::decorations::LineKind::Dotted
 pub paperpaw_sdk::decorations::LineKind::Double
+pub paperpaw_sdk::decorations::LineKind::Other(&'static str)
 pub paperpaw_sdk::decorations::LineKind::Solid
 pub paperpaw_sdk::decorations::LineKind::Wavy
 pub const paperpaw_sdk::decorations::LineKind::ALL: &[paperpaw_sdk::decorations::LineKind]
@@ -78,6 +79,7 @@ pub paperpaw_sdk::decorations::Tone::Gray
 pub paperpaw_sdk::decorations::Tone::Green
 pub paperpaw_sdk::decorations::Tone::LightGray
 pub paperpaw_sdk::decorations::Tone::Orange
+pub paperpaw_sdk::decorations::Tone::Other(&'static str)
 pub paperpaw_sdk::decorations::Tone::Pink
 pub paperpaw_sdk::decorations::Tone::Red
 pub paperpaw_sdk::decorations::Tone::White

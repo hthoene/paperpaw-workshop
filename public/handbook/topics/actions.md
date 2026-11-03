@@ -3,7 +3,7 @@
 | `about.open` | About PaperPaw |
 | `battery.open` | Battery |
 | `bluetooth.open` | Bluetooth |
-| `calibre.open` | Calibre connection |
+| `calibre.open` | Wireless library |
 | `core.apps` | Apps |
 | `core.back` | Back |
 | `core.clean-up` | Clean up storage |
@@ -41,9 +41,11 @@
 | `files.by-tag` | By tag |
 | `files.favourites` | Favourites |
 | `files.list.find` | Find |
+| `files.look-again` | Look for new books |
 | `files.search` | Search the library |
 | `files.shelves` | Shelves |
 | `fonts-browser.open` | More fonts |
+| `fonts-browser.own` | Your own fonts |
 | `home.all-tools` | All tools |
 | `home.edit-pages` | Edit home screen |
 | `keyboard.done` | Finish typing |
@@ -55,10 +57,13 @@
 | `menu-editor.open` | Customise menus |
 | `news.fetch` | Fetch the news |
 | `news.open` | News |
+| `notes-overview.open` | All notes |
+| `notes-vault.open` | Notes vault |
 | `opds.open` | Catalogs |
 | `opds.sync` | Sync catalogs |
 | `plugin-manager.open` | Manage plugins |
 | `plugin-manager.screens.open` | Screens |
+| `power.menu` | Power |
 | `power.open` | Power |
 | `profiles.next` | Next profile |
 | `profiles.open` | Profiles |
@@ -102,6 +107,7 @@
 | `update.open` | Update |
 | `vocabulary.flash-cards` | Flash cards |
 | `vocabulary.open` | Vocabulary |
+| `vocabulary.scan-card` | Scan the SD card for cards |
 | `weather.choose-place` | Place |
 | `weather.refresh` | Fetch the weather |
 | `widgets.todo.open` | To do |

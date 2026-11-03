@@ -1,11 +1,22 @@
 ```rust
 pub trait paperpaw_sdk::event::EventData: core::clone::Clone + core::marker::Sized + 'static
 pub trait paperpaw_sdk::event::ParamValue: core::marker::Sized
+pub struct paperpaw_sdk::event::FixedSubscription
+pub fn paperpaw_sdk::event::FixedSubscription::call(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params, &mut paperpaw_sdk::Commands)
+pub fn paperpaw_sdk::event::FixedSubscription::event(&self) -> &paperpaw_sdk::Id
+pub const fn paperpaw_sdk::event::FixedSubscription::new(paperpaw_sdk::Id, fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params, &mut paperpaw_sdk::Commands)) -> Self
+pub fn paperpaw_sdk::event::FixedSubscription::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+pub fn paperpaw_sdk::event::FixedSubscription::call(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params, &mut paperpaw_sdk::Commands)
+pub fn paperpaw_sdk::event::FixedSubscription::event(&self) -> &paperpaw_sdk::Id
+pub const fn paperpaw_sdk::event::FixedSubscription::new(paperpaw_sdk::Id, fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params, &mut paperpaw_sdk::Commands)) -> Self
+pub fn paperpaw_sdk::event::FixedSubscription::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub type paperpaw_sdk::event::EventHandler = alloc::boxed::Box<dyn core::ops::function::Fn(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params, &mut paperpaw_sdk::Commands)>
 pub struct paperpaw_sdk::event::Event<P: paperpaw_sdk::event::EventData>
 pub fn paperpaw_sdk::event::Event<P>::as_str(&self) -> &str
 pub fn paperpaw_sdk::event::Event<P>::emit(&self, P) -> paperpaw_sdk::Command
+pub fn paperpaw_sdk::event::Event<P>::hear(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params, &mut paperpaw_sdk::Commands, impl core::ops::function::FnOnce(&paperpaw_sdk::Env<'_>, &P, &mut paperpaw_sdk::Commands))
 pub const fn paperpaw_sdk::event::Event<P>::id(&self) -> &paperpaw_sdk::Id
+pub const fn paperpaw_sdk::event::Event<P>::id_static(self) -> paperpaw_sdk::Id
 pub const fn paperpaw_sdk::event::Event<P>::new(&'static str) -> Self
 pub fn paperpaw_sdk::event::Event<P>::read(&self, &paperpaw_sdk::Id, &paperpaw_sdk::Params) -> core::option::Option<P>
 pub fn paperpaw_sdk::event::Event<P>::schedule(&self, P, paperpaw_platform::input::Instant) -> paperpaw_sdk::Command
@@ -16,7 +27,9 @@ pub fn paperpaw_sdk::event::Event<P>::as_ref(&self) -> &str
 pub fn paperpaw_sdk::event::Event<P>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub fn paperpaw_sdk::event::Event<P>::as_str(&self) -> &str
 pub fn paperpaw_sdk::event::Event<P>::emit(&self, P) -> paperpaw_sdk::Command
+pub fn paperpaw_sdk::event::Event<P>::hear(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params, &mut paperpaw_sdk::Commands, impl core::ops::function::FnOnce(&paperpaw_sdk::Env<'_>, &P, &mut paperpaw_sdk::Commands))
 pub const fn paperpaw_sdk::event::Event<P>::id(&self) -> &paperpaw_sdk::Id
+pub const fn paperpaw_sdk::event::Event<P>::id_static(self) -> paperpaw_sdk::Id
 pub const fn paperpaw_sdk::event::Event<P>::new(&'static str) -> Self
 pub fn paperpaw_sdk::event::Event<P>::read(&self, &paperpaw_sdk::Id, &paperpaw_sdk::Params) -> core::option::Option<P>
 pub fn paperpaw_sdk::event::Event<P>::schedule(&self, P, paperpaw_platform::input::Instant) -> paperpaw_sdk::Command

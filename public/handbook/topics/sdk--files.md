@@ -27,6 +27,7 @@ pub fn paperpaw_sdk::files::put_in_free_place(&dyn paperpaw_platform::storage::S
 pub fn paperpaw_sdk::files::put_in_place(&dyn paperpaw_platform::storage::Storage, &str, &str) -> core::result::Result<(), paperpaw_platform::storage::StorageError>
 pub fn paperpaw_sdk::files::read_text(&dyn paperpaw_platform::storage::Storage, &str, usize) -> core::result::Result<alloc::string::String, paperpaw_platform::storage::StorageError>
 pub fn paperpaw_sdk::files::same_path(&dyn paperpaw_platform::storage::Storage, &str, &str) -> bool
+pub fn paperpaw_sdk::files::shown_size(&paperpaw_sdk::Env<'_>, u64) -> alloc::string::String
 pub fn paperpaw_sdk::files::size(u64, &str) -> alloc::string::String
 pub fn paperpaw_sdk::files::without_bom(&[u8]) -> &[u8]
 ```

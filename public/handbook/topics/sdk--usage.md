@@ -1,17 +1,17 @@
 ```rust
 pub struct paperpaw_sdk::usage::PluginUsage
-pub paperpaw_sdk::usage::PluginUsage::awake_ms: u64
+pub paperpaw_sdk::usage::PluginUsage::awake_ms: u32
 pub paperpaw_sdk::usage::PluginUsage::awake_reason: alloc::borrow::Cow<'static, str>
 pub paperpaw_sdk::usage::PluginUsage::busy_us: u64
 pub paperpaw_sdk::usage::PluginUsage::calls: u32
 pub paperpaw_sdk::usage::PluginUsage::pixels: u64
 pub paperpaw_sdk::usage::PluginUsage::plugin: paperpaw_sdk::Id
-pub paperpaw_sdk::usage::PluginUsage::read: u64
+pub paperpaw_sdk::usage::PluginUsage::read: u32
 pub paperpaw_sdk::usage::PluginUsage::refreshes: paperpaw_sdk::usage::Refreshes
 pub paperpaw_sdk::usage::PluginUsage::refused: u32
 pub paperpaw_sdk::usage::PluginUsage::requests: u32
-pub paperpaw_sdk::usage::PluginUsage::shown_ms: u64
-pub paperpaw_sdk::usage::PluginUsage::written: u64
+pub paperpaw_sdk::usage::PluginUsage::shown_ms: u32
+pub paperpaw_sdk::usage::PluginUsage::written: u32
 pub fn paperpaw_sdk::usage::PluginUsage::new(paperpaw_sdk::Id) -> Self
 pub fn paperpaw_sdk::usage::PluginUsage::default() -> Self
 pub struct paperpaw_sdk::usage::Refreshes

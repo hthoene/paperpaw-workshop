@@ -1,6 +1,7 @@
 ```rust
 pub struct paperpaw_sdk::native::CodeRoom
 pub paperpaw_sdk::native::CodeRoom::granule: u32
+pub paperpaw_sdk::native::CodeRoom::larger: core::option::Option<u64>
 pub paperpaw_sdk::native::CodeRoom::max_plugins: core::option::Option<u32>
 pub paperpaw_sdk::native::CodeRoom::placed: u32
 pub paperpaw_sdk::native::CodeRoom::shared: bool
@@ -16,7 +17,10 @@ pub const fn paperpaw_sdk::native::Fingerprint::of(u16, u64) -> paperpaw_sdk::na
 pub fn paperpaw_sdk::native::Fingerprint::parse(&str) -> core::option::Option<paperpaw_sdk::native::Fingerprint>
 pub fn paperpaw_sdk::native::Fingerprint::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub struct paperpaw_sdk::native::Native
+pub paperpaw_sdk::native::Native::api_size: u32
 pub paperpaw_sdk::native::Native::compiler: u32
+pub paperpaw_sdk::native::Native::family_min: paperpaw_table::Revisions
+pub paperpaw_sdk::native::Native::family_revs: paperpaw_table::Revisions
 pub paperpaw_sdk::native::Native::file: alloc::borrow::Cow<'static, str>
 pub paperpaw_sdk::native::Native::fingerprint: paperpaw_sdk::native::Fingerprint
 pub paperpaw_sdk::native::Native::not_installed: alloc::vec::Vec<paperpaw_sdk::native::NotInstalled>
@@ -25,6 +29,8 @@ pub paperpaw_sdk::native::Native::toolchain: alloc::borrow::Cow<'static, str>
 pub fn paperpaw_sdk::native::Native::fits(&self, &paperpaw_native::header::Header) -> bool
 pub fn paperpaw_sdk::native::Native::new(impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> Self
 pub fn paperpaw_sdk::native::Native::path(&self, &str) -> alloc::string::String
+pub fn paperpaw_sdk::native::Native::problem(&self, &paperpaw_native::header::Header) -> core::option::Option<paperpaw_sdk::PluginProblem>
+pub fn paperpaw_sdk::native::Native::problem_of_file(&[u8], paperpaw_native::header::Problem) -> paperpaw_sdk::PluginProblem
 pub struct paperpaw_sdk::native::NotInstalled
 pub paperpaw_sdk::native::NotInstalled::plugin: paperpaw_sdk::Id
 pub paperpaw_sdk::native::NotInstalled::reason: paperpaw_sdk::native::NotInstalledReason
@@ -35,6 +41,11 @@ pub paperpaw_sdk::native::SafeMode::last_loaded: core::option::Option<alloc::str
 pub paperpaw_sdk::native::SafeMode::reason: paperpaw_sdk::native::SafeModeReason
 pub paperpaw_sdk::native::SafeMode::switched_off: alloc::vec::Vec<paperpaw_sdk::Id>
 pub fn paperpaw_sdk::native::SafeMode::new(paperpaw_sdk::native::SafeModeReason) -> Self
+pub struct paperpaw_sdk::native::keys::Revocation
+pub paperpaw_sdk::native::keys::Revocation::key: [u8; 32]
+pub paperpaw_sdk::native::keys::Revocation::plugin: alloc::string::String
+pub paperpaw_sdk::native::keys::Revocation::signature: [u8; 64]
+pub fn paperpaw_sdk::native::keys::Revocation::new(impl core::convert::Into<alloc::string::String>, [u8; 32], [u8; 64]) -> Self
 pub enum paperpaw_sdk::native::Author
 pub paperpaw_sdk::native::Author::Known
 pub paperpaw_sdk::native::Author::New
@@ -45,6 +56,15 @@ pub paperpaw_sdk::native::NotInstalledReason::OtherAuthor
 pub enum paperpaw_sdk::native::SafeModeReason
 pub paperpaw_sdk::native::SafeModeReason::FailedStarts
 pub paperpaw_sdk::native::SafeModeReason::KeyHeld
+pub enum paperpaw_sdk::native::keys::RevokedError
+pub paperpaw_sdk::native::keys::RevokedError::Full
+pub paperpaw_sdk::native::keys::RevokedError::NotKept
+pub enum paperpaw_sdk::native::keys::RotationError
+pub paperpaw_sdk::native::keys::RotationError::BadSignature
+pub paperpaw_sdk::native::keys::RotationError::NoAuthor
+pub paperpaw_sdk::native::keys::RotationError::NoRecoveryKey
+pub paperpaw_sdk::native::keys::RotationError::NotKept
+pub paperpaw_sdk::native::keys::RotationError::Refused
 pub use paperpaw_sdk::native::BadSignature
 pub use paperpaw_sdk::native::Chip
 pub use paperpaw_sdk::native::HEADER_LEN
@@ -54,7 +74,17 @@ pub use paperpaw_sdk::native::Signature
 pub const paperpaw_sdk::native::CODE_FILES: &[&str]
 pub const paperpaw_sdk::native::FINGERPRINT: paperpaw_sdk::native::Fingerprint
 pub const paperpaw_sdk::native::INTERFACE: u16
+pub const paperpaw_sdk::native::LAYOUT: u64
 pub const paperpaw_sdk::native::TOOLCHAIN: &str
+pub const paperpaw_sdk::native::keys::MAX_REVOKED: usize
+pub fn paperpaw_sdk::native::keys::accept_rotation(&dyn paperpaw_platform::storage::Storage, &str, &[u8; 32], &[u8; 64]) -> core::result::Result<(), paperpaw_sdk::native::keys::RotationError>
+pub fn paperpaw_sdk::native::keys::check_rotation(&dyn paperpaw_platform::storage::Storage, &str, &[u8; 32], &[u8; 64]) -> core::result::Result<(), paperpaw_sdk::native::keys::RotationError>
+pub fn paperpaw_sdk::native::keys::is_revoked(&dyn paperpaw_platform::storage::Storage, &str) -> bool
+pub fn paperpaw_sdk::native::keys::keep_revoked(&dyn paperpaw_platform::storage::Storage, &[paperpaw_sdk::native::keys::Revocation]) -> core::result::Result<(), paperpaw_sdk::native::keys::RevokedError>
+pub fn paperpaw_sdk::native::keys::known_recovery(&dyn paperpaw_platform::storage::Storage, &str) -> core::option::Option<[u8; 32]>
+pub fn paperpaw_sdk::native::keys::revocation_message(&str, &[u8; 32]) -> alloc::string::String
+pub fn paperpaw_sdk::native::keys::revoked(&dyn paperpaw_platform::storage::Storage) -> alloc::vec::Vec<paperpaw_sdk::native::keys::Revocation>
+pub fn paperpaw_sdk::native::keys::rotation_message(&str, &[u8; 32], &[u8; 32]) -> alloc::string::String
 pub fn paperpaw_sdk::native::author(&dyn paperpaw_platform::storage::Storage, &str, &[u8; 32]) -> paperpaw_sdk::native::Author
 pub fn paperpaw_sdk::native::code_room(&dyn paperpaw_platform::storage::Storage) -> core::option::Option<paperpaw_sdk::native::CodeRoom>
 pub fn paperpaw_sdk::native::fetched_code(&dyn paperpaw_platform::storage::Storage, &str) -> core::option::Option<[u8; 32]>
@@ -66,4 +96,5 @@ pub fn paperpaw_sdk::native::read_header(&dyn paperpaw_platform::storage::Storag
 pub unsafe fn paperpaw_sdk::native::take(*mut core::ffi::c_void) -> core::option::Option<alloc::boxed::Box<dyn paperpaw_sdk::Plugin>>
 pub use paperpaw_sdk::native::compiler
 pub use paperpaw_sdk::native::signature
+pub mod paperpaw_sdk::native::keys
 ```

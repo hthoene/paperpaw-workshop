@@ -27,6 +27,7 @@ pub const paperpaw_sdk::memory::Placement::LARGE: Self
 pub enum paperpaw_sdk::memory::MemoryError
 pub paperpaw_sdk::memory::MemoryError::Full
 pub paperpaw_sdk::memory::MemoryError::Full::bytes: usize
+pub paperpaw_sdk::memory::MemoryError::Other(u16)
 pub paperpaw_sdk::memory::MemoryError::TooLarge
 pub fn paperpaw_sdk::memory::MemoryError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub type paperpaw_sdk::memory::Placer = fn(usize, usize, u32) -> *mut u8

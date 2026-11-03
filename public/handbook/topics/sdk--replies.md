@@ -84,6 +84,19 @@ pub fn paperpaw_sdk::replies::HttpReply::to_params(&self) -> paperpaw_sdk::Param
 pub fn paperpaw_sdk::replies::HttpReply::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
 pub fn paperpaw_sdk::replies::HttpReply::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::replies::HttpReply::to_params(&self) -> paperpaw_sdk::Params
+pub struct paperpaw_sdk::replies::Played
+pub fn paperpaw_sdk::replies::Played::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::replies::Played::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::replies::Played::to_params(&self) -> paperpaw_sdk::Params
+pub paperpaw_sdk::replies::Played::context: paperpaw_sdk::Params
+pub paperpaw_sdk::replies::Played::played: bool
+pub fn paperpaw_sdk::replies::Played::new(bool, paperpaw_sdk::Params) -> Self
+pub fn paperpaw_sdk::replies::Played::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::replies::Played::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::replies::Played::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::replies::Played::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::replies::Played::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::replies::Played::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::replies::Spoken
 pub fn paperpaw_sdk::replies::Spoken::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
 pub fn paperpaw_sdk::replies::Spoken::into_params(self) -> paperpaw_sdk::Params
@@ -122,6 +135,7 @@ pub paperpaw_sdk::replies::HttpError::Cancelled
 pub paperpaw_sdk::replies::HttpError::Dns
 pub paperpaw_sdk::replies::HttpError::Io
 pub paperpaw_sdk::replies::HttpError::NoNetwork
+pub paperpaw_sdk::replies::HttpError::Other(u16)
 pub paperpaw_sdk::replies::HttpError::Refused
 pub paperpaw_sdk::replies::HttpError::Replaced
 pub paperpaw_sdk::replies::HttpError::Timeout
@@ -169,6 +183,9 @@ pub paperpaw_sdk::replies::SocketNotice::Answer
 pub paperpaw_sdk::replies::SocketNotice::Answer::from: alloc::string::String
 pub paperpaw_sdk::replies::SocketNotice::Answer::socket: paperpaw_sdk::Id
 pub paperpaw_sdk::replies::SocketNotice::Answer::text: alloc::string::String
+pub paperpaw_sdk::replies::SocketNotice::Bytes
+pub paperpaw_sdk::replies::SocketNotice::Bytes::data: alloc::vec::Vec<u8>
+pub paperpaw_sdk::replies::SocketNotice::Bytes::socket: paperpaw_sdk::Id
 pub paperpaw_sdk::replies::SocketNotice::Closed
 pub paperpaw_sdk::replies::SocketNotice::Closed::reason: alloc::string::String
 pub paperpaw_sdk::replies::SocketNotice::Closed::socket: paperpaw_sdk::Id
@@ -178,6 +195,7 @@ pub paperpaw_sdk::replies::SocketNotice::Done
 pub paperpaw_sdk::replies::SocketNotice::Done::reason: alloc::string::String
 pub paperpaw_sdk::replies::SocketNotice::Done::socket: paperpaw_sdk::Id
 pub paperpaw_sdk::replies::SocketNotice::Failed
+pub paperpaw_sdk::replies::SocketNotice::Failed::error: paperpaw_sdk::SocketError
 pub paperpaw_sdk::replies::SocketNotice::Failed::reason: alloc::string::String
 pub paperpaw_sdk::replies::SocketNotice::Failed::socket: paperpaw_sdk::Id
 pub paperpaw_sdk::replies::SocketNotice::Received
@@ -186,6 +204,16 @@ pub paperpaw_sdk::replies::SocketNotice::Received::text: alloc::string::String
 pub paperpaw_sdk::replies::SocketNotice::Saved
 pub paperpaw_sdk::replies::SocketNotice::Saved::path: alloc::string::String
 pub paperpaw_sdk::replies::SocketNotice::Saved::socket: paperpaw_sdk::Id
+pub paperpaw_sdk::replies::SocketNotice::Secured
+pub paperpaw_sdk::replies::SocketNotice::Secured::certificate: paperpaw_sdk::CertificateHash
+pub paperpaw_sdk::replies::SocketNotice::Secured::key: paperpaw_sdk::KeyHash
+pub paperpaw_sdk::replies::SocketNotice::Secured::socket: paperpaw_sdk::Id
+pub paperpaw_sdk::replies::SocketNotice::Secured::time_checked: bool
+pub paperpaw_sdk::replies::SocketNotice::Untrusted
+pub paperpaw_sdk::replies::SocketNotice::Untrusted::certificate: paperpaw_sdk::CertificateHash
+pub paperpaw_sdk::replies::SocketNotice::Untrusted::key: paperpaw_sdk::KeyHash
+pub paperpaw_sdk::replies::SocketNotice::Untrusted::socket: paperpaw_sdk::Id
+pub paperpaw_sdk::replies::SocketNotice::Untrusted::why: paperpaw_sdk::Distrust
 pub fn paperpaw_sdk::replies::SocketNotice::socket(&self) -> &paperpaw_sdk::Id
 pub fn paperpaw_sdk::replies::SocketNotice::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
 pub fn paperpaw_sdk::replies::SocketNotice::into_params(self) -> paperpaw_sdk::Params

@@ -185,6 +185,7 @@ pub paperpaw_sdk::bluetooth::BtError::Lost
 pub paperpaw_sdk::bluetooth::BtError::NotAllowed
 pub paperpaw_sdk::bluetooth::BtError::NotFound
 pub paperpaw_sdk::bluetooth::BtError::Off
+pub paperpaw_sdk::bluetooth::BtError::Other(u16)
 pub paperpaw_sdk::bluetooth::BtError::Timeout
 pub paperpaw_sdk::bluetooth::BtError::Unsupported
 pub const fn paperpaw_sdk::bluetooth::BtError::as_str(self) -> &'static str

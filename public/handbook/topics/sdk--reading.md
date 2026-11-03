@@ -36,11 +36,16 @@ pub paperpaw_sdk::reading::Word::text: alloc::string::String
 pub fn paperpaw_sdk::reading::Word::new(impl core::convert::Into<alloc::string::String>, paperpaw_document::Locator, paperpaw_document::Locator) -> Self
 pub struct paperpaw_sdk::reading::WordBox
 pub paperpaw_sdk::reading::WordBox::area: paperpaw_platform::geometry::Rect
+pub paperpaw_sdk::reading::WordBox::bidi: paperpaw_layout::LineBidi
 pub paperpaw_sdk::reading::WordBox::end: paperpaw_document::Locator
+pub paperpaw_sdk::reading::WordBox::rtl: bool
 pub paperpaw_sdk::reading::WordBox::start: paperpaw_document::Locator
 pub paperpaw_sdk::reading::WordBox::text: alloc::string::String
+pub fn paperpaw_sdk::reading::WordBox::bidi(self, paperpaw_layout::LineBidi) -> Self
 pub fn paperpaw_sdk::reading::WordBox::lookup_text(&self) -> &str
 pub fn paperpaw_sdk::reading::WordBox::new(paperpaw_platform::geometry::Rect, impl core::convert::Into<alloc::string::String>, paperpaw_document::Locator, paperpaw_document::Locator) -> Self
+pub fn paperpaw_sdk::reading::WordBox::rtl(self, bool) -> Self
+pub use paperpaw_sdk::reading::LineBidi
 pub struct paperpaw_sdk::reading::FilteredDocument<'d, 'e>
 pub fn paperpaw_sdk::reading::FilteredDocument<'d, 'e>::in_book(self, &'d str, &'d str) -> Self
 pub fn paperpaw_sdk::reading::FilteredDocument<'d, 'e>::kept_block_at(&self, &dyn paperpaw_platform::storage::Storage, paperpaw_document::Locator) -> core::result::Result<core::option::Option<paperpaw_document::Block>, paperpaw_document::DocumentError>
@@ -57,6 +62,7 @@ pub fn paperpaw_sdk::reading::FilteredDocument<'_, '_>::locate_xpointer(&self, &
 pub fn paperpaw_sdk::reading::FilteredDocument<'_, '_>::metadata(&self) -> &paperpaw_document::Metadata
 pub fn paperpaw_sdk::reading::FilteredDocument<'_, '_>::page_label(&self, &dyn paperpaw_platform::storage::Storage, paperpaw_document::Locator) -> core::option::Option<alloc::string::String>
 pub fn paperpaw_sdk::reading::FilteredDocument<'_, '_>::prepare_image(&self, &dyn paperpaw_platform::storage::Storage, &paperpaw_document::ImageRef) -> core::option::Option<paperpaw_document::ImageRef>
+pub fn paperpaw_sdk::reading::FilteredDocument<'_, '_>::prepare_image_larger(&self, &dyn paperpaw_platform::storage::Storage, &paperpaw_document::ImageRef, u32) -> core::option::Option<paperpaw_document::ImageRef>
 pub fn paperpaw_sdk::reading::FilteredDocument<'_, '_>::progress(&self, paperpaw_document::Locator) -> f32
 pub fn paperpaw_sdk::reading::FilteredDocument<'_, '_>::section_len(&self, u32) -> u32
 pub fn paperpaw_sdk::reading::FilteredDocument<'_, '_>::sections(&self) -> u32

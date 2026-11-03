@@ -6,14 +6,24 @@ pub use paperpaw_sdk::document::Document
 pub use paperpaw_sdk::document::DocumentError
 pub use paperpaw_sdk::document::EmbeddedFont
 pub use paperpaw_sdk::document::ImageRef
+pub use paperpaw_sdk::document::LETTER_SPACING_STEPS
+pub use paperpaw_sdk::document::LineStyle
 pub use paperpaw_sdk::document::Link
+pub use paperpaw_sdk::document::LinkKind
 pub use paperpaw_sdk::document::Locator
+pub use paperpaw_sdk::document::MAX_COLUMNS
 pub use paperpaw_sdk::document::MAX_FAMILIES
+pub use paperpaw_sdk::document::MAX_INLINE_LANGS
+pub use paperpaw_sdk::document::MAX_LETTER_SPACING
+pub use paperpaw_sdk::document::MIN_LETTER_SPACING
 pub use paperpaw_sdk::document::Metadata
 pub use paperpaw_sdk::document::OffsetMap
 pub use paperpaw_sdk::document::PageProgression
 pub use paperpaw_sdk::document::Run
+pub use paperpaw_sdk::document::TableCell
+pub use paperpaw_sdk::document::TableRow
 pub use paperpaw_sdk::document::TextStyle
 pub use paperpaw_sdk::document::TocEntry
+pub use paperpaw_sdk::document::VerticalAlign
 pub use paperpaw_sdk::document::is_external
 ```

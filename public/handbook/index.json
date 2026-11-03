@@ -4,7 +4,7 @@
   "title": "The sample plugin",
   "file": "docs--the-sample-plugin.md",
   "summary": "[`samples/hello-plugin`](../samples/hello-plugin/src/lib.rs) is a small\nplugin to start from.",
-  "tokens": 6273
+  "tokens": 6515
  },
  {
   "id": "docs/the-plugin",
@@ -25,7 +25,7 @@
   "title": "Screens",
   "file": "docs--screens.md",
   "summary": "A screen implements [`Screen`].",
-  "tokens": 1786
+  "tokens": 2029
  },
  {
   "id": "docs/which-building-block-for-what",
@@ -67,7 +67,7 @@
   "title": "Checking your plugin",
   "file": "docs--checking-your-plugin.md",
   "summary": "`paperpaw-dev` ([`tools/dev`](../tools/dev/src/lib.rs)) looks at a\nplugin the way its users will meet it, before it is published.",
-  "tokens": 3024
+  "tokens": 3101
  },
  {
   "id": "docs/variants",
@@ -102,7 +102,7 @@
   "title": "What plugins contribute",
   "file": "docs--what-plugins-contribute.md",
   "summary": "| Contribution | Registrar | What it is |\n|---|---|---|\n| Actions | `add_action` | Something to do, bound to buttons and gestures, listed in menus |\n| Screens |",
-  "tokens": 16236
+  "tokens": 17990
  },
  {
   "id": "docs/what-a-slot-s-screen-does",
@@ -119,6 +119,13 @@
   "tokens": 245
  },
  {
+  "id": "docs/pressing-twice",
+  "title": "Pressing twice",
+  "file": "docs--pressing-twice.md",
+  "summary": "A button, or a tap zone, can do one thing when pressed once and another\nwhen pressed twice: bind the second as `double.<button>` (or\n`double-tap.<zone>`) in a k",
+  "tokens": 207
+ },
+ {
   "id": "docs/examples",
   "title": "Examples",
   "file": "docs--examples.md",
@@ -130,7 +137,7 @@
   "title": "What every reader offers",
   "file": "docs--what-every-reader-offers.md",
   "summary": "A plugin that works with books never names the reader plugin: it uses\nwhat `builtin` defines for every reader, so a reader of one's own (bound\nto `core.reader`)",
-  "tokens": 964
+  "tokens": 985
  },
  {
   "id": "docs/what-the-other-slots-promise",
@@ -207,7 +214,7 @@
   "title": "Passwords and keys",
   "file": "docs--passwords-and-keys.md",
   "summary": "Plugins keep passwords, API keys and tokens with\n`Command::set_secret(SecretChange::keep(id, label, value))` and read them\nwith `env.secrets().get(id)`.",
-  "tokens": 279
+  "tokens": 339
  },
  {
   "id": "docs/the-network",
@@ -224,6 +231,13 @@
   "tokens": 1577
  },
  {
+  "id": "docs/looking-different-tone-look-hooks",
+  "title": "Looking different: tone, look, hooks",
+  "file": "docs--looking-different-tone-look-hooks.md",
+  "summary": "Three ways to change how things look, from the least to the most code.",
+  "tokens": 821
+ },
+ {
   "id": "docs/screens-that-run-in-real-time",
   "title": "Screens that run in real time",
   "file": "docs--screens-that-run-in-real-time.md",
@@ -235,7 +249,7 @@
   "title": "Work in the background",
   "file": "docs--work-in-the-background.md",
   "summary": "What a plugin does on its own, not because the reader just asked for\nit, it declares as work (`paperpaw_sdk::work`, ADR 0025), and the\nkernel runs it at the mom",
-  "tokens": 862
+  "tokens": 1463
  },
  {
   "id": "docs/firmware-updates",
@@ -256,21 +270,21 @@
   "title": "Plugins as files",
   "file": "docs--plugins-as-files.md",
   "summary": "A code plugin can also be a file, `code.ppn`, in a plugin's folder on\nthe card, which the X4 and the X4 Pro load at their\nstart (ADR 0024): from the plugin stor",
-  "tokens": 2919
+  "tokens": 2965
  },
  {
   "id": "docs/the-crate",
   "title": "The crate",
   "file": "docs--the-crate.md",
   "summary": "The plugin stays a library crate, tried in the emulator and tested as\nany other.",
-  "tokens": 588
+  "tokens": 587
  },
  {
   "id": "docs/which-build-fits",
   "title": "Which build fits",
   "file": "docs--which-build-fits.md",
   "summary": "A plugin file runs on every PaperPaw of the plugin interface it was\nbuilt for ([ADR 0026](adr/0026-plugin-interface-version.md)),\nwhichever release made it: its",
-  "tokens": 393
+  "tokens": 441
  },
  {
   "id": "docs/the-file-in-the-emulator",
@@ -284,7 +298,7 @@
   "title": "Packing and signing",
   "file": "docs--packing-and-signing.md",
   "summary": "`paperpaw-sign` (in this repository, `tools/sign`) makes the file from\nthe linked plugin and signs it as its author:\n\n```sh\npaperpaw-sign key author.key        ",
-  "tokens": 255
+  "tokens": 253
  },
  {
   "id": "docs/trying-it-on-a-device",
@@ -312,14 +326,14 @@
   "title": "Plugins without code",
   "file": "docs--plugins-without-code.md",
   "summary": "A data plugin is a folder:\n\n```text\nplugins/large-print/\n  plugin.ini     [plugin] id, name, description, version, formats\n  i18n/*.ini     translation catalogs",
-  "tokens": 2404
+  "tokens": 2949
  },
  {
   "id": "docs/publishing",
   "title": "Publishing",
   "file": "docs--publishing.md",
   "summary": "The plugin library on paperpaw.org is what the website lists and every\nreader's store (*More plugins*) installs from (ADR 0023).",
-  "tokens": 2575
+  "tokens": 2574
  },
  {
   "id": "docs/what-is-uploaded",
@@ -417,14 +431,14 @@
   "title": "Widgets for home screen layouts",
   "file": "widgets.md",
   "summary": "| Widget id | Name |\n|---|---|\n| `core.space` | Space |\n| `core.fill` | Free space |\n| `home.status` | Status line |\n| `home.date` | Date |\n| `home.continue` | ",
-  "tokens": 442
+  "tokens": 505
  },
  {
   "id": "actions",
   "title": "Actions for key maps",
   "file": "actions.md",
-  "summary": "| Action id | Name |\n|---|---|\n| `about.open` | About PaperPaw |\n| `battery.open` | Battery |\n| `bluetooth.open` | Bluetooth |\n| `calibre.open` | Calibre connec",
-  "tokens": 1082
+  "summary": "| Action id | Name |\n|---|---|\n| `about.open` | About PaperPaw |\n| `battery.open` | Battery |\n| `bluetooth.open` | Bluetooth |\n| `calibre.open` | Wireless libra",
+  "tokens": 1148
  },
  {
   "id": "devices",
@@ -438,35 +452,35 @@
   "title": "The SDK's top level (paperpaw_sdk::...)",
   "file": "sdk--root.md",
   "summary": "```rust\npub trait paperpaw_sdk::EventData: core::clone::Clone + core::marker::Sized + 'static\npub trait paperpaw_sdk::Plugin\npub fn paperpaw_sdk::Plugin::manife",
-  "tokens": 24453
+  "tokens": 27393
  },
  {
   "id": "sdk/annotations",
   "title": "The SDK's module annotations",
   "file": "sdk--annotations.md",
   "summary": "```rust\npub struct paperpaw_sdk::annotations::Annotation\npub paperpaw_sdk::annotations::Annotation::created: i64\npub paperpaw_sdk::annotations::Annotation::mark",
-  "tokens": 928
+  "tokens": 1057
  },
  {
   "id": "sdk/ask",
   "title": "The SDK's module ask",
   "file": "sdk--ask.md",
   "summary": "```rust\npub struct paperpaw_sdk::ask::ChoiceQuestion\npub fn paperpaw_sdk::ask::ChoiceQuestion::about(self, impl core::convert::Into<alloc::string::String>) -> S",
-  "tokens": 870
+  "tokens": 888
  },
  {
   "id": "sdk/bluetooth",
   "title": "The SDK's module bluetooth",
   "file": "sdk--bluetooth.md",
   "summary": "```rust\npub struct paperpaw_sdk::bluetooth::Advertising\npub paperpaw_sdk::bluetooth::Advertising::appearance: core::option::Option<u16>\npub paperpaw_sdk::blueto",
-  "tokens": 7945
+  "tokens": 7959
  },
  {
   "id": "sdk/builtin",
   "title": "The SDK's module builtin",
   "file": "sdk--builtin.md",
   "summary": "```rust\npub struct paperpaw_sdk::builtin::events::AnnotationsChanged\npub paperpaw_sdk::builtin::events::AnnotationsChanged::path: alloc::string::String\npub fn p",
-  "tokens": 18946
+  "tokens": 20547
  },
  {
   "id": "sdk/chrome",
@@ -494,28 +508,28 @@
   "title": "The SDK's module contribution",
   "file": "sdk--contribution.md",
   "summary": "```rust\npub struct paperpaw_sdk::contribution::Registrar\npub fn paperpaw_sdk::contribution::Registrar::add_action(&mut self, paperpaw_sdk::ActionSpec) -> core::",
-  "tokens": 7617
+  "tokens": 8011
  },
  {
   "id": "sdk/data",
   "title": "The SDK's module data",
   "file": "sdk--data.md",
   "summary": "```rust\npub struct paperpaw_sdk::data::Format\npub paperpaw_sdk::data::Format::upgrades: &'static [paperpaw_sdk::data::Upgrade]\npub paperpaw_sdk::data::Format::v",
-  "tokens": 394
+  "tokens": 406
  },
  {
   "id": "sdk/decorations",
   "title": "The SDK's module decorations",
   "file": "sdk--decorations.md",
   "summary": "```rust\npub struct paperpaw_sdk::decorations::Decorated\npub paperpaw_sdk::decorations::Decorated::end: paperpaw_document::Locator\npub paperpaw_sdk::decorations:",
-  "tokens": 2706
+  "tokens": 2739
  },
  {
   "id": "sdk/developer",
   "title": "The SDK's module developer",
   "file": "sdk--developer.md",
   "summary": "```rust\npub struct paperpaw_sdk::developer::DevRequest\npub enum paperpaw_sdk::developer::DevClose\npub paperpaw_sdk::developer::DevClose::Asked\npub paperpaw_sdk:",
-  "tokens": 978
+  "tokens": 992
  },
  {
   "id": "sdk/device_name",
@@ -536,56 +550,56 @@
   "title": "The SDK's module document",
   "file": "sdk--document.md",
   "summary": "```rust\npub use paperpaw_sdk::document::Align\npub use paperpaw_sdk::document::Block\npub use paperpaw_sdk::document::BlockKind\npub use paperpaw_sdk::document::Do",
-  "tokens": 199
+  "tokens": 327
  },
  {
   "id": "sdk/event",
   "title": "The SDK's module event",
   "file": "sdk--event.md",
   "summary": "```rust\npub trait paperpaw_sdk::event::EventData: core::clone::Clone + core::marker::Sized + 'static\npub trait paperpaw_sdk::event::ParamValue: core::marker::Si",
-  "tokens": 764
+  "tokens": 1214
  },
  {
   "id": "sdk/reading",
   "title": "The SDK's module reading",
   "file": "sdk--reading.md",
   "summary": "```rust\npub struct paperpaw_sdk::reading::DroppedRuns\npub fn paperpaw_sdk::reading::DroppedRuns::clear(&self)\npub fn paperpaw_sdk::reading::DroppedRuns::new() -",
-  "tokens": 2300
+  "tokens": 2443
  },
  {
   "id": "sdk/replies",
   "title": "The SDK's module replies",
   "file": "sdk--replies.md",
   "summary": "```rust\npub struct paperpaw_sdk::replies::Confirmed\npub fn paperpaw_sdk::replies::Confirmed::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>\npu",
-  "tokens": 4483
+  "tokens": 5063
  },
  {
   "id": "sdk/ui",
   "title": "The SDK's module ui",
   "file": "sdk--ui.md",
   "summary": "```rust\npub struct paperpaw_sdk::ui::CellGrid\npub fn paperpaw_sdk::ui::CellGrid::cell(&self, usize) -> paperpaw_platform::geometry::Rect\npub fn paperpaw_sdk::ui",
-  "tokens": 24921
+  "tokens": 28479
  },
  {
   "id": "sdk/work",
   "title": "The SDK's module work",
   "file": "sdk--work.md",
   "summary": "```rust\npub struct paperpaw_sdk::work::Moments(_)\npub const paperpaw_sdk::work::Moments::ALL: paperpaw_sdk::work::Moments\npub const paperpaw_sdk::work::Moments:",
-  "tokens": 2833
+  "tokens": 2858
  },
  {
   "id": "sdk/wifi",
   "title": "The SDK's module wifi",
   "file": "sdk--wifi.md",
   "summary": "```rust\npub struct paperpaw_sdk::wifi::Wifi\npub paperpaw_sdk::wifi::Wifi::busy: bool\npub paperpaw_sdk::wifi::Wifi::networks: alloc::vec::Vec<paperpaw_sdk::wifi:",
-  "tokens": 1047
+  "tokens": 1095
  },
  {
   "id": "sdk/files",
   "title": "The SDK's module files",
   "file": "sdk--files.md",
   "summary": "```rust\npub struct paperpaw_sdk::files::Entry\npub paperpaw_sdk::files::Entry::is_dir: bool\npub paperpaw_sdk::files::Entry::name: alloc::string::String\npub paper",
-  "tokens": 906
+  "tokens": 931
  },
  {
   "id": "sdk/filters",
@@ -599,7 +613,7 @@
   "title": "The SDK's module firmware",
   "file": "sdk--firmware.md",
   "summary": "```rust\npub struct paperpaw_sdk::firmware::Firmware\npub paperpaw_sdk::firmware::Firmware::chip: u16\npub paperpaw_sdk::firmware::Firmware::keys: alloc::vec::Vec<",
-  "tokens": 1091
+  "tokens": 1107
  },
  {
   "id": "sdk/help",
@@ -613,7 +627,7 @@
   "title": "The SDK's module host",
   "file": "sdk--host.md",
   "summary": "```rust\npub struct paperpaw_sdk::host::ScreenHost\npub fn paperpaw_sdk::host::ScreenHost::area(&self) -> core::option::Option<paperpaw_platform::geometry::Rect>\n",
-  "tokens": 508
+  "tokens": 525
  },
  {
   "id": "sdk/hyphen",
@@ -654,8 +668,8 @@
   "id": "sdk/keys",
   "title": "The SDK's module keys",
   "file": "sdk--keys.md",
-  "summary": "```rust\npub trait paperpaw_sdk::keys::GestureRecognizer\npub fn paperpaw_sdk::keys::GestureRecognizer::next_tick(&self) -> core::option::Option<paperpaw_platform",
-  "tokens": 961
+  "summary": "```rust\npub trait paperpaw_sdk::keys::GestureRecognizer\npub fn paperpaw_sdk::keys::GestureRecognizer::extended(&mut self, &paperpaw_sdk::Id, &paperpaw_sdk::Para",
+  "tokens": 1038
  },
  {
   "id": "sdk/layers",
@@ -669,7 +683,7 @@
   "title": "The SDK's module library",
   "file": "sdk--library.md",
   "summary": "```rust\npub trait paperpaw_sdk::library::Library\npub fn paperpaw_sdk::library::Library::book(&self, &paperpaw_sdk::Env<'_>, &str) -> core::option::Option<paperp",
-  "tokens": 11329
+  "tokens": 12342
  },
  {
   "id": "sdk/logo",
@@ -690,14 +704,14 @@
   "title": "The SDK's module memory",
   "file": "sdk--memory.md",
   "summary": "```rust\npub struct paperpaw_sdk::memory::Memory\npub const paperpaw_sdk::memory::Memory::NONE: Self\npub const fn paperpaw_sdk::memory::Memory::new(fn() -> core::",
-  "tokens": 631
+  "tokens": 644
  },
  {
   "id": "sdk/native",
   "title": "The SDK's module native",
   "file": "sdk--native.md",
-  "summary": "```rust\npub struct paperpaw_sdk::native::CodeRoom\npub paperpaw_sdk::native::CodeRoom::granule: u32\npub paperpaw_sdk::native::CodeRoom::max_plugins: core::option",
-  "tokens": 1330
+  "summary": "```rust\npub struct paperpaw_sdk::native::CodeRoom\npub paperpaw_sdk::native::CodeRoom::granule: u32\npub paperpaw_sdk::native::CodeRoom::larger: core::option::Opt",
+  "tokens": 2079
  },
  {
   "id": "sdk/numbers",
@@ -725,7 +739,7 @@
   "title": "The SDK's module power",
   "file": "sdk--power.md",
   "summary": "```rust\npub struct paperpaw_sdk::power::Power\npub paperpaw_sdk::power::Power::automatic: bool\npub paperpaw_sdk::power::Power::level: paperpaw_sdk::power::PowerL",
-  "tokens": 720
+  "tokens": 848
  },
  {
   "id": "sdk/presets",
@@ -761,6 +775,20 @@
   "file": "sdk--realtime.md",
   "summary": "```rust\npub struct paperpaw_sdk::realtime::FrameReport\npub const fn paperpaw_sdk::realtime::FrameReport::area(&self) -> paperpaw_platform::geometry::Rect\npub co",
   "tokens": 1577
+ },
+ {
+  "id": "sdk/render",
+  "title": "The SDK's module render",
+  "file": "sdk--render.md",
+  "summary": "```rust\npub struct paperpaw_sdk::render::HookStage(_)\npub const paperpaw_sdk::render::HookStage::AFTER_BAND: Self\npub const paperpaw_sdk::render::HookStage::AFT",
+  "tokens": 801
+ },
+ {
+  "id": "sdk/requires",
+  "title": "The SDK's module requires",
+  "file": "sdk--requires.md",
+  "summary": "```rust\npub struct paperpaw_sdk::requires::Requirement\npub paperpaw_sdk::requires::Requirement::at_least: core::option::Option<paperpaw_sdk::Version>\npub paperp",
+  "tokens": 274
  },
  {
   "id": "sdk/secrets",
@@ -805,18 +833,25 @@
   "tokens": 442
  },
  {
+  "id": "sdk/sound",
+  "title": "The SDK's module sound",
+  "file": "sdk--sound.md",
+  "summary": "```rust\npub struct paperpaw_sdk::sound::Sound\npub fn paperpaw_sdk::sound::Sound::answer(&self, bool) -> paperpaw_sdk::Command\npub fn paperpaw_sdk::sound::Sound:",
+  "tokens": 208
+ },
+ {
   "id": "sdk/status",
   "title": "The SDK's module status",
   "file": "sdk--status.md",
   "summary": "```rust\npub struct paperpaw_sdk::status::Place\npub paperpaw_sdk::status::Place::id: paperpaw_sdk::Id\npub paperpaw_sdk::status::Place::line: core::option::Option",
-  "tokens": 3433
+  "tokens": 3488
  },
  {
   "id": "sdk/text",
   "title": "The SDK's module text",
   "file": "sdk--text.md",
-  "summary": "```rust\npub use paperpaw_sdk::text::OUTLINES\npub use paperpaw_sdk::text::ToneCurve\npub use paperpaw_sdk::text::sfnt\n```",
-  "tokens": 33
+  "summary": "```rust\npub use paperpaw_sdk::text::Around\npub use paperpaw_sdk::text::OUTLINES\npub use paperpaw_sdk::text::TextInk\npub use paperpaw_sdk::text::ToneCurve\npub us",
+  "tokens": 73
  },
  {
   "id": "sdk/time",
@@ -829,7 +864,7 @@
   "id": "sdk/usage",
   "title": "The SDK's module usage",
   "file": "sdk--usage.md",
-  "summary": "```rust\npub struct paperpaw_sdk::usage::PluginUsage\npub paperpaw_sdk::usage::PluginUsage::awake_ms: u64\npub paperpaw_sdk::usage::PluginUsage::awake_reason: allo",
+  "summary": "```rust\npub struct paperpaw_sdk::usage::PluginUsage\npub paperpaw_sdk::usage::PluginUsage::awake_ms: u32\npub paperpaw_sdk::usage::PluginUsage::awake_reason: allo",
   "tokens": 441
  },
  {
@@ -851,7 +886,7 @@
   "title": "The SDK's module widgets",
   "file": "sdk--widgets.md",
   "summary": "```rust\npub trait paperpaw_sdk::widgets::Widget\npub fn paperpaw_sdk::widgets::Widget::context(&mut self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::widgets::WidgetC",
-  "tokens": 7794
+  "tokens": 8212
  },
  {
   "id": "sdk/words",
@@ -872,7 +907,7 @@
   "title": "Settings of core",
   "file": "settings--core.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] developer` | Developer options | `true`, `false` | `false` | For developers",
-  "tokens": 7061
+  "tokens": 7549
  },
  {
   "id": "settings/dictionary",
@@ -886,7 +921,7 @@
   "title": "Settings of reader",
   "file": "settings--reader.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[reader] status.size` | Text size | 5 to 16 | `6` | The size of the text in the st",
-  "tokens": 753
+  "tokens": 758
  },
  {
   "id": "settings/files",
@@ -900,7 +935,7 @@
   "title": "Settings of home",
   "file": "settings--home.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[home] page-1` | Home page 1 | text | `home.clock, home.continue, home.recent` | T",
-  "tokens": 1882
+  "tokens": 2178
  },
  {
   "id": "settings/menu",
@@ -936,6 +971,20 @@
   "file": "settings--reading-goal.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[reading-goal] content` | Content from | 5 to 95 | `50` | From which share of the ",
   "tokens": 297
+ },
+ {
+  "id": "settings/end-of-book",
+  "title": "Settings of end-of-book",
+  "file": "settings--end-of-book.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[end-of-book] show` | Show a screen at the end of a book | `true`, `false` | `true",
+  "tokens": 94
+ },
+ {
+  "id": "settings/notes-vault",
+  "title": "Settings of notes-vault",
+  "file": "settings--notes-vault.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[notes-vault] folder` | Vault folder | text | `` | The folder of Markdown notes (a",
+  "tokens": 1733
  },
  {
   "id": "settings/battery",
@@ -998,28 +1047,28 @@
   "title": "Settings of lock",
   "file": "settings--lock.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[lock] kind` | Screen lock | `lock.kind.off`, `lock.kind.pin`, `lock.kind.pattern`",
-  "tokens": 145
+  "tokens": 147
  },
  {
   "id": "settings/aids",
   "title": "Settings of aids",
   "file": "settings--aids.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[aids] bold-beginnings` | Bold word beginnings | `true`, `false` | `false` | The f",
-  "tokens": 98
+  "tokens": 155
  },
  {
   "id": "settings/vocabulary",
   "title": "Settings of vocabulary",
   "file": "settings--vocabulary.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[vocabulary] collect` | Keep a list of words looked up | `true`, `false` | `true` ",
-  "tokens": 1891
+  "tokens": 1975
  },
  {
   "id": "settings/sleep",
   "title": "Settings of sleep",
   "file": "settings--sleep.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[sleep] show` | Show | `sleep.show.cat`, `sleep.show.cover`, `sleep.show.picture`,",
-  "tokens": 490
+  "tokens": 494
  },
  {
   "id": "settings/translate",
@@ -1096,7 +1145,7 @@
   "title": "Settings in the group core.group.reading-display",
   "file": "settings-group--core.group.reading-display.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] night-mode` | Night mode | `true`, `false` | `false` | White text on black.",
-  "tokens": 334
+  "tokens": 438
  },
  {
   "id": "settings-group/core.group.reading-aloud",
@@ -1110,7 +1159,7 @@
   "title": "Settings in the group core.group.controls",
   "file": "settings-group--core.group.controls.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] edge-ends` | Swipe edges: top and bottom | 0 to 25 | `10` | How far from th",
-  "tokens": 428
+  "tokens": 483
  },
  {
   "id": "settings-group/core.group.library",
@@ -1130,22 +1179,22 @@
   "id": "settings-group/core.group.look",
   "title": "Settings in the group core.group.look",
   "file": "settings-group--core.group.look.md",
-  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] ui-size` | Menu text size | 7 to 24 | `9` | Size of menus, lists and the st",
-  "tokens": 572
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] ui-size` | Menu text size | 7 to 24 | `8` | Size of menus, lists and the st",
+  "tokens": 606
  },
  {
   "id": "settings-group/home.group",
   "title": "Settings in the group home.group",
   "file": "settings-group--home.group.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] widgets.frame` | Frames of widgets | `core.frame.own`, `core.frame.none`, `",
-  "tokens": 643
+  "tokens": 938
  },
  {
   "id": "settings-group/sleep.group",
   "title": "Settings in the group sleep.group",
   "file": "settings-group--sleep.group.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] logo` | Logo picture | text | `` | Path of a JPEG or PNG shown instead of P",
-  "tokens": 525
+  "tokens": 529
  },
  {
   "id": "settings-group/core.group.display",
@@ -1159,7 +1208,7 @@
   "title": "Settings in the group power.group",
   "file": "settings-group--power.group.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] sleep-after` | Sleep after | 0 to 120 | `10` | Minutes without use before t",
-  "tokens": 306
+  "tokens": 307
  },
  {
   "id": "settings-group/core.space",
@@ -1187,7 +1236,7 @@
   "title": "Settings in the group core.group.reading-layout",
   "file": "settings-group--core.group.reading-layout.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] line-spacing` | Line spacing | 80 to 250 | `135` | Space between lines, rel",
-  "tokens": 457
+  "tokens": 568
  },
  {
   "id": "settings-group/core.group.reading-hyphenation",
@@ -1208,14 +1257,14 @@
   "title": "Settings in the group core.group.reading-behaviour",
   "file": "settings-group--core.group.reading-behaviour.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] reading-app` | Reading app | `core.reading-app.default` | `core.reading-app",
-  "tokens": 191
+  "tokens": 264
  },
  {
   "id": "settings-group/core.group.reading",
   "title": "Settings in the group core.group.reading",
   "file": "settings-group--core.group.reading.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] scope-only` | Only this book | `true`, `false` | `false` | Changes to font ",
-  "tokens": 546
+  "tokens": 631
  },
  {
   "id": "settings-group/core.group.marks",
@@ -1330,6 +1379,55 @@
   "tokens": 189
  },
  {
+  "id": "settings-group/notes-vault.group",
+  "title": "Settings in the group notes-vault.group",
+  "file": "settings-group--notes-vault.group.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[notes-vault] folder` | Vault folder | text | `` | The folder of Markdown notes (a",
+  "tokens": 57
+ },
+ {
+  "id": "settings-group/notes-vault.recent",
+  "title": "Settings in the group notes-vault.recent",
+  "file": "settings-group--notes-vault.recent.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[notes-vault] recent.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.",
+  "tokens": 347
+ },
+ {
+  "id": "settings-group/notes-vault.pinned",
+  "title": "Settings in the group notes-vault.pinned",
+  "file": "settings-group--notes-vault.pinned.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[notes-vault] pinned.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.",
+  "tokens": 335
+ },
+ {
+  "id": "settings-group/notes-vault.day",
+  "title": "Settings in the group notes-vault.day",
+  "file": "settings-group--notes-vault.day.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[notes-vault] day.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.fra",
+  "tokens": 325
+ },
+ {
+  "id": "settings-group/notes-vault.random",
+  "title": "Settings in the group notes-vault.random",
+  "file": "settings-group--notes-vault.random.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[notes-vault] random.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.",
+  "tokens": 330
+ },
+ {
+  "id": "settings-group/notes-vault.tags",
+  "title": "Settings in the group notes-vault.tags",
+  "file": "settings-group--notes-vault.tags.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[notes-vault] tags.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.fr",
+  "tokens": 262
+ },
+ {
+  "id": "settings-group/notes-vault.search",
+  "title": "Settings in the group notes-vault.search",
+  "file": "settings-group--notes-vault.search.md",
+  "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[notes-vault] search.frame` | Frame | `core.frame.none`, `core.frame.line`, `core.",
+  "tokens": 201
+ },
+ {
   "id": "settings-group/core.group.developer",
   "title": "Settings in the group core.group.developer",
   "file": "settings-group--core.group.developer.md",
@@ -1348,14 +1446,14 @@
   "title": "Settings in the group lock.group",
   "file": "settings-group--lock.group.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[lock] kind` | Screen lock | `lock.kind.off`, `lock.kind.pin`, `lock.kind.pattern`",
-  "tokens": 145
+  "tokens": 147
  },
  {
   "id": "settings-group/core.group.reading-aids",
   "title": "Settings in the group core.group.reading-aids",
   "file": "settings-group--core.group.reading-aids.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[aids] bold-beginnings` | Bold word beginnings | `true`, `false` | `false` | The f",
-  "tokens": 98
+  "tokens": 155
  },
  {
   "id": "settings-group/vocabulary.widget.word",
@@ -1586,6 +1684,6 @@
   "title": "Settings in the group core.group.network",
   "file": "settings-group--core.group.network.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] network.kosync` | Network | `true`, `false` | `true` | Off, this plugin use",
-  "tokens": 1701
+  "tokens": 1891
  }
 ]

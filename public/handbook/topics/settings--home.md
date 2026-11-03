@@ -8,6 +8,14 @@
 | `[home] page-6` | Home page 6 | text | `` | The items on this page and their places. Change them on the home screen. |
 | `[home] page-7` | Home page 7 | text | `` | The items on this page and their places. Change them on the home screen. |
 | `[home] page-8` | Home page 8 | text | `` | The items on this page and their places. Change them on the home screen. |
+| `[home] page-1.wide` | Home page 1, landscape | text | `` | Items of this page on a screen on its side. Edit on the home screen. |
+| `[home] page-2.wide` | Home page 2, landscape | text | `` | Items of this page on a screen on its side. Edit on the home screen. |
+| `[home] page-3.wide` | Home page 3, landscape | text | `` | Items of this page on a screen on its side. Edit on the home screen. |
+| `[home] page-4.wide` | Home page 4, landscape | text | `` | Items of this page on a screen on its side. Edit on the home screen. |
+| `[home] page-5.wide` | Home page 5, landscape | text | `` | Items of this page on a screen on its side. Edit on the home screen. |
+| `[home] page-6.wide` | Home page 6, landscape | text | `` | Items of this page on a screen on its side. Edit on the home screen. |
+| `[home] page-7.wide` | Home page 7, landscape | text | `` | Items of this page on a screen on its side. Edit on the home screen. |
+| `[home] page-8.wide` | Home page 8, landscape | text | `` | Items of this page on a screen on its side. Edit on the home screen. |
 | `[home] columns` | Columns | 2 to 6 | `3` | How many cells the home screen has across. |
 | `[home] rows` | Rows | 0 to 12 | `0` | How many cells it has down; 0: as many as make the cells about square. |
 | `[home] tool-labels` | Tool names | `true`, `false` | `true` | The tools on the home screen with their names, or only their icons. |

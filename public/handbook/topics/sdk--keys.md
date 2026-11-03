@@ -1,11 +1,13 @@
 ```rust
 pub trait paperpaw_sdk::keys::GestureRecognizer
+pub fn paperpaw_sdk::keys::GestureRecognizer::extended(&mut self, &paperpaw_sdk::Id, &paperpaw_sdk::Params) -> paperpaw_sdk::Handled
 pub fn paperpaw_sdk::keys::GestureRecognizer::next_tick(&self) -> core::option::Option<paperpaw_platform::input::Instant>
 pub fn paperpaw_sdk::keys::GestureRecognizer::pointer(&mut self, &paperpaw_platform::input::PointerEvent, paperpaw_platform::input::Instant) -> paperpaw_sdk::keys::PointerVerdict
 pub fn paperpaw_sdk::keys::GestureRecognizer::tick(&mut self, paperpaw_platform::input::Instant) -> paperpaw_sdk::keys::Recognition
 pub trait paperpaw_sdk::keys::KeyBindings
 pub fn paperpaw_sdk::keys::KeyBindings::bindings(&self, &str) -> alloc::vec::Vec<(alloc::string::String, core::option::Option<paperpaw_sdk::Id>, paperpaw_sdk::keys::BindingOrigin)>
 pub fn paperpaw_sdk::keys::KeyBindings::bound(&self, &[&str], &str) -> core::option::Option<paperpaw_sdk::Id>
+pub fn paperpaw_sdk::keys::KeyBindings::extended(&self, &paperpaw_sdk::Id, &paperpaw_sdk::Params) -> core::option::Option<paperpaw_sdk::Params>
 pub struct paperpaw_sdk::keys::GestureSpec
 pub paperpaw_sdk::keys::GestureSpec::factory: paperpaw_sdk::keys::RecognizerFactory
 pub paperpaw_sdk::keys::GestureSpec::id: paperpaw_sdk::Id

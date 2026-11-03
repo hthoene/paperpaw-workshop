@@ -6,6 +6,7 @@ A data plugin is a folder:
 plugins/large-print/
   plugin.ini     [plugin] id, name, description, version, formats
   i18n/*.ini     translation catalogs (also whole new languages)
+  i18n/*.ppcat   the same compiled (paperpaw-sign catalog), read as needed
   keymap.ini     key bindings
   settings.ini   new defaults for any plugin's settings ([core] font-size = 14)
   fonts/*.ttf    fonts to read with (also .otf, .ttc), by family
@@ -99,14 +100,40 @@ change a setting that keeps the device safe, such as the lock's.
 
 Packs for other scripts are read a glyph at a time, so devices with
 little memory can use them ([ADR 0018](adr/0018-font-packs-for-other-scripts.md)).
-`tools/script-pack.py` builds Cyrillic and Greek for Literata.
-A pack that extends a face with sizes larger than its own draws text
-asked that large, and the font size goes as far: the X4's firmware has
-Literata up to 32 px, and `tools/literata-packs.py` builds its larger
-sizes (and its bold italic face) as plugins for the font library.
+`tools/script-pack.py` builds Cyrillic and Greek for Literata (the data plugins
+`script-cyrillic` and `script-greek`), and
+Arabic and Hebrew (with where their marks sit) and Korean (the Hangul
+of KS X 1001, ready as `script-korean`, and the other 8,822 syllables as
+`script-korean-extra`, about 30 MiB; neither offered yet) from the fonts
+in `tools/fonts`. A pack that extends a face with sizes larger than its own,
+and has its letters (at least those of `aenoAEO0` the face has), draws
+text asked that large, and the font size goes as far; a pack of another
+script's letters adds those letters only, in whatever sizes: the X4's firmware has
+Literata's regular face up to 32 px, and `tools/literata-packs.py` builds its
+bold and italic faces (`literata-styles`, which the store fetches by itself
+where they are missing), its larger sizes and its bold italic face as plugins.
 Icon packs are such packs for the icon font: `tools/icons/pack.py` builds
 one with the Tabler icons named
 (`[extends] icons.ppfp = fonts-default.icons`).
+
+A font of your own, for the X4 and the other devices that draw packs
+only, is made on a computer with `paperpaw-fontgen`:
+
+```sh
+paperpaw-fontgen --family "My Font" --regular MyFont-Regular.ttf \
+    --bold MyFont-Bold.ttf --italic MyFont-Italic.ttf plugins
+```
+
+It writes `plugins/font-my-font` (a `plugin.ini` with the family and a
+pack for each face; only the regular one is needed, the others are drawn in
+it), says how large each pack is and how many of the characters asked for
+(`--chars latin,cyrillic,greek`, else Latin) the font has, and warns where
+it has none. Copy the folder into the card's `plugins` folder and choose the
+font in *Settings > Reading > Font*. Devices that draw font files read a
+`.ttf` or `.otf` copied into the `fonts` folder (on Android
+`PaperPaw/fonts` of the shared storage) instead. The fonts browser's
+*Your own fonts* entry, beside *More fonts* where a font is chosen, says
+this in the reader's language.
 
 A family needs a name and a face, a family of its own a regular face;
 its faces are packs, drawn on every device and read a glyph at a time,
@@ -121,17 +148,25 @@ bold = bold.ppfp
 ```
 
 A plugin may also bring a face of a family that is there without it,
-bound to its role: the X4's firmware has no Literata Bold Italic, which
-such a plugin brings back:
+bound to its role: the X4's firmware has Literata's regular face alone
+(no bold, italic or bold italic), which such plugins bring back (bold and
+italic in `literata-styles`, which the store fetches by itself at the first
+start where they are missing). Until they are there, bold and italic text
+is set in the regular face:
 
 ```ini
 [family]
 name = Literata
-bold-italic = literata-bold-italic.ppfp
+bold = literata-bold.ppfp
+italic = literata-italic.ppfp
 
 [fonts]
-core.font-reading-bold-italic = literata-bold-italic.bold-italic
+core.font-reading-bold = literata-styles.bold
+core.font-reading-italic = literata-styles.italic
 ```
+
+Packs that extend a face the plugin brings name it as
+`<plugin>.<style>` (`[extends] literata-bold-large.ppfp = literata-styles.bold`).
 
 A logo of its own takes the place of PaperPaw's (on the sleep screen,
 the About page and the logo widget): a picture in the folder, named in

@@ -2,3 +2,4 @@
 |---|---|---|---|---|
 | `[aids] bold-beginnings` | Bold word beginnings | `true`, `false` | `false` | The first half of every word in bold, which some find easier to follow. |
 | `[aids] replace` | Replace words | text | `` | Pairs like “colour = color; Mr. = Mister”, for whole words in every book. |
+| `[aids] pictures` | Pictures in books | `aids.pictures.show`, `aids.pictures.caption`, `aids.pictures.hide` | `aids.pictures.show` | Show pictures, put a short line in their place, or leave them out. |

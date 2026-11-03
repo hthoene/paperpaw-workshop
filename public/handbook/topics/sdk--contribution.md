@@ -36,6 +36,7 @@ pub fn paperpaw_sdk::contribution::Registrar::add_preset(&mut self, paperpaw_sdk
 pub fn paperpaw_sdk::contribution::Registrar::add_presets(&mut self, &'static [paperpaw_sdk::presets::Preset]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_reader(&mut self, paperpaw_sdk::readers::ReaderSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_refresh_filter(&mut self, paperpaw_sdk::filters::RefreshFilterSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_render_hook(&mut self, paperpaw_sdk::render::RenderHookSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_screen(&mut self, paperpaw_sdk::ScreenSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_screens(&mut self, &'static [paperpaw_sdk::FixedScreen]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_setting(&mut self, paperpaw_sdk::SettingSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
@@ -47,12 +48,15 @@ pub fn paperpaw_sdk::contribution::Registrar::add_status_item(&mut self, paperpa
 pub fn paperpaw_sdk::contribution::Registrar::add_status_line(&mut self, paperpaw_sdk::status::StatusLineSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_status_place(&mut self, paperpaw_sdk::status::Place) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_stylesheet(&mut self, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_subscriptions(&mut self, &'static [paperpaw_sdk::event::FixedSubscription]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_text_filter(&mut self, paperpaw_sdk::filters::TextFilterSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_translation_file(&mut self, impl core::convert::Into<alloc::string::String>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_translations(&mut self, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_voice(&mut self, paperpaw_sdk::voices::VoiceSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_widget(&mut self, paperpaw_sdk::widgets::WidgetSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_widget_category(&mut self, paperpaw_sdk::widgets::WidgetCategory) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_widget_place(&mut self, paperpaw_sdk::widgets::WidgetPlace) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_widgets(&mut self, &'static [paperpaw_sdk::widgets::FixedWidget]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_work(&mut self, paperpaw_sdk::work::WorkSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::bind_font(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<paperpaw_sdk::Id>, paperpaw_sdk::Priority) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::bind_slot(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<paperpaw_sdk::Id>, paperpaw_sdk::Priority) -> core::result::Result<(), paperpaw_sdk::RegisterError>
@@ -110,6 +114,7 @@ pub fn paperpaw_sdk::contribution::Registrar::add_preset(&mut self, paperpaw_sdk
 pub fn paperpaw_sdk::contribution::Registrar::add_presets(&mut self, &'static [paperpaw_sdk::presets::Preset]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_reader(&mut self, paperpaw_sdk::readers::ReaderSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_refresh_filter(&mut self, paperpaw_sdk::filters::RefreshFilterSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_render_hook(&mut self, paperpaw_sdk::render::RenderHookSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_screen(&mut self, paperpaw_sdk::ScreenSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_screens(&mut self, &'static [paperpaw_sdk::FixedScreen]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_setting(&mut self, paperpaw_sdk::SettingSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
@@ -121,12 +126,15 @@ pub fn paperpaw_sdk::contribution::Registrar::add_status_item(&mut self, paperpa
 pub fn paperpaw_sdk::contribution::Registrar::add_status_line(&mut self, paperpaw_sdk::status::StatusLineSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_status_place(&mut self, paperpaw_sdk::status::Place) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_stylesheet(&mut self, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_subscriptions(&mut self, &'static [paperpaw_sdk::event::FixedSubscription]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_text_filter(&mut self, paperpaw_sdk::filters::TextFilterSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_translation_file(&mut self, impl core::convert::Into<alloc::string::String>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_translations(&mut self, impl core::convert::Into<alloc::borrow::Cow<'static, str>>) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_voice(&mut self, paperpaw_sdk::voices::VoiceSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_widget(&mut self, paperpaw_sdk::widgets::WidgetSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_widget_category(&mut self, paperpaw_sdk::widgets::WidgetCategory) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_widget_place(&mut self, paperpaw_sdk::widgets::WidgetPlace) -> core::result::Result<(), paperpaw_sdk::RegisterError>
+pub fn paperpaw_sdk::contribution::Registrar::add_widgets(&mut self, &'static [paperpaw_sdk::widgets::FixedWidget]) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::add_work(&mut self, paperpaw_sdk::work::WorkSpec) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::bind_font(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<paperpaw_sdk::Id>, paperpaw_sdk::Priority) -> core::result::Result<(), paperpaw_sdk::RegisterError>
 pub fn paperpaw_sdk::contribution::Registrar::bind_slot(&mut self, impl core::convert::Into<paperpaw_sdk::Id>, impl core::convert::Into<paperpaw_sdk::Id>, paperpaw_sdk::Priority) -> core::result::Result<(), paperpaw_sdk::RegisterError>
