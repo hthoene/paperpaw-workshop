@@ -35,6 +35,7 @@ pub fn paperpaw_sdk::work::Note::new(paperpaw_platform::input::Instant, impl cor
 pub struct paperpaw_sdk::work::Progress
 pub paperpaw_sdk::work::Progress::done: u32
 pub paperpaw_sdk::work::Progress::of: u32
+pub const fn paperpaw_sdk::work::Progress::new(u32, u32) -> paperpaw_sdk::work::Progress
 pub fn paperpaw_sdk::work::Progress::percent(self) -> u8
 pub struct paperpaw_sdk::work::Refusal
 pub paperpaw_sdk::work::Refusal::reason: paperpaw_sdk::work::Reason

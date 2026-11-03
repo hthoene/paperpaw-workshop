@@ -14,6 +14,12 @@
 | `stats.widget.year` | Books this year |
 | `stats.widget.streak` | Reading streak |
 | `reading-goal.widget` | Reading cat |
+| `notes-vault.recent` | Recent notes |
+| `notes-vault.pinned` | Pinned note |
+| `notes-vault.day` | Note of the day |
+| `notes-vault.random` | Random note |
+| `notes-vault.tags` | Tags |
+| `notes-vault.search` | Search notes |
 | `vocabulary.widget.word` | Word of the day |
 | `vocabulary.widget.saved` | Words saved |
 | `vocabulary.widget.due` | Cards due |

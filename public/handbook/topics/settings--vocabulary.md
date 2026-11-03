@@ -6,6 +6,8 @@
 | `[vocabulary] retention` | Retention wanted | 70 to 97 | `90` | The chance you still know a card when due. Higher means more reviews. |
 | `[vocabulary] cards-from-lookups` | Make cards of words looked up | `true`, `false` | `false` | Each word you look up becomes a card in the deck Looked up. |
 | `[vocabulary] review-on-wake` | Review on waking | `true`, `false` | `false` | The review opens as the device wakes, where flash cards are due. |
+| `[vocabulary] sd-auto` | Update decks from the card when opened | `true`, `false` | `true` | Flash cards read the files in the folder that are new or changed. |
+| `[vocabulary] sd-folder` | Folder for the files of decks | text | `Flashcards` | On the SD card: a CSV, TSV or Anki file in it is a deck. |
 | `[vocabulary] learning.background` | Background | `core.tone.none`, `core.tone.light-gray`, `core.tone.gray`, `core.tone.dark-gray`, `core.tone.black`, `core.tone.white`, `core.tone.yellow`, `core.tone.green`, `core.tone.blue`, `core.tone.pink`, `core.tone.orange`, `core.tone.red` | `core.tone.none` | A colour behind the marked words; shown as a gray where there is no colour. |
 | `[vocabulary] learning.ink` | Text | `core.tone.as-is`, `core.tone.light-gray`, `core.tone.gray`, `core.tone.dark-gray`, `core.tone.black`, `core.tone.white`, `core.tone.yellow`, `core.tone.green`, `core.tone.blue`, `core.tone.pink`, `core.tone.orange`, `core.tone.red` | `core.tone.as-is` | The colour of the marked words themselves; as it is, or a tone of its own. |
 | `[vocabulary] learning.line` | Line under the text | `core.tone.none`, `core.line.solid`, `core.line.dotted`, `core.line.dashed`, `core.line.wavy`, `core.line.double` | `core.line.dotted` | A line under the marked words. |

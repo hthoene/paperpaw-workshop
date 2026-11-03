@@ -125,6 +125,20 @@ next wake. `on_close_request` may keep a screen open, for example to
 ask first. `on_pointer` takes a finger whole, for drawing or moving
 rows.
 
+When its part of the screen changes size (the device turned, a window
+resized, the row of hints or a bar came or went), a screen is made anew
+by its factory for the new size, after `on_close`, which keeps what it
+would lose. A screen that has much to keep (a book open, a long list
+scrolled, a connection) lays itself out anew in `on_resize` instead,
+from `cx.env().content()`, and answers `Handled::Yes`: it stays as it
+is. A screen that shows one thing of the list below it (a book's
+details, a message) says `Pane::DETAIL` in `pane`; where the screen is
+wide that will show it beside the list. `Screen::revision` is never
+implemented: the kernel calls items added later only on screens built
+with them. A screen that shows another inside it (`host::ScreenHost`)
+answers `ScreenHost::revision` there, and calls the newer items of the
+one it holds through `call_since`.
+
 Some rules every screen should follow:
 
 - **Touch and buttons alike.** Some devices have only buttons (the
@@ -198,7 +212,7 @@ like PaperPaw's own, follow the reader's text size and the look chosen
 (a theme paints switches, the focus, buttons, headers, frames and more),
 and work by touch and with the buttons alone. Sizes come from
 `UiStyle::new(env)`: `margin`, `gap`, `row`, `header`, the text sizes
-(`style.size(TextRole::Body)` and the others). No block shortens a
+(`style.size(TextRole::BODY)` and the others). No block shortens a
 title or a button's word: a title is measured first and keeps its whole
 width, a box or control beside it takes what is left, and where that is
 too little the row takes a second line (ask the block for its row's
@@ -214,7 +228,7 @@ shortened.
 | Equal columns side by side, e.g. two buttons | `ui::columns(area, count, gap)` |
 | A list that pages and holds the focus | `ui::ListView`, `ui::list_step` |
 | What a screen draws with | `ui::Ui` (`Ui::new(canvas, env, &style)`; the parts below are its methods: `ui.button(..)`, `ui.message(..)` …) |
-| Text, on a line or wrapped | `ui::Label` (`Label::new(text).role(TextRole::Small).align(..).wrap()`) |
+| Text, on a line or wrapped | `ui::Label` (`Label::new(text).role(TextRole::SMALL).align(..).wrap()`) |
 | Rows of a list | `ui::Row` (`Row::value`, `Row::switch`, `Row::number`, with `.note(..)`; `height`, `draw`, `hit`) |
 | Rows of settings | `ui::draw_setting_row`, `ui::draw_stepper`, `ui::slider::Slider` |
 | Sections with headings | `ui::sections::Sections`, `ui.heading(..)` |

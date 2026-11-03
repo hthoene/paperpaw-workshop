@@ -4,3 +4,5 @@
 | `[core] footnotes` | Footnotes | `core.footnotes.popup`, `core.footnotes.jump` | `core.footnotes.popup` | A tapped note mark (1, [2], *) shows its note over the page, or goes to it. |
 | `[reader] open-last` | Open last book at start | `true`, `false` | `true` | Start with the last book instead of the home screen. |
 | `[reader] auto-turn-seconds` | Turn pages every | 5 to 600 | `30` | For “Turn pages automatically” in the reader’s menu. |
+| `[end-of-book] show` | Show a screen at the end of a book | `true`, `false` | `true` | A screen with the next book and a rating. |
+| `[end-of-book] mark` | Mark the book as finished | `true`, `false` | `true` | A book read to its last page counts as finished. |

@@ -6,15 +6,18 @@ pub paperpaw_sdk::annotations::Annotation::note: alloc::string::String
 pub paperpaw_sdk::annotations::Annotation::percent: u8
 pub paperpaw_sdk::annotations::Annotation::text: alloc::string::String
 pub paperpaw_sdk::annotations::Annotation::updated: i64
+pub fn paperpaw_sdk::annotations::Annotation::new(paperpaw_sdk::annotations::Mark, u8, i64, i64, impl core::convert::Into<alloc::string::String>, impl core::convert::Into<alloc::string::String>) -> paperpaw_sdk::annotations::Annotation
 pub struct paperpaw_sdk::annotations::Mark
 pub paperpaw_sdk::annotations::Mark::end: paperpaw_document::Locator
 pub paperpaw_sdk::annotations::Mark::kind: paperpaw_sdk::annotations::Kind
 pub paperpaw_sdk::annotations::Mark::noted: bool
 pub paperpaw_sdk::annotations::Mark::start: paperpaw_document::Locator
+pub const fn paperpaw_sdk::annotations::Mark::new(paperpaw_sdk::annotations::Kind, paperpaw_document::Locator, paperpaw_document::Locator, bool) -> paperpaw_sdk::annotations::Mark
 pub fn paperpaw_sdk::annotations::Mark::overlaps(&self, paperpaw_document::Locator, paperpaw_document::Locator) -> bool
 pub enum paperpaw_sdk::annotations::Kind
 pub paperpaw_sdk::annotations::Kind::Bookmark
 pub paperpaw_sdk::annotations::Kind::Highlight
+pub paperpaw_sdk::annotations::Kind::Other(u16)
 pub fn paperpaw_sdk::annotations::add(&dyn paperpaw_platform::storage::Storage, &str, paperpaw_sdk::annotations::Annotation) -> core::result::Result<(), paperpaw_sdk::data::Error>
 pub fn paperpaw_sdk::annotations::book(&dyn paperpaw_platform::storage::Storage, &str) -> core::option::Option<paperpaw_sdk::library::Fingerprint>
 pub fn paperpaw_sdk::annotations::changed(&str) -> paperpaw_sdk::Command

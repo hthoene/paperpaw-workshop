@@ -11,7 +11,7 @@
 | `[core] edge-sides` | Swipe edges: left and right | 0 to 25 | `5` | How far from the edge a swipe counts as an edge swipe; 0: off. |
 | `[core] library-folder` | Library folder | text | `books` | The folder with your books. |
 | `[core] device-name` | Device name | text | `PaperPaw X4` | The name Calibre, your router and others see; used from the next connection. |
-| `[core] ui-size` | Menu text size | 7 to 24 | `9` | Size of menus, lists and the status line. |
+| `[core] ui-size` | Menu text size | 7 to 24 | `8` | Size of menus, lists and the status line. |
 | `[core] ui-contrast` | Contrast | `core.contrast.normal`, `core.contrast.strong` | `core.contrast.normal` | Strong draws gray hints and notes in black. |
 | `[core] ui-header` | Headers | `core.header.plain`, `core.header.light`, `core.header.dark` | `core.header.plain` | How the title at the top of menus and lists looks. |
 | `[core] widgets.frame` | Frames of widgets | `core.frame.own`, `core.frame.none`, `core.frame.line`, `core.frame.card`, `core.frame.dark` | `core.frame.own` | A frame for every widget that has none chosen in its own settings. |
@@ -24,7 +24,8 @@
 | `[core] ui-row` | Row height | 120 to 300 | `160` | Height of the rows of menus and lists, relative to their text. |
 | `[core] ui-lines` | Line thickness | 1 to 10 | `3` | How thick lines and frames are drawn. |
 | `[core] logo` | Logo picture | text | `` | Path of a JPEG or PNG shown instead of PaperPaw's logo; empty: the usual one. |
-| `[core] ui-palette` | Grays | text | `` | Grays by purpose, e.g. muted=60 line=170 (0 black, 255 white). |
+| `[core] ui-palette` | Grays | text | `` | Colours by purpose, e.g. muted=60 line=170 link=#2a6f97 (0 black, 255 white). |
+| `[core] ui-text-curve` | Interface text tone curve | text | `` | Advanced. The same for menus and lists. |
 | `[core] keymap-preset` | Button layout | `core.standard`, `core.two-buttons`, `core.left-handed` | `core.standard` | What the device's buttons do. |
 | `[core] full-refresh-interval` | Full refresh | 0 to 1000 | `6` | A flashing refresh after this many page turns removes ghosting; 0 never flashes. |
 | `[core] flash-screens` | Flash on screen change | `true`, `false` | `false` | Redraw fully when a screen opens: no traces of the last one, but slower. |
@@ -33,6 +34,7 @@
 | `[core] rotation` | Turn the screen | `core.rotation.upright`, `core.rotation.landscape`, `core.rotation.upside-down`, `core.rotation.landscape-flipped` | `core.rotation.upright` | Upright or on its side. With “Only this book” on, it applies to that book alone. |
 | `[core] button-hints` | Button hints | `true`, `false` | `true` | A row at the bottom of the screen names what each button below it does. Not while reading. |
 | `[core] swap-page-buttons` | Swap the page buttons | `true`, `false` | `false` | The page buttons turn the other way while reading, not in menus. |
+| `[core] arrows-stay-on-page` | Arrow keys stay on the page | `true`, `false` | `false` | At a page's first or last entry the arrows go round on it; page buttons turn pages. |
 | `[core] notice-seconds` | Message time | 1 to 60 | `4` | How long short messages such as “Sync done” stay on the screen. |
 | `[core] long-press-ms` | Long press | 200 to 3000 | `500` | How long to hold a button or finger for a long press. |
 | `[core] double-tap-ms` | Double tap | 150 to 1000 | `300` | How quickly the second tap or press must follow the first. |
@@ -67,6 +69,8 @@
 | `[core] page-frame` | Page frame | `core.page-frame.single` | `core.page-frame.single` | How the text stands on the page; plugins can add other frames. |
 | `[core] scope-only` | Only this book | `true`, `false` | `false` | Changes to font and layout apply to this book only (marked •). |
 | `[core] line-breaking` | Line breaking | `core.line-breaking.balanced`, `core.line-breaking.fast` | `core.line-breaking.balanced` | Balanced ends lines more evenly; fast breaks them one by one. |
+| `[core] korean-breaks` | Korean line breaks | `core.korean-breaks.syllable`, `core.korean-breaks.word` | `core.korean-breaks.syllable` | By syllable breaks anywhere, as in print; by word keeps words whole. Korean only. |
+| `[core] hanging-punctuation` | Hanging punctuation | `true`, `false` | `false` | Quotes, stops, commas and hyphens set just outside the text, so its edges look straight. |
 | `[core] book-align` | Book's alignment | `true`, `false` | `true` | Centred and right-aligned text as the book sets it. |
 | `[core] book-indent` | Book's indents | `true`, `false` | `true` | First-line and hanging indents as the book sets them. |
 | `[core] book-sizes` | Book's text sizes | `true`, `false` | `true` | Larger and smaller text as the book sets it. |
@@ -80,7 +84,9 @@
 | `[core] indent-size` | Indent size | 50 to 400 | `150` | How far first lines are indented, relative to the font size. |
 | `[core] paragraph-space` | Paragraph space | 20 to 150 | `60` | How much space between paragraphs, relative to a line. |
 | `[core] smooth-text` | Smooth text | `true`, `false` | `false` | Soft gray edges. On black-and-white screens each page flashes, slower. |
-| `[core] text-contrast` | Text contrast | `core.text-contrast.lighter`, `core.text-contrast.normal`, `core.text-contrast.darker`, `core.text-contrast.darkest` | `core.text-contrast.normal` | How dark letters are drawn, finer than the font weight. |
+| `[core] text-contrast` | Text contrast | `core.text-contrast.lighter`, `core.text-contrast.normal`, `core.text-contrast.darker`, `core.text-contrast.darkest` | `core.text-contrast.normal` | How dark letters are drawn. A tone curve set by a theme takes its place. |
+| `[core] text-sharpness` | Sharpness | `core.text-sharpness.soft`, `core.text-sharpness.normal`, `core.text-sharpness.sharp` | `core.text-sharpness.normal` | How crisp letters look. Sharp is sturdier and cleaner, soft is lighter. |
+| `[core] text-curve` | Text tone curve | text | `` | Edge tone of book letters: smooth, sharp:128, or 16 numbers 0-255. |
 | `[core] highlight.background` | Background | `core.tone.none`, `core.tone.light-gray`, `core.tone.gray`, `core.tone.dark-gray`, `core.tone.black`, `core.tone.white`, `core.tone.yellow`, `core.tone.green`, `core.tone.blue`, `core.tone.pink`, `core.tone.orange`, `core.tone.red` | `core.tone.light-gray` | A colour behind the marked words; shown as a gray where there is no colour. |
 | `[core] highlight.ink` | Text | `core.tone.as-is`, `core.tone.light-gray`, `core.tone.gray`, `core.tone.dark-gray`, `core.tone.black`, `core.tone.white`, `core.tone.yellow`, `core.tone.green`, `core.tone.blue`, `core.tone.pink`, `core.tone.orange`, `core.tone.red` | `core.tone.as-is` | The colour of the marked words themselves; as it is, or a tone of its own. |
 | `[core] highlight.line` | Line under the text | `core.tone.none`, `core.line.solid`, `core.line.dotted`, `core.line.dashed`, `core.line.wavy`, `core.line.double` | `core.tone.none` | A line under the marked words. |
@@ -114,7 +120,7 @@
 | `[core] time-zone` | Time zone | `core.tz.auto`, `core.tz.utc`, `core.tz.honolulu`, `core.tz.anchorage`, `core.tz.los-angeles`, `core.tz.phoenix`, `core.tz.denver`, `core.tz.chicago`, `core.tz.new-york`, `core.tz.sao-paulo`, `core.tz.london`, `core.tz.lisbon`, `core.tz.berlin`, `core.tz.helsinki`, `core.tz.istanbul`, `core.tz.moscow`, `core.tz.dubai`, `core.tz.india`, `core.tz.bangkok`, `core.tz.china`, `core.tz.tokyo`, `core.tz.sydney`, `core.tz.auckland` | `core.tz.auto` | Automatic: the system's zone, where there is one. |
 | `[core] time-zone-rule` | Time zone rule | text | `` | A POSIX TZ rule for zones not in the list; overrides the time zone. |
 | `[core] battery-low` | Battery low at | 5 to 50 | `20` | The charge at which "Battery when low" shows in a status line. |
-| `[core] awake-holds` | Plugins may keep awake | `true`, `false` | `true` | A clock, a slideshow or a game may keep the device from sleeping by itself. |
+| `[core] awake-holds` | Plugins may keep awake | `true`, `false` | `true` | A clock, slideshow or game may keep it awake; indexing the library always does. |
 | `[core] network.kosync` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
 | `[core] saving.kosync` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
 | `[core] network.calibre` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
@@ -145,8 +151,12 @@
 | `[core] saving.browser` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
 | `[core] network.readwise` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
 | `[core] saving.readwise` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
+| `[core] network.read-later-cloud` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
+| `[core] saving.read-later-cloud` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
 | `[core] network.joplin` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
 | `[core] saving.joplin` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
+| `[core] network.mail` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
+| `[core] saving.mail` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
 | `[core] network.wallabag` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
 | `[core] saving.wallabag` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
 | `[core] network.update` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |

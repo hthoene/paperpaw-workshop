@@ -10,5 +10,7 @@
 | `[core] orphans` | Lines kept at the bottom | 1 to 4 | `1` | The fewest lines of a paragraph left at the bottom of a page. |
 | `[core] page-frame` | Page frame | `core.page-frame.single` | `core.page-frame.single` | How the text stands on the page; plugins can add other frames. |
 | `[core] line-breaking` | Line breaking | `core.line-breaking.balanced`, `core.line-breaking.fast` | `core.line-breaking.balanced` | Balanced ends lines more evenly; fast breaks them one by one. |
+| `[core] korean-breaks` | Korean line breaks | `core.korean-breaks.syllable`, `core.korean-breaks.word` | `core.korean-breaks.syllable` | By syllable breaks anywhere, as in print; by word keeps words whole. Korean only. |
+| `[core] hanging-punctuation` | Hanging punctuation | `true`, `false` | `false` | Quotes, stops, commas and hyphens set just outside the text, so its edges look straight. |
 | `[core] indent-size` | Indent size | 50 to 400 | `150` | How far first lines are indented, relative to the font size. |
 | `[core] paragraph-space` | Paragraph space | 20 to 150 | `60` | How much space between paragraphs, relative to a line. |

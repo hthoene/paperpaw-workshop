@@ -22,6 +22,7 @@ pub fn paperpaw_sdk::ask::TextQuestion::context(self, &paperpaw_sdk::Params) -> 
 pub fn paperpaw_sdk::ask::TextQuestion::email(self) -> Self
 pub fn paperpaw_sdk::ask::TextQuestion::initial(self, impl core::convert::Into<alloc::string::String>) -> Self
 pub fn paperpaw_sdk::ask::TextQuestion::live(self) -> Self
+pub fn paperpaw_sdk::ask::TextQuestion::multiline(self) -> Self
 pub fn paperpaw_sdk::ask::TextQuestion::number(self) -> Self
 pub fn paperpaw_sdk::ask::TextQuestion::password(self) -> Self
 pub fn paperpaw_sdk::ask::TextQuestion::remote_command(self) -> paperpaw_sdk::Command

@@ -9,6 +9,13 @@ pub fn paperpaw_sdk::power::Power::new(paperpaw_sdk::power::PowerLevel, paperpaw
 pub fn paperpaw_sdk::power::Power::normal() -> &'static paperpaw_sdk::power::Power
 pub fn paperpaw_sdk::power::Power::online(&self) -> bool
 pub fn paperpaw_sdk::power::Power::default() -> Self
+pub struct paperpaw_sdk::power::PowerControls
+pub paperpaw_sdk::power::PowerControls::buttons: bool
+pub paperpaw_sdk::power::PowerControls::cpu_clock: bool
+pub paperpaw_sdk::power::PowerControls::frontlight: bool
+pub paperpaw_sdk::power::PowerControls::radio: bool
+pub paperpaw_sdk::power::PowerControls::system_saver: bool
+pub const fn paperpaw_sdk::power::PowerControls::any(&self) -> bool
 pub struct paperpaw_sdk::power::WakeHold
 pub fn paperpaw_sdk::power::WakeHold::duration(&self) -> core::time::Duration
 pub fn paperpaw_sdk::power::WakeHold::id(&self) -> &paperpaw_sdk::Id
@@ -37,6 +44,7 @@ pub paperpaw_sdk::power::Start::Wake
 pub const paperpaw_sdk::power::AUTOMATIC: &str
 pub const paperpaw_sdk::power::LEVEL: paperpaw_sdk::Id
 pub const paperpaw_sdk::power::MAX_HOLD: core::time::Duration
+pub const paperpaw_sdk::power::MAX_ONLINE_FOR: core::time::Duration
 pub const paperpaw_sdk::power::MODE_KIND: paperpaw_sdk::Id
 pub const paperpaw_sdk::power::NORMAL: paperpaw_sdk::Id
 pub const paperpaw_sdk::power::OFFLINE: paperpaw_sdk::Id

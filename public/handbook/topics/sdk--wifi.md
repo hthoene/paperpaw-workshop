@@ -47,10 +47,12 @@ pub paperpaw_sdk::wifi::WifiState::Off
 pub paperpaw_sdk::wifi::WifiState::On
 pub paperpaw_sdk::wifi::WifiState::Online
 pub paperpaw_sdk::wifi::WifiState::Online::address: alloc::string::String
+pub paperpaw_sdk::wifi::WifiState::Online::name: core::option::Option<alloc::string::String>
 pub paperpaw_sdk::wifi::WifiState::Online::ssid: alloc::string::String
 pub fn paperpaw_sdk::wifi::WifiState::is_hosting(&self) -> bool
 pub fn paperpaw_sdk::wifi::WifiState::is_on(&self) -> bool
 pub fn paperpaw_sdk::wifi::WifiState::is_online(&self) -> bool
+pub fn paperpaw_sdk::wifi::WifiState::reach(&self) -> core::option::Option<&str>
 pub fn paperpaw_sdk::wifi::WifiState::ssid(&self) -> core::option::Option<&str>
 pub const paperpaw_sdk::wifi::NETWORK_WAIT_MS: u64
 pub const paperpaw_sdk::wifi::SECRET_PREFIX: &str

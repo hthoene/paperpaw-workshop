@@ -80,6 +80,9 @@ pub fn paperpaw_sdk::status::StatusTarget::new(paperpaw_platform::geometry::Rect
 pub enum paperpaw_sdk::status::StatusValue
 pub paperpaw_sdk::status::StatusValue::Bar
 pub paperpaw_sdk::status::StatusValue::Bar::permille: u16
+pub paperpaw_sdk::status::StatusValue::Extended
+pub paperpaw_sdk::status::StatusValue::Extended::key: paperpaw_sdk::Id
+pub paperpaw_sdk::status::StatusValue::Extended::params: paperpaw_sdk::Params
 pub paperpaw_sdk::status::StatusValue::Icon(alloc::borrow::Cow<'static, str>)
 pub paperpaw_sdk::status::StatusValue::Labelled
 pub paperpaw_sdk::status::StatusValue::Labelled::icon: alloc::borrow::Cow<'static, str>

@@ -30,8 +30,12 @@
 | `[core] saving.browser` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
 | `[core] network.readwise` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
 | `[core] saving.readwise` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
+| `[core] network.read-later-cloud` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
+| `[core] saving.read-later-cloud` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
 | `[core] network.joplin` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
 | `[core] saving.joplin` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
+| `[core] network.mail` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
+| `[core] saving.mail` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
 | `[core] network.wallabag` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
 | `[core] saving.wallabag` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
 | `[core] network.update` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |

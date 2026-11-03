@@ -6,6 +6,7 @@ pub fn paperpaw_sdk::widgets::Widget::draw_focus(&self, &mut paperpaw_graphics::
 pub fn paperpaw_sdk::widgets::Widget::height(&self, &paperpaw_sdk::Env<'_>, u16) -> u16
 pub fn paperpaw_sdk::widgets::Widget::live(&self) -> bool
 pub fn paperpaw_sdk::widgets::Widget::min_height(&self, &paperpaw_sdk::Env<'_>, u16) -> u16
+pub fn paperpaw_sdk::widgets::Widget::on_extended(&mut self, &paperpaw_sdk::Id, &paperpaw_sdk::Params, &paperpaw_sdk::Env<'_>) -> paperpaw_sdk::Handled
 pub fn paperpaw_sdk::widgets::Widget::on_input(&mut self, &paperpaw_sdk::Env<'_>, paperpaw_sdk::widgets::WidgetInput, paperpaw_platform::geometry::Rect, &mut paperpaw_sdk::Commands) -> bool
 pub fn paperpaw_sdk::widgets::Widget::place(&mut self, &paperpaw_sdk::Env<'_>, paperpaw_platform::geometry::Rect)
 pub fn paperpaw_sdk::widgets::Widget::targets(&self, &paperpaw_sdk::Env<'_>, paperpaw_platform::geometry::Rect) -> alloc::vec::Vec<paperpaw_sdk::widgets::WidgetTarget>
@@ -25,10 +26,18 @@ pub paperpaw_sdk::widgets::Drawn::draw: fn(&mut paperpaw_graphics::canvas::Canva
 pub paperpaw_sdk::widgets::Drawn::height: fn(&paperpaw_sdk::Env<'_>, u16) -> u16
 pub paperpaw_sdk::widgets::Drawn::shows: core::option::Option<fn(&paperpaw_sdk::Env<'_>) -> alloc::string::String>
 pub paperpaw_sdk::widgets::Drawn::targets: core::option::Option<fn(&paperpaw_sdk::Env<'_>, paperpaw_platform::geometry::Rect) -> alloc::vec::Vec<paperpaw_sdk::widgets::WidgetTarget>>
-pub fn paperpaw_sdk::widgets::Drawn::new(fn(&paperpaw_sdk::Env<'_>, u16) -> u16, fn(&mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::Env<'_>, paperpaw_platform::geometry::Rect)) -> Self
-pub fn paperpaw_sdk::widgets::Drawn::shows(self, fn(&paperpaw_sdk::Env<'_>) -> alloc::string::String) -> Self
-pub fn paperpaw_sdk::widgets::Drawn::targets(self, fn(&paperpaw_sdk::Env<'_>, paperpaw_platform::geometry::Rect) -> alloc::vec::Vec<paperpaw_sdk::widgets::WidgetTarget>) -> Self
+pub const fn paperpaw_sdk::widgets::Drawn::new(fn(&paperpaw_sdk::Env<'_>, u16) -> u16, fn(&mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::Env<'_>, paperpaw_platform::geometry::Rect)) -> Self
+pub const fn paperpaw_sdk::widgets::Drawn::shows(self, fn(&paperpaw_sdk::Env<'_>) -> alloc::string::String) -> Self
+pub const fn paperpaw_sdk::widgets::Drawn::targets(self, fn(&paperpaw_sdk::Env<'_>, paperpaw_platform::geometry::Rect) -> alloc::vec::Vec<paperpaw_sdk::widgets::WidgetTarget>) -> Self
 pub fn paperpaw_sdk::widgets::Drawn::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+pub struct paperpaw_sdk::widgets::FixedWidget
+pub const fn paperpaw_sdk::widgets::FixedWidget::category(self, &'static str) -> Self
+pub const fn paperpaw_sdk::widgets::FixedWidget::cells(self, paperpaw_sdk::widgets::CellSpan) -> Self
+pub const fn paperpaw_sdk::widgets::FixedWidget::drawn(paperpaw_sdk::Id, &'static str, paperpaw_sdk::widgets::Drawn) -> Self
+pub fn paperpaw_sdk::widgets::FixedWidget::id(&self) -> &paperpaw_sdk::Id
+pub const fn paperpaw_sdk::widgets::FixedWidget::new(paperpaw_sdk::Id, &'static str, fn(&paperpaw_sdk::Env<'_>) -> alloc::boxed::Box<dyn paperpaw_sdk::widgets::Widget>) -> Self
+pub const fn paperpaw_sdk::widgets::FixedWidget::previews(self, paperpaw_sdk::Id) -> Self
+pub fn paperpaw_sdk::widgets::FixedWidget::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub struct paperpaw_sdk::widgets::WidgetCategory
 pub paperpaw_sdk::widgets::WidgetCategory::icon: alloc::borrow::Cow<'static, str>
 pub paperpaw_sdk::widgets::WidgetCategory::id: paperpaw_sdk::Id
@@ -157,9 +166,12 @@ pub fn paperpaw_sdk::widgets::grid::Item::new(paperpaw_sdk::widgets::grid::What)
 pub fn paperpaw_sdk::widgets::grid::Item::placed(paperpaw_sdk::widgets::grid::What, paperpaw_sdk::widgets::grid::Cells) -> Self
 pub enum paperpaw_sdk::widgets::Align
 pub paperpaw_sdk::widgets::Align::Center
+pub paperpaw_sdk::widgets::Align::End
 pub paperpaw_sdk::widgets::Align::Left
 pub paperpaw_sdk::widgets::Align::Right
+pub paperpaw_sdk::widgets::Align::Start
 pub fn paperpaw_sdk::widgets::Align::of(&str) -> Self
+pub const fn paperpaw_sdk::widgets::Align::resolved(self, bool) -> paperpaw_sdk::widgets::Align
 pub const fn paperpaw_sdk::widgets::Align::value(self) -> &'static str
 pub fn paperpaw_sdk::widgets::Align::x(self, paperpaw_platform::geometry::Rect, f32) -> f32
 pub enum paperpaw_sdk::widgets::Frame
@@ -250,6 +262,7 @@ pub const paperpaw_sdk::widgets::grid::MAX_COLUMNS: u8
 pub const paperpaw_sdk::widgets::grid::MAX_ROWS: u8
 pub fn paperpaw_sdk::widgets::categories::icon(&str) -> core::option::Option<&'static str>
 pub fn paperpaw_sdk::widgets::grid::add(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::widgets::grid::Geometry, &[paperpaw_sdk::widgets::grid::Item], paperpaw_sdk::widgets::grid::What) -> core::option::Option<alloc::vec::Vec<paperpaw_sdk::widgets::grid::Item>>
+pub fn paperpaw_sdk::widgets::grid::columns_for(paperpaw_platform::geometry::Rect, u8) -> u8
 pub fn paperpaw_sdk::widgets::grid::dragged(&paperpaw_sdk::widgets::grid::Geometry, paperpaw_sdk::widgets::grid::Cells, paperpaw_platform::geometry::Point, paperpaw_platform::geometry::Point, bool) -> core::option::Option<paperpaw_sdk::widgets::grid::Cells>
 pub fn paperpaw_sdk::widgets::grid::draw_tool(&mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::Env<'_>, paperpaw_platform::geometry::Rect, &paperpaw_sdk::Id, bool)
 pub fn paperpaw_sdk::widgets::grid::draw_tool_focus(&mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::ui::UiStyle, paperpaw_platform::geometry::Rect)
@@ -258,6 +271,7 @@ pub fn paperpaw_sdk::widgets::grid::fit(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::w
 pub fn paperpaw_sdk::widgets::grid::free_place(&paperpaw_sdk::widgets::grid::Geometry, &[paperpaw_sdk::widgets::grid::Cells], u8, u8) -> core::option::Option<paperpaw_sdk::widgets::grid::Cells>
 pub fn paperpaw_sdk::widgets::grid::parse(&str) -> alloc::vec::Vec<paperpaw_sdk::widgets::grid::Item>
 pub fn paperpaw_sdk::widgets::grid::place(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::widgets::grid::Geometry, &[paperpaw_sdk::widgets::grid::Item]) -> alloc::vec::Vec<(paperpaw_sdk::widgets::grid::Item, paperpaw_sdk::widgets::grid::Cells)>
+pub fn paperpaw_sdk::widgets::grid::refit(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::widgets::grid::Geometry, u8, u8, &[paperpaw_sdk::widgets::grid::Item]) -> (alloc::vec::Vec<paperpaw_sdk::widgets::grid::Item>, alloc::vec::Vec<paperpaw_sdk::widgets::grid::Item>)
 pub fn paperpaw_sdk::widgets::grid::tool_name_lines(&paperpaw_sdk::Env<'_>, paperpaw_platform::geometry::Rect, &paperpaw_sdk::Id, bool) -> usize
 pub fn paperpaw_sdk::widgets::grid::write(&[paperpaw_sdk::widgets::grid::Item]) -> alloc::string::String
 pub fn paperpaw_sdk::widgets::align(&paperpaw_sdk::Env<'_>, &str) -> paperpaw_sdk::widgets::Align

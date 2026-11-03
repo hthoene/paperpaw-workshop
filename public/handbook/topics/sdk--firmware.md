@@ -35,6 +35,7 @@ pub paperpaw_sdk::firmware::InstallFailure::LowBattery
 pub paperpaw_sdk::firmware::InstallFailure::NewerFormat
 pub paperpaw_sdk::firmware::InstallFailure::NotAnUpdate
 pub paperpaw_sdk::firmware::InstallFailure::NotNewer
+pub paperpaw_sdk::firmware::InstallFailure::Other(u16)
 pub paperpaw_sdk::firmware::InstallFailure::OtherDevice
 pub paperpaw_sdk::firmware::InstallFailure::TooLarge
 pub paperpaw_sdk::firmware::InstallFailure::Unreadable

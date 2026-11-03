@@ -5,6 +5,7 @@ pub fn paperpaw_sdk::library::Library::can_delete(&self, &paperpaw_sdk::Env<'_>,
 pub fn paperpaw_sdk::library::Library::catalog_state(&self, &paperpaw_sdk::Env<'_>) -> paperpaw_sdk::library::catalog::State
 pub fn paperpaw_sdk::library::Library::delete(&self, &paperpaw_sdk::Env<'_>, &[&str]) -> paperpaw_sdk::library::service::Deleted
 pub fn paperpaw_sdk::library::Library::each(&self, &paperpaw_sdk::Env<'_>, &mut dyn core::ops::function::FnMut(u64, paperpaw_sdk::library::catalog::Record))
+pub fn paperpaw_sdk::library::Library::extended(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Id, &paperpaw_sdk::Params) -> core::option::Option<paperpaw_sdk::Params>
 pub fn paperpaw_sdk::library::Library::found(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::library::catalog::Query) -> usize
 pub fn paperpaw_sdk::library::Library::index(&self, &paperpaw_sdk::Env<'_>, usize, &str) -> paperpaw_sdk::library::index::Index
 pub fn paperpaw_sdk::library::Library::is_current(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::library::index::Index) -> bool
@@ -23,6 +24,7 @@ pub fn paperpaw_sdk::library::service::Library::can_delete(&self, &paperpaw_sdk:
 pub fn paperpaw_sdk::library::service::Library::catalog_state(&self, &paperpaw_sdk::Env<'_>) -> paperpaw_sdk::library::catalog::State
 pub fn paperpaw_sdk::library::service::Library::delete(&self, &paperpaw_sdk::Env<'_>, &[&str]) -> paperpaw_sdk::library::service::Deleted
 pub fn paperpaw_sdk::library::service::Library::each(&self, &paperpaw_sdk::Env<'_>, &mut dyn core::ops::function::FnMut(u64, paperpaw_sdk::library::catalog::Record))
+pub fn paperpaw_sdk::library::service::Library::extended(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Id, &paperpaw_sdk::Params) -> core::option::Option<paperpaw_sdk::Params>
 pub fn paperpaw_sdk::library::service::Library::found(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::library::catalog::Query) -> usize
 pub fn paperpaw_sdk::library::service::Library::index(&self, &paperpaw_sdk::Env<'_>, usize, &str) -> paperpaw_sdk::library::index::Index
 pub fn paperpaw_sdk::library::service::Library::is_current(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::library::index::Index) -> bool
@@ -175,6 +177,7 @@ pub paperpaw_sdk::library::listing::Entry::name: alloc::string::String
 pub paperpaw_sdk::library::listing::Entry::rank: u32
 pub paperpaw_sdk::library::listing::Entry::size: u64
 pub fn paperpaw_sdk::library::listing::Entry::folder(&str) -> Self
+pub fn paperpaw_sdk::library::listing::Entry::new(impl core::convert::Into<alloc::string::String>, bool, u32, u64) -> Self
 pub struct paperpaw_sdk::library::service::BookBadge
 pub paperpaw_sdk::library::service::BookBadge::badge: paperpaw_sdk::library::service::BadgeFn
 pub paperpaw_sdk::library::service::BookBadge::id: paperpaw_sdk::Id
@@ -201,6 +204,7 @@ pub fn paperpaw_sdk::library::service::Kept::can_delete(&self, &paperpaw_sdk::En
 pub fn paperpaw_sdk::library::service::Kept::catalog_state(&self, &paperpaw_sdk::Env<'_>) -> paperpaw_sdk::library::catalog::State
 pub fn paperpaw_sdk::library::service::Kept::delete(&self, &paperpaw_sdk::Env<'_>, &[&str]) -> paperpaw_sdk::library::service::Deleted
 pub fn paperpaw_sdk::library::service::Kept::each(&self, &paperpaw_sdk::Env<'_>, &mut dyn core::ops::function::FnMut(u64, paperpaw_sdk::library::catalog::Record))
+pub fn paperpaw_sdk::library::service::Kept::extended(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Id, &paperpaw_sdk::Params) -> core::option::Option<paperpaw_sdk::Params>
 pub fn paperpaw_sdk::library::service::Kept::found(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::library::catalog::Query) -> usize
 pub fn paperpaw_sdk::library::service::Kept::index(&self, &paperpaw_sdk::Env<'_>, usize, &str) -> paperpaw_sdk::library::index::Index
 pub fn paperpaw_sdk::library::service::Kept::is_current(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::library::index::Index) -> bool
@@ -218,6 +222,7 @@ pub fn paperpaw_sdk::library::service::Kept::can_delete(&self, &paperpaw_sdk::En
 pub fn paperpaw_sdk::library::service::Kept::catalog_state(&self, &paperpaw_sdk::Env<'_>) -> paperpaw_sdk::library::catalog::State
 pub fn paperpaw_sdk::library::service::Kept::delete(&self, &paperpaw_sdk::Env<'_>, &[&str]) -> paperpaw_sdk::library::service::Deleted
 pub fn paperpaw_sdk::library::service::Kept::each(&self, &paperpaw_sdk::Env<'_>, &mut dyn core::ops::function::FnMut(u64, paperpaw_sdk::library::catalog::Record))
+pub fn paperpaw_sdk::library::service::Kept::extended(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Id, &paperpaw_sdk::Params) -> core::option::Option<paperpaw_sdk::Params>
 pub fn paperpaw_sdk::library::service::Kept::found(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::library::catalog::Query) -> usize
 pub fn paperpaw_sdk::library::service::Kept::index(&self, &paperpaw_sdk::Env<'_>, usize, &str) -> paperpaw_sdk::library::index::Index
 pub fn paperpaw_sdk::library::service::Kept::is_current(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::library::index::Index) -> bool
@@ -235,6 +240,7 @@ pub fn paperpaw_sdk::library::service::Kept::can_delete(&self, &paperpaw_sdk::En
 pub fn paperpaw_sdk::library::service::Kept::catalog_state(&self, &paperpaw_sdk::Env<'_>) -> paperpaw_sdk::library::catalog::State
 pub fn paperpaw_sdk::library::service::Kept::delete(&self, &paperpaw_sdk::Env<'_>, &[&str]) -> paperpaw_sdk::library::service::Deleted
 pub fn paperpaw_sdk::library::service::Kept::each(&self, &paperpaw_sdk::Env<'_>, &mut dyn core::ops::function::FnMut(u64, paperpaw_sdk::library::catalog::Record))
+pub fn paperpaw_sdk::library::service::Kept::extended(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::Id, &paperpaw_sdk::Params) -> core::option::Option<paperpaw_sdk::Params>
 pub fn paperpaw_sdk::library::service::Kept::found(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::library::catalog::Query) -> usize
 pub fn paperpaw_sdk::library::service::Kept::index(&self, &paperpaw_sdk::Env<'_>, usize, &str) -> paperpaw_sdk::library::index::Index
 pub fn paperpaw_sdk::library::service::Kept::is_current(&self, &paperpaw_sdk::Env<'_>, &paperpaw_sdk::library::index::Index) -> bool
@@ -251,6 +257,28 @@ pub struct paperpaw_sdk::library::service::LibraryService(pub alloc::boxed::Box<
 pub fn paperpaw_sdk::library::service::LibraryService::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub const paperpaw_sdk::library::service::LibraryService::KEY: &'static str
 pub const paperpaw_sdk::library::service::LibraryService::KEY: &'static str
+pub struct paperpaw_sdk::library::sorted::Entry
+pub paperpaw_sdk::library::sorted::Entry::item: paperpaw_sdk::library::index::Item
+pub paperpaw_sdk::library::sorted::Entry::stack: u16
+pub struct paperpaw_sdk::library::sorted::Sorted
+pub fn paperpaw_sdk::library::sorted::Sorted::archived(&self) -> usize
+pub fn paperpaw_sdk::library::sorted::Sorted::has_books(&self) -> bool
+pub fn paperpaw_sdk::library::sorted::Sorted::hide(&mut self, &dyn paperpaw_platform::storage::Storage, u32)
+pub fn paperpaw_sdk::library::sorted::Sorted::hide_all(&mut self, &dyn paperpaw_platform::storage::Storage, &[u32])
+pub fn paperpaw_sdk::library::sorted::Sorted::is_current(&self, &paperpaw_sdk::Env<'_>) -> bool
+pub fn paperpaw_sdk::library::sorted::Sorted::is_gone(&self) -> bool
+pub fn paperpaw_sdk::library::sorted::Sorted::open(&paperpaw_sdk::Env<'_>, &str) -> core::option::Option<paperpaw_sdk::library::sorted::Sorted>
+pub fn paperpaw_sdk::library::sorted::Sorted::refresh(&mut self, &dyn paperpaw_platform::storage::Storage)
+pub fn paperpaw_sdk::library::sorted::Sorted::total(&self) -> usize
+pub fn paperpaw_sdk::library::sorted::Sorted::find(&self, &dyn paperpaw_platform::storage::Storage, paperpaw_sdk::library::sorted::View, u32) -> core::option::Option<usize>
+pub fn paperpaw_sdk::library::sorted::Sorted::len(&self, paperpaw_sdk::library::sorted::View) -> usize
+pub fn paperpaw_sdk::library::sorted::Sorted::next_in_series(&self, &dyn paperpaw_platform::storage::Storage, bool) -> alloc::vec::Vec<paperpaw_sdk::library::sorted::Entry>
+pub fn paperpaw_sdk::library::sorted::Sorted::page(&self, &dyn paperpaw_platform::storage::Storage, paperpaw_sdk::library::sorted::View, usize, usize) -> alloc::vec::Vec<paperpaw_sdk::library::sorted::Entry>
+pub struct paperpaw_sdk::library::sorted::View
+pub paperpaw_sdk::library::sorted::View::by_recent: bool
+pub paperpaw_sdk::library::sorted::View::show: paperpaw_sdk::library::catalog::Show
+pub paperpaw_sdk::library::sorted::View::stacked: bool
+pub fn paperpaw_sdk::library::sorted::View::new(paperpaw_sdk::library::catalog::Show, bool, bool) -> paperpaw_sdk::library::sorted::View
 pub enum paperpaw_sdk::library::Badge
 pub paperpaw_sdk::library::Badge::Icon(&'static str)
 pub paperpaw_sdk::library::Badge::Text(alloc::string::String)
@@ -265,11 +293,13 @@ pub enum paperpaw_sdk::library::catalog::Show
 pub paperpaw_sdk::library::catalog::Show::All
 pub paperpaw_sdk::library::catalog::Show::Favourites
 pub paperpaw_sdk::library::catalog::Show::Finished
+pub paperpaw_sdk::library::catalog::Show::Other(&'static str)
 pub paperpaw_sdk::library::catalog::Show::Reading
 pub paperpaw_sdk::library::catalog::Show::Unread
 pub enum paperpaw_sdk::library::catalog::Sort
 pub paperpaw_sdk::library::catalog::Sort::Added
 pub paperpaw_sdk::library::catalog::Sort::Author
+pub paperpaw_sdk::library::catalog::Sort::Other(&'static str)
 pub paperpaw_sdk::library::catalog::Sort::Series
 pub paperpaw_sdk::library::catalog::Sort::Title
 pub enum paperpaw_sdk::library::catalog::State
@@ -290,6 +320,7 @@ pub fn paperpaw_sdk::library::listing::Listing<'_>::page(&self, usize, usize, us
 pub fn paperpaw_sdk::library::listing::Listing<'_>::page_of(&self, &paperpaw_sdk::library::listing::Entry, usize) -> (usize, alloc::vec::Vec<paperpaw_sdk::library::listing::Entry>)
 pub fn paperpaw_sdk::library::listing::Listing<'_>::range(&self, usize, usize) -> alloc::vec::Vec<paperpaw_sdk::library::listing::Entry>
 pub fn paperpaw_sdk::library::listing::Listing<'_>::rank(&self, &paperpaw_sdk::library::listing::Entry) -> usize
+pub fn paperpaw_sdk::library::listing::Listing<'a>::new(&'a dyn paperpaw_platform::storage::Storage, &'a paperpaw_sdk::Formats, &'a str, bool, core::option::Option<&'a dyn core::ops::function::Fn(&str) -> u32>) -> Self
 pub fn paperpaw_sdk::library::listing::Listing<'_>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub paperpaw_sdk::library::listing::Listing::dir: &'a str
 pub paperpaw_sdk::library::listing::Listing::folders_only: bool
@@ -346,6 +377,7 @@ pub fn paperpaw_sdk::library::index::without_article(&str) -> &str
 pub fn paperpaw_sdk::library::service::badges(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::library::catalog::Record, usize) -> alloc::vec::Vec<paperpaw_sdk::library::service::Badge>
 pub fn paperpaw_sdk::library::service::is_book_path(&paperpaw_sdk::Env<'_>, &str) -> bool
 pub fn paperpaw_sdk::library::service::service<'e>(&paperpaw_sdk::Env<'e>) -> &'e dyn paperpaw_sdk::library::service::Library
+pub fn paperpaw_sdk::library::sorted::request(&str) -> paperpaw_sdk::Command
 pub fn paperpaw_sdk::library::added(&str, &str) -> paperpaw_sdk::Command
 pub fn paperpaw_sdk::library::book(&dyn paperpaw_platform::storage::Storage, &str) -> core::option::Option<paperpaw_sdk::library::Book>
 pub fn paperpaw_sdk::library::book_keys(&dyn paperpaw_platform::storage::Storage, &paperpaw_sdk::Formats) -> alloc::vec::Vec<u64>
@@ -364,6 +396,7 @@ pub fn paperpaw_sdk::library::indexed(&paperpaw_sdk::Env<'_>, &str) -> paperpaw_
 pub fn paperpaw_sdk::library::is_book_path(&paperpaw_sdk::Env<'_>, &str) -> bool
 pub fn paperpaw_sdk::library::is_new(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::library::Book, bool) -> bool
 pub fn paperpaw_sdk::library::is_new_on(&paperpaw_sdk::library::Book, bool, core::option::Option<u32>) -> bool
+pub fn paperpaw_sdk::library::kept_path(&str, &str, &str) -> alloc::string::String
 pub fn paperpaw_sdk::library::key(&str) -> alloc::string::String
 pub fn paperpaw_sdk::library::move_data(&dyn paperpaw_platform::storage::Storage, &[paperpaw_sdk::library::BookData], &str, &str)
 pub fn paperpaw_sdk::library::moved(&dyn paperpaw_platform::storage::Storage, &str, &str)
@@ -388,5 +421,6 @@ pub mod paperpaw_sdk::library::catalog
 pub mod paperpaw_sdk::library::index
 pub mod paperpaw_sdk::library::listing
 pub mod paperpaw_sdk::library::service
+pub mod paperpaw_sdk::library::sorted
 pub mod paperpaw_sdk::library::what
 ```

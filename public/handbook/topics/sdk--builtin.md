@@ -250,6 +250,38 @@ pub fn paperpaw_sdk::builtin::events::PageWordsWanted::to_params(&self) -> paper
 pub fn paperpaw_sdk::builtin::events::PageWordsWanted::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
 pub fn paperpaw_sdk::builtin::events::PageWordsWanted::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::PageWordsWanted::to_params(&self) -> paperpaw_sdk::Params
+pub struct paperpaw_sdk::builtin::events::PluginsAnswered
+pub paperpaw_sdk::builtin::events::PluginsAnswered::by: paperpaw_sdk::Id
+pub paperpaw_sdk::builtin::events::PluginsAnswered::declined: bool
+pub paperpaw_sdk::builtin::events::PluginsAnswered::error: alloc::string::String
+pub paperpaw_sdk::builtin::events::PluginsAnswered::installed: alloc::string::String
+pub paperpaw_sdk::builtin::events::PluginsAnswered::missing: alloc::string::String
+pub fn paperpaw_sdk::builtin::events::PluginsAnswered::installed_ids(&self) -> impl core::iter::traits::iterator::Iterator<Item = paperpaw_sdk::Id> + '_
+pub fn paperpaw_sdk::builtin::events::PluginsAnswered::missing_ids(&self) -> impl core::iter::traits::iterator::Iterator<Item = paperpaw_sdk::Id> + '_
+pub fn paperpaw_sdk::builtin::events::PluginsAnswered::new(paperpaw_sdk::Id, alloc::string::String, alloc::string::String, bool, alloc::string::String) -> Self
+pub fn paperpaw_sdk::builtin::events::PluginsAnswered::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::PluginsAnswered::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::PluginsAnswered::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::PluginsAnswered::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::PluginsAnswered::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::PluginsAnswered::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::PluginsAnswered::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::PluginsAnswered::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::PluginsAnswered::to_params(&self) -> paperpaw_sdk::Params
+pub struct paperpaw_sdk::builtin::events::PluginsRequested
+pub paperpaw_sdk::builtin::events::PluginsRequested::by: paperpaw_sdk::Id
+pub paperpaw_sdk::builtin::events::PluginsRequested::plugins: alloc::string::String
+pub fn paperpaw_sdk::builtin::events::PluginsRequested::ids(&self) -> impl core::iter::traits::iterator::Iterator<Item = paperpaw_sdk::Id> + '_
+pub fn paperpaw_sdk::builtin::events::PluginsRequested::new(paperpaw_sdk::Id, alloc::string::String) -> Self
+pub fn paperpaw_sdk::builtin::events::PluginsRequested::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::PluginsRequested::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::PluginsRequested::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::PluginsRequested::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::PluginsRequested::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::PluginsRequested::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::PluginsRequested::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::PluginsRequested::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::PluginsRequested::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::ReadToday
 pub paperpaw_sdk::builtin::events::ReadToday::day: i32
 pub paperpaw_sdk::builtin::events::ReadToday::seconds: u32
@@ -362,6 +394,18 @@ pub fn paperpaw_sdk::builtin::events::Skimmed::to_params(&self) -> paperpaw_sdk:
 pub fn paperpaw_sdk::builtin::events::Skimmed::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
 pub fn paperpaw_sdk::builtin::events::Skimmed::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::Skimmed::to_params(&self) -> paperpaw_sdk::Params
+pub struct paperpaw_sdk::builtin::events::SortedWanted
+pub paperpaw_sdk::builtin::events::SortedWanted::archive: alloc::string::String
+pub fn paperpaw_sdk::builtin::events::SortedWanted::new(alloc::string::String) -> Self
+pub fn paperpaw_sdk::builtin::events::SortedWanted::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::SortedWanted::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::SortedWanted::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::SortedWanted::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::SortedWanted::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::SortedWanted::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::SortedWanted::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::SortedWanted::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::SortedWanted::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::TextChosen
 pub paperpaw_sdk::builtin::events::TextChosen::action: paperpaw_sdk::Id
 pub paperpaw_sdk::builtin::events::TextChosen::end_offset: u32
@@ -480,6 +524,7 @@ pub const paperpaw_sdk::builtin::events::BOOK_MOVED: paperpaw_sdk::event::Event<
 pub const paperpaw_sdk::builtin::events::BOOK_OPENED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::Reading>
 pub const paperpaw_sdk::builtin::events::BOOK_REMOVED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::BookRemoved>
 pub const paperpaw_sdk::builtin::events::CATALOG_CHANGED: paperpaw_sdk::event::Event<()>
+pub const paperpaw_sdk::builtin::events::CATALOG_FAILED: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::CATALOG_WANTED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::CatalogWanted>
 pub const paperpaw_sdk::builtin::events::DECORATION_TAPPED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::DecorationTapped>
 pub const paperpaw_sdk::builtin::events::DOCUMENT_READY: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::DocumentReady>
@@ -496,7 +541,9 @@ pub const paperpaw_sdk::builtin::events::NOTES_EXPORTED: paperpaw_sdk::event::Ev
 pub const paperpaw_sdk::builtin::events::PAGE_LAYER_TAPPED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::PageLayerTapped>
 pub const paperpaw_sdk::builtin::events::PAGE_TURNED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::Reading>
 pub const paperpaw_sdk::builtin::events::PAGE_WORDS_WANTED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::PageWordsWanted>
+pub const paperpaw_sdk::builtin::events::PLUGINS_ANSWERED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::PluginsAnswered>
 pub const paperpaw_sdk::builtin::events::PLUGINS_CHANGED: paperpaw_sdk::event::Event<()>
+pub const paperpaw_sdk::builtin::events::PLUGINS_REQUESTED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::PluginsRequested>
 pub const paperpaw_sdk::builtin::events::POWER_CHANGED: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::PREVIEW_CHANGED: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::READING_APP_WANTED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::ReadingAppWanted>
@@ -507,12 +554,14 @@ pub const paperpaw_sdk::builtin::events::SETTING_CHANGED: paperpaw_sdk::event::E
 pub const paperpaw_sdk::builtin::events::SETTING_TYPED: paperpaw_sdk::event::Event<paperpaw_sdk::replies::Typed>
 pub const paperpaw_sdk::builtin::events::SKIM: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::Skim>
 pub const paperpaw_sdk::builtin::events::SKIMMED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::Skimmed>
+pub const paperpaw_sdk::builtin::events::SORTED_WANTED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::SortedWanted>
 pub const paperpaw_sdk::builtin::events::STARTED: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::STATUS_CHANGED: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::STOPPING: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::SUSPEND: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::TEXT_CHOSEN: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::TextChosen>
 pub const paperpaw_sdk::builtin::events::TYPE_TEXT: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::TypeText>
+pub const paperpaw_sdk::builtin::events::USB_DRIVE_ENDED: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::WIDGET_CHANGED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::WidgetChanged>
 pub const paperpaw_sdk::builtin::events::WIFI_CHANGED: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::WIFI_FAILED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::WifiFailed>
@@ -607,6 +656,7 @@ pub const paperpaw_sdk::builtin::screens::PLACEHOLDER: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::screens::STATUS_ITEMS: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::screens::STATUS_LINES: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::screens::WIDGET_LIST: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::settings::ARROWS_STAY_ON_PAGE: paperpaw_sdk::setting::Setting<bool>
 pub const paperpaw_sdk::builtin::settings::AWAKE_HOLDS: paperpaw_sdk::setting::Setting<bool>
 pub const paperpaw_sdk::builtin::settings::BATTERY_LOW: paperpaw_sdk::setting::Setting<i64>
 pub const paperpaw_sdk::builtin::settings::BOOK_ALIGN: paperpaw_sdk::setting::Setting<bool>
@@ -651,6 +701,9 @@ pub const paperpaw_sdk::builtin::settings::INDENT_SIZE: paperpaw_sdk::setting::S
 pub const paperpaw_sdk::builtin::settings::JUSTIFY: paperpaw_sdk::setting::Setting<bool>
 pub const paperpaw_sdk::builtin::settings::KERNING: paperpaw_sdk::setting::Setting<bool>
 pub const paperpaw_sdk::builtin::settings::KEYMAP_PRESET: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
+pub const paperpaw_sdk::builtin::settings::KOREAN_BREAKS: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
+pub const paperpaw_sdk::builtin::settings::KOREAN_BREAKS_SYLLABLE: &str
+pub const paperpaw_sdk::builtin::settings::KOREAN_BREAKS_WORD: &str
 pub const paperpaw_sdk::builtin::settings::LANGUAGE: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
 pub const paperpaw_sdk::builtin::settings::LETTER_SPACING: paperpaw_sdk::setting::Setting<i64>
 pub const paperpaw_sdk::builtin::settings::LIBRARY_FOLDER: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
@@ -702,6 +755,9 @@ pub const paperpaw_sdk::builtin::settings::TEXT_COLORS: &[&str]
 pub const paperpaw_sdk::builtin::settings::TEXT_COLOR_OWN: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
 pub const paperpaw_sdk::builtin::settings::TEXT_CONTRAST: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
 pub const paperpaw_sdk::builtin::settings::TEXT_CONTRAST_LEVELS: &[&str]
+pub const paperpaw_sdk::builtin::settings::TEXT_CURVE: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
+pub const paperpaw_sdk::builtin::settings::TEXT_SHARPNESS: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
+pub const paperpaw_sdk::builtin::settings::TEXT_SHARPNESS_LEVELS: &[&str]
 pub const paperpaw_sdk::builtin::settings::TIME_ZONE: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
 pub const paperpaw_sdk::builtin::settings::TIME_ZONE_RULE: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
 pub const paperpaw_sdk::builtin::settings::UI_CONTRAST: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
@@ -715,6 +771,7 @@ pub const paperpaw_sdk::builtin::settings::UI_PALETTE: paperpaw_sdk::setting::Se
 pub const paperpaw_sdk::builtin::settings::UI_ROW: paperpaw_sdk::setting::Setting<i64>
 pub const paperpaw_sdk::builtin::settings::UI_SEPARATORS: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
 pub const paperpaw_sdk::builtin::settings::UI_SIZE: paperpaw_sdk::setting::Setting<i64>
+pub const paperpaw_sdk::builtin::settings::UI_TEXT_CURVE: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
 pub const paperpaw_sdk::builtin::settings::UI_TITLE: paperpaw_sdk::setting::Setting<i64>
 pub const paperpaw_sdk::builtin::settings::VOICE: paperpaw_sdk::setting::Setting<paperpaw_sdk::setting::Text>
 pub const paperpaw_sdk::builtin::settings::VOICE_SYSTEM: &str

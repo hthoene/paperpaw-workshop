@@ -17,6 +17,11 @@ What it is given:
   `cargo run --example paperpaw-dev -- check --plugin my-plugin`.
 - **A data plugin**: its folder, `paperpaw-dev check path/to/my-theme`.
 - **A code plugin built for a device**: `paperpaw-dev package hello.ppn`.
+- **A code plugin's source**: `paperpaw-dev package path/to/crate` reads its
+  `src/` for the conventions of
+  [Plugin layout and best practices](plugin-conventions.md): files over 4 KB
+  embedded in the code, writes under `plugins/<id>/`, ids outside `<id>.`.
+  Only warnings.
 - **PaperPaw's own plugins**, which the app has already:
   `cargo run -p paperpaw-dev -- check --plugin widgets`.
 
@@ -144,10 +149,10 @@ plugin and the app share one:
 
 ```toml
 [dev-dependencies]
-paperpaw-dev = { git = "https://github.com/hthoene/paperpaw", tag = "v0.5.0-beta.11" }
+paperpaw-dev = { git = "https://github.com/hthoene/paperpaw", tag = "v0.6.0-beta.1" }
 
 [patch.crates-io]
-paperpaw-sdk = { git = "https://github.com/hthoene/paperpaw", tag = "v0.5.0-beta.11" }
+paperpaw-sdk = { git = "https://github.com/hthoene/paperpaw", tag = "v0.6.0-beta.1" }
 ```
 
 `examples/paperpaw-dev.rs` adds the plugin to the app:

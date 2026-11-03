@@ -11,6 +11,7 @@ pub fn paperpaw_sdk::data::Format::text(&self, &str) -> alloc::string::String
 pub fn paperpaw_sdk::data::Format::version_of(&str) -> u32
 pub enum paperpaw_sdk::data::Error
 pub paperpaw_sdk::data::Error::Newer(u32)
+pub paperpaw_sdk::data::Error::Other(u16)
 pub paperpaw_sdk::data::Error::Storage(paperpaw_platform::storage::StorageError)
 pub paperpaw_sdk::data::Error::Unreadable
 pub fn paperpaw_sdk::data::Error::from(paperpaw_platform::storage::StorageError) -> Self

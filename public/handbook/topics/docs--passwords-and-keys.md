@@ -5,7 +5,10 @@ Plugins keep passwords, API keys and tokens with
 with `env.secrets().get(id)`. They are all listed in *Settings, Passwords
 and keys*, where the user changes or removes them. Ask for one on the
 keyboard in password mode (`ask::text(…).password()`); the keyboard
-offers to type it on a phone. Ask for web and e-mail addresses with
+offers to type it on a phone. Ask for a message or a note of several
+lines with `.multiline()`: the keyboard gets a key for the line break, shows
+the text on as many wrapped lines as fit above the keys, and the answer
+has `\n` between its lines. Ask for web and e-mail addresses with
 `.url()` and `.email()`: the keyboard types them as they are, without
 capitals of its own. They are kept apart from the settings and
 not readable at a glance, but not encrypted: the devices have no safe
