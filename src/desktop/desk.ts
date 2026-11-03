@@ -98,6 +98,10 @@ export class Desk {
   /** A PaperPaw key's budget and what it spent, as its proxy says. */
   keyBudget: { budget: number; spent: number } | null = null;
 
+  /** What the person who gave out the key wrote for its holder (plain
+   *  text, as the proxy says), or empty. */
+  keyMessage = "";
+
   /** What this plugin and this month came to, for the bar. */
   get spent(): { plugin: number; month: number } {
     const project = this.workspace.project;
@@ -111,7 +115,9 @@ export class Desk {
     try {
       const answer = await fetch(`${base}/v1/key`, { headers: { "x-api-key": apiKey } });
       if (!answer.ok) return;
-      const info = (await answer.json()) as { models?: unknown; budget?: unknown; spent?: unknown };
+      const info = (await answer.json()) as { models?: unknown; budget?: unknown; spent?: unknown; message?: unknown };
+      // Text only, and not longer than the proxy lets one write.
+      this.keyMessage = typeof info.message === "string" ? info.message.slice(0, 500) : "";
       if (Array.isArray(info.models)) this.allowed = info.models.filter((m): m is string => typeof m === "string");
       if (typeof info.budget === "number" && typeof info.spent === "number") this.keyBudget = { budget: info.budget, spent: info.spent };
       this.changed();

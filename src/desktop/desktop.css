@@ -370,7 +370,9 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   position: absolute; left: 50%; bottom: 6rem; z-index: 4; transform: translateX(-50%);
   display: flex; align-items: center; gap: .6rem; margin: 0; padding: .45rem .5rem .45rem 1rem;
   border-radius: 999px; background: var(--ink); color: var(--sheet); font-size: .9rem;
+  max-width: min(40rem, 92%); line-height: 1.4; white-space: pre-line;
 }
+.key-message { white-space: pre-line; }
 .notice .close svg { stroke: var(--sheet); }
 .notice .close:hover { background: #3a3631; }
 .notice .link { box-shadow: inset 0 0 0 1.5px var(--sheet); color: var(--sheet); font-size: .86rem; }

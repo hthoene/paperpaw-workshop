@@ -113,4 +113,21 @@ describe("the desk", () => {
     expect(desk.may).toEqual(["auto", "claude-haiku-5-5", "claude-sonnet-5-5"]);
     vi.unstubAllGlobals();
   });
+
+  it("keeps the note written for a PaperPaw key as plain text, and none where there is none", async () => {
+    const backend = standInBackend();
+    const provider = new ReplayProvider({ title: "none", user: [], answers: [] });
+    const desk = new Desk(new Workspace(backend), backend, new Checker({ pluginCheck: async () => [] }), handbook(), provider, "paperpaw");
+    const answer = (info: object) => vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(info))));
+    answer({ models: ["claude-haiku-5-5"], message: "Welcome! <b>For clocks</b>" });
+    await desk.askProxy("https://proxy.test", "ppw-abcdefghijklmnop");
+    expect(desk.keyMessage).toBe("Welcome! <b>For clocks</b>");
+    answer({ models: ["claude-haiku-5-5"], message: 7 });
+    await desk.askProxy("https://proxy.test", "ppw-abcdefghijklmnop");
+    expect(desk.keyMessage).toBe("");
+    answer({ models: ["claude-haiku-5-5"], message: "x".repeat(900) });
+    await desk.askProxy("https://proxy.test", "ppw-abcdefghijklmnop");
+    expect(desk.keyMessage).toHaveLength(500);
+    vi.unstubAllGlobals();
+  });
 });
