@@ -38,6 +38,7 @@ pub fn paperpaw_sdk::Screen::secret(&self) -> bool
 pub fn paperpaw_sdk::Screen::shows_through(&self) -> paperpaw_sdk::ShowsThrough
 pub fn paperpaw_sdk::Screen::takes_buttons(&self) -> bool
 pub fn paperpaw_sdk::Screen::takes_double_taps(&self) -> bool
+pub fn paperpaw_sdk::Screen::times_under_overlays(&self) -> bool
 pub struct paperpaw_sdk::ActionOverride
 pub paperpaw_sdk::ActionOverride::action: paperpaw_sdk::Id
 pub paperpaw_sdk::ActionOverride::handler: paperpaw_sdk::ActionHandler
@@ -860,6 +861,7 @@ pub fn paperpaw_sdk::Command::socket_send(paperpaw_sdk::Id, alloc::vec::Vec<u8>)
 pub fn paperpaw_sdk::Command::speak(paperpaw_sdk::Speech) -> Self
 pub fn paperpaw_sdk::Command::start_tls(paperpaw_sdk::Id, paperpaw_sdk::Tls) -> Self
 pub fn paperpaw_sdk::Command::work(paperpaw_sdk::work::Work) -> Self
+pub fn paperpaw_sdk::Command::extended(impl core::convert::Into<paperpaw_sdk::Id>, paperpaw_sdk::Params) -> paperpaw_sdk::Command
 pub fn paperpaw_sdk::Command::open_slot(paperpaw_sdk::Id) -> paperpaw_sdk::Command
 pub fn paperpaw_sdk::Command::run(impl core::convert::Into<paperpaw_sdk::Id>) -> paperpaw_sdk::Command
 pub fn paperpaw_sdk::Command::set<T: paperpaw_sdk::setting::SettingType>(&paperpaw_sdk::setting::Setting<T>, <T as paperpaw_sdk::setting::SettingType>::Input) -> paperpaw_sdk::Command
@@ -1171,6 +1173,7 @@ pub fn paperpaw_sdk::Cx<'a, 'e>::command(&mut self, paperpaw_sdk::Command)
 pub fn paperpaw_sdk::Cx<'a, 'e>::entry(&self) -> core::option::Option<&paperpaw_sdk::StackEntry>
 pub fn paperpaw_sdk::Cx<'a, 'e>::env(&self) -> &paperpaw_sdk::Env<'e>
 pub fn paperpaw_sdk::Cx<'a, 'e>::for_screen(self, paperpaw_sdk::ScreenKey) -> Self
+pub fn paperpaw_sdk::Cx<'a, 'e>::is_on_top(&self) -> bool
 pub fn paperpaw_sdk::Cx<'a, 'e>::keep_awake(&mut self, paperpaw_sdk::power::WakeHold)
 pub fn paperpaw_sdk::Cx<'a, 'e>::key(&self) -> core::option::Option<paperpaw_sdk::ScreenKey>
 pub fn paperpaw_sdk::Cx<'a, 'e>::let_sleep(&mut self, impl core::convert::Into<paperpaw_sdk::Id>)
@@ -1214,6 +1217,7 @@ pub fn paperpaw_sdk::Env<'a>::i18n(&self) -> &'a paperpaw_i18n::Translator
 pub fn paperpaw_sdk::Env<'a>::inputs(&self) -> &'a [paperpaw_sdk::keys::InputSpec]
 pub fn paperpaw_sdk::Env<'a>::keys(&self) -> &'a dyn paperpaw_sdk::keys::KeyBindings
 pub fn paperpaw_sdk::Env<'a>::keys_held(&self) -> paperpaw_sdk::realtime::KeysHeld<'a>
+pub fn paperpaw_sdk::Env<'a>::landscape(&self) -> bool
 pub fn paperpaw_sdk::Env<'a>::lang(&self) -> paperpaw_lang::Lang
 pub fn paperpaw_sdk::Env<'a>::last_input(&self) -> paperpaw_sdk::keys::InputMode
 pub fn paperpaw_sdk::Env<'a>::look(&self) -> paperpaw_sdk::ui::look::Look
@@ -1231,6 +1235,7 @@ pub fn paperpaw_sdk::Env<'a>::random(&self) -> paperpaw_sdk::random::Random
 pub fn paperpaw_sdk::Env<'a>::reader(&self) -> bool
 pub fn paperpaw_sdk::Env<'a>::readers(&self) -> &'a paperpaw_sdk::readers::Readers
 pub fn paperpaw_sdk::Env<'a>::room(&self) -> paperpaw_sdk::realtime::Room
+pub fn paperpaw_sdk::Env<'a>::screen_class(&self) -> paperpaw_sdk::ui::ScreenClass
 pub fn paperpaw_sdk::Env<'a>::screens(&self) -> paperpaw_sdk::ScreenList<'a>
 pub fn paperpaw_sdk::Env<'a>::secrets(&self) -> paperpaw_sdk::secrets::Visible<'a>
 pub fn paperpaw_sdk::Env<'a>::services(&self) -> &'a paperpaw_sdk::services::Services

@@ -1031,6 +1031,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `core.next-page` | Next page |
 | `core.nothing` | Nothing |
 | `core.open-with` | Open with … |
+| `core.pane.other` | Other pane |
 | `core.prev-page` | Previous page |
 | `core.previous` | Previous |
 | `core.quick-panel` | Quick panel |

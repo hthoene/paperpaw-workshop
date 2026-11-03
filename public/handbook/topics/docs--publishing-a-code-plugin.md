@@ -7,4 +7,6 @@ source, which the library rebuilds to compare. The sample's `build.sh`
 builds, packs and signs both files, and its CI job
 (`samples/hello-native/.github/workflows/build.yml`, for a plugin's own
 repository) runs it on every tag, with the author's key kept as a
-secret of the repository. [Publishing](#publishing) says how.
+secret of the repository. [Publishing](#publishing) says how, and
+[Which devices your plugin is for](#which-devices-your-plugin-is-for) that
+a plugin may be for one reader only.
