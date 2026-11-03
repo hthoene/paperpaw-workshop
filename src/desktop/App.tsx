@@ -110,6 +110,25 @@ function example(): ReplayProvider | undefined {
  *  Anthropic's API and passes on what the key allows. */
 export const PROXY = "https://workshop.paperpaw.org";
 
+const MESSAGE_SEEN = "workshop.keyMessageSeen";
+
+/** Whether this note was not shown yet in this computer's webview. */
+function messageUnseen(message: string): boolean {
+  try {
+    return localStorage.getItem(MESSAGE_SEEN) !== message;
+  } catch {
+    return true;
+  }
+}
+
+function messageSeen(message: string): void {
+  try {
+    localStorage.setItem(MESSAGE_SEEN, message);
+  } catch {
+    // Not kept: told again next time.
+  }
+}
+
 interface WindowProps {
   backend: Backend;
   apiKey: string;
@@ -173,7 +192,13 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
       workspace.afterSave((project) => void checker.plugin(project)),
     ];
     void workspace.refresh();
-    void desk.askProxy(PROXY, apiKey);
+    void desk.askProxy(PROXY, apiKey).then(() => {
+      // A note written for this key is told once, then it stays in Settings.
+      if (desk.keyMessage && messageUnseen(desk.keyMessage)) {
+        setNotice(`A note with your PaperPaw key: ${desk.keyMessage}`);
+        messageSeen(desk.keyMessage);
+      }
+    });
     // The reader, before any project.
     void desk.choose(desk.profile).catch(() => {});
     return () => stops.forEach((stop) => stop());
@@ -237,7 +262,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
         {!notice && <UpdateNotice backend={backend} />}
         {sending && <Send desk={desk} backend={backend} onClose={() => setSending(false)} />}
         {publishing && <Publish desk={desk} backend={backend} onClose={() => setPublishing(false)} />}
-        {settings && <Settings workspace={workspace} backend={backend} keyKind={keyKind} may={desk.may} onClose={() => setSettings(false)} />}
+        {settings && <Settings workspace={workspace} backend={backend} desk={desk} keyKind={keyKind} may={desk.may} onClose={() => setSettings(false)} />}
         {files && <Drawer workspace={workspace} pictures={backend} desk={desk} onClose={() => setFiles(false)} />}
       </div>
     </div>
@@ -245,7 +270,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
 }
 
 /** The app's settings: which model, for all plugins and for this one. */
-function Settings({ workspace, backend, keyKind, may, onClose }: { workspace: Workspace; backend: Backend; keyKind: "claude" | "paperpaw" | null; may: ModelChoice[]; onClose(): void }) {
+function Settings({ workspace, backend, desk, keyKind, may, onClose }: { workspace: Workspace; backend: Backend; desk: Desk; keyKind: "claude" | "paperpaw" | null; may: ModelChoice[]; onClose(): void }) {
   const [choice, setChoice] = useState<ModelChoice>(usable(savedChoice(), may));
   const [looks, setLooks] = useState<LookChoice>(savedLooks());
   const [length, setLength] = useState<LengthChoice>(savedLength());
@@ -279,6 +304,7 @@ function Settings({ workspace, backend, keyKind, may, onClose }: { workspace: Wo
           </label>
         ))}
         {keyKind === "paperpaw" && <p class="hint">Your PaperPaw key decides which models you can pick.</p>}
+        {keyKind === "paperpaw" && desk.keyMessage && <p class="hint key-message"><strong>A note with your key:</strong> {desk.keyMessage}</p>}
       </fieldset>
       {project && shown.length > 1 && (
         <label class="own">
