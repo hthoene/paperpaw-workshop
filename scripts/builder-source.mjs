@@ -18,7 +18,7 @@ const repo = path.resolve(option("repo", "../paperpaw"));
 const ref = option("ref", "main");
 const git = (...args) => execFileSync("git", ["-C", repo, ...args], { encoding: "utf8" });
 
-const commit = git("rev-parse", ref).trim();
+const commit = git("rev-parse", `${ref}^{commit}`).trim(); // a tag names its commit
 const out = path.join(here, "builder");
 execFileSync("git", ["-C", repo, "archive", "--format=tar", "-o", path.join(out, "paperpaw.tar"), commit]);
 fs.writeFileSync(path.join(out, "paperpaw.json"), JSON.stringify({ ref, commit, made: new Date().toISOString().slice(0, 10) }, null, 2) + "\n");
