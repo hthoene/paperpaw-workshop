@@ -108,6 +108,21 @@ pub fn paperpaw_sdk::builtin::events::DecorationTapped::to_params(&self) -> pape
 pub fn paperpaw_sdk::builtin::events::DecorationTapped::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
 pub fn paperpaw_sdk::builtin::events::DecorationTapped::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::DecorationTapped::to_params(&self) -> paperpaw_sdk::Params
+pub struct paperpaw_sdk::builtin::events::DisplayChanged
+pub paperpaw_sdk::builtin::events::DisplayChanged::class: paperpaw_sdk::ui::ScreenClass
+pub paperpaw_sdk::builtin::events::DisplayChanged::height: u16
+pub paperpaw_sdk::builtin::events::DisplayChanged::landscape: bool
+pub paperpaw_sdk::builtin::events::DisplayChanged::width: u16
+pub fn paperpaw_sdk::builtin::events::DisplayChanged::new(u16, u16, paperpaw_sdk::ui::ScreenClass, bool) -> Self
+pub fn paperpaw_sdk::builtin::events::DisplayChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::DisplayChanged::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::DisplayChanged::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::DisplayChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::DisplayChanged::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::DisplayChanged::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::DisplayChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::DisplayChanged::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::DisplayChanged::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::DocumentReady
 pub paperpaw_sdk::builtin::events::DocumentReady::path: alloc::string::String
 pub fn paperpaw_sdk::builtin::events::DocumentReady::new(alloc::string::String) -> Self
@@ -203,6 +218,19 @@ pub fn paperpaw_sdk::builtin::events::MenuChanged::to_params(&self) -> paperpaw_
 pub fn paperpaw_sdk::builtin::events::MenuChanged::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
 pub fn paperpaw_sdk::builtin::events::MenuChanged::into_params(self) -> paperpaw_sdk::Params
 pub fn paperpaw_sdk::builtin::events::MenuChanged::to_params(&self) -> paperpaw_sdk::Params
+pub struct paperpaw_sdk::builtin::events::MenuPage
+pub paperpaw_sdk::builtin::events::MenuPage::menu: alloc::string::String
+pub paperpaw_sdk::builtin::events::MenuPage::page: alloc::string::String
+pub fn paperpaw_sdk::builtin::events::MenuPage::new(alloc::string::String, alloc::string::String) -> Self
+pub fn paperpaw_sdk::builtin::events::MenuPage::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::MenuPage::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::MenuPage::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::MenuPage::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::MenuPage::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::MenuPage::to_params(&self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::MenuPage::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
+pub fn paperpaw_sdk::builtin::events::MenuPage::into_params(self) -> paperpaw_sdk::Params
+pub fn paperpaw_sdk::builtin::events::MenuPage::to_params(&self) -> paperpaw_sdk::Params
 pub struct paperpaw_sdk::builtin::events::NotesExported
 pub paperpaw_sdk::builtin::events::NotesExported::path: alloc::string::String
 pub paperpaw_sdk::builtin::events::NotesExported::title: alloc::string::String
@@ -501,6 +529,7 @@ pub const paperpaw_sdk::builtin::actions::NEXT: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::actions::NEXT_PAGE: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::actions::NOTHING: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::actions::OPEN_WITH: paperpaw_sdk::Id
+pub const paperpaw_sdk::builtin::actions::PANE_OTHER: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::actions::PREVIOUS: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::actions::PREV_PAGE: paperpaw_sdk::Id
 pub const paperpaw_sdk::builtin::actions::QUICK_PANEL: paperpaw_sdk::Id
@@ -527,6 +556,7 @@ pub const paperpaw_sdk::builtin::events::CATALOG_CHANGED: paperpaw_sdk::event::E
 pub const paperpaw_sdk::builtin::events::CATALOG_FAILED: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::CATALOG_WANTED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::CatalogWanted>
 pub const paperpaw_sdk::builtin::events::DECORATION_TAPPED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::DecorationTapped>
+pub const paperpaw_sdk::builtin::events::DISPLAY_CHANGED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::DisplayChanged>
 pub const paperpaw_sdk::builtin::events::DOCUMENT_READY: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::DocumentReady>
 pub const paperpaw_sdk::builtin::events::FIRMWARE_CHANGED: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::FOCUS_CHANGED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::FocusChanged>
@@ -535,6 +565,7 @@ pub const paperpaw_sdk::builtin::events::GOTO: paperpaw_sdk::event::Event<paperp
 pub const paperpaw_sdk::builtin::events::LIBRARY_CHANGED: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::LOOKUP_ANSWERED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::LookupAnswered>
 pub const paperpaw_sdk::builtin::events::MENU_CHANGED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::MenuChanged>
+pub const paperpaw_sdk::builtin::events::MENU_PAGE: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::MenuPage>
 pub const paperpaw_sdk::builtin::events::NETWORK_IDLE: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::NETWORK_WANTED: paperpaw_sdk::event::Event<()>
 pub const paperpaw_sdk::builtin::events::NOTES_EXPORTED: paperpaw_sdk::event::Event<paperpaw_sdk::builtin::events::NotesExported>

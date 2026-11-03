@@ -309,6 +309,7 @@ pub fn paperpaw_sdk::ui::choice::Choice::secret(&self) -> bool
 pub fn paperpaw_sdk::ui::choice::Choice::shows_through(&self) -> paperpaw_sdk::ShowsThrough
 pub fn paperpaw_sdk::ui::choice::Choice::takes_buttons(&self) -> bool
 pub fn paperpaw_sdk::ui::choice::Choice::takes_double_taps(&self) -> bool
+pub fn paperpaw_sdk::ui::choice::Choice::times_under_overlays(&self) -> bool
 pub fn paperpaw_sdk::ui::choice::Choice::dims_below(&self) -> bool
 pub fn paperpaw_sdk::ui::choice::Choice::direction(&self) -> paperpaw_lang::Direction
 pub fn paperpaw_sdk::ui::choice::Choice::draw(&mut self, &mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::Env<'_>)
@@ -343,6 +344,7 @@ pub fn paperpaw_sdk::ui::choice::Choice::secret(&self) -> bool
 pub fn paperpaw_sdk::ui::choice::Choice::shows_through(&self) -> paperpaw_sdk::ShowsThrough
 pub fn paperpaw_sdk::ui::choice::Choice::takes_buttons(&self) -> bool
 pub fn paperpaw_sdk::ui::choice::Choice::takes_double_taps(&self) -> bool
+pub fn paperpaw_sdk::ui::choice::Choice::times_under_overlays(&self) -> bool
 pub struct paperpaw_sdk::ui::choice::Picked
 pub fn paperpaw_sdk::ui::choice::Picked::from_params(&paperpaw_sdk::Params) -> core::option::Option<Self>
 pub fn paperpaw_sdk::ui::choice::Picked::into_params(self) -> paperpaw_sdk::Params
@@ -392,6 +394,7 @@ pub fn paperpaw_sdk::ui::confirm::Confirm::secret(&self) -> bool
 pub fn paperpaw_sdk::ui::confirm::Confirm::shows_through(&self) -> paperpaw_sdk::ShowsThrough
 pub fn paperpaw_sdk::ui::confirm::Confirm::takes_buttons(&self) -> bool
 pub fn paperpaw_sdk::ui::confirm::Confirm::takes_double_taps(&self) -> bool
+pub fn paperpaw_sdk::ui::confirm::Confirm::times_under_overlays(&self) -> bool
 pub fn paperpaw_sdk::ui::confirm::Confirm::dims_below(&self) -> bool
 pub fn paperpaw_sdk::ui::confirm::Confirm::direction(&self) -> paperpaw_lang::Direction
 pub fn paperpaw_sdk::ui::confirm::Confirm::draw(&mut self, &mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::Env<'_>)
@@ -426,6 +429,7 @@ pub fn paperpaw_sdk::ui::confirm::Confirm::secret(&self) -> bool
 pub fn paperpaw_sdk::ui::confirm::Confirm::shows_through(&self) -> paperpaw_sdk::ShowsThrough
 pub fn paperpaw_sdk::ui::confirm::Confirm::takes_buttons(&self) -> bool
 pub fn paperpaw_sdk::ui::confirm::Confirm::takes_double_taps(&self) -> bool
+pub fn paperpaw_sdk::ui::confirm::Confirm::times_under_overlays(&self) -> bool
 pub struct paperpaw_sdk::ui::items::ItemsScreen
 pub fn paperpaw_sdk::ui::items::ItemsScreen::open(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params) -> Self
 pub fn paperpaw_sdk::ui::items::ItemsScreen::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
@@ -463,6 +467,7 @@ pub fn paperpaw_sdk::ui::items::ItemsScreen::secret(&self) -> bool
 pub fn paperpaw_sdk::ui::items::ItemsScreen::shows_through(&self) -> paperpaw_sdk::ShowsThrough
 pub fn paperpaw_sdk::ui::items::ItemsScreen::takes_buttons(&self) -> bool
 pub fn paperpaw_sdk::ui::items::ItemsScreen::takes_double_taps(&self) -> bool
+pub fn paperpaw_sdk::ui::items::ItemsScreen::times_under_overlays(&self) -> bool
 pub fn paperpaw_sdk::ui::items::ItemsScreen::dims_below(&self) -> bool
 pub fn paperpaw_sdk::ui::items::ItemsScreen::direction(&self) -> paperpaw_lang::Direction
 pub fn paperpaw_sdk::ui::items::ItemsScreen::draw(&mut self, &mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::Env<'_>)
@@ -497,6 +502,7 @@ pub fn paperpaw_sdk::ui::items::ItemsScreen::secret(&self) -> bool
 pub fn paperpaw_sdk::ui::items::ItemsScreen::shows_through(&self) -> paperpaw_sdk::ShowsThrough
 pub fn paperpaw_sdk::ui::items::ItemsScreen::takes_buttons(&self) -> bool
 pub fn paperpaw_sdk::ui::items::ItemsScreen::takes_double_taps(&self) -> bool
+pub fn paperpaw_sdk::ui::items::ItemsScreen::times_under_overlays(&self) -> bool
 pub struct paperpaw_sdk::ui::look::ButtonPart
 pub paperpaw_sdk::ui::look::ButtonPart::focused: bool
 pub paperpaw_sdk::ui::look::ButtonPart::on: bool
@@ -692,6 +698,7 @@ pub fn paperpaw_sdk::ui::widget_list::AddScreen::secret(&self) -> bool
 pub fn paperpaw_sdk::ui::widget_list::AddScreen::shows_through(&self) -> paperpaw_sdk::ShowsThrough
 pub fn paperpaw_sdk::ui::widget_list::AddScreen::takes_buttons(&self) -> bool
 pub fn paperpaw_sdk::ui::widget_list::AddScreen::takes_double_taps(&self) -> bool
+pub fn paperpaw_sdk::ui::widget_list::AddScreen::times_under_overlays(&self) -> bool
 pub fn paperpaw_sdk::ui::widget_list::AddScreen::dims_below(&self) -> bool
 pub fn paperpaw_sdk::ui::widget_list::AddScreen::direction(&self) -> paperpaw_lang::Direction
 pub fn paperpaw_sdk::ui::widget_list::AddScreen::draw(&mut self, &mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::Env<'_>)
@@ -726,6 +733,7 @@ pub fn paperpaw_sdk::ui::widget_list::AddScreen::secret(&self) -> bool
 pub fn paperpaw_sdk::ui::widget_list::AddScreen::shows_through(&self) -> paperpaw_sdk::ShowsThrough
 pub fn paperpaw_sdk::ui::widget_list::AddScreen::takes_buttons(&self) -> bool
 pub fn paperpaw_sdk::ui::widget_list::AddScreen::takes_double_taps(&self) -> bool
+pub fn paperpaw_sdk::ui::widget_list::AddScreen::times_under_overlays(&self) -> bool
 pub struct paperpaw_sdk::ui::widget_list::ListScreen
 pub fn paperpaw_sdk::ui::widget_list::ListScreen::open(&paperpaw_sdk::Env<'_>, &paperpaw_sdk::Params) -> Self
 pub fn paperpaw_sdk::ui::widget_list::ListScreen::dims_below(&self) -> bool
@@ -762,6 +770,7 @@ pub fn paperpaw_sdk::ui::widget_list::ListScreen::secret(&self) -> bool
 pub fn paperpaw_sdk::ui::widget_list::ListScreen::shows_through(&self) -> paperpaw_sdk::ShowsThrough
 pub fn paperpaw_sdk::ui::widget_list::ListScreen::takes_buttons(&self) -> bool
 pub fn paperpaw_sdk::ui::widget_list::ListScreen::takes_double_taps(&self) -> bool
+pub fn paperpaw_sdk::ui::widget_list::ListScreen::times_under_overlays(&self) -> bool
 pub fn paperpaw_sdk::ui::widget_list::ListScreen::dims_below(&self) -> bool
 pub fn paperpaw_sdk::ui::widget_list::ListScreen::direction(&self) -> paperpaw_lang::Direction
 pub fn paperpaw_sdk::ui::widget_list::ListScreen::draw(&mut self, &mut paperpaw_graphics::canvas::Canvas<'_>, &paperpaw_sdk::Env<'_>)
@@ -796,6 +805,7 @@ pub fn paperpaw_sdk::ui::widget_list::ListScreen::secret(&self) -> bool
 pub fn paperpaw_sdk::ui::widget_list::ListScreen::shows_through(&self) -> paperpaw_sdk::ShowsThrough
 pub fn paperpaw_sdk::ui::widget_list::ListScreen::takes_buttons(&self) -> bool
 pub fn paperpaw_sdk::ui::widget_list::ListScreen::takes_double_taps(&self) -> bool
+pub fn paperpaw_sdk::ui::widget_list::ListScreen::times_under_overlays(&self) -> bool
 pub enum paperpaw_sdk::ui::DateOrder
 pub paperpaw_sdk::ui::DateOrder::DayMonthYear
 pub paperpaw_sdk::ui::DateOrder::MonthDayYear
@@ -833,6 +843,18 @@ pub paperpaw_sdk::ui::RowPart::Minus
 pub paperpaw_sdk::ui::RowPart::Plus
 pub paperpaw_sdk::ui::RowPart::Row
 pub paperpaw_sdk::ui::RowPart::Switch
+pub enum paperpaw_sdk::ui::ScreenClass
+pub fn paperpaw_sdk::ui::ScreenClass::from_param(&str) -> core::option::Option<Self>
+pub fn paperpaw_sdk::ui::ScreenClass::missing() -> core::option::Option<Self>
+pub fn paperpaw_sdk::ui::ScreenClass::to_param(&self) -> alloc::string::String
+pub paperpaw_sdk::ui::ScreenClass::Compact
+pub paperpaw_sdk::ui::ScreenClass::Expanded
+pub paperpaw_sdk::ui::ScreenClass::Medium
+pub const fn paperpaw_sdk::ui::ScreenClass::name(self) -> &'static str
+pub fn paperpaw_sdk::ui::ScreenClass::of(&paperpaw_sdk::Env<'_>, paperpaw_platform::geometry::Rect) -> Self
+pub fn paperpaw_sdk::ui::ScreenClass::from_param(&str) -> core::option::Option<Self>
+pub fn paperpaw_sdk::ui::ScreenClass::missing() -> core::option::Option<Self>
+pub fn paperpaw_sdk::ui::ScreenClass::to_param(&self) -> alloc::string::String
 pub enum paperpaw_sdk::ui::Separators
 pub paperpaw_sdk::ui::Separators::Inset
 pub paperpaw_sdk::ui::Separators::Line
@@ -904,6 +926,12 @@ pub const fn paperpaw_sdk::ui::Row<'r>::plain(&'r str) -> Self
 pub const fn paperpaw_sdk::ui::Row<'r>::step_focus(self, core::option::Option<bool>) -> Self
 pub const fn paperpaw_sdk::ui::Row<'r>::switch(&'r str, bool) -> Self
 pub const fn paperpaw_sdk::ui::Row<'r>::value(&'r str, &'r str) -> Self
+pub struct paperpaw_sdk::ui::SearchField<'s>
+pub fn paperpaw_sdk::ui::SearchField<'s>::draw(&self, &mut paperpaw_sdk::ui::Ui<'_>, paperpaw_platform::geometry::Rect)
+pub const fn paperpaw_sdk::ui::SearchField<'s>::focused(self, bool) -> Self
+pub fn paperpaw_sdk::ui::SearchField<'s>::height(&paperpaw_sdk::ui::UiStyle) -> u16
+pub const fn paperpaw_sdk::ui::SearchField<'s>::new(&'s str) -> Self
+pub const fn paperpaw_sdk::ui::SearchField<'s>::text(self, &'s str) -> Self
 pub struct paperpaw_sdk::ui::Ui<'c>
 pub fn paperpaw_sdk::ui::Ui<'c>::button(&mut self, paperpaw_platform::geometry::Rect, &str, bool, bool)
 pub fn paperpaw_sdk::ui::Ui<'c>::canvas(&mut self) -> &mut paperpaw_graphics::canvas::Canvas<'c>
@@ -972,6 +1000,8 @@ pub paperpaw_sdk::ui::slider::SliderView::room: &'a str
 pub paperpaw_sdk::ui::slider::SliderView::shown: &'a str
 pub paperpaw_sdk::ui::slider::SliderView::title: &'a str
 pub paperpaw_sdk::ui::slider::SliderView::value: i64
+pub const paperpaw_sdk::ui::COMPACT_BELOW_MM: u32
+pub const paperpaw_sdk::ui::EXPANDED_FROM_MM: u32
 pub const paperpaw_sdk::ui::ICON_SCALE: f32
 pub const paperpaw_sdk::ui::NOTE_LINES: usize
 pub const paperpaw_sdk::ui::NOTE_LINES_MOST: usize
