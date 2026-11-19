@@ -121,13 +121,9 @@ export function uploadPackage(project: Project): Packed {
   let installed = 0;
   let total = 0;
   const encoder = new TextEncoder();
-  // A plugin with code says how it works in how/<lang>.txt beside its
-  // crate (its manifest includes them); the store reads them in the
-  // folder, so they go there too, unless the folder has its own.
-  const shared = (whole: string) => !!folder && whole.startsWith("how/") && project.files[`${folder}${whole}`] === undefined;
   for (const whole of Object.keys(project.files).sort()) {
-    if (!whole.startsWith(folder) && !shared(whole)) continue;
-    const path = shared(whole) ? whole : whole.slice(folder.length);
+    if (!whole.startsWith(folder)) continue;
+    const path = whole.slice(folder.length);
     if (folder && path === "code.ppn") continue;
     const content = project.files[whole]!;
     const bytes = typeof content === "string" ? encoder.encode(content) : content;

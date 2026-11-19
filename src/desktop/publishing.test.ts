@@ -80,7 +80,7 @@ describe("publishing a plugin", () => {
   it("packs a plugin with code as its folder plugin/, its crate and its build apart", () => {
     const project = newProject("code", {
       "Cargo.toml": "[package]\nname = \"night-owl\"\n",
-      "src/lib.rs": "#![no_std]",
+      "src/main.rs": "#![no_std]",
       "plugin/plugin.ini": INI,
       "plugin/i18n/de.ini": "[messages]\n",
     });
@@ -106,12 +106,12 @@ describe("the store file", () => {
 });
 
 describe("the store entry", () => {
-  it("takes how it works into a plugin with code's folder, where the store reads it", () => {
+  it("packs how it works with a plugin with code's folder, where the store reads it", () => {
     const project = newProject("code", {
       "Cargo.toml": "[package]\nname = \"snake\"\n",
-      "src/lib.rs": "#![no_std]",
-      "how/en.txt": "Steer the snake with the buttons.",
-      "how/de.txt": "Steuere die Schlange mit den Tasten.",
+      "src/main.rs": "#![no_std]",
+      "plugin/how/en.txt": "Steer the snake with the buttons.",
+      "plugin/how/de.txt": "Steuere die Schlange mit den Tasten.",
       "plugin/plugin.ini": "[plugin]\nid = snake\nname = Snake\nversion = 0.1.1\n",
     });
     const packed = uploadPackage(project);
@@ -119,11 +119,6 @@ describe("the store entry", () => {
     const files = unzipSync(packed.zip);
     expect(Object.keys(files)).toEqual(["snake/how/de.txt", "snake/how/en.txt", "snake/plugin.ini"]);
     expect(new TextDecoder().decode(files["snake/how/en.txt"])).toBe("Steer the snake with the buttons.");
-    // The folder's own how/ wins.
-    project.files["plugin/how/en.txt"] = "Its own.";
-    const own = uploadPackage(project);
-    if (!own.ok) throw new Error(own.problems.join("; "));
-    expect(new TextDecoder().decode(unzipSync(own.zip)["snake/how/en.txt"])).toBe("Its own.");
   });
 
   it("is read and completed in store.ini, in the plugin's folder", () => {

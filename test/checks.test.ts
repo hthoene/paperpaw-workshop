@@ -50,8 +50,7 @@ describe("the workshop's checks of a data plugin", () => {
         "plugin.ini": MANIFEST,
         "presets.ini":
           "[nook]\nkind = home.layout\nname = night-owl.nook\nhome.columns = 4\nhome.rows = 6\n" +
-          "home.page-1 = widgets.word-clock@1 0/0 4x2, home.nothing@1 0/2 4x2, home.recent@1 2/4 4x2\n" +
-          "home.recent@1.heading = off\n",
+          "home.page-1 = core.space@1 0/0 4x2, home.nothing@1 0/2 4x2, core.fill@1 2/4 4x2\n",
       },
       registry,
     );

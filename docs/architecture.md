@@ -69,8 +69,8 @@ window may call. Each file is one concern:
 | `projects.rs` | Projects as plain folders: the plugin's files right in it, the workshop's in `.workshop/` (`project.json`, `conversation.json`, `uploads/`); rename, archive, the bin. Every path checked to stay inside |
 | `emulator.rs` | `paperpaw-emu --stdio`, driven over its standard input and output |
 | `checks.rs` | `paperpaw-dev check` on the project's folder, its findings with a picture of the spot |
-| `code.rs` | Plugins with code: the crate checked, then built for the emulator |
-| `toolchain.rs` | Rust for plugins with code, set up in the app's folder, the compiler the emulator names; on Windows, Microsoft's C++ build tools |
+| `code.rs` | Plugins with code (plugin interface 7): the crate checked, laid out as `paperpaw-dev new --code` does, then built for the emulator with `paperpaw-dev build --device emulator` |
+| `toolchain.rs` | Rust for plugins with code, set up in the app's folder, the compiler the emulator names (`Rust::tool` runs `paperpaw-dev` with it); on Windows, Microsoft's C++ build tools |
 | `pictures.rs` | Pictures made smaller, as the person chose; the AI's shape of an upload made so |
 | `send.rs` | The plugin onto a reader: over Wi-Fi, onto its card, or as a zip |
 | `install.rs` | A plugin installed on a reader in one step, through PaperPaw's install requests, the same over Wi-Fi and the cable |
@@ -399,7 +399,7 @@ npm run handbook -- --repo ../paperpaw --ref <ref>
 - the docs, taken from `git archive` of that ref;
 - the settings, widgets, actions and devices, from PaperPaw's registry
   (`paperpaw-emu --registry`, or a file of it with `--registry`);
-- the SDK's items for plugins with code, from its source;
+- the SDK's items for plugins with code (`native`, the interface 7 surface), from its source;
 - the workshop's own parts in [handbook/parts/](../handbook/parts/). Only
   how the workshop works belongs there; what PaperPaw is comes from
   PaperPaw. `data-interim.md` holds what PaperPaw's docs do not gather yet
@@ -411,11 +411,16 @@ of its documentation; a struct with its fields and how it is made. A long
 topic is cut only between whole items, and what is left out is named.
 
 **Recipes** ([handbook/recipes/](../handbook/recipes/)) are complete
-plugins with code for common tasks: a widget with JSON from the web (in
-`code.md` whole), settings of its own (a topic). A test builds each
-against the emulator's SDK without a warning (code.rs,
-`the_handbook_s_recipes_build_without_a_warning`, with `PAPERPAW_EMU` and
-`PAPERPAW_SDK`), so they never go stale.
+plugins with code for common tasks, for plugin interface 7: a screen with
+an action, a setting and an event (`hello`, the project a new plugin with
+code starts from), and a widget with a setting of its own (`motto`). Both
+are in `code.md` whole and are topics. A test builds each as the workshop
+builds a project, without a warning, and runs it in the emulator
+(code.rs, `the_handbook_s_recipes_build_without_a_warning_and_run`, with
+`PAPERPAW_EMU`, `PAPERPAW_SDK` and `PAPERPAW_RUST=system`), so they never go
+stale. The handbook leaves out everything of PaperPaw's docs that is about
+the plugin interface before 7 (`generate.mjs`, `withoutOldApi`, and the
+SDK's items outside `native`); `docs/abi/*.md` come in as topics (`abi/<area>`).
 
 `registry.json` is also what the checks in
 [src/checks/data.ts](../src/checks/data.ts) use, so the rules the AI reads
@@ -423,10 +428,12 @@ and the rules its files are checked against are the same.
 
 ## Plugins with code
 
-A plugin with code is a Rust crate: `Cargo.toml` (with
-`[package.metadata.paperpaw] plugin = "Type"`), `src/*.rs`,
-`i18n/*.ini`, `how/*.txt` and `plugin/` (its `plugin.ini`). A new one
-starts from PaperPaw's sample plugin (`public/handbook/code-sample.json`).
+A plugin with code is a Rust program for PaperPaw's plugin interface 7:
+`Cargo.toml` (name, version, `paperpaw-sdk`), `src/main.rs` (and modules)
+with `paperpaw_sdk::native_plugin!`, `native/metadata.json` (what it calls
+of the device) and `plugin/` (its `plugin.ini`, `i18n/*.ini`,
+`how/*.txt`). A new one starts from the recipe `hello`
+(`public/handbook/code-sample.json`).
 
 The `build` tool ([src/tools/build.ts](../src/tools/build.ts)) goes to a
 `Builder`; in the app that is
@@ -434,18 +441,27 @@ The `build` tool ([src/tools/build.ts](../src/tools/build.ts)) goes to a
 [src-tauri/src/code.rs](../src-tauri/src/code.rs):
 
 1. The project's files are checked: only the paths above, no `build.rs`,
-   no crate but `paperpaw-sdk`, no sections of Cargo's own. The workshop
-   writes the Cargo.toml it builds with.
-2. It is built as PaperPaw's emulator loads code: a `cdylib` with the
-   SDK's `plugin!` line and its `outline` feature (`code-host.dll`,
-   `.so`, `.dylib`), against the SDK of that PaperPaw (`=<version>` from
-   crates.io; for a PaperPaw in work the one the installer brought, or
-   `PAPERPAW_SDK` while the workshop is worked on), by the
-   very compiler the emulator names in `ready`: the emulator loads only
-   code with its own fingerprint.
-3. The compiler's messages about the plugin's own files come back to the
-   AI, errors first. When it built, the library goes into the reader's
-   plugin folder and the reader starts again with code allowed.
+   no crate but `paperpaw-sdk`, no sections of Cargo's own, the plugin's
+   id in `plugin.ini` the crate's name.
+2. The crate is laid out as the release's own `paperpaw-dev new --github
+   <id> --code` lays one out (its `Cargo.toml`, `.cargo/config.toml`, the
+   linker script, `native/metadata.json` where the project has none), the
+   project's files over it, the compiler the emulator names in
+   `rust-toolchain.toml`; against the SDK of that PaperPaw (the one the
+   installer brought, `PAPERPAW_SDK` while the workshop is worked on, else
+   `=<version>` from crates.io).
+3. `paperpaw-dev build --device emulator` makes the records of what the
+   code calls from the list, builds the plugin as a library the emulator
+   loads (`code-host.so`; PaperPaw's emulator loads code on Linux x86-64
+   only, so on another computer the build says so), and the compiler's
+   messages about the plugin's own files come back to the AI, errors
+   first. When it built, the library goes into the reader's plugin folder
+   and the reader starts again with code allowed.
+4. For a reader (`device.rs`), `paperpaw-dev build --device x4|x4-pro` builds
+   and packs the plugin (its `paperpaw-sign`), and the file is signed with
+   the author's key. The store's own rebuild of a plugin with code of this
+   interface does not exist yet, so such a file is not one the store
+   rebuilds and compares.
 
 Builds live in the app's folder (`builds/<project>/`), so the next one is
 quick. The first plugin with code sets up Rust in the app's folder

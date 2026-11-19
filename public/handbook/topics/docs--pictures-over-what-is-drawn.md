@@ -28,14 +28,3 @@ marked in `env.stack()` (`StackEntry::guards`), so that nothing shows what
 is below it. The sleep screen's *The page with a picture* shows the
 full screen through: a picture or a widget over the page being read;
 pictures for it are offered as presets (below).
-
-A setting's choices are open to other plugins: `Registrar::add_choice`
-offers a value of one's own among them (in one's namespace, the
-translation key of its name), after the setting's own. This is how the
-sleep screen shows a screen of another plugin as one of its modes. The
-flash card due and the reading cat are such modes:
-
-```rust
-r.add_screen(ScreenSpec::new(Id::new_static("aquarium.sleep"), "aquarium.sleep", factory))?;
-r.add_choice(Id::new_static("sleep.show"), "aquarium.sleep")?;
-```

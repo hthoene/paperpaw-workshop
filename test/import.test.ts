@@ -34,9 +34,9 @@ describe("importing a plugin", () => {
     repo["clock-1.0.0/plugin/code.ppn"] = new Uint8Array([1, 2, 3]);
     const back = importPlugin(zipEntries(zipSync(repo)));
     expect(back.project.kind).toBe("code");
-    expect(back.taken).toContain("src/lib.rs");
+    expect(back.taken).toContain("src/main.rs");
     expect(back.taken).toContain("plugin/plugin.ini");
-    expect(back.project.files["src/lib.rs"]).toBe(sample["src/lib.rs"]);
+    expect(back.project.files["src/main.rs"]).toBe(sample["src/main.rs"]);
     const why = Object.fromEntries(back.skipped.map((s) => [s.path, s.why]));
     expect(why[".github/workflows/build.yml"]).toContain("dot");
     expect(Object.keys(why)).toContain("build.sh");

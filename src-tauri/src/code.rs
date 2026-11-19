@@ -1,19 +1,18 @@
 //! Plugins with code, built on this computer for the reader beside the
-//! conversation: the project's crate (Cargo.toml, src/, the plugin's
-//! folder `plugin/`) checked first (what it may hold, the SDK its only
-//! crate), then built for this computer as PaperPaw's emulator loads code
-//! (`code-host.dll`, `.so`, `.dylib`: a `cdylib` with the `plugin!` line,
-//! the SDK's `outline` feature), by the compiler the emulator names
-//! (toolchain.rs), against its SDK. The compiler's messages come back as
-//! the AI reads them. Builds live in the app's folder (`builds/<project>/`),
-//! so that the next one is quick.
+//! conversation, as PaperPaw's plugin interface 7 has them: the project
+//! (Cargo.toml, src/main.rs with `native_plugin!`, native/metadata.json, the
+//! plugin's folder `plugin/`) checked first (what it may hold, the SDK its
+//! only crate), then laid out as `paperpaw-dev new --code` lays a plugin
+//! out and built with `paperpaw-dev build --device emulator` (a library the
+//! emulator loads as `code-host.so`, Linux x86-64), by the compiler the
+//! emulator names (toolchain.rs), against its SDK. The compiler's messages
+//! come back as the AI reads them. Builds live in the app's folder
+//! (`builds/<project>/`), so that the next one is quick.
 //!
-//! The SDK: the release's on crates.io (`paperpaw-sdk = "=<version>"`).
-//! A PaperPaw in work (`0.5.0-dev`) loads only code built against its own source,
-//! which crates.io does not have: then the SDK the installer brought with
-//! the emulator (`sdk/` beside the app, of the same PaperPaw), or
-//! `PAPERPAW_SDK`, a local checkout's `crates/paperpaw-sdk`, while the
-//! workshop is worked on (see `local_sdk`).
+//! The SDK: the one the installer brought with the emulator (`sdk/` beside
+//! the app, of the same PaperPaw), or `PAPERPAW_SDK`, a local checkout's
+//! `crates/paperpaw-sdk`, while the workshop is worked on (see
+//! `local_sdk`); else the release's on crates.io.
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
@@ -26,9 +25,8 @@ use serde_json::Value;
 const KINDS: &[(&str, usize)] = &[
     ("Cargo.toml", 16 << 10),
     ("src/", 256 << 10),
-    ("i18n/", 128 << 10),
-    // "How it works" texts, by language, as PaperPaw's sample has them.
-    ("how/", 16 << 10),
+    // What the code may call of the device, the plugin's own list.
+    ("native/metadata.json", 16 << 10),
     ("plugin/", 8 << 20),
     ("README", 64 << 10),
     ("LICENCE", 64 << 10),
@@ -63,12 +61,11 @@ pub struct Built {
     pub log_tail: String,
 }
 
-/// The crate as Cargo.toml says it: its name, version and plugin type.
+/// The crate as Cargo.toml says it: its name (the plugin's id) and version.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Crate {
     pub name: String,
     pub version: String,
-    pub plugin: String,
 }
 
 /// Cargo.toml read as a plugin's is written: sections of `key = value`.
@@ -106,20 +103,15 @@ pub fn cargo(manifest: &str) -> (Option<Crate>, Vec<String>) {
     let (sections, mut problems) = sections(manifest);
     let package = sections.get("package").cloned().unwrap_or_default();
     let name = string(package.get("name")).filter(|n| {
-        n.len() <= 64 && n.starts_with(|c: char| c.is_ascii_lowercase()) && n.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
+        n.len() <= 40 && n.starts_with(|c: char| c.is_ascii_lowercase()) && n.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
     });
     let version = string(package.get("version")).unwrap_or_else(|| "0.1.0".into());
-    let plugin = string(sections.get("package.metadata.paperpaw").and_then(|s| s.get("plugin")))
-        .filter(|p| p.starts_with(|c: char| c.is_ascii_uppercase()) && p.chars().all(|c| c.is_ascii_alphanumeric() || c == '_'));
     if name.is_none() {
-        problems.push("Cargo.toml: [package] name = \"my-plugin\" (lower case, digits, hyphens).".into());
-    }
-    if plugin.is_none() {
-        problems.push("Cargo.toml: [package.metadata.paperpaw] plugin = \"MyPlugin\", the type in src/lib.rs that implements Plugin.".into());
+        problems.push("Cargo.toml: [package] name = \"my-plugin\": the plugin's id (lower case, digits, hyphens, beginning with a letter).".into());
     }
     for known in sections.keys() {
-        if !["package", "package.metadata.paperpaw", "dependencies", "lib"].contains(&known.as_str()) {
-            problems.push(format!("Cargo.toml: [{known}] is not taken here; the workshop sets profiles, features and targets itself."));
+        if !["package", "dependencies"].contains(&known.as_str()) {
+            problems.push(format!("Cargo.toml: [{known}] is not taken here; the workshop writes the crate's targets, profiles and features itself: keep [package] and [dependencies]."));
         }
     }
     let deps: Vec<&String> = sections.get("dependencies").map(|d| d.keys().collect()).unwrap_or_default();
@@ -131,8 +123,8 @@ pub fn cargo(manifest: &str) -> (Option<Crate>, Vec<String>) {
     if !deps.iter().any(|d| *d == "paperpaw-sdk") {
         problems.push("Cargo.toml: [dependencies] paperpaw-sdk is needed.".into());
     }
-    let krate = match (name, plugin) {
-        (Some(name), Some(plugin)) if problems.is_empty() => Some(Crate { name, version, plugin }),
+    let krate = match name {
+        Some(name) if problems.is_empty() => Some(Crate { name, version }),
         _ => None,
     };
     (krate, problems)
@@ -155,21 +147,39 @@ pub fn problems(files: &[(String, Vec<u8>)]) -> Vec<String> {
             continue;
         }
         match KINDS.iter().find(|(start, _)| path == start || path.starts_with(start)) {
-            None => out.push(format!("{path}: a project holds Cargo.toml, src/*.rs, i18n/<lang>.ini, how/<lang>.txt, the plugin's folder plugin/ and a README.")),
+            None => out.push(format!("{path}: a project holds Cargo.toml, src/*.rs, native/metadata.json, the plugin's folder plugin/ (plugin.ini, i18n/<lang>.ini, how/<lang>.txt ...) and a README.")),
             Some((_, max)) if bytes.len() > *max => out.push(format!("{path}: larger than {} KB.", max >> 10)),
             Some(_) => {}
         }
     }
     let has = |p: &str| files.iter().any(|(path, _)| path == p);
-    if !has("src/lib.rs") {
-        out.push("src/lib.rs is missing: the plugin crate's root.".into());
+    if !has("src/main.rs") {
+        out.push("src/main.rs is missing: the plugin crate's root (`#![no_std]`, `#![no_main]` and the `native_plugin!` line).".into());
+    }
+    if has("src/lib.rs") {
+        out.push("src/lib.rs: a plugin is a program, not a library: its root is src/main.rs (modules beside it are `mod name;`).".into());
     }
     if !has("plugin/plugin.ini") {
         out.push("plugin/plugin.ini is missing: the plugin's folder, as readers install it.".into());
     }
-    match files.iter().find(|(p, _)| p == "Cargo.toml") {
-        None => out.push("Cargo.toml is missing.".into()),
-        Some((_, bytes)) => out.extend(cargo(&String::from_utf8_lossy(bytes)).1),
+    let id = match files.iter().find(|(p, _)| p == "Cargo.toml") {
+        None => {
+            out.push("Cargo.toml is missing.".into());
+            None
+        }
+        Some((_, bytes)) => {
+            let (krate, said) = cargo(&String::from_utf8_lossy(bytes));
+            out.extend(said);
+            krate.map(|k| k.name)
+        }
+    };
+    // The crate's name is the plugin's id: the build names its folder by it.
+    let ini = files.iter().find(|(p, _)| p == "plugin/plugin.ini").map(|(_, b)| String::from_utf8_lossy(b).into_owned());
+    if let (Some(id), Some(ini)) = (id, ini) {
+        let named = ini.lines().find_map(|l| l.split_once('=').filter(|(k, _)| k.trim() == "id").map(|(_, v)| v.trim().to_string()));
+        if named.as_deref().is_some_and(|n| n != id) {
+            out.push(format!("plugin/plugin.ini: id = {} is not the crate's name {id} (Cargo.toml [package] name): they are the same.", named.unwrap_or_default()));
+        }
     }
     out
 }
@@ -193,112 +203,89 @@ pub fn bundled_sdk(dir: &Path, paperpaw: &str) -> Option<PathBuf> {
     (version.trim() == paperpaw && krate.join("Cargo.toml").is_file()).then_some(krate)
 }
 
-/// How Cargo.toml names the SDK for the emulator: the one on this
-/// computer (see `local_sdk`), or the release's, with the outline fonts
-/// the emulator draws with.
-pub fn sdk(paperpaw: &str) -> String {
-    sdk_with(paperpaw, ", features = [\"outline\"]")
+/// The SDK the crate is built against: the one on this computer (see
+/// `local_sdk`), else none, and then the release's own on crates.io
+/// (`paperpaw-dev new` names it).
+pub fn sdk(paperpaw: &str) -> Option<PathBuf> {
+    local_sdk(paperpaw)
 }
 
-/// How Cargo.toml names the SDK for a reader: without the outline fonts,
-/// which its firmware has itself (and whose crates need atomics the X4's
-/// chip does not have).
-pub fn device_sdk(paperpaw: &str) -> String {
-    sdk_with(paperpaw, "")
-}
-
-fn sdk_with(paperpaw: &str, features: &str) -> String {
-    match local_sdk(paperpaw) {
-        Some(path) => format!("{{ path = {:?}{features} }}", path.to_string_lossy().replace('\\', "/")),
-        None => format!("{{ version = \"={paperpaw}\"{features} }}"),
+/// The compiler's messages in Cargo's plain text (what `paperpaw-dev
+/// build` lets through), as one message each: its first line, where it
+/// points (`--> src/main.rs:3:5`) and all of it. Errors first, at most 30;
+/// a warning only where it is about the plugin's own files.
+pub fn diagnostics(output: &str) -> Vec<Diagnostic> {
+    let output = strip_ansi(output).replace('\\', "/");
+    let mut blocks: Vec<Vec<&str>> = Vec::new();
+    for line in output.lines() {
+        let header = ["error", "warning"].iter().any(|w| line.strip_prefix(w).is_some_and(|r| r.starts_with(':') || r.starts_with('[')));
+        let end = ["   Compiling", "    Finished", "    Building", "For more information", "Some errors have"].iter().any(|p| line.starts_with(p));
+        if header {
+            blocks.push(vec![line]);
+        } else if end {
+            blocks.push(Vec::new());
+        } else if let Some(last) = blocks.last_mut().filter(|b| !b.is_empty()) {
+            last.push(line);
+        }
     }
-}
-
-/// The folder of the SDK a Cargo.toml line of `sdk` names, if it is one
-/// on this computer (`{ path = "…", … }`).
-pub fn sdk_path(sdk: &str) -> Option<PathBuf> {
-    let rest = sdk.split_once("path = \"")?.1;
-    Some(PathBuf::from(&rest[..rest.find('"')?]))
-}
-
-/// The plugin's crate as the workshop builds it: its name and version,
-/// the SDK named as `sdk` says.
-pub fn plugin_manifest(krate: &Crate, sdk: &str) -> String {
-    format!(
-        "[package]\nname = \"{}\"\nversion = \"{}\"\nedition = \"2024\"\npublish = false\n\n[dependencies]\npaperpaw-sdk = {sdk}\n",
-        krate.name, krate.version
-    )
-}
-
-/// The library the emulator loads: the plugin behind PaperPaw's
-/// `plugin!` line, built apart as a plugin's own repository builds it.
-pub fn host_harness(krate: &Crate, sdk: &str) -> [(&'static str, String); 2] {
-    let lib = krate.name.replace('-', "_");
-    [
-        (
-            "Cargo.toml",
-            format!(
-                "[package]\nname = \"code-host\"\nversion = \"0.1.0\"\nedition = \"2024\"\npublish = false\n\n\
-                 # A workspace of its own: the file must fit the emulator built elsewhere.\n[workspace]\n\n\
-                 [lib]\ncrate-type = [\"cdylib\"]\n\n[dependencies]\npaperpaw-sdk = {sdk}\n{} = {{ path = \"../plugin\" }}\n\n\
-                 # Quick to build again; it runs on this computer only.\n[profile.release]\nopt-level = 1\npanic = \"abort\"\nlto = false\ncodegen-units = 16\nincremental = true\n",
-                krate.name
-            ),
-        ),
-        ("src/lib.rs", format!("//! The plugin {} for PaperPaw's emulator.\n#![no_std]\n\npaperpaw_sdk::plugin!({lib}::{});\n", krate.name, krate.plugin)),
-    ]
-}
-
-/// The compiler's messages (`--message-format=json`) about the plugin's
-/// own files, errors first, at most 30.
-pub fn diagnostics(output: &str, root: &str) -> Vec<Diagnostic> {
-    let root = root.replace('\\', "/");
     let mut out: Vec<Diagnostic> = Vec::new();
-    for line in output.lines().filter(|l| l.starts_with('{')) {
-        let Ok(message) = serde_json::from_str::<Value>(line) else { continue };
-        if message["reason"] != "compiler-message" {
+    for block in blocks.iter().filter(|b| !b.is_empty()) {
+        let first = block[0];
+        let (level, message) = match first.split_once(": ") {
+            Some((head, message)) => (if head.starts_with("error") { "error" } else { "warning" }, message.trim().to_string()),
+            None => continue,
+        };
+        // Cargo's own summaries, not about the plugin's code.
+        if message.starts_with("could not compile") || message.starts_with("aborting due to") || message.contains("generated ") && message.contains("warning") {
             continue;
         }
-        let m = &message["message"];
-        let level = m["level"].as_str().unwrap_or_default();
-        if level != "error" && level != "warning" {
-            continue;
-        }
-        let spans = m["spans"].as_array().cloned().unwrap_or_default();
-        let span = spans.iter().find(|s| s["is_primary"] == true).or(spans.first());
-        let file = span
-            .and_then(|s| s["file_name"].as_str())
-            .map(|f| f.replace('\\', "/").replace(&format!("{root}/plugin/"), "").replace(&format!("{root}/"), ""));
-        // Only what the plugin's own files say; PaperPaw's warnings are not its.
+        let at = block.iter().find_map(|l| l.trim_start().strip_prefix("--> "));
+        let mut parts = at.map(|a| a.rsplitn(3, ':').collect::<Vec<_>>()).unwrap_or_default();
+        parts.reverse();
+        let (file, line, column) = match parts.as_slice() {
+            [file, line, column] => (Some(file.to_string()), line.parse().ok(), column.parse().ok()),
+            _ => (None, None, None),
+        };
         let own = file.as_deref().is_some_and(|f| f.starts_with("src/") || f.starts_with("plugin/"));
         if level == "warning" && !own {
             continue;
         }
-        let rendered = strip_ansi(m["rendered"].as_str().or(m["message"].as_str()).unwrap_or_default()).replace('\\', "/").replace(&format!("{root}/plugin/"), "").replace(&format!("{root}/"), "");
+        let rendered = block.join("\n").trim_end().to_string();
         if out.iter().any(|d| d.rendered == rendered) {
             continue;
         }
-        out.push(Diagnostic {
-            level: level.into(),
-            file,
-            line: span.and_then(|s| s["line_start"].as_u64()),
-            column: span.and_then(|s| s["column_start"].as_u64()),
-            message: m["message"].as_str().unwrap_or_default().into(),
-            rendered,
-        });
+        out.push(Diagnostic { level: level.into(), file, line, column, message, rendered });
     }
     out.sort_by_key(|d| d.level != "error");
     out.truncate(30);
     out
 }
 
-/// Writes the plugin's crate and the harness into `dir` (`plugin/`,
-/// `host/`), what was there before of the plugin's sources replaced.
-fn lay_out(dir: &Path, files: &[(String, Vec<u8>)], krate: &Crate, sdk: &str) -> Result<(), String> {
-    let plugin = dir.join("plugin");
-    // The sources anew (a file removed is gone), the build's target kept.
-    for gone in ["src", "i18n", "how"] {
-        let _ = std::fs::remove_dir_all(plugin.join(gone));
+/// What the plugin's crate is laid out with, as `paperpaw-dev new --code`
+/// lays it out: the crate's own `Cargo.toml` (targets, profiles, the SDK),
+/// how it is linked and the compiler. Made by the release's own tool, so
+/// that it never goes stale.
+const SCAFFOLD: &[&str] = &["Cargo.toml", ".cargo/config.toml", "rust-toolchain.toml", "paperpaw-plugin7.x", "native/metadata.json"];
+
+/// Writes the plugin's crate into `dir` (and `dev`'s scaffold apart, in
+/// `dir/.scaffold`), what was there before of the plugin's sources
+/// replaced, its `target/` and lock file kept. The compiler is
+/// `compiler`'s, whatever the scaffold names.
+pub fn lay_out(dev: &Path, dir: &Path, files: &[(String, Vec<u8>)], krate: &Crate, sdk: Option<&Path>, compiler: &str) -> Result<(), String> {
+    let scaffold = dir.join(".scaffold");
+    let _ = std::fs::remove_dir_all(&scaffold);
+    let mut command = std::process::Command::new(dev);
+    command.args(["new", "--github", &krate.name, "--code", "--dir"]).arg(&scaffold);
+    if let Some(sdk) = sdk {
+        command.arg("--sdk").arg(sdk);
+    }
+    crate::toolchain::quiet(&mut command);
+    let ran = command.output().map_err(|e| format!("{}: {e}", dev.display()))?;
+    if !ran.status.success() {
+        return Err(format!("paperpaw-dev new: {}", crate::toolchain::last_line(&ran.stderr)));
+    }
+    for gone in ["src", "plugin", "native"] {
+        let _ = std::fs::remove_dir_all(dir.join(gone));
     }
     let write = |path: PathBuf, bytes: &[u8]| -> Result<(), String> {
         if let Some(parent) = path.parent() {
@@ -306,24 +293,40 @@ fn lay_out(dir: &Path, files: &[(String, Vec<u8>)], krate: &Crate, sdk: &str) ->
         }
         std::fs::write(&path, bytes).map_err(|e| format!("{}: {e}", path.display()))
     };
-    for (path, bytes) in files.iter().filter(|(p, _)| p.starts_with("src/") || p.starts_with("i18n/") || p.starts_with("how/")) {
-        write(plugin.join(path), bytes)?;
+    for name in SCAFFOLD {
+        let mut bytes = std::fs::read(scaffold.join(name)).map_err(|e| format!("paperpaw-dev new made no {name}: {e}"))?;
+        if *name == "rust-toolchain.toml" {
+            // The compiler the emulator names, which the workshop set up.
+            bytes = format!("[toolchain]\nchannel = \"{compiler}\"\nprofile = \"minimal\"\n").into_bytes();
+        }
+        write(dir.join(name), &bytes)?;
     }
-    write(plugin.join("Cargo.toml"), plugin_manifest(krate, sdk).as_bytes())?;
-    for (path, text) in host_harness(krate, sdk) {
-        write(dir.join("host").join(path), text.as_bytes())?;
+    let _ = std::fs::remove_dir_all(&scaffold);
+    for (path, bytes) in files.iter().filter(|(p, _)| p.starts_with("src/") || p.starts_with("plugin/") || p == "native/metadata.json") {
+        // The folder as a reader installs it never holds a build.
+        if path.starts_with("plugin/") && path.ends_with("code.ppn") {
+            continue;
+        }
+        write(dir.join(path), bytes)?;
     }
     Ok(())
 }
 
 /// The library a build made, as the emulator names it.
 pub fn host_file() -> String {
-    format!("code-host{}", std::env::consts::DLL_SUFFIX)
+    "code-host.so".to_string()
 }
 
-/// Builds the plugin of `files` in `dir` with `rust` for the emulator;
-/// where the library is, if it was built.
-pub fn build(dir: &Path, files: &[(String, Vec<u8>)], rust: &crate::toolchain::Rust, paperpaw: &str) -> (Built, Option<PathBuf>) {
+/// Whether the emulator runs a plugin's code on this computer: PaperPaw's
+/// emulator loads it on Linux (x86-64) only, so far.
+pub fn emulator_runs_code() -> bool {
+    cfg!(all(target_os = "linux", target_arch = "x86_64"))
+}
+
+/// Builds the plugin of `files` in `dir` with `rust` and `dev`
+/// (`paperpaw-dev`) for the emulator; where the library is, if it was
+/// built.
+pub fn build(dir: &Path, files: &[(String, Vec<u8>)], rust: &crate::toolchain::Rust, dev: &Path, paperpaw: &str) -> (Built, Option<PathBuf>) {
     let started = Instant::now();
     let mut built = Built {
         id: format!("{}", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis()).unwrap_or(0)),
@@ -334,6 +337,9 @@ pub fn build(dir: &Path, files: &[(String, Vec<u8>)], rust: &crate::toolchain::R
         files: Vec::new(),
         log_tail: String::new(),
     };
+    if !emulator_runs_code() {
+        built.problems.push("In this PaperPaw release the emulator runs a plugin's code on Linux (x86-64) only, so the reader beside the conversation cannot show a plugin with code on this computer. Say so to the person; the plugin can still be built for a reader (Send to reader).".into());
+    }
     // A version in work (`-dev`) has no SDK on crates.io; a beta or a
     // release candidate (`-beta.1`, `-rc.1`) has, like a release.
     if paperpaw.contains("-dev") && local_sdk(paperpaw).is_none() {
@@ -346,29 +352,30 @@ pub fn build(dir: &Path, files: &[(String, Vec<u8>)], rust: &crate::toolchain::R
     }
     let manifest = files.iter().find(|(p, _)| p == "Cargo.toml").map(|(_, b)| String::from_utf8_lossy(b).into_owned()).unwrap_or_default();
     let Some(krate) = cargo(&manifest).0 else { return (built, None) };
-    if let Err(e) = lay_out(dir, files, &krate, &sdk(paperpaw)) {
+    if let Err(e) = lay_out(dev, dir, files, &krate, sdk(paperpaw).as_deref(), &rust.version) {
         built.problems.push(e);
         return (built, None);
     }
-    let host = dir.join("host");
-    let mut command = rust.cargo();
-    command.args(["build", "--release", "--message-format=json-diagnostic-rendered-ansi"]).current_dir(&host);
-    // Plain text for the AI, not the terminal's colours.
-    command.args(["--config", "term.color='never'"]);
+    let mut command = rust.tool(dev);
+    command.args(["build", "--device", "emulator"]).current_dir(dir);
     let ran = match command.output() {
         Ok(ran) => ran,
         Err(e) => {
-            built.log_tail = format!("cargo: {e}");
+            built.log_tail = format!("paperpaw-dev: {e}");
             return (built, None);
         }
     };
     built.seconds = Some(started.elapsed().as_secs());
-    let stdout = String::from_utf8_lossy(&ran.stdout);
-    built.diagnostics = diagnostics(&stdout, &dir.to_string_lossy());
-    let stderr = String::from_utf8_lossy(&ran.stderr);
-    built.log_tail = stderr.lines().rev().take(20).collect::<Vec<_>>().into_iter().rev().collect::<Vec<_>>().join("\n");
-    let library = host.join("target").join("release").join(format!("{}code_host{}", std::env::consts::DLL_PREFIX, std::env::consts::DLL_SUFFIX));
+    let text = format!("{}\n{}", String::from_utf8_lossy(&ran.stdout), String::from_utf8_lossy(&ran.stderr));
+    built.diagnostics = diagnostics(&text);
+    built.log_tail = strip_ansi(&text).lines().filter(|l| !l.trim().is_empty()).rev().take(30).collect::<Vec<_>>().into_iter().rev().collect::<Vec<_>>().join("\n");
+    let library = dir.join("dist").join("emulator").join("plugins").join(&krate.name).join(host_file());
     if !ran.status.success() || !library.exists() {
+        // What `paperpaw-dev` refuses in its own words (the list of what the
+        // code calls, a compiler that is missing) is no compiler message.
+        if built.diagnostics.is_empty() {
+            built.problems.push(built.log_tail.clone());
+        }
         return (built, None);
     }
     built.state = "done".into();
@@ -433,7 +440,8 @@ pub async fn code_build(app: tauri::AppHandle, emulator: tauri::State<'_, crate:
         told("Building…");
         let dir = build_dir(&crate::projects::folder(&root, &project)?);
         std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
-        let (built, library) = build(&dir, &files, &rust, &ready.paperpaw);
+        let dev = crate::checks::dev_beside(&crate::paths::emulator_program()?);
+        let (built, library) = build(&dir, &files, &rust, &dev, &ready.paperpaw);
         if let Some(library) = library {
             std::fs::copy(&library, dir.join(host_file())).map_err(|e| e.to_string())?;
         }
@@ -447,20 +455,12 @@ pub async fn code_build(app: tauri::AppHandle, emulator: tauri::State<'_, crate:
 mod tests {
     use super::*;
 
-    const MANIFEST: &str = "[package]\nname = \"my-clock\"\nversion = \"0.2.0\"\n\n[package.metadata.paperpaw]\nplugin = \"MyClock\"\n\n[dependencies]\npaperpaw-sdk = \"0.5\"\n";
-
-    /// The emulator's build draws outline fonts; a reader's leaves them
-    /// out, since their crates need atomics the X4 does not have.
-    #[test]
-    fn only_the_emulator_builds_with_outline_fonts() {
-        assert_eq!(sdk("0.5.0"), "{ version = \"=0.5.0\", features = [\"outline\"] }");
-        assert_eq!(device_sdk("0.5.0"), "{ version = \"=0.5.0\" }");
-    }
+    const MANIFEST: &str = "[package]\nname = \"my-clock\"\nversion = \"0.2.0\"\n\n[dependencies]\npaperpaw-sdk = \"0.6\"\n";
 
     fn project() -> Vec<(String, Vec<u8>)> {
         vec![
             ("Cargo.toml".into(), MANIFEST.as_bytes().to_vec()),
-            ("src/lib.rs".into(), b"// the plugin".to_vec()),
+            ("src/main.rs".into(), b"// the plugin".to_vec()),
             ("plugin/plugin.ini".into(), b"[plugin]\nid = my-clock\n".to_vec()),
         ]
     }
@@ -469,47 +469,44 @@ mod tests {
     fn a_project_is_read_and_checked_before_it_is_built() {
         assert!(problems(&project()).is_empty(), "{:?}", problems(&project()));
         let krate = cargo(MANIFEST).0.unwrap();
-        assert_eq!((krate.name.as_str(), krate.version.as_str(), krate.plugin.as_str()), ("my-clock", "0.2.0", "MyClock"));
+        assert_eq!((krate.name.as_str(), krate.version.as_str()), ("my-clock", "0.2.0"));
         let mut bad = project();
         bad.push(("build.rs".into(), Vec::new()));
         bad.push((".cargo/config.toml".into(), Vec::new()));
+        bad.push(("src/lib.rs".into(), Vec::new()));
         bad[0].1 = MANIFEST.replace("[dependencies]", "[dependencies]\nserde = \"1\"").into_bytes();
         let said = problems(&bad).join("\n");
         assert!(said.contains("build.rs:"), "{said}");
         assert!(said.contains(".cargo/config.toml: not a path"), "{said}");
         assert!(said.contains("the crate serde is not available"), "{said}");
-    }
-
-    #[test]
-    fn the_harness_loads_the_plugin_as_the_emulator_takes_code() {
-        let krate = cargo(MANIFEST).0.unwrap();
-        let [(_, manifest), (_, lib)] = host_harness(&krate, "{ version = \"=0.4.0\", features = [\"outline\"] }");
-        assert!(manifest.contains("crate-type = [\"cdylib\"]"));
-        assert!(manifest.contains("my-clock = { path = \"../plugin\" }"));
-        assert!(manifest.contains("[workspace]"));
-        assert!(lib.contains("paperpaw_sdk::plugin!(my_clock::MyClock);"));
-        assert!(plugin_manifest(&krate, "{ path = \"x\" }").contains("paperpaw-sdk = { path = \"x\" }"));
+        assert!(said.contains("src/lib.rs: a plugin is a program"), "{said}");
+        // The plugin's id is the crate's name.
+        let mut other = project();
+        other[2].1 = b"[plugin]\nid = other\n".to_vec();
+        assert!(problems(&other).join("\n").contains("id = other is not the crate's name my-clock"));
+        // The old layout: nothing of it is taken.
+        let old = [("i18n/en.ini", ""), ("how/en.txt", "")].map(|(p, b)| (p.to_string(), b.as_bytes().to_vec()));
+        let said = problems(&[project(), old.to_vec()].concat()).join("\n");
+        assert!(said.contains("i18n/en.ini: a project holds") && said.contains("how/en.txt: a project holds"), "{said}");
+        let old = MANIFEST.replace("[dependencies]", "[package.metadata.paperpaw]\nplugin = \"MyClock\"\n\n[dependencies]");
+        assert!(cargo(&old).1.join("\n").contains("[package.metadata.paperpaw] is not taken here"));
     }
 
     #[test]
     fn the_compiler_s_messages_about_the_plugin_are_kept() {
-        let root = "C:/work/build";
-        let line = |level: &str, file: &str, text: &str| {
-            serde_json::json!({"reason": "compiler-message", "message": {"level": level, "message": text, "rendered": format!("{level}: {text}\n --> {root}/plugin/{file}:3:5"), "spans": [{"is_primary": true, "file_name": format!("{root}/plugin/{file}"), "line_start": 3, "column_start": 5}]}}).to_string()
-        };
-        let theirs = serde_json::json!({"reason": "compiler-message", "message": {"level": "warning", "message": "unused", "rendered": "warning: unused", "spans": [{"is_primary": true, "file_name": "C:/cargo/registry/paperpaw-sdk/src/lib.rs", "line_start": 1, "column_start": 1}]}}).to_string();
-        let output = [line("warning", "src/lib.rs", "unused variable"), theirs, line("error", "src/lib.rs", "mismatched types")].join("\n");
-        let found = diagnostics(&output, root);
-        assert_eq!(found.iter().map(|d| d.message.as_str()).collect::<Vec<_>>(), ["mismatched types", "unused variable"]);
-        assert_eq!(found[0].file.as_deref(), Some("src/lib.rs"));
-        assert!(found[0].rendered.contains("--> src/lib.rs:3:5"), "{}", found[0].rendered);
+        let output = "   Compiling hello v0.1.0 (/home/me/hello)\n\
+warning: unused variable: `x`\n --> src/main.rs:3:5\n  |\n3 |     let x = 1;\n  |         ^ help: remove it\n\n\
+warning: unused import: `foo`\n --> /home/me/paperpaw/crates/paperpaw-sdk/src/lib.rs:1:5\n\n\
+error[E0308]: mismatched types\n --> src/main.rs:8:9\n  |\n8 |     1u8\n  |     ^^^ expected `u32`\n\n\
+warning: `hello` (bin \"hello\") generated 1 warning\n\
+error: could not compile `hello` (bin \"hello\") due to 1 previous error\n";
+        let found = diagnostics(output);
+        assert_eq!(found.iter().map(|d| d.message.as_str()).collect::<Vec<_>>(), ["mismatched types", "unused variable: `x`"]);
+        assert_eq!((found[0].file.as_deref(), found[0].line, found[0].column), (Some("src/main.rs"), Some(8), Some(9)));
+        assert!(found[0].rendered.contains("expected `u32`"), "{}", found[0].rendered);
         assert_eq!(strip_ansi("\u{1b}[1mbold\u{1b}[0m"), "bold");
     }
 
-    /// A plugin with code built here and loaded by PaperPaw's emulator:
-    /// with `PAPERPAW_EMU` and `PAPERPAW_SDK` (the checkout it was built
-    /// from), else skipped. Sets up Rust in the app's folder the first
-    /// time (some minutes).
     /// The files of the handbook's recipe `name` (handbook/recipes/), as
     /// a project holds them.
     fn recipe(name: &str) -> Vec<(String, Vec<u8>)> {
@@ -525,115 +522,65 @@ mod tests {
             .collect()
     }
 
-    /// The recipes the AI's handbook gives in full build as the workshop
-    /// builds a project, without a warning: with `PAPERPAW_EMU`, against
-    /// its released SDK or the checkout `PAPERPAW_SDK` names.
-    #[test]
-    fn the_handbook_s_recipes_build_without_a_warning() {
-        let Some(program) = std::env::var_os("PAPERPAW_EMU").map(PathBuf::from) else {
+    /// The program of `PAPERPAW_EMU`, else the test is skipped.
+    fn emu() -> Option<PathBuf> {
+        let program = std::env::var_os("PAPERPAW_EMU").map(PathBuf::from);
+        if program.is_none() {
             eprintln!("skipped: PAPERPAW_EMU names no PaperPaw");
-            return;
-        };
-        let emulator = crate::emulator::Emulator::new(move || Ok(program.clone()), |_| {});
+        }
+        program
+    }
+
+    /// The recipes the AI's handbook gives in full build as the workshop
+    /// builds a project, without a warning, and each runs in PaperPaw's
+    /// emulator (the screen it opens, or the widget alone on the home
+    /// screen, shows what the recipe says): with `PAPERPAW_EMU` and
+    /// `PAPERPAW_SDK` (the checkout it was built from).
+    #[test]
+    fn the_handbook_s_recipes_build_without_a_warning_and_run() {
+        let Some(program) = emu() else { return };
+        let (events, seen) = std::sync::mpsc::channel();
+        let emulator = crate::emulator::Emulator::new({ let program = program.clone(); move || Ok(program.clone()) }, move |e| {
+            let _ = events.send(e);
+        });
         let library = tempfile::tempdir().unwrap();
         emulator.start("xteink-x4", library.path()).unwrap();
         let ready = emulator.ready().unwrap();
         let (version, _) = crate::toolchain::wanted(&ready.toolchain).unwrap();
         let rust = crate::toolchain::ready(&crate::paths::app_data().unwrap().join("rust"), &version, &|t| eprintln!("{t}")).unwrap();
+        let dev = crate::checks::dev_beside(&program);
         let recipes = Path::new(env!("CARGO_MANIFEST_DIR")).join("../handbook/recipes");
         for entry in std::fs::read_dir(recipes).unwrap().flatten() {
             let name = entry.file_name().to_string_lossy().into_owned();
             let files = recipe(&name);
             assert!(problems(&files).is_empty(), "{name}: {:?}", problems(&files));
             let dir = tempfile::tempdir().unwrap();
-            let (built, made) = build(dir.path(), &files, &rust, &ready.paperpaw);
-            assert_eq!(built.state, "done", "{name}: {:#?}
-{}", built.diagnostics, built.log_tail);
+            let (built, made) = build(dir.path(), &files, &rust, &dev, &ready.paperpaw);
+            assert_eq!(built.state, "done", "{name}: {:#?}\n{}\n{:?}", built.diagnostics, built.log_tail, built.problems);
             assert!(built.diagnostics.is_empty(), "{name}: {:#?}", built.diagnostics);
-            assert!(made.is_some(), "{name}");
-        }
-    }
-
-    #[test]
-    fn a_plugin_with_code_is_built_and_runs_in_paperpaw_s_emulator() {
-        let Some(program) = std::env::var_os("PAPERPAW_EMU").map(PathBuf::from) else {
-            eprintln!("skipped: PAPERPAW_EMU names no PaperPaw");
-            return;
-        };
-        let (events, seen) = std::sync::mpsc::channel();
-        let emulator = crate::emulator::Emulator::new(move || Ok(program.clone()), move |e| {
-            let _ = events.send(e);
-        });
-        emulator.show_plugin(Some("calm-code")).unwrap();
-        let library = tempfile::tempdir().unwrap();
-        emulator.start("xteink-x4", library.path()).unwrap();
-        let ready = emulator.ready().unwrap();
-        let (version, target) = crate::toolchain::wanted(&ready.toolchain).unwrap();
-        crate::toolchain::can_link(&target).unwrap();
-        let rust = crate::toolchain::ready(&crate::paths::app_data().unwrap().join("rust"), &version, &|t| eprintln!("{t}")).unwrap();
-
-        let manifest = MANIFEST.replace("my-clock", "calm-code").replace("MyClock", "Calm");
-        let lib = r#"#![no_std]
-extern crate alloc;
-
-use alloc::boxed::Box;
-use paperpaw_sdk::ui::{self, UiStyle};
-use paperpaw_sdk::{Canvas, Cx, Env, Handled, Id, Manifest, Plugin, Rect, RegisterError, Registrar, Screen, ScreenSpec, Version};
-
-pub struct Calm;
-
-struct Here(UiStyle);
-
-impl Screen for Here {
-    fn draw(&mut self, canvas: &mut Canvas<'_>, env: &Env<'_>) {
-        let d = env.device().display;
-        let mut ui = ui::Ui::new(canvas, env, &self.0);
-        ui.message(Rect::new(0, 0, d.width, d.height), "Calm code here");
-    }
-
-    fn on_action(&mut self, _: &Id, _: &mut Cx<'_, '_>) -> Handled {
-        Handled::No
-    }
-}
-
-impl Plugin for Calm {
-    fn manifest(&self) -> Manifest {
-        Manifest::new(Id::new_static("calm-code"), "Calm", Version::new(0, 1, 0)).uses(paperpaw_sdk::Uses::NOTHING)
-    }
-
-    fn register(&self, r: &mut Registrar) -> Result<(), RegisterError> {
-        r.add_screen(ScreenSpec::new(
-            Id::new_static("calm-code.screen"),
-            "calm-code.title",
-            Box::new(|env, _| Box::new(Here(UiStyle::new(env)))),
-        ))
-    }
-}
-"#;
-        let files = vec![
-            ("Cargo.toml".to_string(), manifest.into_bytes()),
-            ("src/lib.rs".to_string(), lib.as_bytes().to_vec()),
-            ("plugin/plugin.ini".to_string(), b"[plugin]\nid = calm-code\nname = Calm\nversion = 0.1.0\n".to_vec()),
-        ];
-        let dir = tempfile::tempdir().unwrap();
-        let (built, made) = build(dir.path(), &files, &rust, &ready.paperpaw);
-        assert_eq!(built.state, "done", "{:#?}\n{}", built.diagnostics, built.log_tail);
-        let mut on_reader: Vec<(String, Vec<u8>)> = vec![("plugin.ini".into(), files[2].1.clone())];
-        on_reader.push((host_file(), std::fs::read(made.unwrap()).unwrap()));
-        // Its screen opened, what the reader shows.
-        let shown = |on_reader: &[(String, Vec<u8>)]| {
-            crate::emulator::place_plugin(library.path(), "calm-code", on_reader).unwrap();
+            let made = made.unwrap_or_else(|| panic!("{name}: no library"));
+            // It runs: the screen the recipe opens, or its widget alone on the
+            // home screen, shows its text.
+            let (screen, widget, text) = match name.as_str() {
+                "hello" => (Some("hello.screen"), None, "Hello someone, from Hello"),
+                "motto" => (None, Some("motto.note"), "Be kind to the page."),
+                other => panic!("the recipe {other} has no check of what it shows"),
+            };
+            let mut on_reader: Vec<(String, Vec<u8>)> = files.iter().filter_map(|(p, b)| p.strip_prefix("plugin/").map(|p| (p.to_string(), b.clone()))).collect();
+            on_reader.push((host_file(), std::fs::read(made).unwrap()));
+            crate::emulator::place_plugin(library.path(), &name, &on_reader).unwrap();
+            emulator.show_plugin(Some(&name)).unwrap();
+            if let Some(widget) = widget {
+                emulator.show_widget(widget).unwrap();
+            }
             emulator.reload().unwrap();
-            let _ = emulator.open("calm-code.screen", &serde_json::json!({}));
+            if let Some(screen) = screen {
+                let _ = emulator.open(screen, &serde_json::json!({}));
+            }
             std::thread::sleep(std::time::Duration::from_secs(2));
-            emulator.describe().unwrap().to_string()
-        };
-        let described = shown(&on_reader);
-        assert!(described.contains("Calm code here"), "the plugin's screen: {described}");
-
-        // A library not built so does not run.
-        on_reader[1].1 = b"not a library".to_vec();
-        assert!(!shown(&on_reader).contains("Calm code here"));
+            let described = emulator.describe().unwrap().to_string();
+            assert!(described.contains(text), "{name}: {described}");
+        }
         emulator.quit();
         drop(seen);
     }

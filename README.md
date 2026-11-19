@@ -58,7 +58,8 @@ small budget, so you can try the workshop before you get a key of your own.
 ## What it does
 
 - Makes **looks, home screens, buttons and texts**: plugins of a few text
-  files. And **plugins with code**, such as new screens and tools. They
+  files. And **plugins with code**, such as new screens and tools, for
+  PaperPaw's plugin interface 7 (`native_plugin!`; see below). They
   are built for the X4, and for the X4 Pro (and the experimental X4
   Classic) once espup's Xtensa tools are on the computer; until a PaperPaw
   release brings the Pro's core libraries, its builds are for your own
@@ -89,6 +90,26 @@ small budget, so you can try the workshop before you get a key of your own.
   Anthropic for what you use. The workshop uses the smallest model that
   does the job, keeps the conversation short, and shows each turn's cost.
   In Settings you can choose another model.
+
+## Plugins with code: plugin interface 7
+
+A plugin with code is a small Rust program, `src/main.rs` with the line
+`paperpaw_sdk::native_plugin!(MyPlugin, metadata = CALLS);` (the interface
+PaperPaw has from Beta 4 on; the older `plugin!` is gone), `Cargo.toml`,
+`native/metadata.json` (what it calls of the device) and its folder
+`plugin/` (`plugin.ini`, `i18n/<language>.ini`, `how/<language>.txt`). The
+workshop lays the crate out as `paperpaw-dev new --github <id> --code`
+does and builds it with the `paperpaw-dev` of the bundled PaperPaw:
+`paperpaw-dev build --device emulator` for the reader beside the
+conversation, `--device x4` or `x4-pro` for a reader; the file for a
+reader is signed with your author key.
+
+Two limits of Beta 4: PaperPaw's emulator runs a plugin's code on Linux
+(x86-64) only, so on Windows the reader beside the conversation shows
+plugins without code and a plugin with code is built for a reader and sent
+there; and the plugin store takes no plugin with code of this interface
+yet (it cannot rebuild it), so **Publish…** makes the package but the
+store does not list the code.
 
 ## What you need
 
@@ -123,7 +144,14 @@ and `PAPERPAW_SDK` its `crates/paperpaw-sdk` for plugins with code.
 `npm run dev` with `?example=night-owl` in the address plays a recorded
 conversation instead of asking the model.
 
-Tests: `npm test`, and `cargo test` in `src-tauri`. The key service for
+Tests: `npm test`, and `cargo test` in `src-tauri` (with `PAPERPAW_EMU`
+naming a `paperpaw-emu` built from PaperPaw, `paperpaw-dev` and
+`paperpaw-sign` beside it, and `PAPERPAW_SDK` its `crates/paperpaw-sdk`,
+`PAPERPAW_RUST=system` for the computer's own Rust, the tests build the
+handbook's recipes and run them in the emulator). The handbook is made from
+a PaperPaw checkout and its emulator's registry:
+`node handbook/generate.mjs --repo ../paperpaw --ref <tag or commit> --registry <file>`
+(`paperpaw-emu --registry <file>` of that ref). The key service for
 PaperPaw keys is in [`proxy/`](proxy/README.md). The Windows installer
 comes from `npm run app:installer`, with `PAPERPAW_EMU` naming the
 PaperPaw build it brings along; with the update key in

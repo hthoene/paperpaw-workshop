@@ -13,5 +13,9 @@
 | `[core] ui-lines` | Line thickness | 1 to 10 | `3` | How thick lines and frames are drawn. |
 | `[core] ui-palette` | Grays | text | `` | Colours by purpose, e.g. muted=60 line=170 link=#2a6f97 (0 black, 255 white). |
 | `[core] ui-text-curve` | Interface text tone curve | text | `` | Advanced. The same for menus and lists. |
+| `[core] ui-shadow` | Shadow | `core.shadow.none`, `core.shadow.hard` | `core.shadow.none` | Whether sheets, dialogs and chips cast a hard shadow. |
+| `[core] ui-frame` | Frames | `core.frame.own`, `core.frame.none`, `core.frame.line`, `core.frame.card`, `core.frame.dark` | `core.frame.own` | The frame of sheets, dialogs and chips: each as it is, or one for all. |
+| `[core] ui-density` | Spacing | `core.density.compact`, `core.density.regular`, `core.density.roomy` | `core.density.regular` | How much room lies between and round the parts of the screens. |
+| `[core] ui-button` | Buttons | `core.button.outlined`, `core.button.filled`, `core.button.flat` | `core.button.outlined` | How buttons look that are not chosen: outlined, filled or flat. |
 | `[core] notice-seconds` | Message time | 1 to 60 | `4` | How long short messages such as “Sync done” stay on the screen. |
 | `[menu] style` | Menus | `menu.style.list`, `menu.style.tiles` | `menu.style.list` | Menus as a list, or as tiles with their icons at the top of the screen. |

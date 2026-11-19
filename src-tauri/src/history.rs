@@ -511,7 +511,8 @@ pub async fn history_preview(
                 .join("builds")
                 .join(format!("{name}.earlier"));
             std::fs::create_dir_all(&builds).map_err(err)?;
-            let (built, library) = crate::code::build(&builds, &files, &rust, &ready.paperpaw);
+            let dev = crate::checks::dev_beside(&crate::paths::emulator_program()?);
+            let (built, library) = crate::code::build(&builds, &files, &rust, &dev, &ready.paperpaw);
             let library = library.ok_or_else(|| {
                 let why = built
                     .problems

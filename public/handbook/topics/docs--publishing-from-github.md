@@ -52,10 +52,3 @@ once. To have it reviewed later, name the repository in the store's form
 as an update. The skill's
 [`publishing.md`](../.claude/skills/paperpaw-plugin-development/publishing.md)
 has the steps.
-
-[`Plugin`]: ../crates/paperpaw-sdk/src/plugin.rs
-[`Registrar`]: ../crates/paperpaw-sdk/src/contribution.rs
-[`Env`]: ../crates/paperpaw-sdk/src/env.rs
-[`Command`]: ../crates/paperpaw-sdk/src/command.rs
-[`Screen`]: ../crates/paperpaw-sdk/src/screen.rs
-[`Widget`]: ../crates/paperpaw-sdk/src/widgets.rs

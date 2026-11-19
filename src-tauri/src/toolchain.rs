@@ -35,6 +35,7 @@ pub fn wanted(toolchain: &str) -> Result<(String, String), String> {
 #[derive(Debug, Clone)]
 pub struct Rust {
     /// `cargo` (rustup's proxy for it).
+    #[allow(dead_code, reason = "builds run through `tool` now; the field says which cargo is the app's")]
     pub cargo: PathBuf,
     /// The toolchain, as `+1.99.0` takes it.
     pub version: String,
@@ -43,22 +44,26 @@ pub struct Rust {
 }
 
 impl Rust {
-    /// `cargo +<version>` with the homes set.
-    pub fn cargo(&self) -> Command {
-        let mut command = Command::new(&self.cargo);
-        command.arg(format!("+{}", self.version));
+    /// `program` (PaperPaw's `paperpaw-dev`) run with this Rust: its
+    /// homes, its `bin` first on the path (the program calls `rustup` and
+    /// `cargo`), and its compiler whatever a plugin's `rust-toolchain.toml`
+    /// says.
+    pub fn tool(&self, program: &Path) -> Command {
+        let mut command = Command::new(program);
         if let Some((rustup, cargo)) = &self.homes {
             command.env("RUSTUP_HOME", rustup).env("CARGO_HOME", cargo);
+            let mut path = vec![cargo.join("bin")];
+            path.extend(std::env::split_paths(&std::env::var_os("PATH").unwrap_or_default()));
+            if let Ok(joined) = std::env::join_paths(path) {
+                command.env("PATH", joined);
+            }
         }
-        // The builds go where the workshop looks for them, whatever the
-        // person's own Cargo is set to.
-        command.env_remove("CARGO_TARGET_DIR").env_remove("CARGO_BUILD_TARGET_DIR");
+        command.env("RUSTUP_TOOLCHAIN", &self.version);
+        command.env_remove("CARGO_TARGET_DIR").env_remove("CARGO_BUILD_TARGET_DIR").env_remove("RUSTFLAGS");
         quiet(&mut command);
         command
     }
-}
 
-impl Rust {
     /// rustup, of the app's own Rust or the computer's.
     fn rustup(&self) -> Command {
         let program = match &self.homes {
@@ -290,10 +295,11 @@ mod tests {
     fn system_rust_still_builds_with_the_emulators_exact_compiler() {
         let (version, _) = wanted("rustc 1.99.0 (b940084d7 2026-09-28), x86_64-pc-windows-msvc").unwrap();
         let rust = Rust { cargo: PathBuf::from(exe("cargo")), version, homes: None };
-        let command = rust.cargo();
-        // An explicit rustup selector takes precedence over the default
-        // toolchain and RUSTUP_TOOLCHAIN, including a newer CI stable.
-        assert_eq!(command.get_args().next(), Some(std::ffi::OsStr::new("+1.99.0")));
+        let command = rust.tool(Path::new("paperpaw-dev"));
+        // The exact compiler is chosen for the program, whatever the computer's
+        // default toolchain is (a newer CI stable) or a plugin's own file says.
+        let chosen = command.get_envs().find(|(key, _)| *key == "RUSTUP_TOOLCHAIN").and_then(|(_, value)| value);
+        assert_eq!(chosen, Some(std::ffi::OsStr::new("1.99.0")));
     }
 
     #[test]

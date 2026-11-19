@@ -1,3 +1,10 @@
+# NOT FOR BETA 4: this builder (PaperPaw's web emulator with the plugin compiled
+# in, the plugin interface before 7) cannot build for PaperPaw's plugin
+# interface 7: the web shell no longer takes a plugin's code (`set_plugins`)
+# and a browser module cannot load a plugin's file. The Workshop builds
+# plugins with code on the computer (src-tauri/src/code.rs) instead. Kept for
+# the day the web emulator loads interface-7 code.
+#
 # The builder: PaperPaw at a ref, its crates already compiled
 # for the browser (wasm32), the X4 (RISC-V) and the X4 Pro (Xtensa), and
 # the build API.

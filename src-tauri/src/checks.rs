@@ -152,7 +152,7 @@ pub fn findings(report: &str, id: Option<&str>, out: Option<&Path>) -> Result<Ve
 }
 
 /// paperpaw-dev beside the emulator `program`, as the release puts it.
-fn dev_beside(program: &Path) -> PathBuf {
+pub(crate) fn dev_beside(program: &Path) -> PathBuf {
     program.with_file_name(format!("paperpaw-dev{}", std::env::consts::EXE_SUFFIX))
 }
 

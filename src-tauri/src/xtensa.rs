@@ -77,25 +77,6 @@ pub struct Esp {
     pub libraries: bool,
 }
 
-impl Esp {
-    /// `cargo +esp` with espup's environment. The registry is `cargo_home`'s
-    /// (where the workshop fetched the crates), the toolchain the computer's.
-    pub fn cargo(&self, cargo_home: Option<&Path>) -> Command {
-        let mut command = Command::new(format!("cargo{}", std::env::consts::EXE_SUFFIX));
-        command.arg("+esp");
-        for (key, value) in &self.env {
-            command.env(key, value);
-        }
-        // The toolchain is in the computer's rustup, not the workshop's own.
-        command.env_remove("RUSTUP_HOME").env_remove("CARGO_TARGET_DIR").env_remove("CARGO_BUILD_TARGET_DIR");
-        if let Some(home) = cargo_home {
-            command.env("CARGO_HOME", home);
-        }
-        crate::toolchain::quiet(&mut command);
-        command
-    }
-}
-
 /// How to get the toolchain, in the person's words.
 pub fn how_to_get_it() -> String {
     format!(

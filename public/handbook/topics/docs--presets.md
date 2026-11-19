@@ -10,26 +10,6 @@ being kept, until the screen that asked closes. It keeps it with
 `presets::commands`. The settings of its kind that a preset leaves out
 go back to their defaults.
 
-The kinds PaperPaw's own plugins offer are themes (`core.theme`,
-below) and the power modes, `core.power-mode`, which the kernel offers.
-The sleep screen offers pictures over the page as `sleep.overlay`, see
-[Plugins without code](#plugins-without-code). Add presets kept in the
-program with `Registrar::add_presets`, a `static` list of
-`Preset::fixed`. They may be of your own kind or another plugin's:
-
-```rust
-static THEMES: [Preset; 1] = [Preset::fixed(
-    "my.dusk",
-    presets::THEME,
-    "my.dusk",      // translation keys of its name
-    "my.dusk.help", // and of a sentence on it
-    "core.ui-focus = core.focus.ring
-core.ui-separators = core.separators.none",
-)];
-
-r.add_presets(&THEMES)?;
-```
-
 A theme is a preset of the kind `core.theme` (`presets::THEME`): values
 for the appearance settings. Where any plugin brings one, the
 appearance settings begin with *Theme*, which lists them; the one
