@@ -64,4 +64,8 @@ docker compose exec proxy node src/admin.mjs revoke 2
 here. Options: `--budget <dollars>` (5), `--days <n>` (90),
 `--models haiku,sonnet`, `--max-tokens <n>` (32000), `--note <text>`.
 
-Nothing of this is deployed yet.
+Nothing of this is deployed yet. The proxy that runs at
+workshop.paperpaw.org is paperpaw.org's own (`src/proxy.rs` of the
+paperpaw.org repository, the `proxy` service of its `docker-compose.yml`),
+which takes several Claude keys with a fallback (`ANTHROPIC_API_KEYS`); this
+one, a single `ANTHROPIC_API_KEY`, is not kept in step.

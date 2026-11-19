@@ -11,27 +11,6 @@ the alignment there is a ready setting: register
 Widgets of all plugins share a look the reader shapes for each, so that
 they sit well together on a page: give yours a frame and draw in it.
 
-```rust
-const ID: Id = Id::new_static("my.card");
-static SETTINGS: [SettingSpec; 4] = [
-    widgets::align_spec("my.card.align", ID, Align::Left),
-    widgets::frame_spec("my.card.frame", ID, Frame::None), // none, line, light or dark card
-    widgets::size_spec("my.card.size", ID, TextSize::Medium, true), // true: also "as large as it fits"
-    widgets::part_spec("my.card.author", ID, "my.show-author", true),
-];
-r.add_setting_group(widgets::settings_group(&ID, "my.card"))?;
-r.add_settings(&SETTINGS)?;
-
-fn draw(&self, canvas: &mut Canvas<'_>, env: &Env<'_>, area: Rect) {
-    let look = widgets::draw_frame(canvas, env, ID.as_str(), area);
-    let rest = widgets::draw_caption(canvas, env, ID.as_str(), &look, "Today");
-    let size = widgets::size(env, ID.as_str()).text(&UiStyle::new(env));
-    // ... the content in `rest`, in `look.ink` (and `look.faint` for
-    // what matters less), never in a fixed black: on a dark card it is
-    // light.
-}
-```
-
 A widget may be placed more than once, each placement with its own
 values of the widget's settings: the home screen places a clock as
 `widgets.clock@1` and `widgets.clock@2`, whose frames are the settings

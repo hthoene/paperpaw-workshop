@@ -1,6 +1,7 @@
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
 | `[core] developer` | Developer options | `true`, `false` | `false` | For developers: measure battery use, try things out, find faults. |
+| `[core] usb-link` | USB developer tools | `true`, `false` | `false` | Lets a computer on the USB cable press keys and copy files. Asks first; off after a restart. |
 | `[core] language` | Language | language | `en` | Language of menus and messages. |
 | `[core] night-mode` | Night mode | `true`, `false` | `false` | White text on black. |
 | `[core] night-pictures` | Invert pictures | `true`, `false` | `false` | Off: covers and photos as they are, not as negatives. |
@@ -14,7 +15,6 @@
 | `[core] ui-size` | Menu text size | 7 to 24 | `8` | Size of menus, lists and the status line. |
 | `[core] ui-contrast` | Contrast | `core.contrast.normal`, `core.contrast.strong` | `core.contrast.normal` | Strong draws gray hints and notes in black. |
 | `[core] ui-header` | Headers | `core.header.plain`, `core.header.light`, `core.header.dark` | `core.header.plain` | How the title at the top of menus and lists looks. |
-| `[core] widgets.frame` | Frames of widgets | `core.frame.own`, `core.frame.none`, `core.frame.line`, `core.frame.card`, `core.frame.dark` | `core.frame.own` | A frame for every widget that has none chosen in its own settings. |
 | `[core] ui-corners` | Corners | `core.corners.square`, `core.corners.small`, `core.corners.round`, `core.corners.soft` | `core.corners.soft` | Of highlighted rows, buttons and boxes. |
 | `[core] ui-focus` | Selected row | `core.focus.fill`, `core.focus.ring`, `core.focus.soft` | `core.focus.fill` | How the chosen row is shown. |
 | `[core] ui-separators` | Lines between rows | `core.separators.inset`, `core.separators.line`, `core.separators.none` | `core.separators.inset` | Light lines, fainter lines from where the text starts, or none. |
@@ -26,11 +26,25 @@
 | `[core] logo` | Logo picture | text | `` | Path of a JPEG or PNG shown instead of PaperPaw's logo; empty: the usual one. |
 | `[core] ui-palette` | Grays | text | `` | Colours by purpose, e.g. muted=60 line=170 link=#2a6f97 (0 black, 255 white). |
 | `[core] ui-text-curve` | Interface text tone curve | text | `` | Advanced. The same for menus and lists. |
+| `[core] ui-shadow` | Shadow | `core.shadow.none`, `core.shadow.hard` | `core.shadow.none` | Whether sheets, dialogs and chips cast a hard shadow. |
+| `[core] ui-frame` | Frames | `core.frame.own`, `core.frame.none`, `core.frame.line`, `core.frame.card`, `core.frame.dark` | `core.frame.own` | The frame of sheets, dialogs and chips: each as it is, or one for all. |
+| `[core] ui-density` | Spacing | `core.density.compact`, `core.density.regular`, `core.density.roomy` | `core.density.regular` | How much room lies between and round the parts of the screens. |
+| `[core] ui-button` | Buttons | `core.button.outlined`, `core.button.filled`, `core.button.flat` | `core.button.outlined` | How buttons look that are not chosen: outlined, filled or flat. |
+| `[core] widgets.frame` | Frames of widgets | `core.frame.own`, `core.frame.none`, `core.frame.line`, `core.frame.card`, `core.frame.dark` | `core.frame.own` | A frame for every widget that has none chosen in its own settings. |
+| `[core] widgets.paper` | Colours of widgets | `core.plate.normal`, `core.plate.inverted`, `core.plate.light-gray`, `core.plate.dark-gray`, `core.plate.none` | `core.plate.normal` | What every widget sits on that has none chosen in its own settings. |
+| `[core] widgets.ink` | Text of widgets | `core.ink.auto`, `core.tone.black`, `core.tone.white` | `core.ink.auto` | The text colour of every widget that has none chosen in its own settings. |
+| `[core] widgets.corners` | Corners of widgets | `core.corners.auto`, `core.corners.square`, `core.corners.small`, `core.corners.round`, `core.corners.soft` | `core.corners.auto` | The corners of every widget that has none chosen in its own settings. |
+| `[core] widgets.frame-line` | Frame lines of widgets | `core.lines.auto`, `core.lines.thin`, `core.lines.medium`, `core.lines.thick` | `core.lines.auto` | The frame line of every widget that has none chosen in its own settings. |
+| `[core] widgets.shadow` | Shadows of widgets | `core.shadow.none`, `core.shadow.hard` | `core.shadow.none` | A shadow for every widget that has none chosen in its own settings. |
+| `[core] widgets.padding` | Spacing in widgets | `core.padding.auto`, `core.padding.none`, `core.padding.small`, `core.padding.normal`, `core.padding.large` | `core.padding.auto` | The spacing inside every widget that has none chosen in its own settings. |
+| `[core] widgets.gap` | Space between widgets | `core.gap.small`, `core.gap.normal`, `core.gap.large` | `core.gap.normal` | How far apart the widgets on the home screen are. |
+| `[core] widgets.font` | Font of widgets | `core.widgets.font.menus`, `core.widgets.font.book`, `PaperPaw Sans` | `core.widgets.font.menus` | The font of every widget that has none chosen in its own settings. |
 | `[core] keymap-preset` | Button layout | `core.standard`, `core.two-buttons`, `core.left-handed` | `core.standard` | What the device's buttons do. |
 | `[core] full-refresh-interval` | Full refresh | 0 to 1000 | `6` | A flashing refresh after this many page turns removes ghosting; 0 never flashes. |
 | `[core] flash-screens` | Flash on screen change | `true`, `false` | `false` | Redraw fully when a screen opens: no traces of the last one, but slower. |
+| `[core] ui-full-refresh-interval` | Full refresh in menus | 0 to 1000 | `0` | A flash after this many menu changes removes ghosting; 0 never flashes. |
 | `[core] pictures-in-grays` | Pictures in grays | `true`, `false` | `true` | Draws pictures such as covers in four grays: finer, but a little slower. |
-| `[core] sleep-after` | Sleep after | 0 to 120 | `10` | Minutes without use before the device sleeps; 0: never. |
+| `[core] sleep-after` | Sleep after | 0 to 120 | `10` | Idle minutes before sleep; 0: never. |
 | `[core] rotation` | Turn the screen | `core.rotation.upright`, `core.rotation.landscape`, `core.rotation.upside-down`, `core.rotation.landscape-flipped` | `core.rotation.upright` | Upright or on its side. With “Only this book” on, it applies to that book alone. |
 | `[core] button-hints` | Button hints | `true`, `false` | `true` | A row at the bottom of the screen names what each button below it does. Not while reading. |
 | `[core] swap-page-buttons` | Swap the page buttons | `true`, `false` | `false` | The page buttons turn the other way while reading, not in menus. |
@@ -47,8 +61,8 @@
 | `[core] text-color-own` | Own text colour | text | `#5b4636` | A colour code such as #5b4636 (red, green, blue), used when the colour above is "Own colour". |
 | `[core] paper-color` | Paper colour | `core.paper.white`, `core.paper.cream`, `core.paper.sepia`, `core.paper.sand`, `core.paper.light-gray`, `core.paper.mint`, `core.paper.light-blue`, `core.paper.rose`, `core.paper.own` | `core.paper.white` | Softer than black on white, easier on the eyes; night mode swaps them. |
 | `[core] paper-color-own` | Own paper colour | text | `#f4ecd8` | A colour code such as #5b4636 (red, green, blue), used when the colour above is "Own colour". |
-| `[core] status-font` | Font | `core.status-font.ui`, `core.status-font.book`, `Literata`, `PaperPaw Sans` | `core.status-font.ui` | The font of the status lines while reading: as the menus', as the book's, or one of its own. |
-| `[core] reading-font` | Font | `core.font.default`, `Literata`, `PaperPaw Sans` | `core.font.default` | “Book's font” is Literata, or the book's own where the device draws them. |
+| `[core] status-font` | Font | `core.status-font.ui`, `core.status-font.book`, `PaperPaw Sans` | `core.status-font.ui` | The font of the status lines while reading: as the menus', as the book's, or one of its own. |
+| `[core] reading-font` | Font | `core.font.default`, `PaperPaw Sans` | `core.font.default` | “Book's font” is the one the device comes with, or the book's own where the device draws them. |
 | `[core] font-size` | Font size | 6 to 16 | `9` | Size of the book text. |
 | `[core] line-spacing` | Line spacing | 80 to 250 | `135` | Space between lines, relative to the font size. |
 | `[core] font-weight` | Font weight | 0 to 4 | `0` | Darker, bolder text with any font; helps on light screens. |
@@ -87,6 +101,9 @@
 | `[core] text-contrast` | Text contrast | `core.text-contrast.lighter`, `core.text-contrast.normal`, `core.text-contrast.darker`, `core.text-contrast.darkest` | `core.text-contrast.normal` | How dark letters are drawn. A tone curve set by a theme takes its place. |
 | `[core] text-sharpness` | Sharpness | `core.text-sharpness.soft`, `core.text-sharpness.normal`, `core.text-sharpness.sharp` | `core.text-sharpness.normal` | How crisp letters look. Sharp is sturdier and cleaner, soft is lighter. |
 | `[core] text-curve` | Text tone curve | text | `` | Edge tone of book letters: smooth, sharp:128, or 16 numbers 0-255. |
+| `[core] picture-contrast` | Picture contrast | `core.picture-contrast.lower`, `core.picture-contrast.normal`, `core.picture-contrast.higher`, `core.picture-contrast.highest` | `core.picture-contrast.normal` | How strong the difference between light and dark is in pictures and comics. |
+| `[core] picture-gamma` | Picture brightness | `core.picture-gamma.lightest`, `core.picture-gamma.lighter`, `core.picture-gamma.normal`, `core.picture-gamma.darker`, `core.picture-gamma.darkest` | `core.picture-gamma.normal` | How light the middle grays of pictures are. Darker suits pictures that look washed out. |
+| `[core] picture-dither` | Picture grays | `core.picture-dither.atkinson`, `core.picture-dither.floyd-steinberg`, `core.picture-dither.ordered` | `core.picture-dither.atkinson` | How grays are drawn: Atkinson is clean, Floyd-Steinberg smoother. |
 | `[core] highlight.background` | Background | `core.tone.none`, `core.tone.light-gray`, `core.tone.gray`, `core.tone.dark-gray`, `core.tone.black`, `core.tone.white`, `core.tone.yellow`, `core.tone.green`, `core.tone.blue`, `core.tone.pink`, `core.tone.orange`, `core.tone.red` | `core.tone.light-gray` | A colour behind the marked words; shown as a gray where there is no colour. |
 | `[core] highlight.ink` | Text | `core.tone.as-is`, `core.tone.light-gray`, `core.tone.gray`, `core.tone.dark-gray`, `core.tone.black`, `core.tone.white`, `core.tone.yellow`, `core.tone.green`, `core.tone.blue`, `core.tone.pink`, `core.tone.orange`, `core.tone.red` | `core.tone.as-is` | The colour of the marked words themselves; as it is, or a tone of its own. |
 | `[core] highlight.line` | Line under the text | `core.tone.none`, `core.line.solid`, `core.line.dotted`, `core.line.dashed`, `core.line.wavy`, `core.line.double` | `core.tone.none` | A line under the marked words. |
@@ -120,44 +137,24 @@
 | `[core] time-zone` | Time zone | `core.tz.auto`, `core.tz.utc`, `core.tz.honolulu`, `core.tz.anchorage`, `core.tz.los-angeles`, `core.tz.phoenix`, `core.tz.denver`, `core.tz.chicago`, `core.tz.new-york`, `core.tz.sao-paulo`, `core.tz.london`, `core.tz.lisbon`, `core.tz.berlin`, `core.tz.helsinki`, `core.tz.istanbul`, `core.tz.moscow`, `core.tz.dubai`, `core.tz.india`, `core.tz.bangkok`, `core.tz.china`, `core.tz.tokyo`, `core.tz.sydney`, `core.tz.auckland` | `core.tz.auto` | Automatic: the system's zone, where there is one. |
 | `[core] time-zone-rule` | Time zone rule | text | `` | A POSIX TZ rule for zones not in the list; overrides the time zone. |
 | `[core] battery-low` | Battery low at | 5 to 50 | `20` | The charge at which "Battery when low" shows in a status line. |
-| `[core] awake-holds` | Plugins may keep awake | `true`, `false` | `true` | A clock, slideshow or game may keep it awake; indexing the library always does. |
-| `[core] network.kosync` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.kosync` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
-| `[core] network.calibre` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.calibre` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
-| `[core] network.stats` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.stats` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
-| `[core] network.wifi` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.wifi` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
-| `[core] network.transfer` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.transfer` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
-| `[core] network.opds` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.opds` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
+| `[core] status-bar.all` | Status bar on all screens | `true`, `false` | `false` | Shows the time and the battery at the top of every screen that has no status line of its own. |
+| `[core] status-bar.line` | Status bar line | text | `core.status-line.items` | The status line the status bar shows. Empty: no status bar. |
+| `[core] status-bar.screens` | Status bar per screen | text | `` | One screen per line, as screen=shown or screen=hidden. Wins over what the screen says. |
+| `[core] awake-holds` | Plugins may keep awake | `true`, `false` | `true` | A clock or game may keep it awake; indexing always does. |
+| `[core] network-manager` | Network manager plugin | text | `wifi` | Advanced. The plugin that connects to Wi-Fi when a network is wanted; empty: none. |
 | `[core] network.fonts-browser` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
 | `[core] saving.fonts-browser` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
-| `[core] network.store` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.store` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
-| `[core] network.wikipedia` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.wikipedia` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
-| `[core] network.vocabulary` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.vocabulary` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
-| `[core] network.translate` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.translate` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
 | `[core] network.news` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
 | `[core] saving.news` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
-| `[core] network.weather` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.weather` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
-| `[core] network.browser` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.browser` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
-| `[core] network.readwise` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.readwise` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
-| `[core] network.read-later-cloud` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.read-later-cloud` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
-| `[core] network.joplin` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.joplin` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
-| `[core] network.mail` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.mail` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
-| `[core] network.wallabag` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
-| `[core] saving.wallabag` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
+| `[core] network.opds` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
+| `[core] saving.opds` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
+| `[core] network.store` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
+| `[core] saving.store` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
+| `[core] network.transfer` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
+| `[core] saving.transfer` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
 | `[core] network.update` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
 | `[core] saving.update` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
+| `[core] network.vocabulary` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
+| `[core] saving.vocabulary` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |
+| `[core] network.wifi` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
+| `[core] saving.wifi` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |

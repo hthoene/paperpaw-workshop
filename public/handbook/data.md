@@ -425,7 +425,8 @@ little memory can use them ([ADR 0018](adr/0018-font-packs-for-other-scripts.md)
 Arabic and Hebrew (with where their marks sit) and Korean (the Hangul
 of KS X 1001, ready as `script-korean`, and the other 8,822 syllables as
 `script-korean-extra`, about 30 MiB; neither offered yet) from the fonts
-in `tools/fonts`. A pack that extends a face with sizes larger than its own,
+in `tools/fonts`, and Ethiopic for Amharic and Tigrinya (`script-ethiopic`, from
+Noto Serif Ethiopic). A pack that extends a face with sizes larger than its own,
 and has its letters (at least those of `aenoAEO0` the face has), draws
 text asked that large, and the font size goes as far; a pack of another
 script's letters adds those letters only, in whatever sizes: the X4's firmware has
@@ -516,13 +517,28 @@ ui-title = 140
 ui-row = 180
 ```
 
+More of the look is a setting as well, each leaving the look as it is until
+a theme sets it: `ui-shadow` (`core.shadow.none`, `.hard`: a hard shadow under
+dialogs and chips), `ui-frame` (`core.frame.own` or one of `.none`, `.line`,
+`.card`, `.dark`: the plate of sheets, dialogs and chips), `ui-density`
+(`core.density.compact`, `.regular`, `.roomy`: the margins and gaps),
+`ui-button` (`core.button.outlined`, `.filled`, `.flat`: buttons not chosen),
+and `ui-focus = core.focus.soft` (a light bar; a frame on panels of black and
+white alone). The colours of the parts sit in `ui-palette` beside the grays:
+`panel` (plates), `focus` (the chosen row's bar), `control` (filled
+buttons), `outline` (lines round plates and chips), `chip` (the chosen chip)
+and `bar` (a dark header); a part the theme does not colour keeps its look.
+`samples/plugins/theme-slate` sets them all. The palette text is read in 512
+bytes, enough for every name with a colour each; the kit's tests fail before
+more names come than that.
+
 Pebble, a theme with lists on cards for touch screens, comes with
 PaperPaw, switched off in the plugin manager.
 
 The fonts browser (`plugins/fonts-browser`) downloads fonts as such
 plugins from paperpaw.org: font files for devices with scalable fonts
 and the memory for them, packs for the others. The store
-(`plugins/store`, *More plugins*) lists the other plugins of the plugin
+(`plugins/store`, *Plugin store*) lists the other plugins of the plugin
 library made for the device, data plugins and, where PaperPaw loads
 them and a build fits, plugins with code, and installs, updates and
 removes them ([ADR 0023](adr/0023-plugin-store.md)). Both build on the
@@ -537,14 +553,6 @@ store updates only those it installed, and one put in place otherwise
 (the Wi-Fi transfer, the USB cable, a card) is local, which the plugin
 manager says. `install::local::Staging` installs a plugin sent file by
 file, with the same checks.
-
-Copy it into the `plugins` folder of a device (or of the emulator's
-library) and restart, or have a plugin load it at once
-(`Command::LoadPlugin` with its folder; `Command::RemovePlugin` removes
-one, its fonts and presets at once, the rest after the next start). A plugin's `styles.css` comes after a book's own
-stylesheets and before one's own (`styles.css` beside the books, then
-the one named like a book), so the more particular wins; plugins with
-code add theirs with `Registrar::add_stylesheet`.
 
 A `presets.ini` holds presets (see above), a section each: its `kind`,
 its `name` and `description` (translation keys from its `i18n`, or the
@@ -578,26 +586,6 @@ with `Preset::changes` and the settings it covers. It shows it with
 being kept, until the screen that asked closes. It keeps it with
 `presets::commands`. The settings of its kind that a preset leaves out
 go back to their defaults.
-
-The kinds PaperPaw's own plugins offer are themes (`core.theme`,
-below) and the power modes, `core.power-mode`, which the kernel offers.
-The sleep screen offers pictures over the page as `sleep.overlay`, see
-[Plugins without code](#plugins-without-code). Add presets kept in the
-program with `Registrar::add_presets`, a `static` list of
-`Preset::fixed`. They may be of your own kind or another plugin's:
-
-```rust
-static THEMES: [Preset; 1] = [Preset::fixed(
-    "my.dusk",
-    presets::THEME,
-    "my.dusk",      // translation keys of its name
-    "my.dusk.help", // and of a sentence on it
-    "core.ui-focus = core.focus.ring
-core.ui-separators = core.separators.none",
-)];
-
-r.add_presets(&THEMES)?;
-```
 
 A theme is a preset of the kind `core.theme` (`presets::THEME`): values
 for the appearance settings. Where any plugin brings one, the
@@ -933,6 +921,10 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `[core] ui-lines` | Line thickness | 1 to 10 | `3` | How thick lines and frames are drawn. |
 | `[core] ui-palette` | Grays | text | `` | Colours by purpose, e.g. muted=60 line=170 link=#2a6f97 (0 black, 255 white). |
 | `[core] ui-text-curve` | Interface text tone curve | text | `` | Advanced. The same for menus and lists. |
+| `[core] ui-shadow` | Shadow | `core.shadow.none`, `core.shadow.hard` | `core.shadow.none` | Whether sheets, dialogs and chips cast a hard shadow. |
+| `[core] ui-frame` | Frames | `core.frame.own`, `core.frame.none`, `core.frame.line`, `core.frame.card`, `core.frame.dark` | `core.frame.own` | The frame of sheets, dialogs and chips: each as it is, or one for all. |
+| `[core] ui-density` | Spacing | `core.density.compact`, `core.density.regular`, `core.density.roomy` | `core.density.regular` | How much room lies between and round the parts of the screens. |
+| `[core] ui-button` | Buttons | `core.button.outlined`, `core.button.filled`, `core.button.flat` | `core.button.outlined` | How buttons look that are not chosen: outlined, filled or flat. |
 | `[core] notice-seconds` | Message time | 1 to 60 | `4` | How long short messages such as “Sync done” stay on the screen. |
 | `[menu] style` | Menus | `menu.style.list`, `menu.style.tiles` | `menu.style.list` | Menus as a list, or as tiles with their icons at the top of the screen. |
 
@@ -950,7 +942,6 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `[vocabulary] review-on-wake` | Review on waking | `true`, `false` | `false` | The review opens as the device wakes, where flash cards are due. |
 | `[vocabulary] sd-auto` | Update decks from the card when opened | `true`, `false` | `true` | Flash cards read the files in the folder that are new or changed. |
 | `[vocabulary] sd-folder` | Folder for the files of decks | text | `Flashcards` | On the SD card: a CSV, TSV or Anki file in it is a deck. |
-| `[translate] to` | Translate into | `translate.to.auto`, `translate.to.ar`, `translate.to.bg`, `translate.to.cs`, `translate.to.da`, `translate.to.de`, `translate.to.el`, `translate.to.en-gb`, `translate.to.en-us`, `translate.to.es`, `translate.to.et`, `translate.to.fi`, `translate.to.fr`, `translate.to.hu`, `translate.to.id`, `translate.to.it`, `translate.to.ja`, `translate.to.ko`, `translate.to.lt`, `translate.to.lv`, `translate.to.nb`, `translate.to.nl`, `translate.to.pl`, `translate.to.pt-br`, `translate.to.pt-pt`, `translate.to.ro`, `translate.to.ru`, `translate.to.sk`, `translate.to.sl`, `translate.to.sv`, `translate.to.tr`, `translate.to.uk`, `translate.to.zh-hans` | `translate.to.auto` | The language selected text is translated into. |
 
 ## Widgets for home screen layouts
 
@@ -958,62 +949,13 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 |---|---|
 | `core.space` | Space |
 | `core.fill` | Free space |
-| `home.status` | Status line |
-| `home.date` | Date |
-| `home.continue` | Continue reading |
-| `home.recent` | Recently read |
-| `home.clock` | Clock |
-| `stats.widget.today` | Read today |
-| `stats.widget.week` | Reading per day |
-| `stats.widget.goal` | Daily goal |
-| `stats.widget.calendar` | Reading calendar |
-| `stats.widget.year` | Books this year |
-| `stats.widget.streak` | Reading streak |
-| `reading-goal.widget` | Reading cat |
-| `notes-vault.recent` | Recent notes |
-| `notes-vault.pinned` | Pinned note |
-| `notes-vault.day` | Note of the day |
-| `notes-vault.random` | Random note |
-| `notes-vault.tags` | Tags |
-| `notes-vault.search` | Search notes |
-| `vocabulary.widget.word` | Word of the day |
-| `vocabulary.widget.saved` | Words saved |
-| `vocabulary.widget.due` | Cards due |
-| `news.widget.headlines` | News headlines |
-| `weather.now` | Weather now |
-| `weather.forecast` | Forecast |
-| `widgets.analogue-clock` | Analogue clock |
-| `widgets.word-clock` | Word clock |
-| `widgets.tile-clock` | Clock in tiles |
-| `widgets.world-clock` | World clock |
-| `widgets.calendar` | Calendar |
-| `widgets.year-progress` | The year so far |
-| `widgets.countdown` | Countdown |
-| `widgets.moon` | Moon phase |
-| `widgets.day` | Day and date |
-| `widgets.quote` | Quote of the day |
-| `widgets.picture` | Picture |
-| `widgets.note` | Note |
-| `widgets.todo` | To do |
-| `widgets.greeting` | Greeting |
-| `widgets.logo` | PaperPaw logo |
-| `widgets.progress` | Book progress |
-| `widgets.reading` | Now reading |
-| `widgets.next` | Next up |
-| `widgets.series` | Series |
-| `widgets.favourites` | Favourites |
-| `widgets.highlight` | Highlight |
-| `widgets.library` | Library in numbers |
-| `widgets.battery` | Battery |
 
 ## Actions for key maps
 
 | Action id | Name |
 |---|---|
 | `about.open` | About PaperPaw |
-| `battery.open` | Battery |
 | `bluetooth.open` | Bluetooth |
-| `calibre.open` | Wireless library |
 | `core.apps` | Apps |
 | `core.back` | Back |
 | `core.clean-up` | Clean up storage |
@@ -1025,13 +967,12 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `core.home` | Home |
 | `core.left` | Left |
 | `core.library` | Library |
+| `core.library.look-again` | Look for new books |
 | `core.long-confirm` | Menu or more |
 | `core.menu` | Menu |
 | `core.next` | Next |
 | `core.next-page` | Next page |
 | `core.nothing` | Nothing |
-| `core.open-with` | Open with … |
-| `core.pane.other` | Other pane |
 | `core.prev-page` | Previous page |
 | `core.previous` | Previous |
 | `core.quick-panel` | Quick panel |
@@ -1044,15 +985,12 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `core.toggle-night-mode` | Night mode |
 | `core.tools` | Tools |
 | `core.up` | Up |
-| `diagnostics.open-check` | Device check |
-| `diagnostics.reset` | Reset diagnostics screen |
+| `core.usb-drive` | USB drive |
 | `file-manager.open` | Files |
 | `files.by-author` | By author |
 | `files.by-series` | By series |
 | `files.by-tag` | By tag |
 | `files.favourites` | Favourites |
-| `files.list.find` | Find |
-| `files.look-again` | Look for new books |
 | `files.search` | Search the library |
 | `files.shelves` | Shelves |
 | `fonts-browser.open` | More fonts |
@@ -1060,30 +998,25 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `home.all-tools` | All tools |
 | `home.edit-pages` | Edit home screen |
 | `keyboard.done` | Finish typing |
-| `keys.open` | Buttons and gestures |
-| `kosync.sync-now` | Sync progress |
 | `lock.now` | Lock now |
 | `lock.touch-hint` | How to unlock touch |
+| `lock.touch-lock` | Lock touch |
 | `lock.touch-toggle` | Lock or unlock touch |
-| `menu-editor.open` | Customise menus |
 | `news.fetch` | Fetch the news |
 | `news.open` | News |
-| `notes-overview.open` | All notes |
-| `notes-vault.open` | Notes vault |
 | `opds.open` | Catalogs |
 | `opds.sync` | Sync catalogs |
 | `plugin-manager.open` | Manage plugins |
 | `plugin-manager.screens.open` | Screens |
 | `power.menu` | Power |
 | `power.open` | Power |
-| `profiles.next` | Next profile |
-| `profiles.open` | Profiles |
 | `reader.auto-turn` | Turn pages automatically |
 | `reader.book-info` | Book information |
 | `reader.font-larger` | Larger text |
 | `reader.font-smaller` | Smaller text |
 | `reader.go-to-page` | Go to page |
 | `reader.go-to-percent` | Go to a percentage |
+| `reader.hold-select` | Hold Select: picture full screen, else bookmark |
 | `reader.links` | Links and marks |
 | `reader.next-chapter` | Next chapter |
 | `reader.next-status-line` | Next status line |
@@ -1092,6 +1025,11 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `reader.quick-settings` | Font and layout |
 | `reader.read-aloud` | Read aloud |
 | `reader.search` | Search |
+| `reader.sel-hold-down` | Selection: paragraph down |
+| `reader.sel-hold-left` | Selection: first word of the page, or start earlier |
+| `reader.sel-hold-right` | Selection: last word of the page, or start later |
+| `reader.sel-hold-up` | Selection: paragraph up |
+| `reader.sel-widen` | Selection: widen |
 | `reader.select-text` | Select text |
 | `reader.selection.cancel` | Cancel |
 | `reader.selection.copy` | Copy |
@@ -1107,20 +1045,16 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `reader.skim-book` | Skim through the book |
 | `reader.toggle-bookmark` | Bookmark this page |
 | `reader.toggle-justify` | Justify text on/off |
-| `rules.open` | Rules |
 | `settings.secrets.open` | Passwords and keys |
 | `setup.open` | Set up PaperPaw |
-| `stats.open` | Reading statistics |
 | `store.discover-fonts` | Discover fonts |
-| `store.open` | More plugins |
+| `store.open` | Plugin store |
 | `transfer.open` | Wi-Fi transfer |
 | `update.check` | Search online |
 | `update.open` | Update |
 | `vocabulary.flash-cards` | Flash cards |
 | `vocabulary.open` | Vocabulary |
 | `vocabulary.scan-card` | Scan the SD card for cards |
-| `weather.choose-place` | Place |
-| `weather.refresh` | Fetch the weather |
 | `widgets.todo.open` | To do |
 | `wifi.open` | Wi-Fi |
 
@@ -1130,6 +1064,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 |---|---|---|---|---|
 | `xteink-x4` | Xteink X4 | 480 x 800, 220 dpi | no | page-back, page-forward, left, right, confirm, back, power |
 | `xteink-x4-pro` | Xteink X4 Pro | 480 x 800, 217 dpi | yes | page-back, page-forward, home, power |
+| `boox-picco` | Boox Picco | 480 x 800, 235 dpi | yes | page-back, page-forward, power |
 | `xteink-x4-classic` | Xteink X4 Classic | 480 x 800, 217 dpi | no | page-back, page-forward, left, right, confirm, back, power |
 | `xteink-x3` | Xteink X3 | 528 x 792, 260 dpi | no | page-back, page-forward, left, right, confirm, back, power |
 | `boox-go-7` | Boox Go 7 | 1264 x 1680, 300 dpi | yes | page-back, page-forward, back |

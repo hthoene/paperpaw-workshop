@@ -96,8 +96,6 @@ PageLayerSpec::new(id, "interlinear.words", draw)
     })
 ```
 
-`samples/interlinear` is all of this as a plugin to start from.
-
 A frame (`layers::PageFrameSpec`) sets the text in columns: two
 columns, two pages side by side. The setting `core.page-frame` (each
 book may have its own) offers every frame by its id, named by the

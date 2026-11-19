@@ -57,11 +57,14 @@ describe("small edits", () => {
 });
 
 describe("a plugin with code", () => {
-  it("may hold its how-it-works texts by language, as PaperPaw's sample does", async () => {
+  it("holds its crate, the list of what it calls and its folder, whose words and how-it-works texts are by language", async () => {
     const { pathProblem } = await import("../src/project/rules");
-    expect(pathProblem("how/en.txt", "code")).toBeNull();
-    expect(pathProblem("how/de.txt", "code")).toBeNull();
-    expect(pathProblem("how/notes/en.txt", "code")).not.toBeNull();
-    expect(pathProblem("build.rs", "code")).not.toBeNull();
+    for (const path of ["Cargo.toml", "src/main.rs", "src/screen.rs", "native/metadata.json", "plugin/plugin.ini", "plugin/i18n/en.ini", "plugin/how/de.txt"]) {
+      expect(pathProblem(path, "code"), path).toBeNull();
+    }
+    // The layout before interface 7, and what the workshop writes itself.
+    for (const path of ["how/en.txt", "i18n/en.ini", "build.rs", "native/metadata.bin", "rust-toolchain.toml", "paperpaw-plugin7.x"]) {
+      expect(pathProblem(path, "code"), path).not.toBeNull();
+    }
   });
 });

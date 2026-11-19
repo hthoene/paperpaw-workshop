@@ -1,6 +1,14 @@
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
 | `[core] widgets.frame` | Frames of widgets | `core.frame.own`, `core.frame.none`, `core.frame.line`, `core.frame.card`, `core.frame.dark` | `core.frame.own` | A frame for every widget that has none chosen in its own settings. |
+| `[core] widgets.paper` | Colours of widgets | `core.plate.normal`, `core.plate.inverted`, `core.plate.light-gray`, `core.plate.dark-gray`, `core.plate.none` | `core.plate.normal` | What every widget sits on that has none chosen in its own settings. |
+| `[core] widgets.ink` | Text of widgets | `core.ink.auto`, `core.tone.black`, `core.tone.white` | `core.ink.auto` | The text colour of every widget that has none chosen in its own settings. |
+| `[core] widgets.corners` | Corners of widgets | `core.corners.auto`, `core.corners.square`, `core.corners.small`, `core.corners.round`, `core.corners.soft` | `core.corners.auto` | The corners of every widget that has none chosen in its own settings. |
+| `[core] widgets.frame-line` | Frame lines of widgets | `core.lines.auto`, `core.lines.thin`, `core.lines.medium`, `core.lines.thick` | `core.lines.auto` | The frame line of every widget that has none chosen in its own settings. |
+| `[core] widgets.shadow` | Shadows of widgets | `core.shadow.none`, `core.shadow.hard` | `core.shadow.none` | A shadow for every widget that has none chosen in its own settings. |
+| `[core] widgets.padding` | Spacing in widgets | `core.padding.auto`, `core.padding.none`, `core.padding.small`, `core.padding.normal`, `core.padding.large` | `core.padding.auto` | The spacing inside every widget that has none chosen in its own settings. |
+| `[core] widgets.gap` | Space between widgets | `core.gap.small`, `core.gap.normal`, `core.gap.large` | `core.gap.normal` | How far apart the widgets on the home screen are. |
+| `[core] widgets.font` | Font of widgets | `core.widgets.font.menus`, `core.widgets.font.book`, `PaperPaw Sans` | `core.widgets.font.menus` | The font of every widget that has none chosen in its own settings. |
 | `[home] page-1` | Home page 1 | text | `home.clock, home.continue, home.recent` | The items on this page and their places. Change them on the home screen. |
 | `[home] page-2` | Home page 2 | text | `home.tools` | The items on this page and their places. Change them on the home screen. |
 | `[home] page-3` | Home page 3 | text | `` | The items on this page and their places. Change them on the home screen. |

@@ -1,7 +1,10 @@
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
 | `[core] logo` | Logo picture | text | `` | Path of a JPEG or PNG shown instead of PaperPaw's logo; empty: the usual one. |
-| `[sleep] show` | Show | `sleep.show.cat`, `sleep.show.cover`, `sleep.show.picture`, `sleep.show.overlay`, `sleep.show.widgets`, `sleep.show.message`, `sleep.show.page`, `reading-goal.sleep`, `vocabulary.sleep-card` | `sleep.show.cat` | What the screen shows while the device sleeps; e-ink keeps it without power. |
+| `[sleep] show` | Show | `sleep.show.cat`, `sleep.show.cover`, `sleep.show.picture`, `sleep.show.overlay`, `sleep.show.widgets`, `sleep.show.message`, `sleep.show.page`, `vocabulary.sleep-card` | `sleep.show.cat` | What the screen shows while the device sleeps; e-ink keeps it without power. |
+| `[sleep] off-show` | Show when switched off | `sleep.off-show.same`, `sleep.off-show.message`, `sleep.show.cat`, `sleep.show.cover`, `sleep.show.picture` | `sleep.off-show.same` | What the screen shows once the device is switched off; e-ink keeps it without power. |
+| `[sleep] start-show` | Show when starting | `sleep.start-show.built-in` | `sleep.start-show.built-in` | What the screen shows while the device starts, before plugins run. |
+| `[sleep] restart-show` | Show when restarting | `sleep.restart-show.built-in` | `sleep.restart-show.built-in` | What the screen shows while PaperPaw restarts. |
 | `[sleep] folder` | Pictures folder | text | `sleep` | For "My pictures": JPEG, PNG and GIF files, one after the other. |
 | `[sleep] widgets` | Widgets | list | `home.date, home.continue, stats.widget.today, home.recent` | For "Widgets": what the sleep screen shows, top to bottom. |
 | `[sleep] overlay-picture` | Picture over the page | text | `` | For "The page with a picture": the folder's pictures in turn, or a plugin's. |
@@ -10,3 +13,4 @@
 | `[sleep] overlay-size` | Picture size | 10 to 100 | `35` | How large the picture is, of the screen. 100 % fills the whole screen. |
 | `[sleep] overlay-see-through` | Page through the picture | 0 to 90 | `0` | How much of the page shows through the picture; its clear parts always show the page. |
 | `[sleep] overlay-when` | When the picture shows | `sleep.when.always`, `sleep.when.reading`, `sleep.when.elsewhere` | `sleep.when.always` | When the picture goes over the page; otherwise the book's cover shows. |
+| `[sleep] refresh-every` | Redraw while asleep | `sleep.refresh.off`, `sleep.refresh.15`, `sleep.refresh.30`, `sleep.refresh.60` | `sleep.refresh.off` | Redraws the clock and widgets now and then while asleep. Costs battery; see How it works. |

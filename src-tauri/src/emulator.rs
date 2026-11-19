@@ -255,6 +255,11 @@ impl Emulator {
 
     /// Starts (or switches to) a reader of `profile` on its folder.
     pub fn start(&self, profile: &str, library: &Path) -> Result<(), String> {
+        // The first-run setup counts as done: the reader shows the plugin,
+        // not the welcome (PaperPaw's own sample libraries are made so).
+        let setup = library.join(".paperpaw").join("plugins").join("setup");
+        std::fs::create_dir_all(&setup).map_err(|e| format!("{}: {e}", setup.display()))?;
+        std::fs::write(setup.join("done"), b"").map_err(|e| format!("{}: {e}", setup.display()))?;
         let request = json!({
             "op": "start",
             "profile": profile,
