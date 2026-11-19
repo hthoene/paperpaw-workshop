@@ -342,6 +342,12 @@ export function Publish({ desk, backend, onClose }: Props) {
           if (built.state !== "done" || !built.ppn) return setStep({ at: "problems", problems: whyFailed(built) });
           readers.push("x4-pro");
         }
+        // The emulator's library too, where this computer builds it: the store
+        // lists it for PaperPaw's emulator. Without it the readers' files go alone.
+        if (readiness?.emulator) {
+          const built = await backend.deviceBuild(project.key, packed.id, packed.version, "emulator-linux-x86_64");
+          if (built.state === "done" && built.ppn) readers.push("emulator-linux-x86_64");
+        }
       }
       // One file for the store: the package, and the build and the source just made.
       const file = await backend.publishPack(project.key, packed.id, packed.version, toBase64(packed.zip), !!code, readers);

@@ -81,6 +81,9 @@ export interface DeviceReadiness {
   /** What to do about it where it is not there. */
   x4_pro_help: string | null;
   sign: boolean;
+  /** PaperPaw's emulator runs a plugin's code on this computer (Linux
+   *  x86-64): its library goes to the store too. */
+  emulator?: boolean;
 }
 
 /** A build for the readers. */
@@ -276,7 +279,7 @@ export interface Backend extends FolderApi, PictureApi, CheckApi, HistoryApi {
   deviceToolchainInstall(): Promise<void>;
   /** Builds the project's plugin with code for the X4, signed, with its
    *  source as a ZIP, into the project's `.workshop/publish/parts/`. */
-  deviceBuild(project: string, id: string, version: string, reader?: "x4" | "x4-pro"): Promise<DeviceBuilt>;
+  deviceBuild(project: string, id: string, version: string, reader?: "x4" | "x4-pro" | "emulator-linux-x86_64"): Promise<DeviceBuilt>;
   /** The author key that signs plugins with code: never its secret. */
   authorStatus(): Promise<AuthorStatus>;
   /** Makes the author key, if there is none yet. */
