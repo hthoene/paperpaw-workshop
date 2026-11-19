@@ -261,6 +261,18 @@ pub fn diagnostics(output: &str) -> Vec<Diagnostic> {
     out
 }
 
+/// The link in a plugin's folder to the PaperPaw checkout its SDK is taken
+/// from, as `paperpaw-dev new --code --sdk` makes it; no part of its source.
+pub const SDK_LINK: &str = ".paperpaw";
+
+/// Makes `link` a link to the folder `to`.
+fn link_folder(to: &Path, link: &Path) -> std::io::Result<()> {
+    #[cfg(unix)]
+    return std::os::unix::fs::symlink(to, link);
+    #[cfg(windows)]
+    return std::os::windows::fs::symlink_dir(to, link);
+}
+
 /// What the plugin's crate is laid out with, as `paperpaw-dev new --code`
 /// lays it out: the crate's own `Cargo.toml` (targets, profiles, the SDK),
 /// how it is linked and the compiler. Made by the release's own tool, so
@@ -300,6 +312,20 @@ pub fn lay_out(dev: &Path, dir: &Path, files: &[(String, Vec<u8>)], krate: &Crat
             bytes = format!("[toolchain]\nchannel = \"{compiler}\"\nprofile = \"minimal\"\n").into_bytes();
         }
         write(dir.join(name), &bytes)?;
+    }
+    // A checkout's SDK (the one beside the app, `PAPERPAW_SDK`) is reached
+    // through a link in the plugin's folder, `.paperpaw`, and named by it:
+    // so the build is the same file on any computer, and the store can
+    // rebuild it. `paperpaw-dev new` made the link in its scaffold; the
+    // plugin's folder gets the same one.
+    let link = dir.join(SDK_LINK);
+    let wanted = std::fs::read_link(scaffold.join(SDK_LINK)).ok();
+    if std::fs::read_link(&link).ok() != wanted {
+        // A link to a folder is a file on Linux and macOS, a folder on Windows.
+        let _ = std::fs::remove_file(&link).or_else(|_| std::fs::remove_dir(&link));
+        if let Some(checkout) = &wanted {
+            link_folder(checkout, &link).map_err(|e| format!("{}: {e}", link.display()))?;
+        }
     }
     let _ = std::fs::remove_dir_all(&scaffold);
     for (path, bytes) in files.iter().filter(|(p, _)| p.starts_with("src/") || p.starts_with("plugin/") || p == "native/metadata.json") {
