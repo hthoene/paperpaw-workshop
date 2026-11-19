@@ -1,0 +1,22 @@
+{
+  "target": "esp32c3-riscv32imc-ilp32-soft-le",
+  "floor": 1,
+  "used": [
+    {"kind": "host", "name": "heap.alloc"},
+    {"kind": "host", "name": "heap.dealloc"},
+    {"kind": "host", "name": "heap.realloc"},
+    {"kind": "host", "name": "registrations.submit"},
+    {"kind": "host", "name": "commands.submit"},
+    {"kind": "host", "name": "font.acquire"},
+    {"kind": "host", "name": "handle.release"},
+    {"kind": "host", "name": "canvas.fill_rect"},
+    {"kind": "host", "name": "text.draw"},
+    {"kind": "host", "name": "settings.read"},
+    {"kind": "callback", "name": "drop"},
+    {"kind": "callback", "name": "dispatch_event"},
+    {"kind": "callback", "name": "draw"},
+    {"kind": "callback", "name": "input"}
+  ],
+  "services": [],
+  "features": []
+}

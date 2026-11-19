@@ -1,9 +1,7 @@
 | Action id | Name |
 |---|---|
 | `about.open` | About PaperPaw |
-| `battery.open` | Battery |
 | `bluetooth.open` | Bluetooth |
-| `calibre.open` | Wireless library |
 | `core.apps` | Apps |
 | `core.back` | Back |
 | `core.clean-up` | Clean up storage |
@@ -15,13 +13,12 @@
 | `core.home` | Home |
 | `core.left` | Left |
 | `core.library` | Library |
+| `core.library.look-again` | Look for new books |
 | `core.long-confirm` | Menu or more |
 | `core.menu` | Menu |
 | `core.next` | Next |
 | `core.next-page` | Next page |
 | `core.nothing` | Nothing |
-| `core.open-with` | Open with … |
-| `core.pane.other` | Other pane |
 | `core.prev-page` | Previous page |
 | `core.previous` | Previous |
 | `core.quick-panel` | Quick panel |
@@ -34,15 +31,12 @@
 | `core.toggle-night-mode` | Night mode |
 | `core.tools` | Tools |
 | `core.up` | Up |
-| `diagnostics.open-check` | Device check |
-| `diagnostics.reset` | Reset diagnostics screen |
+| `core.usb-drive` | USB drive |
 | `file-manager.open` | Files |
 | `files.by-author` | By author |
 | `files.by-series` | By series |
 | `files.by-tag` | By tag |
 | `files.favourites` | Favourites |
-| `files.list.find` | Find |
-| `files.look-again` | Look for new books |
 | `files.search` | Search the library |
 | `files.shelves` | Shelves |
 | `fonts-browser.open` | More fonts |
@@ -50,30 +44,25 @@
 | `home.all-tools` | All tools |
 | `home.edit-pages` | Edit home screen |
 | `keyboard.done` | Finish typing |
-| `keys.open` | Buttons and gestures |
-| `kosync.sync-now` | Sync progress |
 | `lock.now` | Lock now |
 | `lock.touch-hint` | How to unlock touch |
+| `lock.touch-lock` | Lock touch |
 | `lock.touch-toggle` | Lock or unlock touch |
-| `menu-editor.open` | Customise menus |
 | `news.fetch` | Fetch the news |
 | `news.open` | News |
-| `notes-overview.open` | All notes |
-| `notes-vault.open` | Notes vault |
 | `opds.open` | Catalogs |
 | `opds.sync` | Sync catalogs |
 | `plugin-manager.open` | Manage plugins |
 | `plugin-manager.screens.open` | Screens |
 | `power.menu` | Power |
 | `power.open` | Power |
-| `profiles.next` | Next profile |
-| `profiles.open` | Profiles |
 | `reader.auto-turn` | Turn pages automatically |
 | `reader.book-info` | Book information |
 | `reader.font-larger` | Larger text |
 | `reader.font-smaller` | Smaller text |
 | `reader.go-to-page` | Go to page |
 | `reader.go-to-percent` | Go to a percentage |
+| `reader.hold-select` | Hold Select: picture full screen, else bookmark |
 | `reader.links` | Links and marks |
 | `reader.next-chapter` | Next chapter |
 | `reader.next-status-line` | Next status line |
@@ -82,6 +71,11 @@
 | `reader.quick-settings` | Font and layout |
 | `reader.read-aloud` | Read aloud |
 | `reader.search` | Search |
+| `reader.sel-hold-down` | Selection: paragraph down |
+| `reader.sel-hold-left` | Selection: first word of the page, or start earlier |
+| `reader.sel-hold-right` | Selection: last word of the page, or start later |
+| `reader.sel-hold-up` | Selection: paragraph up |
+| `reader.sel-widen` | Selection: widen |
 | `reader.select-text` | Select text |
 | `reader.selection.cancel` | Cancel |
 | `reader.selection.copy` | Copy |
@@ -97,19 +91,15 @@
 | `reader.skim-book` | Skim through the book |
 | `reader.toggle-bookmark` | Bookmark this page |
 | `reader.toggle-justify` | Justify text on/off |
-| `rules.open` | Rules |
 | `settings.secrets.open` | Passwords and keys |
 | `setup.open` | Set up PaperPaw |
-| `stats.open` | Reading statistics |
 | `store.discover-fonts` | Discover fonts |
-| `store.open` | More plugins |
+| `store.open` | Plugin store |
 | `transfer.open` | Wi-Fi transfer |
 | `update.check` | Search online |
 | `update.open` | Update |
 | `vocabulary.flash-cards` | Flash cards |
 | `vocabulary.open` | Vocabulary |
 | `vocabulary.scan-card` | Scan the SD card for cards |
-| `weather.choose-place` | Place |
-| `weather.refresh` | Fetch the weather |
 | `widgets.todo.open` | To do |
 | `wifi.open` | Wi-Fi |

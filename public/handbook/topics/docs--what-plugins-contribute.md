@@ -1,45 +1,5 @@
 ## What plugins contribute
 
-| Contribution | Registrar | What it is |
-|---|---|---|
-| Actions | `add_action` | Something to do, bound to buttons and gestures, listed in menus |
-| Screens | `add_screen` | Full screens and overlays (menus, dialogs, panels) |
-| Slots | `add_slot`, `bind_slot` | Roles a screen fills: home, reader, library, menu, settings, keyboard, dictionary, … |
-| Menu entries and sections | `add_menu_entry`, `add_menu_section`, `place_menu_entry`, `hide_menu_entry` | Actions, settings and submenus in any menu, by order or beside other entries (`MenuPlace`: after, before, in a section, first, last); another plugin's entry taken out. A menu the user redefined shows entries added later too |
-| What entries show now | `set_item_state`, `describe_item` | A label, a switch, faint, hidden or a badge of the plugin's own entries as things are now (`ItemState`); a line under an entry |
-| Icons | `add_icon` | The icon of an action, setting group or menu; of a semantic icon (`icons::BACK`, `NEXT`, `SHIFT`, …) for a theme; `U+F8000` names a code point of one's own |
-| Settings and groups | `add_setting`, `add_setting_group` | Shown and saved by the kernel. A group names its order in the sections of the main page (`SettingGroupSpec::order`: books 1 to 49, the device 51 to 199, customising from 201) and an icon (`add_icon` with its id); one that names no order is listed at the end of customising, by name, with a plugin's icon |
-| Setting defaults | `set_setting_default` | New defaults for other plugins' settings (themes) |
-| Event handlers | `on`, `subscribe` | React to events |
-| Key maps | `add_keymap`, `add_keymap_preset`, `add_keymap_when` | What buttons, taps and swipes do; bindings that apply while a switch is on |
-| Formats | `add_format` | Open a kind of file as a document to read; big pictures may be decoded when their page shows (`Document::prepare_image`); files without a known extension told by their first bytes (`FormatSpec::sniff`); the format's own settings in `OpenOptions::setting`; a document still coming says `DocumentError::NotReady`, then `events::DOCUMENT_READY` |
-| Lookup providers | `add_lookup_provider` | Where words are looked up (a glossary, a translator, Wikipedia): the dictionary's panel lists every provider's entries, those that go online when asked; an entry may open a screen with more of it (`LookupEntry::more`) |
-| Reading apps | `add_reader` | A screen of the plugin that reads books of some formats (a comics reader), offered where books open and chosen per format, folder or book |
-| Voices | `add_voice` | Speak text aloud in place of the system's voice, for the languages it speaks, chosen with `settings::VOICE` |
-| Fonts | `add_font`, `add_font_file`, `bind_font` | Fonts and the roles they fill |
-| Hyphenation | `add_hyphenation` | Patterns for a language |
-| Text filters | `add_text_filter` | Change a book's text before it is laid out |
-| Decorators | `add_decorator` | Mark words on book pages (a background, a line, a frame), drawn the same by every reader |
-| Page layers and frames | `add_page_layer`, `add_page_frame` | Draw on book pages beside the words, with room of one's own; set pages in columns |
-| Input filters | `add_input_filter` | See every button and finger first: pass it, take it, or run an action instead |
-| Refresh filters | `add_refresh_filter` | Change how the panel is refreshed, e.g. in full on a screen of your own |
-| Status items, lines and places | `add_status_item`, `add_status_line`, `add_status_place` | What status lines show, what a tap on an item does, how much it matters where a line is full; places where items show (`status::Place`) |
-| A look | `set_ui_look` | Another look for switches, the focus, separators, buttons, headers, button hints, progress bars, sliders and widgets' frames on every screen (`ui::look`) |
-| Widgets and their places | `add_widget`, `add_widget_place`, `add_widget_category` | Blocks for the home screen and the sleep screen; places that show widgets (`widgets::WidgetPlace`), in a grid or above each other (`widgets::WidgetStack`), which plugins ask whether they show theirs (`Widgets::shown`); kinds of widgets of one's own, with their icon |
-| Setup steps | `add_setup_step` | A page of the first-run setup: a setting to choose or a screen of the plugin's, where the device needs it |
-| Services | `provide` | Anything one plugin offers others, found with `env.services().get` |
-| Contributions | `contribute` | Additions to a point another plugin defined |
-| Translations | `add_translations` | Catalogs for any language |
-| Book data | `add_book_data`, `add_book_cache` | Where the plugin keeps something for each book (named by `library::key`, in the folder itself or in its subfolder of the key's first two digits, `<folder>/<2 hex>/<prefix><key>…`, so that no folder holds thousands of entries): moved and removed with the book. What `add_book_cache` names (made again from the book when needed) is cleaned up by itself when the book is gone; what `add_book_data` names (the reader's own: notes, places) only when the reader agrees, in *Clean up storage* |
-| Book fields | `add_book_field` | A value kept with books (`library::set_field`), shown on their information page and, where `in_catalog`, kept in the catalog to filter by |
-| Book badges | `add_book_badge` | A few letters or an icon on books' rows in views of the library |
-| Actions of others | `override_action` | Runs in place of any action's own handler; of several, the highest priority wins |
-| Inputs and gestures of one's own | `add_input`, `add_gesture` | `input.<id>` and `gesture.<id>`, bound in key maps like any other |
-| Bars across screens | `add_chrome` | Tabs, a dock or a bar along an edge that stays while screens open and close (`chrome`) |
-| Watching | `observe_actions`, `observe_events` | Sees every action before it runs, and every event after its handlers |
-| Menus by device | `set_menu_need` | Offers an entry only where the device can do it, e.g. speak |
-| Points and events declared | `add_point`, `declare_event` | Says what a point takes and what an event carries, for authors and for rules |
-
 Slots are how a plugin replaces another: bind your screen to
 `core.home` and it is the home screen; the user's
 `[slots]` configuration has the final word. Where several plugins offer
@@ -52,27 +12,10 @@ Built-in slots are in
 (`core.main`), its tools (`core.tools`) and the settings' pages
 (`core.settings-pages`).
 
-```rust
-// A home screen of one's own: preferred over the shipped one.
-r.add_screen(ScreenSpec::new(SHELF, "shelf.title", Box::new(|env, _| Box::new(Shelf::new(env)))))?;
-r.bind_slot(slots::HOME, SHELF, Priority::PREFERRED)?;
-```
-
 ### What a slot's screen does
 
 A screen bound to a standard slot takes the parameters the others open
 it with and answers as they expect, so that every plugin works with it:
-
-| Slot | Opened with | The screen |
-|---|---|---|
-| `core.home` | nothing; at the start and by `actions::HOME` | is the bottom of the stack: opened again, the screens above it close. It leads to the menu and the library by touch and by buttons alone. |
-| `core.library` | nothing; by `actions::LIBRARY` | opens a book with `readers::open` (the reading app chosen for it). For a book it offers the menu `menus::BOOK`, as `Menus::shown_items` has it: when an entry is chosen it emits `events::BOOK_CHOSEN` with the book, then runs the entry's action. |
-| `core.settings` | nothing: the groups; `params::ID`: the settings of that group; `params::FOCUS`: the page of that setting, focused on it | changes settings with `Command::SetSetting`, and a setting with an editor (`SettingExtra::editor`, a screen or a slot) by opening that (`Editor::open`). |
-| `core.menu` | `params::MENU`, the menu; `params::HIDE`, entries to leave out this time | shows `env.menus().items(menu)`; for an entry chosen it closes (`Command::Back`) and runs its action (`Command::RunAction`); a setting listed there it changes, or opens its editor. |
-| `core.choose-folder`, `core.choose-value` | `params::ID`, the setting | writes the folder, or the value, chosen to the setting. Name the slot as the editor (`SettingExtra::editor_slot`) to have it edited there by whichever plugin fills it. |
-| `core.choice` | `params::TITLE`, `PATH` (what it is about), the options, `REPLY`; asked with `ask::choice` | shows the options; for one chosen it closes and emits the reply as a `Picked` with the option and `path`; *Back* or a tap outside closes without one. |
-| `core.confirm` | `params::TITLE` (the question), `TEXT`, `ui::confirm::YES_LABEL`, `NO_LABEL`, `FOCUS_YES`, `REPLY`; asked with `ask::confirm` | asks yes or no, the focus on no unless `FOCUS_YES`; for an answer it closes and emits the reply as a `Confirmed` with all of its parameters; *Back* or a tap outside closes without one. |
-| `core.keyboard` | `params::TITLE`, `TEXT` (to start from), `MODE` (`text`, `number`, `password`), `REPLY`, `LIVE` | on confirming, closes and emits the event named by `reply` as a `Typed` with all of its parameters; with `live`, on each change too, with `Typed::typing` set; *Back* closes without an answer. `ask::text` asks this way. |
 
 The documentation of `builtin::slots` says the same for every slot.
 
@@ -177,40 +120,6 @@ r.on(TICK, |_env, _, out| out.push(Command::http(HttpRequest::get(FORECAST, &FET
 
 ### What every reader offers
 
-A plugin that works with books never names the reader plugin: it uses
-what `builtin` defines for every reader, so a reader of one's own (bound
-to `core.reader`) replaces the shipped one in full. A reader of some
-formats only registers as a reading app instead (`readers::ReaderSpec`,
-`Registrar::add_reader`): books open in the app chosen for them, and
-whatever opens a book opens it with `readers::open(path)` (never by
-opening `slots::READER` itself). The reader chooses with
-`readers::ask_once` (*Open with …* in the book menu: this time, or kept
-when asked; plugins add other ways to open a book to `menus::OPEN_WITH`),
-`readers::ask` (a book's or a folder's reading app, kept) and in the reading
-settings (`settings::READING_APP`, and one per format that more than one
-app reads). A reading app's screen is its own; one that cannot open a
-book after all answers `readers::cannot_open` instead of an error of
-its own, and the next app in that order opens it. One reading app is
-open at a time. What moves folders calls `readers::folder_moved`, so
-that their choices go along; a shell opens a book with
-`Kernel::open_book`.
-
-| What | Standard | |
-|---|---|---|
-| Show a place in the open book, a part marked | `events::GOTO` (`Goto`) | readers take it; tables of contents, bookmarks, search and syncs send it |
-| Text chosen, and the action chosen for it | `menus::SELECTION`, `events::TEXT_CHOSEN` | add an action to the menu, hear the event |
-| Notes exported as Markdown | `events::NOTES_EXPORTED` | for notes apps and syncs |
-| The reader's menus | `menus::READER`, `READER_MORE`, `READER_PANEL` | add entries there |
-| The type of pages | `settings::FONT_SIZE`, `FONT_WEIGHT`, `TEXT_CONTRAST`, `SMOOTH_TEXT`, `WORD_SPACING`, `LETTER_SPACING`, `KERNING`, `LIGATURES`, `LINE_SPACING`, `LINE_BREAKING`, `KOREAN_BREAKS`, `MARGIN`, `MARGIN_ENDS`, `JUSTIFY`, `HYPHENATE`, `HYPHEN_MIN_LEFT`, `HYPHEN_MIN_RIGHT`, `INDENT`, `INDENT_SIZE`, `PARAGRAPH_SPACING`, `PARAGRAPH_SPACE`, `WIDOWS`, `ORPHANS`, `PUBLISHER_STYLES`, `BOOK_ALIGN` and the other `BOOK_*`, `FOOTNOTES` | the kernel's settings (each book may have its own), which readers read |
-| The page's words | `events::PAGE_WORDS_WANTED`, `reading::PageWords` | readers answer `reading::ask_page_words` |
-| Where a book was left | `positions::{load, save}`, `Reading::xpointer` with `BOOK_CLOSED` | readers keep it; syncs and lists read it without opening the book |
-| The contents, search, the marks, a footnote, skimming | `slots::TOC`, `SEARCH`, `ANNOTATIONS`, `FOOTNOTE`, `SKIM`, `events::FOLLOW_LINK`, `SKIM`, `SKIMMED` | bind a screen of one's own; readers open the slots, follow the links and go where skimming asks |
-| A book opened as the reader opens it | `reading::open_options`, `reading::conversion` | its places fit the reader's (a search, contents, an XPointer) |
-| Pages that go right to left | `Metadata::direction` (`PageProgression`), `Screen::direction` | readers mirror taps and swipes (an EPUB's `page-progression-direction`); other screens follow the interface (`Direction::Auto`) |
-| Status lines' settings | `groups::STATUS_LINES` | the group readers put them in |
-| Reading aloud's settings | `group_sections::ALOUD` | the section readers and shells put them in |
-| Key bindings while reading | the layer `[keymap.core.reader]` | the slot's layer, whichever screen fills it |
-
 A reader in turn sends the reading events (`BOOK_OPENED`, `PAGE_TURNED`,
 `BOOK_CLOSED`, `BOOK_FINISHED`), takes `GOTO`, and offers its actions
 in these menus.
@@ -220,17 +129,6 @@ in these menus.
 A screen bound to one of these slots replaces the shipped one; it is
 opened with what the table says and keeps its promises, so the plugins
 around it go on working.
-
-| Slot | Opened with | Promises |
-|---|---|---|
-| `slots::HOME` | nothing | The start screen; where it lists things to open, it lists `menus::APPS` and `menus::TOOLS` |
-| `slots::MENU` | `params::MENU`, `params::HIDE` (entries left out this time) | The menu's entries as `Menus::shown_items` has them, with their state and the line under them; runs an action, changes a setting in place, opens a submenu |
-| `slots::PANEL` | `params::MENU` | The same as controls for quick changes (sliders, switches) |
-| `slots::SETTINGS` | `params::ID` (a group), or nothing for all | The settings by group and `menus::SETTINGS`; a choice with fewer than two values is not listed |
-| `slots::KEYBOARD` | `params::TITLE`, `TEXT`, `MODE` (`text`, `number`, `password`), `REPLY` | Emits the event `reply` with every parameter it was opened with and `text` set to what was typed; nothing when cancelled |
-| `slots::LOOKUP` | `params::WORD`, `LANGUAGE` | The entries of every lookup provider that knows the language (`lookup`), those that go online only when asked; an entry's `more` opened on request, by touch and with the buttons |
-
-Points of the shipped plugins, for `Registrar::contribute`:
 
 | Point | A line each | |
 |---|---|---|
@@ -282,21 +180,6 @@ fast as the shipped one, on the X4 too, as both ask the same service
 and read the same catalog; plugins that add to the library add to
 every view of it.
 
-| What | Standard | |
-|---|---|---|
-| The library to ask | `library::service(env)`, a `trait Library` | A book's details, the catalog's state, queries, the index of all books, finished and favourite. Deleting books: `delete`, `can_delete`. A library of one's own provides a `LibraryService` as `library::service::SERVICE` in `library::service::VERSION`, with at least `each`, `records` and `version`. |
-| Every book, without reading each | `library::catalog` | One line a book: author, title, series, number, tags, how far read, favourite, opened, added, fields. Read in pieces with `each`, `each_at` and `read_at`. |
-| Books found, a page at a time | `catalog::Query`, `query`, `found` | by how far read, words, author, series, tag, folder, added since; sorted by title, author, series or added |
-| All books to sort and filter in memory | `library::index::Index` | 24 bytes a book, at most 2000 on the X4 (48 KB). Kept in a file while a book is open with `save` and `load`. Status changes are taken with `refresh`. |
-| The catalog made anew | the kernel, as work in the background, never while a book is open | Walked once a view asks after a start (`library::request_catalog`, `request_catalog_anew`). Also for a new library folder and after `LIBRARY_CHANGED`. Caught up after `BOOK_ADDED`, `BOOK_MOVED` and changed fields. `BOOK_REMOVED` leaves a book out at once. Then `events::CATALOG_CHANGED` comes. |
-| Something of one book changed | `events::BOOK_CHANGED` (`library::changed_book`, bits of `library::what`) | finished, a favourite, read further, details, cover, a field |
-| A book came | `events::BOOK_ADDED` (`library::added(path, source)`) | transfers, syncs and downloads send it |
-| A book deleted | `Library::delete`, which answers `library::Deleted` | Only books are deleted: a format known by its extension or first bytes, outside PaperPaw's own folder (`library::is_book_path`). Others are refused, and what fails says why. Asking first is the view's job, as the book's sheet does. The kernel's library removes the files and sends `events::BOOK_REMOVED` for each. The kernel then forgets the book and removes what is kept for it in the folders of `Registrar::add_book_data`. Views leave it out at once. |
-| What can be done with a book | `menus::BOOK`, `events::BOOK_CHOSEN` | add an action to the menu, hear which book it was chosen for |
-| Another way to open a book | `menus::OPEN_WITH`, `events::BOOK_CHOSEN` | add an action to the list of *Open with …*, beside the reading apps; it hears the book as the book menu's actions do |
-| A book's information | `slots::BOOK_INFO` | lists the fields of `add_book_field` |
-| Where the books are | `settings::LIBRARY_FOLDER` (`library::folder(env)`) | the kernel's setting, chosen with `screens::FOLDER_EDITOR` (the folder chooser of `slots::CHOOSE_FOLDER`) |
-
 How far a book is read and whether it is a favourite change while the
 catalog stands: the kernel notes such changes beside it (when a book is
 opened, closed or finished, and through the service's setters), so a
@@ -307,7 +190,6 @@ library's version (`Library::version`: keys hold only for it,
 (`Library::records`), their badges asked then
 (`library::service::badges`), never while drawing.
 
-
 ### Services and points of your own
 
 A plugin can offer others more than the kernel knows of. A service is
@@ -317,20 +199,6 @@ Its type names its contract in a key, such as `"weather.forecast/1"`,
 written with `service_type!`; the key changes (`/2`) when the type's
 fields do. Others use the service when it is there and do without it
 when not:
-
-```rust
-// In the providing plugin's crate.
-pub struct Weather(pub Box<dyn Forecast>);
-paperpaw_sdk::service_type!(Weather, "weather.forecast/1");
-
-// The providing plugin's `register`.
-r.provide(WEATHER, Weather(Box::new(Today::new())), Version::new(1, 0, 0))?;
-
-// Any other plugin, wherever it has an `Env`: version 1.0 or later.
-if let Some(weather) = env.services().get::<Weather>(WEATHER.as_str(), Version::new(1, 0, 0)) {
-    let today = weather.0.today();
-}
-```
 
 A service is found by its key, so native code plugins built apart from
 the firmware find it too (see *Plugins as files* below); its size and
@@ -519,8 +387,6 @@ PageLayerSpec::new(id, "interlinear.words", draw)
     })
 ```
 
-`samples/interlinear` is all of this as a plugin to start from.
-
 A frame (`layers::PageFrameSpec`) sets the text in columns: two
 columns, two pages side by side. The setting `core.page-frame` (each
 book may have its own) offers every frame by its id, named by the
@@ -561,39 +427,7 @@ is below it. The sleep screen's *The page with a picture* shows the
 full screen through: a picture or a widget over the page being read;
 pictures for it are offered as presets (below).
 
-A setting's choices are open to other plugins: `Registrar::add_choice`
-offers a value of one's own among them (in one's namespace, the
-translation key of its name), after the setting's own. This is how the
-sleep screen shows a screen of another plugin as one of its modes. The
-flash card due and the reading cat are such modes:
-
-```rust
-r.add_screen(ScreenSpec::new(Id::new_static("aquarium.sleep"), "aquarium.sleep", factory))?;
-r.add_choice(Id::new_static("sleep.show"), "aquarium.sleep")?;
-```
-
 ### Widgets
-
-A widget is a [`Widget`] a screen makes and keeps
-(`env.widgets().make`): it reads what it shows in `update`, which the
-screen calls when it shows the widget, about each minute and after
-events, and only draws in `draw` (which runs for every band of a
-frame). The screen tells it where it goes (`place`) before drawing it
-there: what is made for that size, such as a cover made small
-(`ui::Thumbnail`), is made then, and again in `update` when what it
-shows changed. Register it with `WidgetSpec::new(id, title, factory)`; a widget
-with nothing to read, such as a clock, is a pair of functions
-(`WidgetSpec::drawn` with `Drawn::new(height, draw)`, and `shows` to be
-drawn again when what it shows changes). A widget whose content changes
-only after events (books, settings) says so (`live` false) and is not
-read again each minute; one that can be drawn smaller says how small
-(`min_height`), so that a grid fits it where its full height has no
-room. `widgets::grid` puts widgets
-and tools in a grid as the home screen does, edited in place
-(`GridView`). Say which kind a widget is
-(`.category(widgets::categories::TIME)`, or `BOOKS`, `READING`, `WORDS`,
-`PERSONAL`, `WORLD`, `DEVICE`): the home screen offers widgets by their
-kind, each drawn as it would show.
 
 A widget may also react. `targets` names the places in it that do
 something. `on_input` gets taps, swipes and the buttons there, and
@@ -612,27 +446,6 @@ the alignment there is a ready setting: register
 
 Widgets of all plugins share a look the reader shapes for each, so that
 they sit well together on a page: give yours a frame and draw in it.
-
-```rust
-const ID: Id = Id::new_static("my.card");
-static SETTINGS: [SettingSpec; 4] = [
-    widgets::align_spec("my.card.align", ID, Align::Left),
-    widgets::frame_spec("my.card.frame", ID, Frame::None), // none, line, light or dark card
-    widgets::size_spec("my.card.size", ID, TextSize::Medium, true), // true: also "as large as it fits"
-    widgets::part_spec("my.card.author", ID, "my.show-author", true),
-];
-r.add_setting_group(widgets::settings_group(&ID, "my.card"))?;
-r.add_settings(&SETTINGS)?;
-
-fn draw(&self, canvas: &mut Canvas<'_>, env: &Env<'_>, area: Rect) {
-    let look = widgets::draw_frame(canvas, env, ID.as_str(), area);
-    let rest = widgets::draw_caption(canvas, env, ID.as_str(), &look, "Today");
-    let size = widgets::size(env, ID.as_str()).text(&UiStyle::new(env));
-    // ... the content in `rest`, in `look.ink` (and `look.faint` for
-    // what matters less), never in a fixed black: on a dark card it is
-    // light.
-}
-```
 
 A widget may be placed more than once, each placement with its own
 values of the widget's settings: the home screen places a clock as
@@ -672,26 +485,6 @@ with `Preset::changes` and the settings it covers. It shows it with
 being kept, until the screen that asked closes. It keeps it with
 `presets::commands`. The settings of its kind that a preset leaves out
 go back to their defaults.
-
-The kinds PaperPaw's own plugins offer are themes (`core.theme`,
-below) and the power modes, `core.power-mode`, which the kernel offers.
-The sleep screen offers pictures over the page as `sleep.overlay`, see
-[Plugins without code](#plugins-without-code). Add presets kept in the
-program with `Registrar::add_presets`, a `static` list of
-`Preset::fixed`. They may be of your own kind or another plugin's:
-
-```rust
-static THEMES: [Preset; 1] = [Preset::fixed(
-    "my.dusk",
-    presets::THEME,
-    "my.dusk",      // translation keys of its name
-    "my.dusk.help", // and of a sentence on it
-    "core.ui-focus = core.focus.ring
-core.ui-separators = core.separators.none",
-)];
-
-r.add_presets(&THEMES)?;
-```
 
 A theme is a preset of the kind `core.theme` (`presets::THEME`): values
 for the appearance settings. Where any plugin brings one, the
@@ -811,84 +604,8 @@ and all of them before the device sleeps. Where plugins ask for
 different powers, the radio runs at the cheapest one that serves them
 all, and the time it was on is counted (`Usage::bluetooth_ms`).
 
-- **Scanning**: `bluetooth::scan(&FOUND).service(Uuid::sig(0x180D))
-  .command()` finds devices in reach (`BtEvent::Found` with a `Device`:
-  its id, name, signal, services, advertised data and kind), then
-  `BtEvent::ScanEnded`. A scan lasts 10 seconds unless
-  `.lasting(duration)` says otherwise (a minute at most), listens
-  passively and seldom (`ScanPower::Low`; `.power(ScanPower::Balanced)`,
-  `.active()` to ask devices for their names), and `.first()` ends it
-  with the first device. `ScanPower::Fast` is only for the reader's own
-  doing, and a plugin scans again only a minute after its last scan
-  ended, unless the reader asked. A plugin hears only what passes its
-  own filters.
-- **A GATT client**: `connect(device, &LINK).command()` (`.power(...)`
-  for shorter intervals, `.idle(duration)` to let go of the link when
-  nothing was asked for that long), then `discover(device).command()`
-  lists the services and their characteristics (`BtEvent::Discovered`;
-  `bluetooth::characteristic(&services, service, characteristic)` finds
-  one), `read`, `write(device, handle, bytes)` (`.without_response()`),
-  `subscribe` to notifications (`BtEvent::Value`), or
-  `subscribe_to(device, service, characteristic)`, the handle found by
-  the kernel; `disconnect`.
-- **Pairing**: `pair(device)` asks the reader, in the kernel's own
-  question, never the plugin's; the device is then bonded and given to
-  the plugin (`BtEvent::Paired`). A plugin sees only devices its scans
-  found and bonded devices the reader gave it; anything else fails with
-  `BtError::NotFound`. Devices are known by a `DeviceId`, never by their
-  address. The Bluetooth manager, the plugin whose screen is bound to
-  `slots::BLUETOOTH`, sees every bond; `forget`, `give` and `take_back`
-  count otherwise only as the reader's own doing.
-- **Keys of a remote or a keyboard** need no plugin: once the reader lets
-  a bonded device type (`remote_keys(device, &DONE)`), its keys are
-  buttons of the key maps, `button.hid.right`, `button.hid.page-down`,
-  `button.hid.volume-up` and so on, bound like the device's own. Its
-  link slows down a minute after the last key. A plugin the device is
-  given to may ask for the reports themselves with
-  `hid_reports(device, &REPORTS)`.
-- **Being seen**: `advertise(&SEEN).name("…").service(uuid).command()`,
-  for a minute unless `.lasting(…)` says otherwise (ten minutes at
-  most), and services of the device's own GATT server declared with
-  `Registrar::add_gatt_service(ServiceSpec::new(uuid, &EVENTS)
-  .characteristic(CharacteristicSpec::new(uuid).read().notify()))`:
-  centrals' reads (`BtEvent::ReadRequest`, answered with `respond` or
-  `refuse`), writes and subscriptions come as events, and
-  `notify_centrals` sends to those subscribed. Characteristics need an
-  encrypted link unless `.access(Access::Open)` says otherwise.
-
 Events written out for others (observers, rules) carry no payloads:
 neither readings nor keys nor what a phone sent. A heart-rate reader:
-
-```rust
-const FOUND: Event<BtEvent> = Event::new("pulse.found");
-const LINK: Event<BtEvent> = Event::new("pulse.link");
-const HEART_RATE: Uuid = Uuid::sig(0x180D);
-const MEASUREMENT: Uuid = Uuid::sig(0x2A37);
-
-r.add_action(ActionSpec::new(START, "pulse.start").handler(|_, _, out| {
-    out.push(bluetooth::scan(&FOUND).service(HEART_RATE).first().command());
-}))?;
-r.on(FOUND, |_, event: &BtEvent, out| {
-    if let BtEvent::Found(device) = event {
-        out.push(bluetooth::connect(device.id, &LINK).command());
-    }
-})?;
-r.on(LINK, |_, event: &BtEvent, out| match event {
-    BtEvent::Connected { device, .. } => {
-        out.push(bluetooth::subscribe_to(*device, HEART_RATE, MEASUREMENT));
-    }
-    BtEvent::Value { bytes, .. } => {
-        // Flags first; the rate is one byte, or two where flag 0 is set.
-        let bpm = match bytes.as_slice() {
-            [flags, low, high, ..] if flags & 1 == 1 => u16::from_le_bytes([*low, *high]),
-            [_, rate, ..] => u16::from(*rate),
-            _ => return,
-        };
-        out.push(Command::set(&BPM, i64::from(bpm)));
-    }
-    _ => {}
-})?;
-```
 
 The emulator pretends to have Bluetooth for the X4 Pro's profile, with
 made-up devices in reach: `PaperPaw Remote`, a page-turner whose keys a
@@ -901,35 +618,6 @@ second.
 
 Three ways to change how things look, from the least to the most code. Each
 changes how a thing *looks*, never where it goes or how wide it is.
-
-- **Numbers (no code).** A theme or a reader sets `core.text-curve` (book
-  text; in place of *Text contrast* when set) or `core.ui-text-curve` (the
-  interface) to a list of `[script=]curve` entries separated by `;`, e.g.
-  `smooth; arab=contrast:1`. A curve is `smooth`, `contrast:-1` to
-  `contrast:2`, `sharp:128` or 16 numbers from 0 to 255 (the opacity of
-  each of the 16 coverage levels of a letter's edge). On a black-and-white
-  panel the curve decides which edge pixels turn black, so it is also the
-  knob for thicker or thinner letters. In code: `ToneCurve::parse_for`,
-  `FontHandle::inked(TextInk::new(curve))`.
-- **A look.** `Painters::text` paints the text that `ui::Label` draws (a
-  shadow, an outline): draw with `part.font.draw(..)` and return `true`; the
-  width stays the stock one. `Painters::extras` takes a `static` list of
-  `ExtraPaint`s for parts of kinds that come later (scrollbars, tabs): a
-  look made now works when the SDK learns to ask
-  (`Capability::LOOK_EXTRAS`). The SDK's own rows, headers,
-  buttons, hints and widgets' captions pass it too, with their role
-  (`TextRole::BUTTON`, `HINT`, …); text a plugin draws itself does so with
-  `ui::draw_label_in(canvas, font, style, role, ..)`. `ui::draw_label` is the
-  stock look.
-- **A render hook.** `Registrar::add_render_hook` with a `RenderHookSpec`
-  changes each finished band (night or sepia tint, grain, a better dither of
-  the four-gray pass). **Check `Capability::RENDER_HOOK`:** without it the
-  hook is accepted and never run (today's firmware). A hook sees pixels, not
-  coverage, so it cannot make letter edges softer (use the tone curve for
-  that); it must give the same rows for the same band and carry (no clock or
-  random: `HookCx` has none); state across bands goes in `BandView::carry`,
-  which the kernel zeroes at the start of each pass; a panic aborts the
-  device.
 
 **Colour roles.** `style.ink(Ink::MUTED)` gives the colour of a role of the
 interface; a theme sets them in `core.ui-palette` (`muted=60 link=#2a6f97`,
@@ -1009,11 +697,6 @@ a slideshow, a long download), hold it: `cx.keep_awake(WakeHold::new(id,
 reason).lasting(...))` on a screen (it ends when the screen closes), or
 `Command::KeepAwake` from work and services; renew it before it ends,
 let go with `Command::LetSleep`. The reader can switch holds off.
-
-`samples/frame-test` does all of this and shows what it measures (frames
-a second, the work as hot and as ordinary code, the drawing, the heap):
-`cargo run -p paperpaw-emulator --features frame-test`, then *Frame
-test* in the tools.
 
 ### Work in the background
 

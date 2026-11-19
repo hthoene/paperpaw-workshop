@@ -35,9 +35,9 @@ export function validVersion(version: string): boolean {
   return /^\d+\.\d+\.\d+$/.test(version);
 }
 
-/** Paths a plugin with code holds (as the builder takes them,
- *  builder/project.mjs): its crate, its translations, its folder. */
-const CODE_PATHS = [/^Cargo\.toml$/, /^src\/[a-z0-9_/]+\.rs$/, /^i18n\/[a-z]{2,3}(-[A-Za-z]+)?\.ini$/, /^how\/[a-z]{2,3}(-[A-Za-z]+)?\.txt$/, /^plugin\/.+$/, /^(README|LICENCE|LICENSE)(\.md|\.txt)?$/];
+/** Paths a plugin with code holds (as the app takes them, src-tauri/src/code.rs):
+ *  its crate, the list of what it calls, its folder. */
+const CODE_PATHS = [/^Cargo\.toml$/, /^src\/[a-z0-9_/]+\.rs$/, /^native\/metadata\.json$/, /^plugin\/.+$/, /^(README|LICENCE|LICENSE)(\.md|\.txt)?$/];
 /** The most files a plugin with code's project holds. */
 export const MAX_CODE_FILES = 200;
 
@@ -50,7 +50,7 @@ export function pathProblem(path: string, kind: "data" | "code" = "data"): strin
     if (base) return base;
     if (path.startsWith("plugin/")) return pathProblem(path.slice("plugin/".length));
     if (!CODE_PATHS.some((p) => p.test(path))) {
-      return "a plugin with code holds Cargo.toml, src/*.rs, i18n/<language>.ini, how/<language>.txt (how it works, as PaperPaw's sample has it) and its folder plugin/ (plugin.ini and what it brings)";
+      return "a plugin with code holds Cargo.toml, src/*.rs (src/main.rs is its root), native/metadata.json (what it calls of the device) and its folder plugin/ (plugin.ini, i18n/<language>.ini, how/<language>.txt and what else it brings)";
     }
     return null;
   }
@@ -96,5 +96,5 @@ export function extension(path: string): string {
 
 /** Whether `path` holds text (what the AI writes and reads). */
 export function isText(path: string): boolean {
-  return [".ini", ".css", ".txt", ".md", ".rs", ".toml"].includes(extension(path));
+  return [".ini", ".css", ".txt", ".md", ".rs", ".toml", ".json"].includes(extension(path));
 }

@@ -105,7 +105,8 @@ little memory can use them ([ADR 0018](adr/0018-font-packs-for-other-scripts.md)
 Arabic and Hebrew (with where their marks sit) and Korean (the Hangul
 of KS X 1001, ready as `script-korean`, and the other 8,822 syllables as
 `script-korean-extra`, about 30 MiB; neither offered yet) from the fonts
-in `tools/fonts`. A pack that extends a face with sizes larger than its own,
+in `tools/fonts`, and Ethiopic for Amharic and Tigrinya (`script-ethiopic`, from
+Noto Serif Ethiopic). A pack that extends a face with sizes larger than its own,
 and has its letters (at least those of `aenoAEO0` the face has), draws
 text asked that large, and the font size goes as far; a pack of another
 script's letters adds those letters only, in whatever sizes: the X4's firmware has
@@ -196,13 +197,28 @@ ui-title = 140
 ui-row = 180
 ```
 
+More of the look is a setting as well, each leaving the look as it is until
+a theme sets it: `ui-shadow` (`core.shadow.none`, `.hard`: a hard shadow under
+dialogs and chips), `ui-frame` (`core.frame.own` or one of `.none`, `.line`,
+`.card`, `.dark`: the plate of sheets, dialogs and chips), `ui-density`
+(`core.density.compact`, `.regular`, `.roomy`: the margins and gaps),
+`ui-button` (`core.button.outlined`, `.filled`, `.flat`: buttons not chosen),
+and `ui-focus = core.focus.soft` (a light bar; a frame on panels of black and
+white alone). The colours of the parts sit in `ui-palette` beside the grays:
+`panel` (plates), `focus` (the chosen row's bar), `control` (filled
+buttons), `outline` (lines round plates and chips), `chip` (the chosen chip)
+and `bar` (a dark header); a part the theme does not colour keeps its look.
+`samples/plugins/theme-slate` sets them all. The palette text is read in 512
+bytes, enough for every name with a colour each; the kit's tests fail before
+more names come than that.
+
 Pebble, a theme with lists on cards for touch screens, comes with
 PaperPaw, switched off in the plugin manager.
 
 The fonts browser (`plugins/fonts-browser`) downloads fonts as such
 plugins from paperpaw.org: font files for devices with scalable fonts
 and the memory for them, packs for the others. The store
-(`plugins/store`, *More plugins*) lists the other plugins of the plugin
+(`plugins/store`, *Plugin store*) lists the other plugins of the plugin
 library made for the device, data plugins and, where PaperPaw loads
 them and a build fits, plugins with code, and installs, updates and
 removes them ([ADR 0023](adr/0023-plugin-store.md)). Both build on the
@@ -217,14 +233,6 @@ store updates only those it installed, and one put in place otherwise
 (the Wi-Fi transfer, the USB cable, a card) is local, which the plugin
 manager says. `install::local::Staging` installs a plugin sent file by
 file, with the same checks.
-
-Copy it into the `plugins` folder of a device (or of the emulator's
-library) and restart, or have a plugin load it at once
-(`Command::LoadPlugin` with its folder; `Command::RemovePlugin` removes
-one, its fonts and presets at once, the rest after the next start). A plugin's `styles.css` comes after a book's own
-stylesheets and before one's own (`styles.css` beside the books, then
-the one named like a book), so the more particular wins; plugins with
-code add theirs with `Registrar::add_stylesheet`.
 
 A `presets.ini` holds presets (see above), a section each: its `kind`,
 its `name` and `description` (translation keys from its `i18n`, or the

@@ -100,7 +100,35 @@ function sections(markdown) {
     return { ...s, body: lines.slice(s.start, end).join("\n").trim() };
   });
 }
-const plugins = sections(read("docs/plugins.md"));
+/** Names of the plugin interface before 7 (the closure-and-registrar API,
+ *  removed with Beta 4): a paragraph of PaperPaw's docs that names one is left
+ *  out of everything the AI reads, until the docs themselves are rewritten. */
+const OLD_API =
+  /\bRegistrar\b|\bplugin!|\bnative::(take|support)\b|Native::(fits|problem)|\b(ScreenSpec|ActionSpec|SettingSpec|WidgetSpec|MenuEntry|Manifest)::|\bimpl (Plugin|Screen|Widget) for\b|\bfn register\(|\b(add_screen|add_action|add_setting|add_settings|add_widget|add_stylesheet|add_presets|add_translations|add_icon|add_choice|add_reader|add_render_hook|add_gatt_service|add_setting_group)\b|paperpaw_sdk::Plugin\b|`(Env|Plugin|Screen|Widget|Cx)`|\b(actions|menus|readers)::[a-z_A-Z]+|code-host|`outline` feature/;
+function withoutOldApi(markdown) {
+  // A passing mention of the old name ("(interface 6 `WidgetSpec`)") goes; the sentence stays.
+  markdown = markdown.replace(/\s*\((?:the )?interface 6 `\w+`\)/g, "");
+  const out = [];
+  let paragraph = [];
+  let fence = false;
+  const flush = () => {
+    if (paragraph.length && !OLD_API.test(paragraph.join("\n"))) out.push(paragraph.join("\n"));
+    paragraph = [];
+  };
+  for (const line of markdown.split("\n")) {
+    if (line.startsWith("```")) {
+      fence = !fence;
+      paragraph.push(line);
+    } else if (!fence && line.trim() === "") {
+      flush();
+    } else {
+      paragraph.push(line);
+    }
+  }
+  flush();
+  return out.join("\n\n");
+}
+const plugins = sections(read("docs/plugins.md")).map((s) => ({ ...s, body: withoutOldApi(s.body) }));
 /** The section `title` of the plugin guide; several titles: the first
  *  there is (a section renamed between releases). */
 const section = (...titles) => {
@@ -195,7 +223,7 @@ const data = [
   section("What is uploaded"),
   section("Plugins without code").replace(/^## /, "## "),
   section("Presets and home screen layouts", "Presets"),
-  customisation ? customisation.body : "",
+  customisation ? withoutOldApi(customisation.body) : "",
   "## The default key map\n\nInputs (`button.<name>`, `long.<name>`, `tap.<zone>`, `swipe.<direction>` ...) and the actions they run, as PaperPaw ships them; a plugin's `keymap.ini` overrides single bindings in the same layers.\n\n```ini\n" +
     keymap +
     "\n```",
@@ -211,63 +239,76 @@ const data = [
   .filter(Boolean)
   .join("\n\n");
 
-// 6b. The code handbook (the system prompt for plugins with code): the
-// rules, PaperPaw's own docs on writing plugins, the sample complete.
-const sampleCode = exists("samples/hello-plugin/src/lib.rs")
-  ? [
-      "# The sample plugin, complete\n\nPaperPaw's own sample (`samples/hello-plugin`), which a new project starts from.",
-      "`src/lib.rs`:\n\n```rust\n" + read("samples/hello-plugin/src/lib.rs").trim() + "\n```",
-      "`i18n/en.ini`:\n\n```ini\n" + read("samples/hello-plugin/i18n/en.ini").trim() + "\n```",
-      ...(exists("samples/hello-plugin/how/en.txt")
-        ? ["`how/en.txt`:\n\n```\n" + read("samples/hello-plugin/how/en.txt").trim() + "\n```"]
-        : []),
-    ]
-  : [];
-// The recipes (handbook/recipes/): complete plugins for common tasks,
-// which the workshop's tests build against this PaperPaw (code.rs,
-// `the_handbook_s_recipes_build_without_a_warning`), so that they never
-// go stale. The widget from the web is in the handbook whole, the others
-// are topics.
+// 6b. The code handbook (the system prompt for plugins with code, plugin
+// interface 7): the rules (handbook/parts/code.md), the recipes complete
+// (handbook/recipes/, which the workshop's tests build and run against this
+// PaperPaw, code.rs `the_handbook_s_recipes_build_without_a_warning_and_run`,
+// so that they never go stale), and the device's functions a plugin may list
+// in native/metadata.json, from the table of the `paperpaw-dev` of that ref.
+// PaperPaw's docs/plugins.md describes the interface before 7 for most of its
+// code chapters: none of it goes into the handbook, and every topic below it
+// comes from the interface 7 docs (docs/abi) and the SDK's own items.
 const RECIPES = {
-  "widget-fetch": "A widget with data from the web: JSON fetched over HTTP, shown wrapped",
-  settings: "A widget's own settings (text, choice, switch, number), in the widget's settings group",
+  hello: "A screen with an action in the tools menu, a setting, an event and translations (the sample a new project starts with)",
+  motto: "A widget for the home screen with a setting of its own",
 };
 const recipeFiles = (name) => {
   const dir = path.join(here, "recipes", name);
   const walk = (rel) =>
     fs.readdirSync(path.join(dir, rel), { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.posix.join(rel, e.name)) : [path.posix.join(rel, e.name)]));
-  const first = ["src/lib.rs", "Cargo.toml", "plugin/plugin.ini", "i18n/en.ini"];
+  const first = ["src/main.rs", "Cargo.toml", "native/metadata.json", "plugin/plugin.ini", "plugin/i18n/en.ini"];
   return walk("")
     .sort((a, b) => (first.indexOf(a) + 1 || 99) - (first.indexOf(b) + 1 || 99) || a.localeCompare(b))
     .map((p) => ({ path: p, text: fs.readFileSync(path.join(dir, p), "utf8").replace(/\r\n/g, "\n").trim() }));
 };
-const fenceOf = (p) => (p.endsWith(".rs") ? "rust" : p.endsWith(".toml") ? "toml" : p.endsWith(".ini") ? "ini" : "text");
+const fenceOf = (p) => (p.endsWith(".rs") ? "rust" : p.endsWith(".toml") ? "toml" : p.endsWith(".ini") ? "ini" : p.endsWith(".json") ? "json" : "text");
 const recipeText = (name) => recipeFiles(name).map((f) => `\`${f.path}\`:\n\n\`\`\`${fenceOf(f.path)}\n${f.text}\n\`\`\``).join("\n\n");
 const recipes = [
   "# Recipes",
-  "Complete plugins for common tasks, built against this PaperPaw without a warning. Start from the one closest to what the person wants: write its files whole into the project (in place of the sample's), build, and only then change it. Look up only what a recipe does not show.\n\n" +
+  "Complete plugins for common tasks, built against this PaperPaw without a warning and run in its emulator. Start from the one closest to what the person wants: write its files whole into the project (in place of the sample's), rename it, build, and only then change it. Look up only what a recipe does not show.\n\n" +
     Object.entries(RECIPES)
       .map(([name, title]) => `- \`recipes/${name}\`: ${title}.`)
-      .join("\n") +
-    "\n- A screen, an action in a menu, a text setting, an event and translations: the sample plugin the project starts with (below).",
-  `## ${RECIPES["widget-fetch"]}\n\n` +
-    "To see it: `build`, then `control` `widget` with its id (here `quote.today`), `wait` for a text of the reply, and `look`. The reader beside the conversation fetches from the internet as a reader does.\n\n" +
-    recipeText("widget-fetch"),
+      .join("\n"),
+  ...Object.entries(RECIPES).map(([name, title]) => `## Recipe \`${name}\`: ${title}\n\n` + recipeText(name)),
 ].join("\n\n");
+
+// What native/metadata.json may name: the interface's table of this ref.
+const metadataTable = (() => {
+  const file = "tools/dev/src/metadata/table.txt";
+  if (!exists(file)) return "";
+  const lines = read(file).split("\n");
+  const names = (kind) => lines.filter((l) => l.startsWith(`${kind} `)).map((l) => l.split(" ")[1]);
+  const keys = (kind) => lines.filter((l) => l.startsWith(`${kind} `)).map((l) => l.split(" ")[1]);
+  const [major, minor] = (lines.find((l) => l.startsWith("abi ")) ?? "abi 7 1").split(" ").slice(1);
+  return [
+    "## The device's functions a plugin may list",
+    `Plugin interface ${major}, minor ${minor}. The \`used\` lines of \`native/metadata.json\` are \`{"kind": "host", "name": "<function>"}\` and \`{"kind": "callback", "name": "<callback>"}\`; \`floor\` is ${minor} unless the plugin should also run where the device has an older minor (then \`used\` must list what it needs).`,
+    "Functions of the device (`host`): " + names("host").map((n) => `\`${n}\``).join(", ") + ".",
+    "Callbacks a plugin has (`callback`): " + names("callback").map((n) => `\`${n}\``).join(", ") + ".",
+    "`services` the plugin may ask to use (each a consent): " + keys("service").map((n) => `\`${n}\``).join(", ") + ".",
+    "`features` it may ask for, as `{\"key\": \"uses.network\", \"required\": false}`: " + keys("feature").map((n) => `\`${n}\``).join(", ") + ".",
+  ].join("\n\n");
+})();
 
 const code = [
   part("common.md"),
   part("code.md"),
   recipes,
-  "# From PaperPaw's documentation",
-  ...["The sample plugin", "Reading and changing: `Env` and commands", "Screens", "Settings", "Events", "Translations", "What plugins contribute", "Memory"]
-    .filter((t) => plugins.some((s) => s.title === t))
-    .map((t) => section(t)),
-  ...sampleCode,
+  metadataTable,
   "## The devices\n\n" + profilesTable,
 ]
   .filter(Boolean)
   .join("\n\n");
+
+// What a plugin of interface 7 reaches of the SDK: `native` (the interface),
+// `builtin` (the ids the device has) and the few types the interface shares.
+// The rest of the SDK's items (`ui`, `widgets`, `Canvas` ...) are the
+// interface before 7, which Beta 4 no longer runs; the AI is not shown them.
+const SHARED_TYPES = new Set(["Color", "Handled", "Rect", "Point", "Version"]);
+const reachable = (itemPath) => {
+  const [first] = itemPath.split("::");
+  return first === "native" || first === "builtin" || SHARED_TYPES.has(first);
+};
 
 // 7. Topics for lookup_docs.
 const slug = (t) =>
@@ -306,7 +347,25 @@ function byImportance(lines) {
     })
     .map((p) => p.line);
 }
-for (const s of plugins.filter((s) => s.level >= 2)) add(`docs/${slug(s.title)}`, s.title, s.body);
+// The chapters about plugins with code describe the interface before 7: the
+// recipes, the SDK's items and docs/abi replace them (below).
+const CODE_CHAPTERS = new Set(["Your first plugin with code", "Plugins as files", "Memory"]);
+const inCodeChapter = (() => {
+  let current = "";
+  const inside = new Map();
+  for (const s of plugins) {
+    if (s.level === 2) current = s.title;
+    inside.set(s, current);
+  }
+  return (s) => CODE_CHAPTERS.has(inside.get(s)) || CODE_CHAPTERS.has(s.title);
+})();
+for (const s of plugins.filter((s) => s.level >= 2 && !inCodeChapter(s) && s.body.split("\n").length > 1)) add(`docs/${slug(s.title)}`, s.title, s.body);
+// What the device does for each area of plugin interface 7.
+if (exists("docs/abi")) {
+  for (const file of fs.readdirSync(path.join(tree, "docs/abi")).filter((f) => f.endsWith(".md")).sort()) {
+    add(`abi/${file.replace(/\.md$/, "")}`, `Plugin interface 7: ${file.replace(/\.md$/, "").replace(/-/g, " ")}`, withoutOldApi(read(`docs/abi/${file}`)));
+  }
+}
 if (customisation) add("docs/customisation", "Customisation at a glance (paperpaw.ini)", customisation.body);
 add("keymap/default", "The default key map", "```ini\n" + keymap + "\n```");
 for (const s of sampleList) add(`samples/${s.id}`, `Sample data plugin: ${s.id}`, s.body);
@@ -321,7 +380,12 @@ if (exists("crates/paperpaw-sdk/api.txt")) {
   for (const line of apiLines(read("crates/paperpaw-sdk/api.txt"))) {
     const m = /^pub (?:[a-z ]+ )?paperpaw_sdk::([a-z_]+)::/.exec(line);
     if (!line.startsWith("pub ")) continue;
-    const module = m ? m[1] : "root";
+    // Where the item lives: after `paperpaw_sdk::`, without what it is.
+    const at = /paperpaw_sdk::([\w:]+)/.exec(line)?.[1] ?? "";
+    if (!reachable(at)) continue;
+    // `native` is most of what a plugin reaches: a topic for each of its modules.
+    const sub = /^native::([a-z][a-z0-9_]*)::/.exec(at)?.[1];
+    const module = sub ? `native/${sub}` : m ? m[1] : "root";
     byModule.set(module, [...(byModule.get(module) || []), line]);
   }
   for (const [module, lines] of byModule) {
@@ -335,7 +399,7 @@ const rustFiles = (rel) =>
   fs
     .readdirSync(path.join(tree, rel), { withFileTypes: true })
     .flatMap((e) => (e.isDirectory() ? rustFiles(`${rel}/${e.name}`) : e.name.endsWith(".rs") ? [`${rel}/${e.name}`] : []));
-const sdkItemList = sdkItems({ read, exists, files: rustFiles });
+const sdkItemList = sdkItems({ read, exists, files: rustFiles }).filter((i) => reachable(i.path));
 const byPlugin = new Map();
 for (const s of registry.settings) {
   const plugin = s.id.split(".")[0];
@@ -352,22 +416,10 @@ fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(path.join(out, "topics"), { recursive: true });
 fs.writeFileSync(path.join(out, "data.md"), data + "\n");
 fs.writeFileSync(path.join(out, "code.md"), code + "\n");
-// The project a plugin with code starts from: PaperPaw's sample, as the
-// workshop and its builder take a project (builder/project.mjs).
-if (exists("samples/hello-plugin/src/lib.rs")) {
-  const sample = {
-    "Cargo.toml": '[package]\nname = "hello"\nversion = "0.1.0"\n\n[package.metadata.paperpaw]\nplugin = "Hello"\n\n[dependencies]\npaperpaw-sdk = "0.5"\n',
-    "src/lib.rs": read("samples/hello-plugin/src/lib.rs"),
-    "i18n/en.ini": read("samples/hello-plugin/i18n/en.ini"),
-    "plugin/plugin.ini": exists("samples/hello-native/plugin/plugin.ini")
-      ? read("samples/hello-native/plugin/plugin.ini")
-      : "[plugin]\nid = hello\nname = Hello\ndescription = A sample plugin to start from.\nversion = 0.1.0\n",
-  };
-  if (exists("samples/hello-plugin/i18n/de.ini")) sample["i18n/de.ini"] = read("samples/hello-plugin/i18n/de.ini");
-  // How it works, which src/lib.rs includes (`include_str!("../how/en.txt")`).
-  for (const lang of ["en", "de"]) {
-    if (exists(`samples/hello-plugin/how/${lang}.txt`)) sample[`how/${lang}.txt`] = read(`samples/hello-plugin/how/${lang}.txt`);
-  }
+// The project a plugin with code starts from: the recipe `hello`, as the
+// workshop takes a project (src-tauri/src/code.rs).
+{
+  const sample = Object.fromEntries(recipeFiles("hello").map((f) => [f.path, f.text + "\n"]));
   fs.writeFileSync(path.join(out, "code-sample.json"), JSON.stringify(sample, null, 1) + "\n");
 }
 const index = topics.map((t) => {

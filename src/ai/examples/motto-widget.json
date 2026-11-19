@@ -1,0 +1,163 @@
+{
+ "title": "A motto widget: a plugin with code, a compiler error, the widget",
+ "kind": "code",
+ "user": [
+  "A widget for the home screen that shows a line of my own, my motto."
+ ],
+ "answers": [
+  {
+   "stop_reason": "tool_use",
+   "content": [
+    {
+     "type": "text",
+     "text": "I'll start from the recipe `motto`: a widget with a setting of its own."
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_01",
+     "name": "lookup_docs",
+     "input": {
+      "topic": "recipes/motto"
+     }
+    }
+   ]
+  },
+  {
+   "stop_reason": "tool_use",
+   "content": [
+    {
+     "type": "text",
+     "text": "A widget for the home screen that shows a line of the person's own, set in its settings."
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_02",
+     "name": "write_file",
+     "input": {
+      "path": "Cargo.toml",
+      "content": "[package]\nname = \"motto\"\nversion = \"0.1.0\"\n\n[dependencies]\npaperpaw-sdk = \"0.6\"\n"
+     }
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_03",
+     "name": "write_file",
+     "input": {
+      "path": "native/metadata.json",
+      "content": "{\n  \"target\": \"esp32c3-riscv32imc-ilp32-soft-le\",\n  \"floor\": 1,\n  \"used\": [\n    {\"kind\": \"host\", \"name\": \"heap.alloc\"},\n    {\"kind\": \"host\", \"name\": \"heap.dealloc\"},\n    {\"kind\": \"host\", \"name\": \"heap.realloc\"},\n    {\"kind\": \"host\", \"name\": \"registrations.submit\"},\n    {\"kind\": \"host\", \"name\": \"commands.submit\"},\n    {\"kind\": \"host\", \"name\": \"font.acquire\"},\n    {\"kind\": \"host\", \"name\": \"handle.release\"},\n    {\"kind\": \"host\", \"name\": \"canvas.fill_rect\"},\n    {\"kind\": \"host\", \"name\": \"text.draw\"},\n    {\"kind\": \"host\", \"name\": \"settings.read\"},\n    {\"kind\": \"callback\", \"name\": \"drop\"},\n    {\"kind\": \"callback\", \"name\": \"dispatch_event\"},\n    {\"kind\": \"callback\", \"name\": \"draw\"},\n    {\"kind\": \"callback\", \"name\": \"input\"}\n  ],\n  \"services\": [],\n  \"features\": []\n}\n"
+     }
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_04",
+     "name": "write_file",
+     "input": {
+      "path": "plugin/plugin.ini",
+      "content": "[plugin]\nid = motto\nname = Motto\ndescription = A widget for the home screen that shows my motto: a line of my own.\nversion = 0.1.0\n"
+     }
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_05",
+     "name": "write_file",
+     "input": {
+      "path": "plugin/i18n/en.ini",
+      "content": "[meta]\nlanguage = en\nname = English\nplural = one-other\n\n[messages]\nmotto.plugin.name = Motto\nmotto.widget = Motto\nmotto.setting.text = Motto\nmotto.setting.text.help = The text the widget shows.\n"
+     }
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_06",
+     "name": "write_file",
+     "input": {
+      "path": "plugin/i18n/de.ini",
+      "content": "[meta]\nlanguage = de\nname = Deutsch\nplural = one-other\n\n[messages]\nmotto.plugin.name = Leitspruch\nmotto.widget = Leitspruch\nmotto.setting.text = Leitspruch\nmotto.setting.text.help = Der Text, den das Widget zeigt.\n"
+     }
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_07",
+     "name": "write_file",
+     "input": {
+      "path": "src/main.rs",
+      "content": "//! Motto: a widget for the home screen that shows a short text, the motto, set in its settings.\n#![no_std]\n#![no_main]\n\nextern crate alloc;\n\nuse paperpaw_sdk::{\n    Color, Handled,\n    native::{\n        Error, Host, Plugin,\n        callbacks::{DrawFrame, Input},\n        declare::{Declarations, DeclareError, GroupDecl, Kind, SpecDecl, WidgetDecl},\n        fonts::{Font, FontRole, TextOrigin},\n        registrations,\n        settings::{self, SettingValue},\n    },\n};\n\n/// The number the device hands back when it draws the widget.\nconst WIDGET: u32 = 1;\n\nstruct Motto;\n\nfn declare(host: &Host<'_>) -> Result<(), DeclareError> {\n    let mut d = Declarations::new(|batch| registrations::submit(host, batch).map_err(i32::from));\n    // The widget `motto.note`, in the home screen's list of widgets, and the group of its settings.\n    d.group(GroupDecl::new(\"note\", \"motto.widget\"))?;\n    d.widget(\n        WidgetDecl::new(\"note\", \"motto.widget\", \"core.widgets.words\", WIDGET)\n            .map_err(|_| DeclareError::TooLong(\"widget\"))?\n            .cells(2, 1),\n    )?;\n    let mut text = SpecDecl::new(\"note.text\", Kind::Text(\"Be kind to the page.\"), \"motto.note\", \"motto.setting.text\");\n    text.help = \"motto.setting.text.help\";\n    d.spec(text)?;\n    d.submit()\n}\n\nimpl Plugin for Motto {\n    fn make(host: &Host<'_>) -> Result<Self, Error> {\n        declare(host).map_err(DeclareError::to_error)?;\n        Ok(Self)\n    }\n\n    fn draw(&mut self, host: &Host<'_>, token: u32, mut frame: DrawFrame<'_>) -> Result<(), Error> {\n        if token != WIDGET {\n            return Err(Error::Invalid);\n        }\n        // A place with no room yet (the host measuring) has nothing to draw.\n        let Ok(canvas) = frame.draw_canvas() else {\n            return Ok(());\n        };\n        let area = canvas.frame_rect();\n        canvas.fill_rectangle(area, Color::WHITE)?;\n        let mut scratch = [0; 128];\n        let motto = match settings::read_setting(host, \"motto.note.text\", &mut scratch)? {\n            SettingValue::Text(text) if !text.trim().is_empty() => text.trim(),\n            _ => \"Be kind to the page.\",\n        };\n        let font = Font::acquire_role(host, FontRole::Ui)?;\n        let origin = TextOrigin::new(area.x as f32 + 12.0, area.y + area.height as i32 / 2);\n        font.draw_text(&canvas, 22.0, origin, Color::BLACK, motto)?;\n        font.release()\n    }\n\n    fn input(&mut self, _: &Host<'_>, _: u32, _: Input<'_>) -> Result<Handled, Error> {\n        Ok(Handled::No)\n    }\n}\n\n#[cfg(target_arch = \"riscv32\")]\nconst CALLS: &[u8] = include_bytes!(\"../native/metadata.bin\");\n#[cfg(target_arch = \"xtensa\")]\nconst CALLS: &[u8] = include_bytes!(\"../native/metadata.s3.bin\");\n#[cfg(not(any(target_arch = \"riscv32\", target_arch = \"xtensa\")))]\nconst CALLS: &[u8] = include_bytes!(\"../native/metadata.host.bin\");\n\npaperpaw_sdk::native_plugin!(Motto, metadata = CALLS);\n"
+     }
+    }
+   ]
+  },
+  {
+   "stop_reason": "tool_use",
+   "content": [
+    {
+     "type": "tool_use",
+     "id": "toolu_09",
+     "name": "build",
+     "input": {}
+    }
+   ]
+  },
+  {
+   "stop_reason": "tool_use",
+   "content": [
+    {
+     "type": "text",
+     "text": "Font has no draw_text: it is render_text. Fixing that."
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_10",
+     "name": "write_file",
+     "input": {
+      "path": "src/main.rs",
+      "content": "//! Motto: a widget for the home screen that shows a short text, the motto, set in its settings.\n#![no_std]\n#![no_main]\n\nextern crate alloc;\n\nuse paperpaw_sdk::{\n    Color, Handled,\n    native::{\n        Error, Host, Plugin,\n        callbacks::{DrawFrame, Input},\n        declare::{Declarations, DeclareError, GroupDecl, Kind, SpecDecl, WidgetDecl},\n        fonts::{Font, FontRole, TextOrigin},\n        registrations,\n        settings::{self, SettingValue},\n    },\n};\n\n/// The number the device hands back when it draws the widget.\nconst WIDGET: u32 = 1;\n\nstruct Motto;\n\nfn declare(host: &Host<'_>) -> Result<(), DeclareError> {\n    let mut d = Declarations::new(|batch| registrations::submit(host, batch).map_err(i32::from));\n    // The widget `motto.note`, in the home screen's list of widgets, and the group of its settings.\n    d.group(GroupDecl::new(\"note\", \"motto.widget\"))?;\n    d.widget(\n        WidgetDecl::new(\"note\", \"motto.widget\", \"core.widgets.words\", WIDGET)\n            .map_err(|_| DeclareError::TooLong(\"widget\"))?\n            .cells(2, 1),\n    )?;\n    let mut text = SpecDecl::new(\"note.text\", Kind::Text(\"Be kind to the page.\"), \"motto.note\", \"motto.setting.text\");\n    text.help = \"motto.setting.text.help\";\n    d.spec(text)?;\n    d.submit()\n}\n\nimpl Plugin for Motto {\n    fn make(host: &Host<'_>) -> Result<Self, Error> {\n        declare(host).map_err(DeclareError::to_error)?;\n        Ok(Self)\n    }\n\n    fn draw(&mut self, host: &Host<'_>, token: u32, mut frame: DrawFrame<'_>) -> Result<(), Error> {\n        if token != WIDGET {\n            return Err(Error::Invalid);\n        }\n        // A place with no room yet (the host measuring) has nothing to draw.\n        let Ok(canvas) = frame.draw_canvas() else {\n            return Ok(());\n        };\n        let area = canvas.frame_rect();\n        canvas.fill_rectangle(area, Color::WHITE)?;\n        let mut scratch = [0; 128];\n        let motto = match settings::read_setting(host, \"motto.note.text\", &mut scratch)? {\n            SettingValue::Text(text) if !text.trim().is_empty() => text.trim(),\n            _ => \"Be kind to the page.\",\n        };\n        let font = Font::acquire_role(host, FontRole::Ui)?;\n        let origin = TextOrigin::new(area.x as f32 + 12.0, area.y + area.height as i32 / 2);\n        font.render_text(&canvas, 22.0, origin, Color::BLACK, motto)?;\n        font.release()\n    }\n\n    fn input(&mut self, _: &Host<'_>, _: u32, _: Input<'_>) -> Result<Handled, Error> {\n        Ok(Handled::No)\n    }\n}\n\n#[cfg(target_arch = \"riscv32\")]\nconst CALLS: &[u8] = include_bytes!(\"../native/metadata.bin\");\n#[cfg(target_arch = \"xtensa\")]\nconst CALLS: &[u8] = include_bytes!(\"../native/metadata.s3.bin\");\n#[cfg(not(any(target_arch = \"riscv32\", target_arch = \"xtensa\")))]\nconst CALLS: &[u8] = include_bytes!(\"../native/metadata.host.bin\");\n\npaperpaw_sdk::native_plugin!(Motto, metadata = CALLS);\n"
+     }
+    }
+   ]
+  },
+  {
+   "stop_reason": "tool_use",
+   "content": [
+    {
+     "type": "tool_use",
+     "id": "toolu_11",
+     "name": "build",
+     "input": {}
+    }
+   ]
+  },
+  {
+   "stop_reason": "tool_use",
+   "content": [
+    {
+     "type": "text",
+     "text": "Built. Opening it from the tools menu on the X4."
+    },
+    {
+     "type": "tool_use",
+     "id": "toolu_12",
+     "name": "press",
+     "input": {
+      "device": "X4",
+      "buttons": [
+       "page-forward",
+       "left",
+       "left",
+       "left",
+       "left",
+       "confirm"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "stop_reason": "end_turn",
+   "content": [
+    {
+     "type": "text",
+     "text": "Your plugin is in the reader: the widget Motto, which you put on the home screen from its widget list. It shows a line of your own, and you set the text in its settings. It has German too. Say if you want it changed."
+    }
+   ]
+  }
+ ]
+}

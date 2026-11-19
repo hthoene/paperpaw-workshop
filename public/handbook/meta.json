@@ -1,7 +1,7 @@
 {
-  "ref": "v0.6.0-beta.2",
-  "commit": "40a290f5563e7747afe83a68fb8a6ed9721ad3db",
-  "generated": "2026-11-03",
-  "dataTokens": 13491,
-  "codeTokens": 38468
+  "ref": "48a233e65ad0e28e94e4e6d21ec5d69eb94835de",
+  "commit": "48a233e65ad0e28e94e4e6d21ec5d69eb94835de",
+  "generated": "2026-11-19",
+  "dataTokens": 12945,
+  "codeTokens": 9825
 }

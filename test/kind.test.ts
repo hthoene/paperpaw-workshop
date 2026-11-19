@@ -45,7 +45,8 @@ describe("the kind of a new plugin", () => {
     const desk = new Desk(workspace, backend, new Checker({ pluginCheck: async () => [] }), book, provider, "claude");
     await desk.send(DUCKS);
     expect(workspace.project!.kind).toBe("code");
-    expect(workspace.project!.files["how/en.txt"]).toBeDefined();
+    expect(workspace.project!.files["src/main.rs"]).toBeDefined();
+    expect(workspace.project!.files["plugin/i18n/en.ini"]).toBeDefined();
     expect(provider.requests[1]!.system).toEqual([{ type: "text", text: book.code, cache_control: { type: "ephemeral" } }]);
   });
 });

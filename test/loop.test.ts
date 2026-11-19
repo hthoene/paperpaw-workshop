@@ -264,23 +264,23 @@ describe("the press tool", () => {
 
 describe("a turn's ends", () => {
   it("writes a plugin with code, gives the compiler's error back, and runs the build", async () => {
-    const rec = recording("quote-a-day");
+    const rec = recording("motto-widget");
     expect(rec.kind).toBe("code");
     const provider = new ReplayProvider(rec);
-    // The builder: the field LocalTime does not have fails, the rest builds.
+    // The builder: the method Font does not have fails, the rest builds.
     const sent: Record<string, unknown>[] = [];
     const builder: Builder = {
       async build(files) {
         sent.push(files);
-        const lib = (files["src/lib.rs"] as { text: string }).text;
-        const wrong = lib.includes("t.day_of_year");
+        const main = (files["src/main.rs"] as { text: string }).text;
+        const wrong = main.includes("font.draw_text(");
         const result: BuildResult = {
           id: `b${sent.length}`,
           state: wrong ? "failed" : "done",
           seconds: 1,
           problems: [],
           diagnostics: wrong
-            ? [{ level: "error", file: "src/lib.rs", line: 70, column: 53, message: "no field `day_of_year` on type `LocalTime`", rendered: "error[E0609]: no field `day_of_year` on type `LocalTime`" }]
+            ? [{ level: "error", file: "src/main.rs", line: 70, column: 14, message: "no method named `draw_text` found for struct `Font`", rendered: "error[E0599]: no method named `draw_text` found for struct `Font`" }]
             : [],
           files: wrong ? [] : [{ target: "web", name: "web.wasm", size: 1, url: "/api/v1/workshop/builds/b2/files/web.wasm" }],
           log_tail: "",
@@ -303,10 +303,10 @@ describe("a turn's ends", () => {
     expect(await runTurn(s, rec.user[0]!)).toBe("done");
     expect(provider.done).toBe(true);
     expect(sent).toHaveLength(2);
-    expect(b.files.read("Cargo.toml")).toContain('plugin = "QuoteOfTheDay"');
+    expect(b.files.read("Cargo.toml")).toContain('name = "motto"');
     // The compiler's error went back to the AI as a failed tool result.
     const failed = results(b.project.messages).find((r) => r.is_error);
-    expect(JSON.stringify(failed?.content)).toContain("no field `day_of_year`");
+    expect(JSON.stringify(failed?.content)).toContain("no method named `draw_text`");
     // The reader runs the second build's module.
     expect(b.emulator.modules).toEqual(["/api/v1/workshop/builds/b2/files/web.wasm"]);
     expect(provider.requests[0]!.system?.[0]).toMatchObject({ text: b.handbook.promptFor("code") });
