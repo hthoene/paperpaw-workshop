@@ -162,7 +162,7 @@ export function recordPublished(project: Project, version: string, at = new Date
  *  its build for the X4 and its source". */
 export function holds(parts: string[]): string {
   const said = parts.map((part) =>
-    part === "package" ? "the plugin" : part === "source" ? "its source" : `its build for the ${part === "x4-pro" ? "X4 Pro" : part.toUpperCase()}`,
+    part === "package" ? "the plugin" : part === "source" ? "its source" : part === "emulator-linux-x86_64" ? "its library for the emulator" : `its build for the ${part === "x4-pro" ? "X4 Pro" : part.toUpperCase()}`,
   );
   if (said.length < 2) return said[0] ?? "";
   return `${said.slice(0, -1).join(", ")} and ${said.at(-1)}`;

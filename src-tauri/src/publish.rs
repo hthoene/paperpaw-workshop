@@ -9,8 +9,11 @@
 //!
 //! - the plugin's folder as a ZIP (`<id>-<version>-upload.zip`);
 //! - a plugin with code: its build for each reader, signed with the
-//!   author's key (`<id>-<version>-<device>.ppn`), and its source as a
-//!   ZIP (`<id>-<version>-source.zip`).
+//!   author's key (`<id>-<version>-<device>.ppn`; the X3 takes the X4's
+//!   and the X4 Classic the X4 Pro's, which the store lists for both),
+//!   the library PaperPaw's emulator on Linux loads, signed the same
+//!   (`<id>-<version>-emulator-linux-x86_64.so`), and its source as a ZIP
+//!   (`<id>-<version>-source.zip`).
 //!
 //! The parts are made in `.workshop/publish/parts/`, so that the folder
 //! the person sees holds only the files to upload. They are stored in the
@@ -32,9 +35,16 @@ pub const SUBMIT: &str = "https://paperpaw.org/submit";
 pub const MANIFEST: &str = "paperpaw-store.ini";
 /// The format of that list the store reads.
 pub const FORMAT: u32 = 1;
-/// The readers a plugin with code may have a build for, as the store
-/// names them.
-pub const READERS: [&str; 2] = ["x4", "x4-pro"];
+/// What a plugin with code may have a build for, as the store names them:
+/// the readers, and the emulator on Linux.
+pub const READERS: [&str; 3] = ["x4", "x4-pro", crate::device::EMULATOR];
+
+/// The name of the build of `stem` (`<id>-<version>`) for `device`: a
+/// reader's plugin file, or the emulator's library.
+fn build_file(stem: &str, device: &str) -> String {
+    let end = if device == crate::device::EMULATOR { "so" } else { "ppn" };
+    format!("{stem}-{device}.{end}")
+}
 
 /// A name the workshop gives its files: lower-case letters, digits,
 /// hyphens and dots, ending in `end`.
@@ -91,8 +101,8 @@ pub fn store_zip(id: &str, version: &str, package: &[u8], builds: &[(&str, Vec<u
         if !READERS.contains(device) {
             return Err(format!("{device}: no reader the store knows"));
         }
-        manifest.push_str(&format!("{device} = {stem}-{device}.ppn\n"));
-        files.push((format!("{stem}-{device}.ppn"), bytes));
+        manifest.push_str(&format!("{device} = {}\n", build_file(&stem, device)));
+        files.push((build_file(&stem, device), bytes));
     }
     if let Some(source) = source {
         files.push((format!("{stem}-source.zip"), source));
@@ -128,15 +138,14 @@ pub fn pack(publish: &Path, parts: &Path, id: &str, version: &str, package: &[u8
     if code {
         for device in READERS {
             if readers.contains(&device) {
-                if let Ok(bytes) = std::fs::read(parts.join(format!("{stem}-{device}.ppn"))) {
+                if let Ok(bytes) = std::fs::read(parts.join(build_file(&stem, device))) {
                     builds.push((device, bytes));
                 }
             } else {
                 // Not asked for in this publish: an earlier build of it (and its
                 // trial) is not kept, so it cannot get into this file or a later one.
-                for tail in ["", "-trial"] {
-                    let _ = std::fs::remove_file(parts.join(format!("{stem}-{device}{tail}.ppn")));
-                }
+                let _ = std::fs::remove_file(parts.join(build_file(&stem, device)));
+                let _ = std::fs::remove_file(parts.join(format!("{stem}-{device}-trial.ppn")));
             }
         }
         if builds.is_empty() {
