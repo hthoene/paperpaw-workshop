@@ -29,6 +29,10 @@ export function Conversation({ desk }: { desk: Desk }) {
   const said = lines(project?.messages ?? []);
   const busy = !!workshop?.busy;
   const states = afterAnswers(desk.history, project?.earlier?.length ?? 0);
+  const parts = segments(project).map((segment) => ({ ...segment, parts: grouped(segment.lines) }));
+  // The newest card of steps stays open, the earlier ones fold.
+  const lastSeg = parts.findLastIndex((s) => s.parts.some(Array.isArray));
+  const lastPart = lastSeg < 0 ? -1 : parts[lastSeg]!.parts.findLastIndex(Array.isArray);
 
   const down = (smooth: boolean) => {
     const l = log.current;
@@ -65,24 +69,35 @@ export function Conversation({ desk }: { desk: Desk }) {
   return (
     <section class="talk" aria-label="Conversation">
       <div class="log" aria-live="polite" ref={log} onScroll={scrolled}>
-        {!said.length && !busy && <p class="empty">What should your reader do? A look, a home screen, a tool: say it in your own words.</p>}
+        {!said.length && !busy && (
+          <div class="empty">
+            <p class="kicker">New plugin</p>
+            <h1>What should your reader <span class="blk g-look">do?</span></h1>
+            <p class="lede">A look, a home screen, a tool: say it in your own words. The workshop writes the plugin and shows it on the reader beside you.</p>
+          </div>
+        )}
         {!said.length && !busy && !desk.previewing && <Ideas onPick={(words) => { setDraft((typed) => withIdea(typed, words)); input.current?.focus(); }} />}
         {(project?.earlier ?? []).map((earlier, n) => (
           <details class="earlier" key={`earlier-${n}`}>
             <summary>The conversation before</summary>
-            <div class="earlier-lines">{lines(earlier).map((line, i) => <Said key={i} line={line} />)}</div>
+            <div class="earlier-lines">{grouped(lines(earlier)).map((part, i) => (Array.isArray(part) ? <Steps key={i} lines={part} open={false} /> : <Said key={i} line={part} />))}</div>
           </details>
         ))}
         {said.length > 0 && <BackHere desk={desk} snapshot={states.get(0)} label="Back to how it began" />}
-        {segments(project).map((segment, n) => (
+        {parts.map((segment, n) => (
           <Fragment key={n}>
-            {segment.lines.map((line, i) => <Said key={i} line={line} />)}
+            {segment.parts.map((part, i) => (Array.isArray(part) ? <Steps key={i} lines={part} open={n === lastSeg && i === lastPart} /> : <Said key={i} line={part} />))}
             {segment.turn && <Cost turn={segment.turn} before={segment.before} />}
             {segment.turn && <BackHere desk={desk} snapshot={states.get(segment.turn.end)} />}
           </Fragment>
         ))}
         {workshop?.live && <div class="ai">{workshop.live}</div>}
-        {busy && !workshop?.live && <div class="step busy">{desk.building || (workshop?.thinking ? lastLine(workshop.thinking) : "Working…")}</div>}
+        {busy && !workshop?.live && (
+          <div class="steps now" role="status">
+            <p class="steps-head"><span class="mark run" aria-hidden="true" /><b>Working</b><span>{desk.building || (workshop?.thinking ? lastLine(workshop.thinking) : "")}</span></p>
+            <div class="running" aria-hidden="true"><span /></div>
+          </div>
+        )}
         {workshop?.error && <p class="problem" role="alert">{workshop.error}</p>}
         {workshop?.long && !busy && (
           <button type="button" class="go fresh" onClick={() => workshop.freshConversation()}>Go on in a fresh conversation</button>
@@ -119,6 +134,35 @@ export function Conversation({ desk }: { desk: Desk }) {
         )}
       </form>
     </section>
+  );
+}
+
+/** The lines with the AI's steps in a row taken together. */
+function grouped(said: Line[]): (Line | Line[])[] {
+  const out: (Line | Line[])[] = [];
+  for (const line of said) {
+    const step = line.kind === "step" || line.kind === "sample" || line.kind === "added";
+    const before = out[out.length - 1];
+    if (step && Array.isArray(before)) before.push(line);
+    else out.push(step ? [line] : line);
+  }
+  return out;
+}
+
+/** What the AI did in a row, as one card: a mark at each step, the
+ *  latest turn's open, earlier ones folded. */
+function Steps({ lines: steps, open }: { lines: Line[]; open: boolean }) {
+  const failed = steps.filter((s) => "failed" in s && s.failed).length;
+  const n = steps.length;
+  return (
+    <details class="steps" open={open}>
+      <summary>
+        <b>{n === 1 ? "1 step" : `${n} steps`}</b>
+        {failed > 0 && <span>{failed === 1 ? "one did not work" : `${failed} did not work`}</span>}
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" /></svg>
+      </summary>
+      <div class="steps-list">{steps.map((line, i) => <Said key={i} line={line} />)}</div>
+    </details>
   );
 }
 
