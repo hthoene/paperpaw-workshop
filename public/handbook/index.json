@@ -431,7 +431,7 @@
   "title": "Plugin interface 7: document",
   "file": "abi--document.md",
   "summary": "Contract for #228 (assignment #1025).",
-  "tokens": 34849
+  "tokens": 36209
  },
  {
   "id": "abi/files",
@@ -508,7 +508,7 @@
   "title": "Plugin interface 7: stages services",
   "file": "abi--stages-services.md",
   "summary": "Status: contract of family 1a (#228).",
-  "tokens": 8023
+  "tokens": 8053
  },
  {
   "id": "abi/ui",
@@ -634,7 +634,7 @@
   "title": "The SDK's module native",
   "file": "sdk--native.md",
   "summary": "```rust\npub trait paperpaw_sdk::native::Plugin: core::marker::Sized + 'static\npub struct paperpaw_sdk::native::CodeRoom\npub paperpaw_sdk::native::CodeRoom::gran",
-  "tokens": 2666
+  "tokens": 2676
  },
  {
   "id": "sdk/native/callbacks",
@@ -663,6 +663,13 @@
   "file": "sdk--native--commands.md",
   "summary": "```rust\npub enum paperpaw_sdk::native::commands::CheckKind\npub paperpaw_sdk::native::commands::CheckKind::Firmware\npub paperpaw_sdk::native::commands::CheckKind",
   "tokens": 4727
+ },
+ {
+  "id": "sdk/native/convert",
+  "title": "The SDK's module native/convert",
+  "file": "sdk--native--convert.md",
+  "summary": "```rust\npub struct paperpaw_sdk::native::convert::Asked<'a>\npub fn paperpaw_sdk::native::convert::Asked<'a>::decode(&'a [u8]) -> core::result::Result<Self, pape",
+  "tokens": 241
  },
  {
   "id": "sdk/native/declare",
@@ -830,7 +837,7 @@
   "title": "The SDK's module native/stage_schemas",
   "file": "sdk--native--stage_schemas.md",
   "summary": "```rust\npub struct paperpaw_sdk::native::stage_schemas::StageSchema\npub paperpaw_sdk::native::stage_schemas::StageSchema::input_tags: &'static [u32]\npub paperpa",
-  "tokens": 21238
+  "tokens": 22920
  },
  {
   "id": "sdk/native/stages",
