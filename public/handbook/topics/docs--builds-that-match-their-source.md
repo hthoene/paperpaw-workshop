@@ -12,7 +12,19 @@ Paths end up in a build (in its panic messages), so the sample's
 (through `cargo --config`): the source's top as `/plugin` and Cargo's
 home as `/cargo`. The core libraries come built, the same for everyone:
 rustup's for the X4, the release's for the X4 Pro, which the rebuild
-installs as authors do (see [The crate](#the-crate)). So:
+installs as authors do (see [The crate](#the-crate)).
+
+A plugin of plugin interface 7 has no fingerprint; the site rebuilds it
+as its author builds it, with `paperpaw-dev build` of the PaperPaw whose
+SDK its `Cargo.lock` pins, once for each chip (the X4's file is the
+X3's, the X4 Pro's the X4 Classic's) and once as the library of the
+emulator on Linux. `paperpaw-dev build` writes the paths itself: the
+plugin's folder as `/plugin`, Cargo's home as `/cargo`. Where the SDK is
+taken from a PaperPaw checkout (`new --code --sdk`), it is named through
+a link in the plugin's own folder, `.paperpaw`, which is no part of the
+source: Cargo makes a path outside the folder a part of the build, so a
+plugin that names its SDK by such a path builds to another file on
+another computer and cannot be verified. So:
 
 - build with `build.sh`, or with the sample's CI job that runs it
   (`samples/hello-native/.github/workflows/build.yml`). Build from a
@@ -22,7 +34,7 @@ installs as authors do (see [The crate](#the-crate)). So:
 - commit `Cargo.lock`;
 - keep the release's compilers pinned (`rust-toolchain.toml`, the job's
   `RUST_X4`, `RUST_X4_PRO`, `ESP_GCC`), its SDK
-  (`paperpaw-sdk = "0.6.0-beta.3"`) and, for the X4 Pro, its core libraries
+  (`paperpaw-sdk = "0.6.0-beta.4"`) and, for the X4 Pro, its core libraries
   installed, and build again for every release until 1.0 (see
   [Which build fits](#which-build-fits));
 - never set `RUSTFLAGS`, which would replace the flags that link the

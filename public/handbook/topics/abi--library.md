@@ -222,7 +222,8 @@ Records (the generated codec; tags 1094-1124 follow DOC's 1060-1093, and 1182):
   damaged file or a failing card, `books` 0 until a walk makes it again; a walk under way is 1
   first), `books`, `generation`, `walk_ppm`. An SDK before state 3 reads `CatalogPhase::Unknown(3)`.
 - [D] `query` (interface 6 `Query`, `Show`, `Sort`): `show` (0 all, 1 unread, 2 reading, 3 finished,
-  4 favourites, 5 new: added in the last 30 days and not opened), `sort` (0 title, 1 author, 2
+  4 favourites, 5 new: added in the last 30 days and not opened, 6 opened: opened at least once,
+  being read or finished; a host before 6 refuses it, `ERR_INVALID`), `sort` (0 title, 1 author, 2
   series, 3 added, 4 recently opened), `flags` (bit 0 descending, bit 1 leave out the archive
   folder), `words` (any number of words, each found in the title, author, series, tags or file name,
   any case; at most 256 bytes in all, a longer search is `ERR_NO_SPACE`, never shortened), `author`,

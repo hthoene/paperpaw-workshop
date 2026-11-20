@@ -133,6 +133,7 @@ pub mod paperpaw_sdk::native::keys
 pub mod paperpaw_sdk::native::library
 pub mod paperpaw_sdk::native::lookup
 pub mod paperpaw_sdk::native::net
+pub mod paperpaw_sdk::native::page_layers
 pub mod paperpaw_sdk::native::registrations
 pub mod paperpaw_sdk::native::registry
 pub mod paperpaw_sdk::native::reply

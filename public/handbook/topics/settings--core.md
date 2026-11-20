@@ -40,6 +40,8 @@
 | `[core] widgets.gap` | Space between widgets | `core.gap.small`, `core.gap.normal`, `core.gap.large` | `core.gap.normal` | How far apart the widgets on the home screen are. |
 | `[core] widgets.font` | Font of widgets | `core.widgets.font.menus`, `core.widgets.font.book`, `PaperPaw Sans` | `core.widgets.font.menus` | The font of every widget that has none chosen in its own settings. |
 | `[core] keymap-preset` | Button layout | `core.standard`, `core.two-buttons`, `core.left-handed` | `core.standard` | What the device's buttons do. |
+| `[core] tap-layout` | Tap zones | `core.tap-thirds`, `core.tap-halves`, `core.tap-l-shape`, `core.tap-top-bottom` | `core.tap-thirds` | Where a tap turns pages or opens the menu while reading. |
+| `[core] tap-swap` | Swap left and right taps | `true`, `false` | `false` | Left goes on, right goes back; for the other hand. |
 | `[core] full-refresh-interval` | Full refresh | 0 to 1000 | `6` | A flashing refresh after this many page turns removes ghosting; 0 never flashes. |
 | `[core] flash-screens` | Flash on screen change | `true`, `false` | `false` | Redraw fully when a screen opens: no traces of the last one, but slower. |
 | `[core] ui-full-refresh-interval` | Full refresh in menus | 0 to 1000 | `0` | A flash after this many menu changes removes ghosting; 0 never flashes. |

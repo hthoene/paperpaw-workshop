@@ -335,7 +335,7 @@ after the callback, chains bounded at 8 hops, `screens-input.md` section 3).
   | `core.panel` | a menu as a panel of controls, an overlay | `menu` (required), as `core.menu` |
   | `core.settings` | settings | `id` (a group), `focus` (a setting) |
   | `core.setup` | the first-run setup | none |
-  | `core.lookup`, `core.lookup-online` | a word looked up, an overlay | `word` (required), `language` |
+  | `core.lookup`, `core.lookup-online` | a word looked up, an overlay | `word` (required), `language`, `anchor` (`x,y,width,height`: the words' box on the screen, `page-layers.md` 3.1) |
   | `core.browser` | a web page | `url` (required), `id` |
   | `core.bluetooth` | the Bluetooth page | none |
   | `core.cable` | the cable (USB) transfer | none (opened by the host) |

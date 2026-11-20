@@ -184,6 +184,7 @@ pub paperpaw_sdk::native::declare::FontFaceDecl::role: &'a str
 pub paperpaw_sdk::native::declare::FontFaceDecl::style: u32
 pub paperpaw_sdk::native::declare::FontFaceDecl::weight: u32
 pub struct paperpaw_sdk::native::declare::FormatDecl<'a>
+pub const fn paperpaw_sdk::native::declare::FormatDecl<'a>::asks(self) -> Self
 pub const fn paperpaw_sdk::native::declare::FormatDecl<'a>::folder(self) -> Self
 pub const fn paperpaw_sdk::native::declare::FormatDecl<'a>::new(&'a str, &'a str, &'a str, u32) -> Self
 pub const fn paperpaw_sdk::native::declare::FormatDecl<'a>::prepared(self) -> Self
