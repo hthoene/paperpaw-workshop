@@ -13,3 +13,4 @@ export interface ReadItem {
 export function readItems(source: string): ReadItem[];
 export function apiLines(text: string): string[];
 export function sdkItems(tree: { read(path: string): string; exists(path: string): boolean; files(folder: string): string[] }): unknown[];
+export function reachable(itemPath: string): boolean;
