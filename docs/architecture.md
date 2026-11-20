@@ -70,6 +70,7 @@ window may call. Each file is one concern:
 | `emulator.rs` | `paperpaw-emu --stdio`, driven over its standard input and output |
 | `checks.rs` | `paperpaw-dev check` on the project's folder, its findings with a picture of the spot |
 | `code.rs` | Plugins with code (plugin interface 7): the crate checked, laid out as `paperpaw-dev new --code` does, then built for the emulator with `paperpaw-dev build --device emulator` |
+| `versions.rs` | Which PaperPaw plugins are made for: GitHub's releases of PaperPaw (kept, asked again after six hours), the person's choice, a release's emulator and handbook fetched once and checked against PaperPaw's release key (`emulators/<version>/`, `handbooks/<version>.zip`), the release's interface minor (`-abi.txt`), the SDK's files for the window to make the AI's items from (`src/handbook/release.ts`) |
 | `toolchain.rs` | Rust for plugins with code, set up in the app's folder, the compiler the emulator names (`Rust::tool` runs `paperpaw-dev` with it); on Windows, Microsoft's C++ build tools |
 | `pictures.rs` | Pictures made smaller, as the person chose; the AI's shape of an upload made so |
 | `send.rs` | The plugin onto a reader: over Wi-Fi, onto its card, or as a zip |

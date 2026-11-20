@@ -67,6 +67,13 @@ export interface SdkItem {
   provided?: boolean;
 }
 
+/** The PaperPaw release plugins are made for. */
+export interface Target {
+  version: string;
+  interface: number;
+  minor: number;
+}
+
 /** The most items a search answers with. */
 export const MAX_ITEMS = 12;
 
@@ -153,6 +160,18 @@ export class Handbook {
   ) {}
 
   private sdk?: Promise<SdkItem[]>;
+
+  /** The handbook for plugins made for `target`: the SDK's items are
+   *  those of that release (`itemsOfRelease`), and the code prompt says
+   *  which release and minor it is, so that the AI suggests no call the
+   *  target lacks. */
+  retarget(target: Target, items: SdkItem[]): Handbook {
+    const note =
+      `\n\n## The target\n\nThis plugin is made for PaperPaw ${target.version} (plugin interface ${target.interface}, minor ${target.minor}). ` +
+      `A plugin built for a minor runs on every PaperPaw with that minor or a newer one, so use only what that release's SDK has: \`lookup_docs\` answers for that release alone. ` +
+      `Never call something it does not list.`;
+    return new Handbook(this.meta, this.prompt, this.topics, this.registry, this.fetchTopic, this.code + note, this.codeSample, async () => items);
+  }
 
   /** The system prompt for a kind of plugin. */
   promptFor(kind: "data" | "code"): string {

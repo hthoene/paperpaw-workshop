@@ -13,6 +13,15 @@
 // trait's method also { decl (as its source declares it), provided (has
 // a default) }.
 
+/** Whether a plugin of interface 7 reaches an item by its path: `native`,
+ *  `builtin` and the types they share. The rest of the SDK's items are the
+ *  interface before 7, which Beta 4 no longer runs. */
+const SHARED_TYPES = new Set(["Color", "Handled", "Rect", "Point", "Version"]);
+export const reachable = (itemPath) => {
+  const [first] = itemPath.split("::");
+  return first === "native" || first === "builtin" || SHARED_TYPES.has(first);
+};
+
 /** The crates the SDK passes on, by their name in paths. */
 const PASSED_ON = [
   "paperpaw_config",

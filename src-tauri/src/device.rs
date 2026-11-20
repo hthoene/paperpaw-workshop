@@ -111,7 +111,14 @@ fn fingerprint(sign: &Path, file: &Path) -> Option<String> {
     let out = command.output().ok()?;
     let said = String::from_utf8_lossy(&out.stdout);
     let field = |key: &str| said.lines().find_map(|l| l.strip_prefix(key).map(|f| f.trim().to_string()));
-    Some(format!("interface {}, {}", field("interface:")?.split(',').next()?.trim(), field("digest:")?))
+    // `interface:   7, needs minor 1`: the minor the plugin needs of it, which the store shows.
+    let interface = field("interface:")?;
+    let (number, minor) = match interface.split_once(',') {
+        Some((n, rest)) => (n.trim().to_string(), rest.trim().strip_prefix("needs minor ").map(|m| m.trim().to_string())),
+        None => (interface.trim().to_string(), None),
+    };
+    let minor = minor.map(|m| format!(", minor {m}")).unwrap_or_default();
+    Some(format!("interface {number}{minor}, {}", field("digest:")?))
 }
 
 /// Writes the crate of `files` into `dir`, builds it for `reader` with

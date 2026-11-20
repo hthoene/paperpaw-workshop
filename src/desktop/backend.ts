@@ -27,6 +27,35 @@ export interface AppUpdate {
   notes: string | null;
 }
 
+/** A PaperPaw release the workshop can make plugins for (versions.rs). */
+export interface PaperPawRelease {
+  version: string;
+  prerelease: boolean;
+  interface: number;
+  /** The newest minor of the interface the release's firmware has. */
+  minor: number;
+  /** Whether it has the signed emulator for this computer. */
+  emulator: boolean;
+}
+
+/** How the release is chosen: the newest, one version, or the oldest
+ *  whose minor has what the plugin uses. */
+export type ReleasePick = { mode: "latest" } | { mode: "pinned"; version: string } | { mode: "oldest"; version: number };
+
+/** Which PaperPaw plugins are made for, and which one runs them. */
+export interface Versions {
+  /** Newest first. */
+  releases: PaperPawRelease[];
+  pick: ReleasePick;
+  target: PaperPawRelease | null;
+  /** The version whose emulator and tools are used for the target. */
+  emulator: string | null;
+  /** The version of the emulator in use now. */
+  using: string | null;
+  checked: number | null;
+  problem: string | null;
+}
+
 /** A reader found on the USB cable, as it says what it is. */
 export interface CableReader {
   port: string;
@@ -227,6 +256,14 @@ export interface Backend extends FolderApi, PictureApi, CheckApi, HistoryApi {
   updateCheck(): Promise<AppUpdate | null>;
   /** Fetches and installs the newer workshop, then starts it again. */
   updateInstall(): Promise<void>;
+  /** The releases and the choice; the list asked again when `refresh`, and
+   *  the emulator of the choice fetched and put in use when `apply`. */
+  versionsState(refresh: boolean, apply: boolean): Promise<Versions | null>;
+  /** Chooses the release plugins are made for. */
+  versionsChoose(pick: ReleasePick): Promise<Versions | null>;
+  /** The files of the release's SDK (api lists and source), by the paths
+   *  of a PaperPaw tree. */
+  versionsHandbook(version: string): Promise<Record<string, string>>;
   /** The readers on the USB cable. */
   usbReaders(): Promise<CableReader[]>;
   /** The project's plugin installed on the reader on the cable at `port`. */
@@ -361,6 +398,9 @@ export const appBackend: Backend = {
   emulatorBodies: () => invoke("emulator_bodies"),
   emulatorTold: () => invoke("emulator_told"),
   emulatorReady: () => invoke("emulator_ready"),
+  versionsState: (refresh, apply) => invoke("versions_state", { refresh, apply }),
+  versionsChoose: (pick) => invoke("versions_choose", { pick }),
+  versionsHandbook: (version) => invoke("versions_handbook", { version }),
   sendWifi: (project, address) => invoke("send_wifi", { project, address }),
   updateCheck: async () => {
     try {
@@ -499,6 +539,9 @@ export function standInBackend(): Backend {
     emulatorTold: async () => [[], []],
     emulatorReady: async () => null,
     sendWifi: async () => { throw new Error("Sending to a reader needs the app."); },
+    versionsState: async () => null,
+    versionsChoose: async () => null,
+    versionsHandbook: async () => ({}),
     updateCheck: async () => null,
     updateInstall: async () => {},
     usbReaders: async () => [],
