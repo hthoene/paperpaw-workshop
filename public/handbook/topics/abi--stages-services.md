@@ -378,7 +378,8 @@ Each major of a host-defined stage has one JSON schema, `abi/stages/<key>@<major
   Stage declarations select the stage by key and major. The initial schemas are
   `core.input-filter` (4 subscribers, one verdict), `core.widget` (32 subscribers, up to 32
   target rows) and `core.status` (32 subscribers, up to 8 value rows); DOC adds `core.picture`
-  (2 subscribers, one tone row: `document.md` 5) and `core.format`
+  (2 subscribers, one tone row: `document.md` 5), `core.convert` (4 subscribers, one text row: the
+  conversion hook of a foreign element, `document.md` 4.1) and `core.format`
   (the format call, 22 reply kinds, up to 64 rows) and `core.lookup` (one entry per provider
   call), `document.md` sections 3 and 7; LIB adds `core.book-badge` (32 subscribers, 16 book keys
   in, up to 16 badge rows out), `library.md` section 1.

@@ -119,6 +119,7 @@ pub mod paperpaw_sdk::native::callbacks
 pub mod paperpaw_sdk::native::canvas
 pub mod paperpaw_sdk::native::clock
 pub mod paperpaw_sdk::native::commands
+pub mod paperpaw_sdk::native::convert
 pub mod paperpaw_sdk::native::declare
 pub mod paperpaw_sdk::native::device
 pub mod paperpaw_sdk::native::document
