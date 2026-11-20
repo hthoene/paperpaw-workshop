@@ -1,23 +1,38 @@
-/* The workshop app, in paperpaw.org's look: warm, muted paper, ink, the
-   reader as the one dark thing on it. One window, nothing more on screen
-   than the conversation, the reader and a thin bar. */
+/* The workshop app, in paperpaw.org's design C: e-ink paper and ink,
+   grey cards, dark block buttons; colour belongs to the plugins alone, a
+   brick with three paw studs in its group's colour. One window: the
+   conversation, the reader on its card and a thin bar. */
 
-@font-face { font-family: "Literata"; src: url("/fonts/Literata.woff2") format("woff2"); font-weight: 200 900; font-display: swap; }
 @font-face { font-family: "Albert Sans"; src: url("/fonts/AlbertSans.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
 
 :root {
-  --sheet: #e6e0d4;
-  --sheet-2: #ddd6c9;
+  --sheet: #f3efe6;
+  --sheet-2: #e9e3d7;
   --ink: #1d1b18;
   --ink-2: #4a463f;
-  --rule: #c4bcae;
+  --rule: #d9d2c3;
   --field-edge: #7d7568;
-  --mark: #3b625f;
+  --mark: #1d1b18;
+  --warn: #a8261b;
+  --r: 18px;
+  /* The groups of plugins, one colour each, as on paperpaw.org. */
+  --g-reading: #9c4f40;
+  --g-formats: #c9b27a;
+  --g-library: #262624;
+  --g-sync: #8e908a;
+  --g-home: #a7bfb9;
+  --g-look: #4d607a;
+  --g-system: #cfd0ca;
+  --g-news: #e2cf8f;
+  --g-notes: #d8b4a0;
+  --g-learning: #b9b3d6;
+  --g-tools: #b7c99a;
+  --g-games: #e3a98f;
   --bezel: #262624;
   /* Scrollbars: a muted ink, darker where the pointer is. */
-  --scroll: #a59d8f;
+  --scroll: #b5ad9f;
   --scroll-near: #6f685d;
-  --display: "Literata", Georgia, serif;
+  --display: "Albert Sans", system-ui, sans-serif;
   --text: "Albert Sans", system-ui, sans-serif;
   color-scheme: light;
 }
@@ -35,48 +50,76 @@
 @supports not selector(::-webkit-scrollbar) {
   * { scrollbar-width: thin; scrollbar-color: var(--scroll) transparent; }
 }
-html, body { margin: 0; height: 100%; background: var(--sheet); color: var(--ink); font: 400 15px/1.55 var(--text); }
+html, body { margin: 0; height: 100%; background: var(--sheet); color: var(--ink); font: 400 15px/1.55 var(--text); font-kerning: normal; }
+[hidden] { display: none !important; }
 #app { height: 100%; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 4px; }
-::selection { background: #a7bfb9; }
+::selection { background: var(--ink); color: var(--sheet); }
 
 /* Fields and the ink button, as on the site */
 .line { display: flex; gap: .7rem; align-items: stretch; }
 .line input, .line textarea {
-  flex: 1; min-width: 0; padding: .75rem 1.2rem; border: 0; border-radius: 999px;
-  background: var(--sheet-2); color: var(--ink); box-shadow: inset 0 0 0 1px var(--field-edge);
+  flex: 1; min-width: 0; padding: .75rem 1.1rem; border: 0; border-radius: 14px;
+  background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--rule);
   font: 400 1rem/1.4 var(--text);
 }
 .line input::placeholder, .line textarea::placeholder { color: var(--ink-2); opacity: 1; }
 .line input:focus-visible, .line textarea:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--ink); }
+/* The ink button: a dark block that sits on its own shadow. */
 .go {
-  /* Literata sets its letters low in the line: a little room below lifts
-     them to the button's middle (measured by the capitals' ink). */
-  padding: 0 1.4rem 3px; border-radius: 999px; background: var(--ink); color: var(--sheet);
-  font: 600 1rem/1 var(--display); transition: background-color .2s;
+  padding: 0 1.2rem; border-radius: 14px; background: var(--ink); color: var(--sheet);
+  font: 700 1rem/1 var(--text); box-shadow: 0 4px 0 rgb(0 0 0 / .22);
+  transition: transform .15s, box-shadow .15s, background-color .2s;
 }
-.go:hover:not(:disabled) { background: #3a3631; }
-.go:disabled { background: var(--rule); color: var(--ink-2); cursor: default; }
+.go:hover:not(:disabled) { transform: translateY(1px); box-shadow: 0 3px 0 rgb(0 0 0 / .22); }
+.go:disabled { background: var(--rule); color: var(--ink-2); box-shadow: none; cursor: default; }
+@media (prefers-reduced-motion: reduce) { .go { transition: none; } }
+
+/* A brick: a tile in its group's colour with three paw studs on top. */
+.blk { --c: var(--g-system); --on-c: var(--ink); position: relative; background: var(--c); color: var(--on-c); border-radius: var(--r); }
+.blk::before {
+  --d: 12px; --sg: 4px;
+  --stud: radial-gradient(circle closest-side, var(--c) 92%, transparent 100%);
+  content: ""; position: absolute; top: calc(var(--d) * -.7); left: 14px;
+  width: calc(var(--d) * 3 + var(--sg) * 2); height: var(--d);
+  background: var(--stud) 0 0 / var(--d) var(--d) no-repeat, var(--stud) calc(var(--d) + var(--sg)) 0 / var(--d) var(--d) no-repeat, var(--stud) 100% 0 / var(--d) var(--d) no-repeat;
+  pointer-events: none;
+}
+.g-reading { --c: var(--g-reading); --on-c: #fff; }
+.g-formats { --c: var(--g-formats); }
+.g-library { --c: var(--g-library); --on-c: #f1f2ee; }
+.g-sync { --c: var(--g-sync); }
+.g-home { --c: var(--g-home); }
+.g-look { --c: var(--g-look); --on-c: #fff; }
+.g-system { --c: var(--g-system); }
+.g-news { --c: var(--g-news); }
+.g-notes { --c: var(--g-notes); }
+.g-learning { --c: var(--g-learning); }
+.g-tools { --c: var(--g-tools); }
+.g-games { --c: var(--g-games); }
+.blk :focus-visible, .blk:focus-visible { outline-color: var(--ink); }
 
 /* First start: one field */
 .first { height: 100%; display: grid; place-items: center; padding: 2rem; }
 .first-card { width: min(100%, 31rem); text-align: center; }
 .first .cat { width: 15rem; height: auto; mix-blend-mode: multiply; }
-.first h1 { margin: .4rem 0 .6rem; font: 600 2.4rem/1.05 var(--display); letter-spacing: -.02em; }
-.first p { margin: 0 0 1.6rem; color: var(--ink-2); font: 400 1.05rem/1.55 var(--display); }
+.first h1 { margin: .4rem 0 .6rem; font: 800 2.6rem/1.02 var(--display); letter-spacing: -.045em; }
+.first p { margin: 0 0 1.6rem; color: var(--ink-2); font: 400 1.08rem/1.55 var(--text); }
 .first .line { min-height: 2.9rem; }
-.first .note { margin: 1rem 0 0; font: 400 .85rem/1.4 var(--display); }
+.first .note { margin: 1rem 0 0; font: 400 .85rem/1.4 var(--text); }
 
 /* The window */
 .window { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); }
-.bar { position: relative; z-index: 5; display: flex; align-items: center; gap: 1.4rem; padding: .65rem 1.2rem; border-bottom: 1px solid var(--rule); }
+.bar { position: relative; z-index: 5; display: flex; align-items: center; gap: 1rem; padding: .85rem 1.2rem .7rem 1rem; }
+.brand { display: flex; align-items: center; gap: .5rem; margin-right: .4rem; font: 800 1.15rem/1 var(--display); letter-spacing: -.02em; white-space: nowrap; }
+.brand img { width: 1.9rem; height: 1.9rem; }
 .projects { position: relative; margin-right: auto; }
-.bar .project { display: flex; align-items: center; gap: .3rem; padding: .3rem .4rem .3rem 0; font: 600 1.15rem/1 var(--display); }
-/* The kind beside the name: with code, without, or as the first words
-   ask; in the middle of the name's letters, which Literata sets low. */
-.bar .project .kind { position: relative; top: .1em; margin-left: .2rem; font: 400 .78rem/1 var(--text); color: var(--ink-2); white-space: nowrap; }
-.bar .project svg { align-self: center; width: 1.1rem; height: 1.1rem; fill: none; stroke: var(--ink-2); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+/* The project: its brick, the name and its kind on it. */
+.bar .project { display: flex; align-items: center; gap: .5rem; margin-top: 6px; padding: .5rem .7rem .5rem .85rem; border-radius: 12px; font: 800 1rem/1.1 var(--display); letter-spacing: -.01em; }
+.bar .project::before { --d: 8px; --sg: 3px; left: 9px; }
+.bar .project .kind { font: 500 .8rem/1 var(--text); opacity: .8; white-space: nowrap; }
+.bar .project svg { align-self: center; width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .project-list {
   position: absolute; left: 0; top: calc(100% + .4rem); z-index: 3; width: 21rem;
   /* Never off the screen: the recent ones scroll inside, the new ones and "All" stay. */
@@ -85,7 +128,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 }
 .project-list .news { display: grid; padding-bottom: .3rem; margin-bottom: .3rem; border-bottom: 1px solid var(--rule); }
 .project-list .recent { overflow: auto; display: grid; align-content: start; }
-.project-list button { display: grid; gap: .1rem; text-align: left; padding: .5rem .7rem; border-radius: .45rem; font: 500 1rem/1.3 var(--display); }
+.project-list button { display: grid; gap: .1rem; text-align: left; padding: .5rem .7rem; border-radius: .45rem; font: 600 1rem/1.3 var(--display); }
 .project-list button small { font: 400 .8rem/1.3 var(--text); color: var(--ink-2); }
 .project-list button:hover, .project-list .on { background: var(--sheet-2); }
 .project-list .new { font-weight: 600; }
@@ -97,7 +140,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   width: min(38rem, 100%); max-height: calc(100vh - 6rem); display: grid; grid-template-rows: auto auto auto auto minmax(0, 1fr);
   padding: 1.1rem 1.3rem 1rem; border-radius: 1rem; background: var(--sheet); box-shadow: 0 0 0 1px var(--rule), 0 1.4rem 2.4rem -1.4rem rgb(0 0 0 / .55);
 }
-.all-projects h2 { margin: 0; font: 600 1.3rem/1.2 var(--display); }
+.all-projects h2 { margin: 0; font: 800 1.4rem/1.2 var(--display); letter-spacing: -.03em; }
 .all-tools { display: flex; gap: .8rem; align-items: center; }
 .all-tools input {
   flex: 1; min-width: 0; padding: .6rem 1rem; border: 0; border-radius: 999px; background: var(--sheet-2); color: var(--ink);
@@ -113,7 +156,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .all-list li:first-child { border-top: 0; }
 .all-list li.on .open span { font-weight: 600; }
 .all-list .open { display: grid; gap: .05rem; padding: .45rem .5rem; border-radius: .45rem; text-align: left; min-width: 0; }
-.all-list .open span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 1rem/1.3 var(--display); }
+.all-list .open span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 1rem/1.3 var(--display); }
 .all-list .open small { font-size: .8rem; color: var(--ink-2); }
 .all-list button.open:hover { background: var(--sheet-2); }
 .all-list .row-do { display: flex; gap: .9rem; padding-right: .3rem; font: 400 .84rem/1.3 var(--text); opacity: 0; transition: opacity .15s; }
@@ -131,28 +174,29 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
    text: whatever does something looks like it can be pressed. */
 .link {
   display: inline-flex; align-items: center; justify-content: center; gap: .35em;
-  padding: .36em 1em .46em; border-radius: 999px; text-align: center;
-  box-shadow: inset 0 0 0 1.5px var(--ink); color: var(--ink);
-  font: 500 .92rem/1.15 var(--display); transition: background-color .2s, color .2s;
+  padding: .42em 1em .46em; border-radius: 999px; text-align: center;
+  background: var(--sheet-2); color: var(--ink);
+  font: 600 .92rem/1.15 var(--display); transition: background-color .2s, color .2s;
 }
-.link:hover:not(:disabled), .link[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
-.link:disabled { box-shadow: inset 0 0 0 1.5px var(--rule); color: var(--ink-2); cursor: default; }
-.link.quiet { box-shadow: inset 0 0 0 1px var(--field-edge); color: var(--ink-2); }
+.link:hover:not(:disabled), .link[aria-pressed="true"], .link[aria-expanded="true"] { background: var(--ink); color: var(--sheet); }
+.link:disabled { background: none; box-shadow: inset 0 0 0 1.5px var(--rule); color: var(--ink-2); cursor: default; }
+.link.quiet { background: none; box-shadow: inset 0 0 0 1.5px var(--rule); color: var(--ink-2); }
 .link.quiet:hover:not(:disabled) { background: var(--sheet-2); color: var(--ink); }
 .link.quiet[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
 @media (prefers-reduced-motion: reduce) { .link { transition: none; } }
-.bar .link { padding: .5rem 1rem .55rem; font: 500 .98rem/1 var(--display); }
-.bar .send { padding: .5rem 1rem .55rem; border-radius: 999px; background: var(--ink); color: var(--sheet); font: 600 .98rem/1 var(--display); }
+.bar .link { padding: .55rem 1rem; font: 600 .95rem/1 var(--display); }
+.bar .send { margin-left: .2rem; padding: .6rem 1rem; border-radius: 12px; background: var(--ink); color: var(--sheet); font: 700 .95rem/1 var(--display); box-shadow: 0 3px 0 rgb(0 0 0 / .22); white-space: nowrap; }
+.bar .send:hover { transform: translateY(1px); box-shadow: 0 2px 0 rgb(0 0 0 / .22); }
 .menu { position: relative; }
-.dots { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 999px; }
+.dots { display: grid; place-items: center; width: 2.4rem; height: 2.4rem; border-radius: 999px; }
 .dots svg { width: 1.2rem; height: 1.2rem; fill: var(--ink); }
 .dots:hover { background: var(--sheet-2); }
 .projects:has(+ .checks) { margin-right: 0; }
 .checks { position: relative; margin-right: auto; }
 .checks-state { font-size: .88rem; color: var(--ink-2); padding: .3rem .1rem; }
 /* The checks' state opens their list when there is one: then a button. */
-.checks-state:not(:disabled) { padding: .3rem .8rem .35rem; border-radius: 999px; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--field-edge); transition: background-color .2s; }
-.checks-state.fix:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.checks-state:not(:disabled) { padding: .4rem .85rem; border-radius: 999px; color: var(--ink); background: var(--sheet-2); font-weight: 600; transition: background-color .2s; }
+.checks-state.fix:not(:disabled) { box-shadow: inset 0 0 0 2px var(--ink); }
 .checks-state:not(:disabled):hover, .checks-state[aria-expanded="true"] { background: var(--sheet-2); }
 .checks-state:disabled { cursor: default; }
 .checks-list {
@@ -173,8 +217,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .menu-list button { text-align: left; padding: .5rem .7rem; border-radius: .45rem; }
 .menu-list button:hover { background: var(--sheet-2); }
 
-.main { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(22rem, 30%); min-height: 0; }
-.talk { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; border-right: 1px solid var(--rule); }
+.main { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(22rem, 32%); gap: 1rem; padding: 0 1rem 1rem; min-height: 0; }
+/* Which side shows in a narrow window; beside each other, no switch. */
+.sides { display: none; }
+.talk { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; }
 /* Back to the newest, when something came while reading further up. */
 .to-new {
   position: absolute; left: 50%; bottom: 5.4rem; transform: translateX(-50%); z-index: 1;
@@ -183,19 +229,33 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 }
 .to-new svg { width: .95rem; height: .95rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .to-new:hover { background: var(--sheet-2); }
-.log { overflow: auto; padding: 1.6rem 2rem; display: grid; align-content: start; gap: 1.1rem; }
-.empty { margin: 18vh auto 0; max-width: 26rem; text-align: center; color: var(--ink-2); font: 400 1.15rem/1.55 var(--display); }
-.internet { display: flex; gap: .5rem; align-items: center; padding: .35rem 1rem; font-size: .9rem; color: var(--ink-2); }
-.ideas { list-style: none; margin: 1.6rem auto 0; padding: 0; max-width: 34rem; display: grid; gap: .5rem; }
-.idea { display: grid; gap: .1rem; width: 100%; text-align: left; padding: .65rem .85rem; border: 1px solid var(--field-edge); border-radius: 8px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
-.idea:hover, .idea:focus-visible { border-color: var(--ink-2); }
-.idea span { color: var(--ink-2); font-size: .9em; }
-.idea em { font-style: normal; font-size: .8em; color: var(--ink-2); }
-.ask { padding: .9rem 1.2rem 1.1rem; min-height: 4.7rem; align-items: flex-end; }
+.log { overflow: auto; padding: 1rem 1.6rem 1.4rem; display: grid; align-content: start; gap: 1rem; }
+/* An empty conversation: the site's opening, the ideas a tray of bricks. */
+.empty { display: grid; gap: .9rem; margin-top: max(1rem, 9vh); }
+.kicker { display: flex; align-items: center; gap: .45rem; margin: 0; font: 700 .95rem/1 var(--text); color: var(--ink-2); }
+.kicker::before { content: ""; width: 1.2rem; height: 1.2rem; background: url(/favicon.svg) center / contain no-repeat; }
+.empty h1 { margin: 0; font: 800 clamp(2.2rem, 3.6vw, 3.4rem)/1 var(--display); letter-spacing: -.045em; max-width: 16ch; }
+.empty h1 .blk { display: inline-block; margin-top: 8px; padding: .02em .22em .08em; border-radius: .2em; transform: rotate(-2deg); }
+.empty .lede { margin: 0; max-width: 46ch; font-size: 1.12rem; color: var(--ink-2); }
+.internet { display: flex; gap: .55rem; align-items: center; font: 600 .9rem/1.2 var(--text); color: var(--ink); cursor: pointer; }
+/* The checkbox drawn as a switch: ink when on. */
+.internet input { appearance: none; flex: none; position: relative; width: 2.2rem; height: 1.3rem; margin: 0; border-radius: 999px; background: var(--rule); cursor: pointer; transition: background-color .15s; }
+.internet input::after { content: ""; position: absolute; top: .18rem; left: .18rem; width: .94rem; height: .94rem; border-radius: 999px; background: #fff; transition: left .15s; }
+.internet input:checked { background: var(--ink); }
+.internet input:checked::after { left: 1.08rem; }
+@media (prefers-reduced-motion: reduce) { .internet input, .internet input::after { transition: none; } }
+.ideas { list-style: none; margin: .6rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 1.3rem 1rem; }
+.idea { display: flex; flex-direction: column; gap: .3rem; width: 100%; height: 100%; min-height: 7.4rem; padding: 1rem 1.05rem; text-align: left; font: inherit; cursor: pointer; transition: translate .15s; }
+.idea:hover { translate: 0 -3px; }
+.idea em { font: 800 .7rem/1.2 var(--text); font-style: normal; text-transform: uppercase; letter-spacing: .07em; opacity: .9; }
+.idea b { font-size: 1.12rem; letter-spacing: -.02em; line-height: 1.2; }
+.idea span { font-size: .88rem; line-height: 1.38; }
+@media (prefers-reduced-motion: reduce) { .idea { transition: none; } }
+.ask { padding: .4rem 1.6rem 0; min-height: 4rem; align-items: flex-end; }
 /* The room above and below the words is a clear border, not padding: it
    does not scroll away, so lines never run into the field's edge, which
    is drawn outside. */
-.ask textarea { resize: none; min-height: 2.75rem; max-height: 12rem; padding-top: 0; padding-bottom: 0; border-block: .7rem solid transparent; box-shadow: 0 0 0 1px var(--field-edge); line-height: 1.4; border-radius: 1.4rem; field-sizing: content; overflow-y: auto; }
+.ask textarea { resize: none; min-height: 2.75rem; max-height: 12rem; padding-top: 0; padding-bottom: 0; border-block: .7rem solid transparent; box-shadow: 0 0 0 1.5px var(--rule), 0 .6rem 1.4rem -1rem rgb(0 0 0 / .35); line-height: 1.4; border-radius: 18px; field-sizing: content; overflow-y: auto; }
 .ask textarea:focus-visible { box-shadow: 0 0 0 2px var(--ink); }
 /* Long words: a quiet thin bar inside the rounded field, only when it
    scrolls, kept clear of its round ends, without arrows. */
@@ -214,15 +274,36 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .log .ai.md li { margin: .2em 0; }
 .log .ai.md code { font: .9em/1 ui-monospace, monospace; padding: .1em .3em; border-radius: .3em; background: var(--sheet-2); }
 .log .ai.md .md-code { margin: 0 0 .8em; padding: .5rem .7rem; border-radius: .5rem; background: var(--sheet-2); font-size: .82rem; white-space: pre-wrap; overflow-wrap: anywhere; }
-.log .me { justify-self: end; padding: .6rem .95rem .65rem; border-radius: 1.1rem 1.1rem .3rem 1.1rem; background: var(--sheet-2); }
-.log .ai { font: 400 1.04rem/1.6 var(--display); }
-.log .step { font-size: .86rem; color: var(--ink-2); padding-left: .9rem; border-left: 2px solid var(--rule); }
-/* Steps in a row read as one quiet column. */
-.log .step + .step { margin-top: -.85rem; padding-top: .25rem; }
-.log .step.failed { border-left-color: var(--field-edge); }
-.log .step.busy { animation: breathe 1.6s ease-in-out infinite; }
-@keyframes breathe { 50% { opacity: .45; } }
-@media (prefers-reduced-motion: reduce) { .log .step.busy { animation: none; } }
+.log .me { justify-self: end; max-width: 34rem; padding: .8rem 1.05rem; border-radius: 16px 16px 4px 16px; background: var(--ink); color: var(--sheet); }
+.log .ai { font: 400 1.05rem/1.55 var(--text); }
+/* What the AI did in a row: one grey card, a mark at each step. */
+.log .steps { max-width: 40rem; border-radius: 16px; background: var(--sheet-2); }
+.log .steps summary, .steps-head { display: flex; align-items: center; gap: .6rem; margin: 0; padding: .75rem 1rem; list-style: none; cursor: pointer; }
+.log .steps summary::-webkit-details-marker { display: none; }
+.log .steps summary span, .steps-head span { color: var(--ink-2); font-size: .88rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.log .steps summary svg { flex: none; margin-left: auto; width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: rotate .15s; }
+.log .steps[open] summary svg { rotate: 180deg; }
+.steps-list { display: grid; gap: .5rem; padding: 0 1rem .85rem; }
+.log .step { display: flex; gap: .65rem; align-items: flex-start; font-size: .92rem; line-height: 1.4; }
+.log .step::before, .mark {
+  content: ""; flex: none; width: 1.25rem; height: 1.25rem; margin-top: -.05rem; border-radius: 999px;
+  background: var(--ink) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4L18 8' fill='none' stroke='%23f3efe6' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / .85rem no-repeat;
+}
+.log .step.failed::before { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 8l8 8M16 8l-8 8' fill='none' stroke='%23a8261b' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") center / .85rem no-repeat; box-shadow: inset 0 0 0 2px var(--warn); }
+.log details.step { display: block; }
+.log details.step summary { display: flex; gap: .65rem; }
+.log details.step::before { content: none; }
+.log details.step summary::before { content: ""; flex: none; width: 1.25rem; height: 1.25rem; border-radius: 999px; background: inherit; }
+/* The step running: the card ringed in ink, a bar that moves. */
+.log .steps.now { background: transparent; box-shadow: inset 0 0 0 2px var(--ink); }
+.steps-head { cursor: default; }
+.mark.run { background: none; box-shadow: inset 0 0 0 2.5px var(--rule); position: relative; }
+.mark.run::after { content: ""; position: absolute; inset: 0; border-radius: 999px; border: 2.5px solid transparent; border-top-color: var(--ink); animation: spin 1s linear infinite; }
+.running { margin: 0 1rem .9rem; height: 4px; border-radius: 999px; background: var(--rule); overflow: hidden; }
+.running span { display: block; width: 35%; height: 100%; border-radius: 999px; background: var(--ink); animation: run 1.6s ease-in-out infinite; }
+@keyframes spin { to { rotate: 360deg; } }
+@keyframes run { from { translate: -100% 0; } to { translate: 290% 0; } }
+@media (prefers-reduced-motion: reduce) { .mark.run::after, .running span { animation: none; } .log .steps summary svg { transition: none; } }
 .log .cost { margin: 0; font-size: .8rem; color: var(--ink-2); }
 .log .earlier summary { cursor: pointer; font-size: .86rem; color: var(--ink-2); }
 /* The conversation before, laid out as the log itself: its spacing, its steps grouped. */
@@ -230,10 +311,11 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .log .fresh { justify-self: start; }
 
 /* The reader */
-.reader { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; justify-items: center; gap: .8rem; padding: 1rem 1rem 1.1rem; min-height: 0; }
-.which { display: flex; gap: .3rem; }
+/* The reader on its grey card. */
+.reader { display: flex; flex-direction: column; align-items: center; gap: .8rem; padding: 1rem 1rem .9rem; min-height: 0; border-radius: 24px; background: var(--sheet-2); }
+.which { display: flex; gap: .25rem; }
 /* Publishing on GitHub: the code to type, the steps reached. */
-.device-code .code { margin: .3rem 0; font: 600 1.6rem/1.2 var(--display); letter-spacing: .08em; user-select: all; }
+.device-code .code { margin: .3rem 0; font: 700 1.6rem/1.2 var(--display); letter-spacing: .08em; user-select: all; }
 .github-steps li { color: var(--ink-2); }
 .github-steps li.past { color: var(--ink); }
 .github-steps li.now { color: var(--ink); font-weight: 600; }
@@ -248,17 +330,17 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .shot-actions .link { padding: .15em .5em .22em; font-size: .82rem; }
 
 /* The switch in the middle, the camera at the right edge of the reader. */
-.reader-top { position: relative; justify-self: stretch; display: flex; justify-content: center; }
+.reader-top { position: relative; align-self: stretch; display: flex; justify-content: center; }
 .camera { position: absolute; right: 0; top: 50%; translate: 0 -50%; z-index: 1; }
-.camera-button { display: grid; place-items: center; width: 2.1rem; height: 2.1rem; border-radius: 999px; color: var(--ink-2); }
-.camera-button:hover, .camera-button[aria-expanded="true"] { color: var(--ink); background: var(--sheet-2); }
+.camera-button { display: grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 999px; color: var(--ink); background: var(--sheet); }
+.camera-button:hover, .camera-button[aria-expanded="true"] { color: var(--sheet); background: var(--ink); }
 .camera-button svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
 .camera-panel { gap: .55rem; min-width: 18.5rem; padding: .7rem; justify-items: start; }
 .camera-panel .menu-note { margin: 0; }
 .camera-panel .which { flex-wrap: nowrap; }
-.which button { padding: calc(.32rem - 1.5px) .85rem calc(.3rem + 1.5px); border-radius: 999px; font: 500 .92rem/1.2 var(--display); color: var(--ink-2); }
+.which button { padding: .45rem .85rem; border-radius: 999px; font: 600 .95rem/1.2 var(--display); color: var(--ink-2); }
 .which button:hover { color: var(--ink); }
-.which .on { color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+.which .on, .which .on:hover { color: var(--sheet); background: var(--ink); }
 .device {
   --pad: 18px;
   align-self: center; display: block; width: fit-content; max-width: 100%;
@@ -266,7 +348,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   background: var(--bezel); box-shadow: 0 1.2rem 1.6rem -1.1rem rgb(0 0 0 / .5); position: relative;
 }
 .device:focus-visible { outline-offset: 5px; }
-.device img { display: block; max-width: 100%; max-height: calc(100vh - 13rem); width: auto; height: auto; border-radius: 2px; touch-action: none; user-select: none; }
+.device img { display: block; max-width: 100%; max-height: calc(100vh - 19.5rem); width: auto; height: auto; border-radius: 2px; touch-action: none; user-select: none; }
 .device-boox-go-7 { padding-bottom: var(--pad); }
 .device-xteink-x4::after, .device-xteink-x4-pro::after {
   content: ""; position: absolute; left: 50%; bottom: calc(var(--pad) * .9); translate: -50% 0;
@@ -277,7 +359,9 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
    whatever it holds. A body the emulator describes is fitted to it with
    its bezels and its keys where they sit (body.ts), not the drawn row
    above; its screen is as large as the room allows. */
-.stage { justify-self: stretch; min-width: 0; min-height: 0; display: grid; place-items: center; overflow: hidden; }
+.stage { order: 1; flex: 1 1 0; align-self: stretch; min-width: 0; min-height: 0; display: grid; place-items: center; overflow: hidden; }
+.reader .internet { order: 2; }
+.reader .state { order: 3; }
 .body-room { display: block; }
 .device.has-body { --on-body: #e9e6dd; padding: 0; border-radius: 18px; }
 .device.has-body::after { content: none; }
@@ -309,7 +393,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   border-left: 1px solid var(--rule); box-shadow: -1rem 0 2rem -1.6rem rgb(0 0 0 / .45);
 }
 .drawer-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .9rem; }
-.drawer h2 { margin: 0; font: 600 1.25rem/1.2 var(--display); }
+.drawer h2 { margin: 0; font: 800 1.35rem/1.2 var(--display); letter-spacing: -.03em; }
 .close, .remove { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 999px; }
 .close:hover, .remove:hover { background: var(--sheet-2); }
 .close svg, .remove svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
@@ -359,7 +443,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .send-sheet .before p { margin: 0 0 .45rem; }
 .send-sheet .before .files { margin-top: .4rem; }
 .send-sheet .way { padding: 1rem 0; border-top: 1px solid var(--rule); }
-.send-sheet h3 { margin: 0 0 .3rem; font: 600 1.02rem/1.3 var(--display); }
+.send-sheet h3 { margin: 0 0 .3rem; font: 700 1.02rem/1.3 var(--display); }
 .send-sheet .way p { margin: 0 0 .7rem; color: var(--ink-2); }
 .send-sheet .way .go { min-height: 2.6rem; }
 .send-sheet .said { margin: .4rem 0 0; font-weight: 600; }
@@ -404,7 +488,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 /* The author key in Settings, and the backup before the first package. */
 .author-key, .app-update { margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
-.author-key h3, .app-update h3 { margin: 0 0 .4rem; font: 600 1.02rem/1.3 var(--display); }
+.author-key h3, .app-update h3 { margin: 0 0 .4rem; font: 800 1.12rem/1.3 var(--display); letter-spacing: -.02em; }
 .author-key .fingerprint { font-variant-numeric: tabular-nums; letter-spacing: .04em; }
 .key-gate .go { min-height: 2.4rem; }
 
@@ -414,7 +498,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .publish-sheet .way .store-file { display: grid; gap: .15rem; margin: .5rem 0 .9rem; padding: .75rem .95rem; border-radius: .8rem; background: var(--sheet-2); color: var(--ink); }
 .publish-sheet .store-file small { color: var(--ink-2); font-size: .86rem; }
 .publish-sheet .steps { display: grid; gap: .4rem; margin: 0 0 1.1rem; padding-left: 1.35rem; }
-.publish-sheet .steps li::marker { font: 600 .95rem var(--display); }
+.publish-sheet .steps li::marker { font: 700 .95rem var(--display); }
 
 /* Going back in the history: a quiet link under an answer, the reader
    showing that state first, the versions packed for the store. */
@@ -437,3 +521,54 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 /* The licences in Settings: the notices as they are written, scrolled. */
 .licences-text { max-height: 24rem; overflow: auto; white-space: pre-wrap; font-size: 0.75rem; line-height: 1.4; margin: 0.5rem 0 0; padding: 0.75rem; background: var(--sheet-2); border-radius: 6px; }
+
+/* Settings: a page of its own, the site's tiles; the chosen one turns ink,
+   as a selection does on e-ink. The PaperPaw version first. */
+.settings-page { overflow: auto; padding: .5rem 1rem 3rem; }
+.settings-in { max-width: 64rem; margin: 0 auto; display: grid; gap: 1.8rem; }
+.settings-in .back { justify-self: start; display: inline-flex; align-items: center; gap: .3rem; padding: .3rem .5rem .3rem .2rem; border-radius: 10px; font: 600 .95rem/1 var(--text); color: var(--ink-2); }
+.settings-in .back:hover { color: var(--ink); background: var(--sheet-2); }
+.settings-in .back svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.settings-in h1 { margin: -1rem 0 0; font: 800 2.8rem/1.05 var(--display); letter-spacing: -.045em; }
+.settings-in .versions { margin: 0; padding: 0; border: 0; }
+.settings-in .hint { margin: 0; font-size: .88rem; max-width: 60ch; }
+.settings-in .choices + .hint, .settings-in .tiles .hint { margin-top: .2rem; }
+.tiles { grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: .7rem; }
+.tiles legend { grid-column: 1 / -1; margin-bottom: .7rem; font: 800 1.35rem/1.2 var(--display); letter-spacing: -.02em; }
+.tiles .lede-s, .tiles .hint { grid-column: 1 / -1; }
+.lede-s { margin: -.3rem 0 .1rem; color: var(--ink-2); }
+.tiles .choice { position: relative; display: grid; align-content: start; gap: .25rem; margin: 0; padding: .9rem 1rem 1rem; border-radius: var(--r); background: var(--sheet-2); font-weight: 700; font-size: 1.05rem; transition: background-color .15s, color .15s, box-shadow .15s; }
+.tiles .choice:hover { background: var(--sheet-2); box-shadow: inset 0 0 0 2px var(--ink-2); }
+.tiles .choice input[type="radio"] { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+.tiles .choice:has(:focus-visible) { outline: 3px solid var(--ink); outline-offset: 3px; }
+.tiles .choice small { margin: 0; font-weight: 400; font-size: .87rem; line-height: 1.4; color: var(--ink-2); }
+.tiles .choice:has(:checked) { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.tiles .choice:has(:checked) small { color: #d6d2c8; }
+.tiles:disabled .choice { cursor: default; opacity: .7; }
+.settings-in .own + .choices, .settings-in .choices + .choices { margin: 0; padding: 0; border: 0; }
+.settings-in .own { display: flex; align-items: center; gap: .6rem; margin: -1rem 0 0; padding: 0; border: 0; }
+.settings-in .mode { padding: .45rem 2.2rem .45rem .9rem; font-size: .95rem; font-weight: 600; background-color: #fff; border: 0; border-radius: 12px; box-shadow: inset 0 0 0 1.5px var(--rule); }
+.halves { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+.halves .tiles { grid-template-columns: minmax(0, 1fr); }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: .8rem; align-items: start; }
+.cards > section { margin: 0; padding: 1.1rem 1.15rem 1.15rem; border: 0; border-radius: var(--r); box-shadow: inset 0 0 0 2px var(--rule); }
+.cards .hint { margin: .3rem 0 .6rem; }
+
+/* A narrow window: the bar to its essentials, one side at a time. */
+@media (max-width: 52rem) {
+  .bar { flex-wrap: wrap; gap: .5rem .6rem; padding: .7rem .8rem .6rem; }
+  .brand { margin: 0; font-size: 0; gap: 0; }
+  .spent { display: none; }
+  .main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); padding: 0 .6rem .6rem; gap: .6rem; }
+  .sides { display: flex; justify-self: center; gap: .2rem; padding: .25rem; border-radius: 999px; background: var(--sheet-2); }
+  .sides button { padding: .4rem .95rem; border-radius: 999px; font: 600 .92rem/1.2 var(--text); color: var(--ink-2); }
+  .sides [aria-selected="true"] { background: var(--ink); color: var(--sheet); }
+  .main.show-talk .reader, .main.show-reader .talk { display: none; }
+  .device img { max-height: calc(100vh - 22.5rem); }
+  .log { padding: 1rem .6rem; }
+  .ask { padding: .4rem .2rem 0; }
+  .ideas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .halves { grid-template-columns: minmax(0, 1fr); }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .settings-in h1 { font-size: 2.2rem; }
+}

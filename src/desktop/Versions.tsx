@@ -42,15 +42,26 @@ export function PaperPawVersion({ backend }: { backend: Backend }) {
   const target = versions.target;
   return (
     <section class="versions" aria-label="PaperPaw version">
-      <h3>PaperPaw version</h3>
-      <select aria-label="PaperPaw version" disabled={busy} value={valueOf(versions.pick)} onChange={(e) => void choose(e.currentTarget.value)}>
-        <option value="latest">Newest ({versions.releases[0]!.version})</option>
+      <fieldset class="choices tiles" disabled={busy}>
+        <legend>PaperPaw version</legend>
+        <p class="lede-s">Which PaperPaw your plugins are made for.</p>
+        <label class="choice">
+          <input type="radio" name="paperpaw" checked={valueOf(versions.pick) === "latest"} onChange={() => void choose("latest")} />
+          <span>
+            Newest
+            <small>{versions.releases[0]!.version}, follows new releases</small>
+          </span>
+        </label>
         {versions.releases.map((r) => (
-          <option value={`v:${r.version}`}>
-            PaperPaw {r.version} (interface {r.interface}, minor {r.minor})
-          </option>
+          <label class="choice">
+            <input type="radio" name="paperpaw" checked={valueOf(versions.pick) === `v:${r.version}`} onChange={() => void choose(`v:${r.version}`)} />
+            <span>
+              PaperPaw {r.version}
+              <small>interface {r.interface}, minor {r.minor}</small>
+            </span>
+          </label>
         ))}
-      </select>
+      </fieldset>
       {target && (
         <p class="hint">
           Plugins are made for PaperPaw {target.version}: interface {target.interface}, minor {target.minor}. They run on every PaperPaw with that minor or a newer one.
