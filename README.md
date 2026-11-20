@@ -13,8 +13,9 @@ it on a reader right in the window. When you like it, it goes onto your
 reader. It works with [PaperPaw](https://paperpaw.org), first on the
 Xteink X4 and X4 Pro.
 
-> **This is a beta (0.1.0-beta.15), for testers and developers.** It works
-> with PaperPaw 0.6.0-beta.2, which is a beta too. Expect bugs, and expect
+> **This is a beta (0.1.0-beta.15), for testers and developers.** It comes
+> with PaperPaw 0.6.0-beta.2, which is a beta too, and makes plugins for
+> the PaperPaw you choose in Settings (see below). Expect bugs, and expect
 > things to change before the first release. Keep a copy of your plugins
 > (*Export project…* in the menu). When something goes wrong, please open
 > an [issue](https://github.com/hthoene/paperpaw-workshop/issues) and say
@@ -110,6 +111,20 @@ plugins without code and a plugin with code is built for a reader and sent
 there; and the plugin store takes no plugin with code of this interface
 yet (it cannot rebuild it), so **Publish…** makes the package but the
 store does not list the code.
+
+### Which PaperPaw
+
+Settings has *PaperPaw version*: the newest release (the default) or one
+you pick. The list of releases is read from PaperPaw's GitHub releases when
+the workshop starts, so a new release needs no new workshop. The release is
+fetched once (its emulator and tools, checked against PaperPaw's release
+key), plugins are built with its SDK and tried in its emulator, and the AI
+is told only the SDK items that release has. Plugin interface 7 only grows:
+a plugin built for minor N of it runs on every PaperPaw with minor N or a
+newer one, which the list shows next to each release; the plugin file
+carries the minor it needs, and the store shows it. This needs the release
+to publish its signed emulator and handbook (see PaperPaw's release
+workflow) and its SDK on crates.io.
 
 ## What you need
 

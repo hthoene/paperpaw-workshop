@@ -37,14 +37,22 @@ pub fn emulator_library(profile: &str) -> Result<PathBuf, String> {
 /// PaperPaw's emulator, `paperpaw-emu` (paperpaw-dev beside it for the
 /// checks): `PAPERPAW_EMU` while the workshop is worked on (a build of
 /// PaperPaw's own), else the one of the PaperPaw release chosen, kept in
-/// the app's folder (`emulators/<version>/`, see the version step), else
+/// the app's folder (`emulators/<version>/`, versions.rs), else
 /// the one the installer brought (`emulator/` beside the app).
 pub fn emulator_program() -> Result<PathBuf, String> {
     if let Some(program) = std::env::var_os("PAPERPAW_EMU") {
         return Ok(PathBuf::from(program));
     }
     let name = format!("paperpaw-emu{}", std::env::consts::EXE_SUFFIX);
-    let chosen = app_data()?.join("emulators").join("current").join(&name);
+    let emulators = app_data()?.join("emulators");
+    // The release in use (versions.rs): `current.txt` names its folder.
+    if let Some(version) = std::fs::read_to_string(emulators.join("current.txt")).ok().map(|v| v.trim().to_string()).filter(|v| crate::versions::plain_version(v)) {
+        let program = emulators.join(version).join(&name);
+        if program.exists() {
+            return Ok(program);
+        }
+    }
+    let chosen = emulators.join("current").join(&name);
     if chosen.exists() {
         return Ok(chosen);
     }

@@ -22,6 +22,8 @@ import { Projects } from "./Projects";
 import { Reader } from "./Reader";
 import { KeySettings } from "./AuthorKey";
 import { AppUpdates, UpdateNotice } from "./Updates";
+import { PaperPawVersion } from "./Versions";
+import { itemsOfRelease } from "../handbook/release";
 import { Publish } from "./Publish";
 import { exportZip, Send } from "./Send";
 import { Workspace } from "./workspace";
@@ -123,10 +125,24 @@ function Window(props: WindowProps) {
   const [handbook, setHandbook] = useState<Handbook | null>(null);
   const [failed, setFailed] = useState("");
   useEffect(() => {
-    Handbook.load(new URL("handbook/", document.baseURI).href).then(setHandbook, (e: unknown) => setFailed(String(e)));
+    Handbook.load(new URL("handbook/", document.baseURI).href).then(async (loaded) => {
+      // The API of the release plugins are made for, read from that release
+      // (once chosen and fetched); the handbook's own where that fails.
+      try {
+        const versions = await props.backend.versionsState(true, true);
+        const target = versions?.target;
+        if (target) {
+          const items = itemsOfRelease(await props.backend.versionsHandbook(target.version));
+          if (items.length) loaded = loaded.retarget({ version: target.version, interface: target.interface, minor: target.minor }, items);
+        }
+      } catch {
+        // Offline, or the release not reached: the handbook as built.
+      }
+      setHandbook(loaded);
+    }, (e: unknown) => setFailed(String(e)));
   }, []);
   if (failed) return <p class="problem" role="alert">The handbook could not be read: {failed}</p>;
-  if (!handbook) return null;
+  if (!handbook) return <p class="hint" role="status">Looking for the PaperPaw release…</p>;
   return <Bench {...props} handbook={handbook} />;
 }
 
@@ -315,6 +331,7 @@ function Settings({ workspace, backend, keyKind, may, onClose }: { workspace: Wo
       </fieldset>
       <p class="hint">What each turn cost shows in the conversation.</p>
       <KeySettings backend={backend} />
+      <PaperPawVersion backend={backend} />
       <AppUpdates backend={backend} />
       <Licences />
     </aside>

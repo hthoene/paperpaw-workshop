@@ -20,6 +20,7 @@ mod sample;
 mod send;
 mod toolchain;
 mod usb;
+mod versions;
 mod xtensa;
 
 use tauri::Manager;
@@ -55,6 +56,9 @@ pub fn run() {
             emulator::emulator_widget,
             checks::plugin_check,
             code::code_build,
+            versions::versions_state,
+            versions::versions_choose,
+            versions::versions_handbook,
             toolchain::build_tools_install,
             send::send_wifi,
             send::send_card,

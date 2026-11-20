@@ -30,7 +30,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { apiLines, sdkItems } from "./sdk-items.mjs";
+import { apiLines, reachable, sdkItems } from "./sdk-items.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
@@ -304,11 +304,6 @@ const code = [
 // `builtin` (the ids the device has) and the few types the interface shares.
 // The rest of the SDK's items (`ui`, `widgets`, `Canvas` ...) are the
 // interface before 7, which Beta 4 no longer runs; the AI is not shown them.
-const SHARED_TYPES = new Set(["Color", "Handled", "Rect", "Point", "Version"]);
-const reachable = (itemPath) => {
-  const [first] = itemPath.split("::");
-  return first === "native" || first === "builtin" || SHARED_TYPES.has(first);
-};
 
 // 7. Topics for lookup_docs.
 const slug = (t) =>

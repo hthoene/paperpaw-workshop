@@ -565,6 +565,9 @@ pub fn state(fetch: &dyn Fetch, folders: &Folders, refresh_list: bool, apply: bo
             }
         }
     }
+    if let (Some(target), None, None) = (&target, &emulator, &problem) {
+        problem = Some(format!("PaperPaw {} has no emulator for this computer yet, and no newer release that could run its plugins has one.", target.version));
+    }
     let mut releases: Vec<Release> = cache.releases.iter().filter(|r| r.offered()).cloned().collect();
     releases.sort_by(|a, b| b.version().cmp(&a.version()));
     State { releases, pick, target, emulator: emulator.map(|r| r.version), using: current(folders), checked: (cache.fetched > 0).then_some(cache.fetched), problem }
@@ -671,8 +674,9 @@ mod tests {
     #[test]
     fn a_release_without_an_emulator_is_tried_in_the_newest_that_is_not_older() {
         let list = vec![release("0.6.0", 1, true), release("0.6.1", 2, true), release("0.7.0", 3, false), release("0.7.1", 1, true)];
-        let target = &list[2];
-        assert_eq!(emulator_for(&list, target).unwrap().version, "0.6.1", "minor 3 is more than any emulator's");
+        assert!(emulator_for(&list, &list[2]).is_none(), "minor 3 is more than any emulator's");
+        let two = release("0.7.0-beta.1", 2, false);
+        assert_eq!(emulator_for(&list, &two).unwrap().version, "0.6.1", "the newest with minor 2 or more");
         let own = &list[0];
         assert_eq!(emulator_for(&list, own).unwrap().version, "0.6.0", "its own first");
         let older = release("0.6.5", 1, false);
@@ -743,7 +747,8 @@ mod tests {
         let fake = github();
         let first = state(&fake, &folders, true, false, "linux-x64", &[]);
         assert_eq!(first.target.as_ref().unwrap().version, "0.7.0-beta.1");
-        assert_eq!(first.emulator.as_deref(), Some("0.6.0"), "the beta has no emulator signed: the newest that is not older has none either");
+        assert_eq!(first.emulator, None, "the beta has no emulator, and 0.6.0's minor 1 is older than its 2");
+        assert!(first.problem.as_deref().is_some_and(|p| p.contains("0.7.0-beta.1")), "{:?}", first.problem);
     }
 
     #[test]
