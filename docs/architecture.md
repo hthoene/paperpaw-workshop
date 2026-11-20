@@ -609,7 +609,7 @@ results) are English in the code, since they are prompt, not interface.
 The workshop began as a web page. Its pages (start, conversation, share
 panel) were removed once the window in `src/desktop/` replaced them. Still
 in the repository, and not used by the app: the reader in a frame
-(`frame.html`, `src/emulator/frame/`, `Workshop.attach`), the builder's
-container (`builder/`, `Dockerfile`, `docker-compose.yml`, `local/`),
+(`frame.html`, `src/emulator/frame/`, `Workshop.attach`), the web
+workshop's container (`Dockerfile`, `docker-compose.yml`, `local/`),
 and the description of the store API the pages used
 ([store-api.md](store-api.md)). They go when the app has what they did.

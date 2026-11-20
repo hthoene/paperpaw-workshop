@@ -5,6 +5,7 @@ pub const fn paperpaw_sdk::native::format::FormatFeatures::embedded_fonts(self) 
 pub const fn paperpaw_sdk::native::format::FormatFeatures::new() -> Self
 pub const fn paperpaw_sdk::native::format::FormatFeatures::page_labels(self) -> Self
 pub const fn paperpaw_sdk::native::format::FormatFeatures::right_to_left(self) -> Self
+pub const fn paperpaw_sdk::native::format::FormatFeatures::some_whole_pages(self) -> Self
 pub const fn paperpaw_sdk::native::format::FormatFeatures::table_of_contents(self) -> Self
 pub const fn paperpaw_sdk::native::format::FormatFeatures::whole_pages(self) -> Self
 pub const fn paperpaw_sdk::native::format::FormatFeatures::xpointers(self) -> Self
@@ -45,6 +46,7 @@ pub const fn paperpaw_sdk::native::format::BlockReply<'a>::image_index(self, u32
 pub const fn paperpaw_sdk::native::format::BlockReply<'a>::last_in_section(self) -> Self
 pub fn paperpaw_sdk::native::format::BlockReply<'a>::new(&'a paperpaw_document::Block) -> Self
 pub const fn paperpaw_sdk::native::format::BlockReply<'a>::next(self, u32) -> Self
+pub const fn paperpaw_sdk::native::format::BlockReply<'a>::whole_page(self) -> Self
 pub struct paperpaw_sdk::native::format::FormatCall<'a>
 pub fn paperpaw_sdk::native::format::FormatCall<'_>::reply_accept(&self, &mut [u8]) -> core::result::Result<usize, paperpaw_sdk::native::Error>
 pub fn paperpaw_sdk::native::format::FormatCall<'_>::reply_closed(&self, &mut [u8]) -> core::result::Result<usize, paperpaw_sdk::native::Error>
@@ -60,6 +62,7 @@ pub fn paperpaw_sdk::native::format::FormatCall<'_>::rows<'w>(&self, &'w mut [u8
 pub fn paperpaw_sdk::native::format::FormatCall<'_>::reply_metadata(&self, &paperpaw_document::Metadata, u32, &mut [u8]) -> core::result::Result<usize, paperpaw_sdk::native::Error>
 pub fn paperpaw_sdk::native::format::FormatCall<'_>::reply_metadata_text(&self, &paperpaw_document::Metadata, &mut [u8]) -> core::result::Result<usize, paperpaw_sdk::native::Error>
 pub const fn paperpaw_sdk::native::format::FormatCall<'a>::background(&self) -> bool
+pub const fn paperpaw_sdk::native::format::FormatCall<'a>::claimed(&self) -> bool
 pub const fn paperpaw_sdk::native::format::FormatCall<'a>::color(&self) -> bool
 pub const fn paperpaw_sdk::native::format::FormatCall<'a>::conversion(&self) -> u64
 pub const fn paperpaw_sdk::native::format::FormatCall<'a>::cover_side(&self) -> u32

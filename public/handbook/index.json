@@ -39,7 +39,7 @@
   "title": "What plugins contribute",
   "file": "docs--what-plugins-contribute.md",
   "summary": "Slots are how a plugin replaces another: bind your screen to\n`core.home` and it is the home screen; the user's\n`[slots]` configuration has the final word.",
-  "tokens": 10748
+  "tokens": 10897
  },
  {
   "id": "docs/what-a-slot-s-screen-does",
@@ -108,8 +108,8 @@
   "id": "docs/drawing-on-the-page",
   "title": "Drawing on the page",
   "file": "docs--drawing-on-the-page.md",
-  "summary": "A page layer (`layers::PageLayerSpec`) draws on every page a reader\nshows: side notes, a reading ruler, change bars.",
-  "tokens": 1225
+  "summary": "On plugin interface 7, text filters that change a paragraph (room between\nthe lines, words replaced, glosses and ruby, blocks inserted) and page\nlayers are the ",
+  "tokens": 1374
  },
  {
   "id": "docs/pictures-over-what-is-drawn",
@@ -207,7 +207,7 @@
   "title": "Publishing",
   "file": "docs--publishing.md",
   "summary": "The plugin library on paperpaw.org is what the website lists and every\nreader's store (*Plugin store*) installs from (ADR 0023).",
-  "tokens": 13475
+  "tokens": 13683
  },
  {
   "id": "docs/what-is-uploaded",
@@ -235,7 +235,7 @@
   "title": "Builds that match their source",
   "file": "docs--builds-that-match-their-source.md",
   "summary": "The site keeps each code plugin's source, shows it file by file, and\nrebuilds each build in a container with the toolchain its fingerprint\nnames, with the sampl",
-  "tokens": 634
+  "tokens": 842
  },
  {
   "id": "docs/a-plugin-source-of-your-own",
@@ -431,7 +431,7 @@
   "title": "Plugin interface 7: document",
   "file": "abi--document.md",
   "summary": "Contract for #228 (assignment #1025).",
-  "tokens": 34604
+  "tokens": 34849
  },
  {
   "id": "abi/files",
@@ -445,14 +445,21 @@
   "title": "Plugin interface 7: library",
   "file": "abi--library.md",
   "summary": "Contract for #228 (assignment #1025).",
-  "tokens": 17872
+  "tokens": 17900
  },
  {
   "id": "abi/network",
   "title": "Plugin interface 7: network",
   "file": "abi--network.md",
   "summary": "Contract for #228 (assignment #1088).",
-  "tokens": 10104
+  "tokens": 10239
+ },
+ {
+  "id": "abi/page-layers",
+  "title": "Plugin interface 7: page layers",
+  "file": "abi--page-layers.md",
+  "summary": "What a plugin adds to the reader's pages (#284, #261, ADR 0032): room above and below the lines,\nwords replaced, glosses, ruby and phonetics over or under words",
+  "tokens": 3545
  },
  {
   "id": "abi/records",
@@ -501,14 +508,14 @@
   "title": "Plugin interface 7: stages services",
   "file": "abi--stages-services.md",
   "summary": "Status: contract of family 1a (#228).",
-  "tokens": 7693
+  "tokens": 8023
  },
  {
   "id": "abi/ui",
   "title": "Plugin interface 7: ui",
   "file": "abi--ui.md",
   "summary": "Contract for #228 (assignment #1002).",
-  "tokens": 24614
+  "tokens": 24637
  },
  {
   "id": "abi/work",
@@ -627,7 +634,7 @@
   "title": "The SDK's module native",
   "file": "sdk--native.md",
   "summary": "```rust\npub trait paperpaw_sdk::native::Plugin: core::marker::Sized + 'static\npub struct paperpaw_sdk::native::CodeRoom\npub paperpaw_sdk::native::CodeRoom::gran",
-  "tokens": 2654
+  "tokens": 2666
  },
  {
   "id": "sdk/native/callbacks",
@@ -662,7 +669,7 @@
   "title": "The SDK's module native/declare",
   "file": "sdk--native--declare.md",
   "summary": "```rust\npub enum paperpaw_sdk::native::declare::BookDataKind\npub paperpaw_sdk::native::declare::BookDataKind::Cache\npub paperpaw_sdk::native::declare::BookDataK",
-  "tokens": 8144
+  "tokens": 8166
  },
  {
   "id": "sdk/native/device",
@@ -676,7 +683,7 @@
   "title": "The SDK's module native/document",
   "file": "sdk--native--document.md",
   "summary": "```rust\npub struct paperpaw_sdk::native::document::BlockCell(_)\npub fn paperpaw_sdk::native::document::BlockCell::align(&self) -> paperpaw_document::Align\npub c",
-  "tokens": 6558
+  "tokens": 6583
  },
  {
   "id": "sdk/native/events",
@@ -704,7 +711,7 @@
   "title": "The SDK's module native/format",
   "file": "sdk--native--format.md",
   "summary": "```rust\npub struct paperpaw_sdk::native::format::FormatFeatures(_)\npub const fn paperpaw_sdk::native::format::FormatFeatures::cache_made(self) -> Self\npub const",
-  "tokens": 2421
+  "tokens": 2492
  },
  {
   "id": "sdk/native/formatting",
@@ -739,7 +746,7 @@
   "title": "The SDK's module native/library",
   "file": "sdk--native--library.md",
   "summary": "```rust\npub struct paperpaw_sdk::native::library::AnnotationCursor\npub const fn paperpaw_sdk::native::library::AnnotationCursor::start() -> Self\npub struct pape",
-  "tokens": 8364
+  "tokens": 8378
  },
  {
   "id": "sdk/native/lookup",
@@ -753,7 +760,14 @@
   "title": "The SDK's module native/net",
   "file": "sdk--native--net.md",
   "summary": "```rust\npub struct paperpaw_sdk::native::net::HttpDone\npub const fn paperpaw_sdk::native::net::HttpDone::answered(&self) -> bool\npub const fn paperpaw_sdk::nati",
-  "tokens": 2822
+  "tokens": 2905
+ },
+ {
+  "id": "sdk/native/page_layers",
+  "title": "The SDK's module native/page_layers",
+  "file": "sdk--native--page_layers.md",
+  "summary": "```rust\npub struct paperpaw_sdk::native::page_layers::LayerKey<'a>\npub paperpaw_sdk::native::page_layers::LayerKey::action: &'a str\npub paperpaw_sdk::native::pa",
+  "tokens": 2450
  },
  {
   "id": "sdk/native/registrations",
@@ -788,7 +802,7 @@
   "title": "The SDK's module native/services",
   "file": "sdk--native--services.md",
   "summary": "```rust\npub struct paperpaw_sdk::native::services::PageEnd\npub paperpaw_sdk::native::services::PageEnd::generation: u32\npub paperpaw_sdk::native::services::Page",
-  "tokens": 1231
+  "tokens": 1318
  },
  {
   "id": "sdk/native/settings",
@@ -823,7 +837,7 @@
   "title": "The SDK's module native/stages",
   "file": "sdk--native--stages.md",
   "summary": "```rust\npub struct paperpaw_sdk::native::stages::Stage<'cb>\npub fn paperpaw_sdk::native::stages::Stage<'cb>::new(&'cb paperpaw_sdk::native::Host<'cb>, &'cb str)",
-  "tokens": 348
+  "tokens": 389
  },
  {
   "id": "sdk/native/storage",
@@ -858,7 +872,7 @@
   "title": "Settings of core",
   "file": "settings--core.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] developer` | Developer options | `true`, `false` | `false` | For developers",
-  "tokens": 7614
+  "tokens": 7704
  },
  {
   "id": "settings/aids",
@@ -984,7 +998,7 @@
   "title": "Settings of sleep",
   "file": "settings--sleep.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[sleep] show` | Show | `sleep.show.cat`, `sleep.show.cover`, `sleep.show.picture`,",
-  "tokens": 725
+  "tokens": 915
  },
  {
   "id": "settings/store",
@@ -1054,7 +1068,7 @@
   "title": "Settings in the group core.group.controls",
   "file": "settings-group--core.group.controls.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] edge-ends` | Swipe edges: top and bottom | 0 to 25 | `10` | How far from th",
-  "tokens": 483
+  "tokens": 574
  },
  {
   "id": "settings-group/core.group.library",
@@ -1082,7 +1096,7 @@
   "title": "Settings in the group sleep.group",
   "file": "settings-group--sleep.group.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] logo` | Logo picture | text | `` | Path of a JPEG or PNG shown instead of P",
-  "tokens": 760
+  "tokens": 950
  },
  {
   "id": "settings-group/home.group",

@@ -1,9 +1,13 @@
 | Setting | Name | Values | Default | What it does |
 |---|---|---|---|---|
-| `[sleep] show` | Show | `sleep.show.cat`, `sleep.show.cover`, `sleep.show.picture`, `sleep.show.overlay`, `sleep.show.widgets`, `sleep.show.message`, `sleep.show.page`, `vocabulary.sleep-card` | `sleep.show.cat` | What the screen shows while the device sleeps; e-ink keeps it without power. |
+| `[sleep] show` | Show | `sleep.show.cat`, `sleep.show.cover`, `sleep.show.picture`, `sleep.show.overlay`, `sleep.show.widgets`, `sleep.show.message`, `sleep.show.page`, `news.sleep`, `vocabulary.sleep-card` | `sleep.show.cat` | What the screen shows while the device sleeps; e-ink keeps it without power. |
+| `[sleep] look` | Sleep screen is | `sleep.look.device`, `sleep.look.light`, `sleep.look.dark` | `sleep.look.device` | Light or dark, whatever night mode says. |
 | `[sleep] off-show` | Show when switched off | `sleep.off-show.same`, `sleep.off-show.message`, `sleep.show.cat`, `sleep.show.cover`, `sleep.show.picture` | `sleep.off-show.same` | What the screen shows once the device is switched off; e-ink keeps it without power. |
+| `[sleep] off-look` | Off screen is | `sleep.look.device`, `sleep.look.light`, `sleep.look.dark` | `sleep.look.device` | Light or dark, whatever night mode says. |
 | `[sleep] start-show` | Show when starting | `sleep.start-show.built-in` | `sleep.start-show.built-in` | What the screen shows while the device starts, before plugins run. |
+| `[sleep] start-look` | Start screen is | `sleep.look.device`, `sleep.look.light`, `sleep.look.dark` | `sleep.look.device` | Light or dark, whatever night mode says. |
 | `[sleep] restart-show` | Show when restarting | `sleep.restart-show.built-in` | `sleep.restart-show.built-in` | What the screen shows while PaperPaw restarts. |
+| `[sleep] restart-look` | Restart screen is | `sleep.look.device`, `sleep.look.light`, `sleep.look.dark` | `sleep.look.device` | Light or dark, whatever night mode says. |
 | `[sleep] folder` | Pictures folder | text | `sleep` | For "My pictures": JPEG, PNG and GIF files, one after the other. |
 | `[sleep] widgets` | Widgets | list | `home.date, home.continue, stats.widget.today, home.recent` | For "Widgets": what the sleep screen shows, top to bottom. |
 | `[sleep] overlay-picture` | Picture over the page | text | `` | For "The page with a picture": the folder's pictures in turn, or a plugin's. |

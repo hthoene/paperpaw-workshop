@@ -102,7 +102,12 @@ file's size, 2.1).
   receive window and write chunks where the heap allows, whatever `max_file` says, and the radio
   stays out of power saving while data moves). It is honoured only when the request is made from
   a callback of a screen of the plugin that shows, outside a work run; otherwise it is ignored
-  without an error (no background radio hold). Others `ERR_UNSUPPORTED`.
+  without an error (no background radio hold). Bit 2 `lean` (#242, #419): never the larger
+  window and chunks, whatever the size (a background sync that must not take the heap from what
+  the user does), always honoured; bits 1 and 2 together are `ERR_INVALID`. Without either the
+  shell decides as before: a download saved to a file whose `max_file` is at least 32 KiB gets the
+  larger pair where the heap keeps its largest block with a 40 KiB reserve, one download at a
+  time (SDK `Request::priority`: `Normal`, `Boost`, `Lean`). Others `ERR_UNSUPPORTED`.
 - [D] **`timeout_ms`**: 0 for the default; else 1,000-600,000. The default is 30,000 for a request
   in memory, the whole request, connection and TLS counted, and for a request with a file
   60,000 **without a byte moving** (a long download never ends while it moves).

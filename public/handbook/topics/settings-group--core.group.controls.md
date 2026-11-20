@@ -3,6 +3,8 @@
 | `[core] edge-ends` | Swipe edges: top and bottom | 0 to 25 | `10` | How far from the edge a swipe counts as an edge swipe; 0: off. |
 | `[core] edge-sides` | Swipe edges: left and right | 0 to 25 | `5` | How far from the edge a swipe counts as an edge swipe; 0: off. |
 | `[core] keymap-preset` | Button layout | `core.standard`, `core.two-buttons`, `core.left-handed` | `core.standard` | What the device's buttons do. |
+| `[core] tap-layout` | Tap zones | `core.tap-thirds`, `core.tap-halves`, `core.tap-l-shape`, `core.tap-top-bottom` | `core.tap-thirds` | Where a tap turns pages or opens the menu while reading. |
+| `[core] tap-swap` | Swap left and right taps | `true`, `false` | `false` | Left goes on, right goes back; for the other hand. |
 | `[core] button-hints` | Button hints | `true`, `false` | `true` | A row at the bottom of the screen names what each button below it does. Not while reading. |
 | `[core] swap-page-buttons` | Swap the page buttons | `true`, `false` | `false` | The page buttons turn the other way while reading, not in menus. |
 | `[core] arrows-stay-on-page` | Arrow keys stay on the page | `true`, `false` | `false` | At a page's first or last entry the arrows go round on it; page buttons turn pages. |

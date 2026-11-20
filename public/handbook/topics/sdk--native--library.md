@@ -121,6 +121,7 @@ pub paperpaw_sdk::native::library::Show::All
 pub paperpaw_sdk::native::library::Show::Favourites
 pub paperpaw_sdk::native::library::Show::Finished
 pub paperpaw_sdk::native::library::Show::New
+pub paperpaw_sdk::native::library::Show::Opened
 pub paperpaw_sdk::native::library::Show::Reading
 pub paperpaw_sdk::native::library::Show::Unread
 pub enum paperpaw_sdk::native::library::Sort
