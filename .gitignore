@@ -11,7 +11,6 @@ test-results/
 handbook/registry/Cargo.lock
 scripts/*.png
 .work/
-builder/paperpaw.tar
 
 # The app's Rust side
 src-tauri/target/

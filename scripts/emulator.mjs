@@ -9,7 +9,7 @@
 // (rustup target add wasm32-unknown-unknown). The ref is built in a
 // worktree of its own (never the checkout as it is), and the module's
 // names section, only for stack traces, is left out. Its memory may grow
-// to 512 MB at most, as a build's module (builder/server.mjs): PaperPaw
+// to 512 MB at most, as the old hosted builder's modules had: PaperPaw
 // needs some 70; without a cap it could grow to 4 GB in the browser.
 
 import { execFileSync } from "node:child_process";

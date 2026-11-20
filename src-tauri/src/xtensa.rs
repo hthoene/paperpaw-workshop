@@ -6,7 +6,7 @@
 //!
 //! Until a PaperPaw release's `paperpaw-xtensa-std` archive is installed
 //! into that toolchain, a plugin is built with `-Zbuild-std`, as the
-//! hosted builder does (`builder/server.mjs`). Such a file runs on a reader,
+//! former hosted builder did. Such a file runs on a reader,
 //! but the store's rebuild would not match it byte for byte, so it is a
 //! *trial* build: kept apart, never put into a store file.
 
