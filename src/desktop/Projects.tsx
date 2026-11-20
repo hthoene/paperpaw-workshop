@@ -8,7 +8,16 @@ import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 
 import type { Listed } from "./folders";
 import { kindLabel } from "./kind";
+import { storeEntry } from "./publishing";
 import type { Workspace } from "./workspace";
+
+/** The colour of the project's brick: its group in the store once it has
+ *  one, else by its kind; a new plugin's is grey. */
+export function brick(workspace: Pick<Workspace, "project">): string {
+  const project = workspace.project;
+  if (!project) return "system";
+  return storeEntry(project).group ?? (project.kind === "code" ? "tools" : "home");
+}
 
 /** How many plugins the menu shows before "All projects…". */
 export const IN_MENU = 8;
@@ -48,7 +57,7 @@ export function Projects({ workspace }: { workspace: Workspace }) {
   const recent = workspace.listed.slice(0, IN_MENU);
   return (
     <div class="projects" ref={box}>
-      <button type="button" class="project" aria-expanded={open} onClick={() => setOpen(!open)}>
+      <button type="button" class={`project blk g-${brick(workspace)}`} aria-expanded={open} onClick={() => setOpen(!open)}>
         {workspace.name}
         <small class="kind">{kindLabel(workspace.project?.kind ?? workspace.freshKind)}</small>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" /></svg>

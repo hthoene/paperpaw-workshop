@@ -169,6 +169,8 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
   const [sending, setSending] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [notice, setNotice] = useState("");
+  // In a narrow window one side at a time: the conversation or the reader.
+  const [side, setSide] = useState<"talk" | "reader">("talk");
   // What an export or an import says, or why it could not.
   const tell = (done: Promise<string>) => done.then(setNotice, (e: unknown) => setNotice(e instanceof Error ? e.message : String(e)));
   // One panel at a time over the reader's side.
@@ -205,10 +207,11 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
   return (
     <div class="window">
       <header class="bar">
+        <span class="brand"><img src="favicon.svg" alt="" width="32" height="32" />Workshop</span>
         <Projects workspace={workspace} />
         <Findings desk={desk} />
         <Spent desk={desk} />
-        <button type="button" class="link" aria-expanded={files} onClick={() => only("files", !files)}>Files</button>
+        <button type="button" class="link files-button" aria-expanded={files} onClick={() => only("files", !files)}>Files</button>
         <button type="button" class="send" aria-expanded={sending} onClick={() => only("send", !sending)}>Send to reader</button>
         <div class="menu">
           <button type="button" class="dots" aria-label="Menu" aria-expanded={menu} onClick={() => setMenu(!menu)}>
@@ -233,7 +236,12 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
           )}
         </div>
       </header>
-      <div class="main">
+      {settings && <Settings workspace={workspace} backend={backend} keyKind={keyKind} may={desk.may} onClose={() => setSettings(false)} />}
+      <div class={`main show-${side}`} hidden={settings}>
+        <div class="sides" role="tablist" aria-label="Show">
+          <button type="button" role="tab" aria-selected={side === "talk"} onClick={() => setSide("talk")}>Conversation</button>
+          <button type="button" role="tab" aria-selected={side === "reader"} onClick={() => setSide("reader")}>Reader</button>
+        </div>
         <Conversation desk={desk} />
         <Reader
           backend={backend}
@@ -253,7 +261,6 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
         {!notice && <UpdateNotice backend={backend} />}
         {sending && <Send desk={desk} backend={backend} onClose={() => setSending(false)} />}
         {publishing && <Publish desk={desk} backend={backend} onClose={() => setPublishing(false)} />}
-        {settings && <Settings workspace={workspace} backend={backend} keyKind={keyKind} may={desk.may} onClose={() => setSettings(false)} />}
         {files && <Drawer workspace={workspace} pictures={backend} desk={desk} onClose={() => setFiles(false)} />}
       </div>
     </div>
@@ -276,65 +283,70 @@ function Settings({ workspace, backend, keyKind, may, onClose }: { workspace: Wo
   };
   const shown = CHOICES.filter((c) => may.includes(c.choice));
   return (
-    <aside class="drawer settings" aria-label="Settings">
-      <div class="drawer-head">
-        <h2>Settings</h2>
-        <button type="button" class="close" aria-label="Close" onClick={onClose}>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+    <main class="settings-page" aria-label="Settings">
+      <div class="settings-in">
+        <button type="button" class="back" onClick={onClose}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+          Back to {workspace.name}
         </button>
+        <h1>Settings</h1>
+        <PaperPawVersion backend={backend} />
+        <fieldset class="choices tiles">
+          <legend>Model</legend>
+          {shown.map((c) => (
+            <label class="choice">
+              <input type="radio" name="model" checked={choice === c.choice} onChange={() => pick(c.choice)} />
+              <span>
+                {c.label}
+                <small>{c.hint}</small>
+              </span>
+            </label>
+          ))}
+          {keyKind === "paperpaw" && <p class="hint">Your PaperPaw key decides which models you can pick.</p>}
+        </fieldset>
+        {project && shown.length > 1 && (
+          <label class="own">
+            <span>For {workspace.name}</span>
+            <select class="mode" value={own} onChange={(e) => void pickOwn(e.currentTarget.value as ModelChoice)}>
+              <option value="auto">Same as above</option>
+              {shown.filter((c) => c.choice !== "auto").map((c) => <option value={c.choice}>{c.label}</option>)}
+            </select>
+          </label>
+        )}
+        <div class="halves">
+          <fieldset class="choices tiles">
+            <legend>Check the look myself</legend>
+            {LOOK_CHOICES.map((c) => (
+              <label class="choice">
+                <input type="radio" name="looks" checked={looks === c.choice} onChange={() => { setLooks(c.choice); saveLooks(c.choice); }} />
+                <span>
+                  {c.label}
+                  <small>{c.hint}</small>
+                </span>
+              </label>
+            ))}
+          </fieldset>
+          <fieldset class="choices tiles">
+            <legend>Conversation length</legend>
+            {LENGTH_CHOICES.map((c) => (
+              <label class="choice">
+                <input type="radio" name="length" checked={length === c.choice} onChange={() => { setLength(c.choice); saveLength(c.choice); }} />
+                <span>
+                  {c.label}
+                  <small>{c.hint}</small>
+                </span>
+              </label>
+            ))}
+          </fieldset>
+        </div>
+        <p class="hint">What each turn cost shows in the conversation.</p>
+        <div class="cards">
+          <KeySettings backend={backend} />
+          <AppUpdates backend={backend} />
+          <Licences />
+        </div>
       </div>
-      <fieldset class="choices">
-        <legend>Model</legend>
-        {shown.map((c) => (
-          <label class="choice">
-            <input type="radio" name="model" checked={choice === c.choice} onChange={() => pick(c.choice)} />
-            <span>
-              {c.label}
-              <small>{c.hint}</small>
-            </span>
-          </label>
-        ))}
-        {keyKind === "paperpaw" && <p class="hint">Your PaperPaw key decides which models you can pick.</p>}
-      </fieldset>
-      {project && shown.length > 1 && (
-        <label class="own">
-          <span>For {workspace.name}</span>
-          <select class="mode" value={own} onChange={(e) => void pickOwn(e.currentTarget.value as ModelChoice)}>
-            <option value="auto">Same as above</option>
-            {shown.filter((c) => c.choice !== "auto").map((c) => <option value={c.choice}>{c.label}</option>)}
-          </select>
-        </label>
-      )}
-      <fieldset class="choices">
-        <legend>Check the look myself</legend>
-        {LOOK_CHOICES.map((c) => (
-          <label class="choice">
-            <input type="radio" name="looks" checked={looks === c.choice} onChange={() => { setLooks(c.choice); saveLooks(c.choice); }} />
-            <span>
-              {c.label}
-              <small>{c.hint}</small>
-            </span>
-          </label>
-        ))}
-      </fieldset>
-      <fieldset class="choices">
-        <legend>Conversation length</legend>
-        {LENGTH_CHOICES.map((c) => (
-          <label class="choice">
-            <input type="radio" name="length" checked={length === c.choice} onChange={() => { setLength(c.choice); saveLength(c.choice); }} />
-            <span>
-              {c.label}
-              <small>{c.hint}</small>
-            </span>
-          </label>
-        ))}
-      </fieldset>
-      <p class="hint">What each turn cost shows in the conversation.</p>
-      <KeySettings backend={backend} />
-      <PaperPawVersion backend={backend} />
-      <AppUpdates backend={backend} />
-      <Licences />
-    </aside>
+    </main>
   );
 }
 
