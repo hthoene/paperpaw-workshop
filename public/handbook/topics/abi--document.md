@@ -161,7 +161,9 @@ caller's own Data). Every op on a document is the opener's only (`ERR_DENIED` fo
 - [D] `doc_state`: `document`, `state` (0 ready, 1 preparing, 2 failed), `progress_ppm` while
   preparing, `status` (an `ERR_*` when failed), `format` (the format id), `flags` (bit 0 whole
   pages, bit 1 has a table of contents, bit 2 has XPointers, bit 3 has embedded fonts, bit 4 has
-  page labels, bit 5 right-to-left pages, bit 6 the cache was made now). A failed open still has an
+  page labels, bit 5 right-to-left pages, bit 6 the cache was made now, bit 7 some sections are
+  whole-page pictures and others are not, #242: each `doc_section` says which; bit 0 stays "every
+  section"). A failed open still has an
   id until closed, so the opener can read `status` (and the reader can say "this book is damaged").
 - [D] **Preparing**: while `state` is 1, the host calls the format's op 3
   `prepare` again and again from its main loop, between inputs, each call for at most 50 ms of work
@@ -260,7 +262,8 @@ caller's own Data). Every op on a document is the opener's only (`ERR_DENIED` fo
   N5 locator's ordinal belongs to the reader's inserted content). `section` past the end
   `ERR_NOT_FOUND`; an offset past a section's end is the end.
 - [D] `sections` rows `doc_section` (`index`, `length` in source units for progress, `flags` bit 0 a
-  whole-page picture). Op 17 `progress` answers `progress_ppm` (0-1,000,000) where the format
+  whole-page picture: a reader shows that section as a page picture, the others reflowed, where
+  `doc_state` bit 7 says the sections differ, #242). Op 17 `progress` answers `progress_ppm` (0-1,000,000) where the format
   computes it itself (interface 6 `Document::progress`, EPUB and TXT); elsewhere `ERR_UNSUPPORTED`
   and the reader computes it from the section lengths (N5 rule 1).
 - [D] `toc` rows `doc_toc` (`index`, `level` 0-15, `section`, `offset`, `flags` bit 0 approximate:
@@ -354,7 +357,7 @@ host passes them on after checking them.
 
 | Op | Name and input | Rows of the reply | Roots |
 | --- | --- | --- | --- |
-| 1 | `sniff` (`arg`: the file's first at most 512 bytes) | `fmt.yes` (or none: not mine) | none |
+| 1 | `sniff` (`arg`: the file's first at most 512 bytes; with `flags` bit 0 `claimed`, section 1's handing on: `arg` empty, `document` set) | `fmt.yes` (or none: not mine) | none (`claimed`: 3) |
 | 2 | `open` (`flags`, sides, `conversion`; `fmt.option`*) | `doc_state` | 2, 3, 4 |
 | 3 | `prepare` | `doc_state` (`progress_ppm`; `state` 0 done, 1 more, 2 failed) | 2, 3, 4 |
 | 4 | `close` | none | none |
@@ -640,7 +643,9 @@ caller's own Data). Every op on a document is the opener's only (`ERR_DENIED` fo
 - [D] `doc_state`: `document`, `state` (0 ready, 1 preparing, 2 failed), `progress_ppm` while
   preparing, `status` (an `ERR_*` when failed), `format` (the format id), `flags` (bit 0 whole
   pages, bit 1 has a table of contents, bit 2 has XPointers, bit 3 has embedded fonts, bit 4 has
-  page labels, bit 5 right-to-left pages, bit 6 the cache was made now). A failed open still has an
+  page labels, bit 5 right-to-left pages, bit 6 the cache was made now, bit 7 some sections are
+  whole-page pictures and others are not, #242: each `doc_section` says which; bit 0 stays "every
+  section"). A failed open still has an
   id until closed, so the opener can read `status` (and the reader can say "this book is damaged").
 - [D] **Preparing**: while `state` is 1, the host calls the format's op 3
   `prepare` again and again from its main loop, between inputs, each call for at most 50 ms of work
@@ -739,7 +744,8 @@ caller's own Data). Every op on a document is the opener's only (`ERR_DENIED` fo
   N5 locator's ordinal belongs to the reader's inserted content). `section` past the end
   `ERR_NOT_FOUND`; an offset past a section's end is the end.
 - [D] `sections` rows `doc_section` (`index`, `length` in source units for progress, `flags` bit 0 a
-  whole-page picture). Op 17 `progress` answers `progress_ppm` (0-1,000,000) where the format
+  whole-page picture: a reader shows that section as a page picture, the others reflowed, where
+  `doc_state` bit 7 says the sections differ, #242). Op 17 `progress` answers `progress_ppm` (0-1,000,000) where the format
   computes it itself (interface 6 `Document::progress`, EPUB and TXT); elsewhere `ERR_UNSUPPORTED`
   and the reader computes it from the section lengths (N5 rule 1).
 - [D] `toc` rows `doc_toc` (`index`, `level` 0-15, `section`, `offset`, `flags` bit 0 approximate:
@@ -828,7 +834,7 @@ host passes them on after checking them.
 
 | Op | Name and input | Rows of the reply | Roots |
 | --- | --- | --- | --- |
-| 1 | `sniff` (`arg`: the file's first at most 512 bytes) | `fmt.yes` (or none: not mine) | none |
+| 1 | `sniff` (`arg`: the file's first at most 512 bytes; with `flags` bit 0 `claimed`, section 1's handing on: `arg` empty, `document` set) | `fmt.yes` (or none: not mine) | none (`claimed`: 3) |
 | 2 | `open` (`flags`, sides, `conversion`; `fmt.option`*) | `doc_state` | 2, 3, 4 |
 | 3 | `prepare` | `doc_state` (`progress_ppm`; `state` 0 done, 1 more, 2 failed) | 2, 3, 4 |
 | 4 | `close` | none | none |
@@ -1022,7 +1028,9 @@ and the SDK answers `Unsupported` there.
   and end with the document; a plugin's own come from `image_prepare` and end with `image_release`
   or when the plugin stops. Image ids are per plugin: another plugin's id is `ERR_NOT_FOUND`.
 - [D] A format answers a picture as its cache path (stage-local `fmt.image`: `path: str 256` in root
-  6, `index: u32`, `width`, `height`, `flags` bit 0 not decoded yet); the host turns it into an
+  6, `index: u32`, `width`, `height`, `flags` bit 0 not decoded yet, bit 1 a whole page: the
+  picture of a whole-page section of a book whose sections differ, which the picture stage is
+  asked about as a comic's page, place 1, #242); the host turns it into an
   image id for the opener. **Two names:** the image id is only a drawing handle and may end; `index`
   is the format's own number of the picture in the document (op 18's `index`; `u32::MAX` the cover),
   stable for the document's life, and `doc_image` carries it on, so the reader can always ask again.

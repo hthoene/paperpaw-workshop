@@ -39,6 +39,10 @@ pub enum paperpaw_sdk::native::net::FileRoot
 pub paperpaw_sdk::native::net::FileRoot::Data
 pub paperpaw_sdk::native::net::FileRoot::Files
 pub paperpaw_sdk::native::net::FileRoot::Install
+pub enum paperpaw_sdk::native::net::Priority
+pub paperpaw_sdk::native::net::Priority::Boost
+pub paperpaw_sdk::native::net::Priority::Lean
+pub paperpaw_sdk::native::net::Priority::Normal
 pub enum paperpaw_sdk::native::net::Reason
 pub paperpaw_sdk::native::net::Reason::Cancelled
 pub paperpaw_sdk::native::net::Reason::Dns
@@ -83,6 +87,7 @@ pub fn paperpaw_sdk::native::net::Request<'a>::headers(self, &'a [paperpaw_sdk::
 pub const fn paperpaw_sdk::native::net::Request<'a>::max_body(self, u32) -> Self
 pub const fn paperpaw_sdk::native::net::Request<'a>::max_file(self, u64) -> core::result::Result<Self, paperpaw_sdk::native::Error>
 pub fn paperpaw_sdk::native::net::Request<'a>::new(u32, &'a str, &'a str) -> core::result::Result<Self, paperpaw_sdk::native::Error>
+pub const fn paperpaw_sdk::native::net::Request<'a>::priority(self, paperpaw_sdk::native::net::Priority) -> Self
 pub const fn paperpaw_sdk::native::net::Request<'a>::progress(self) -> Self
 pub fn paperpaw_sdk::native::net::Request<'a>::save_to(self, paperpaw_sdk::native::net::FileRoot, &'a str) -> core::result::Result<Self, paperpaw_sdk::native::Error>
 pub fn paperpaw_sdk::native::net::Request<'a>::send_file(self, paperpaw_sdk::native::net::FileRoot, &'a str) -> core::result::Result<Self, paperpaw_sdk::native::Error>

@@ -271,6 +271,19 @@ Each major of a service has one schema file, `abi/services/<key>@<major>.def` (J
   `max_reply` never change (so a reply never grows past what a caller sized for); a new op takes a
   new id and the service's next revision; a breaking change is a new major, a new schema file next
   to the old one.
+- [D] **A frozen service gains ops** (#242). A revision only appends ops: the schema's `revision`
+  goes up by one, the new ops take `since` that revision, and its catalog entry
+  (`metadata.services`) moves to the same `semantic_revision`; nothing else of either changes
+  (`tools/abi-gen.py` refuses a changed or removed op, a revision that goes back, and a catalog
+  entry that changes otherwise, also once a minor is released; the SDK's interface test takes a
+  grown `REVISION` constant as an addition). A plugin's metadata names the revision it was built
+  against, and the host admits **any** revision of a service it has at that major (D1 matches key
+  and major, and a table at most the host's): one built before the ops were appended runs
+  unchanged and opens the revision it knows; one built against a later revision than the host's
+  opens the host's (`service.open` with a higher `minor` is `ERR_UNSUPPORTED`). A call of an op
+  newer than the revision the handle was opened with is `ERR_UNSUPPORTED`, refused before the
+  host's backend. SDK: `Service::open_newest` opens the newest revision both know,
+  `Service::revision` and `Service::has_op` say what the handle has.
 - [D] **First services**, each with its family's PR: `core.device` (DEV), `core.registry` (REG),
   `core.storage` metadata (FS), `core.library` (LIB), `core.secrets` (SEC), `core.net` (NET).
   `core.test-echo` exists for host tests and is never offered on a device.

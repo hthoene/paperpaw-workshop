@@ -7,9 +7,12 @@ pub paperpaw_sdk::native::services::PageEnd::total: u32
 pub paperpaw_sdk::native::services::PageEnd::truncated: bool
 pub struct paperpaw_sdk::native::services::Service
 pub fn paperpaw_sdk::native::services::Service::call(&self, &paperpaw_sdk::native::Host<'_>, u32, &[u8], &mut [u8]) -> core::result::Result<usize, paperpaw_sdk::native::Error>
+pub fn paperpaw_sdk::native::services::Service::has_op(&self, u32) -> bool
 pub fn paperpaw_sdk::native::services::Service::max_reply(&self, u32) -> core::option::Option<usize>
 pub fn paperpaw_sdk::native::services::Service::open(&paperpaw_sdk::native::Host<'_>, &str, u16, u16) -> core::result::Result<Self, paperpaw_sdk::native::Error>
+pub fn paperpaw_sdk::native::services::Service::open_newest(&paperpaw_sdk::native::Host<'_>, &str, u16) -> core::result::Result<Self, paperpaw_sdk::native::Error>
 pub fn paperpaw_sdk::native::services::Service::release(self, &paperpaw_sdk::native::Host<'_>) -> core::result::Result<(), paperpaw_sdk::native::Error>
+pub const fn paperpaw_sdk::native::services::Service::revision(&self) -> u16
 pub struct paperpaw_sdk::native::services::ServicePluginUsage<'a>
 pub paperpaw_sdk::native::services::ServicePluginUsage::awake_ms: u64
 pub paperpaw_sdk::native::services::ServicePluginUsage::awake_reason: &'a str

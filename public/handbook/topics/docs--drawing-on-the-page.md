@@ -1,5 +1,14 @@
 ### Drawing on the page
 
+On plugin interface 7, text filters that change a paragraph (room between
+the lines, words replaced, glosses and ruby, blocks inserted) and page
+layers are the reader's stages `reader.text@1` and `reader.layer@1`: the
+SDK has them as `native::page_layers` (`TextAsk`, `TextAnswer`, `LayerAsk`,
+`LayerAnswer`), `docs/abi/page-layers.md` is their contract and
+`samples/interlinear` a plugin that shows a translation under each sentence and
+`samples/read-along` one that marks the sentence read aloud.
+What follows is interface 6's form.
+
 A page layer (`layers::PageLayerSpec`) draws on every page a reader
 shows: side notes, a reading ruler, change bars. It may reserve room at
 a side of the text, which is then laid out without it, and it hears

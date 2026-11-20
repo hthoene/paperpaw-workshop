@@ -163,6 +163,7 @@ pub const fn paperpaw_sdk::native::document::DocState<'a>::id(&self) -> paperpaw
 pub const fn paperpaw_sdk::native::document::DocState<'a>::preparation(&self) -> paperpaw_sdk::native::document::Preparation
 pub const fn paperpaw_sdk::native::document::DocState<'a>::progress_ppm(&self) -> u32
 pub const fn paperpaw_sdk::native::document::DocState<'a>::right_to_left(&self) -> bool
+pub const fn paperpaw_sdk::native::document::DocState<'a>::some_whole_pages(&self) -> bool
 pub const fn paperpaw_sdk::native::document::DocState<'a>::status(&self) -> i32
 pub const fn paperpaw_sdk::native::document::DocState<'a>::whole_pages(&self) -> bool
 pub struct paperpaw_sdk::native::document::DocTextPart<'a>
