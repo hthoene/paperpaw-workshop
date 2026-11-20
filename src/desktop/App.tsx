@@ -207,7 +207,7 @@ function Bench({ backend, apiKey, keyKind, onForgetKey, handbook }: WindowProps 
   return (
     <div class="window">
       <header class="bar">
-        <span class="brand"><img src="favicon.svg" alt="" width="32" height="32" />Workshop</span>
+        <span class="brand"><img src="mark.svg" alt="" width="32" height="32" />Workshop</span>
         <Projects workspace={workspace} />
         <Findings desk={desk} />
         <Spent desk={desk} />
