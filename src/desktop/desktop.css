@@ -233,7 +233,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* An empty conversation: the site's opening, the ideas a tray of bricks. */
 .empty { display: grid; gap: .9rem; margin-top: max(1rem, 9vh); }
 .kicker { display: flex; align-items: center; gap: .45rem; margin: 0; font: 700 .95rem/1 var(--text); color: var(--ink-2); }
-.kicker::before { content: ""; width: 1.2rem; height: 1.2rem; background: url(/favicon.svg) center / contain no-repeat; }
+.kicker::before { content: ""; width: 1.2rem; height: 1.2rem; background: url(/mark.svg) center / contain no-repeat; }
 .empty h1 { margin: 0; font: 800 clamp(2.2rem, 3.6vw, 3.4rem)/1 var(--display); letter-spacing: -.045em; max-width: 16ch; }
 .empty h1 .blk { display: inline-block; margin-top: 8px; padding: .02em .22em .08em; border-radius: .2em; transform: rotate(-2deg); }
 .empty .lede { margin: 0; max-width: 46ch; font-size: 1.12rem; color: var(--ink-2); }
