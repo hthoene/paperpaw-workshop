@@ -173,6 +173,42 @@ pub fn paperpaw_sdk::native::stage_schemas::core_book_badge_v1::ReplyWriter<'w>:
 pub fn paperpaw_sdk::native::stage_schemas::core_book_badge_v1::ReplyWriter<'w>::len(&self) -> usize
 pub fn paperpaw_sdk::native::stage_schemas::core_book_badge_v1::ReplyWriter<'w>::new(&'w mut [u8]) -> core::result::Result<Self, i32>
 pub fn paperpaw_sdk::native::stage_schemas::core_book_badge_v1::ReplyWriter<'w>::push(&mut self, &paperpaw_sdk::native::stage_schemas::core_book_badge_v1::Record<'_>) -> core::result::Result<(), i32>
+pub struct paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvAsk<'a>
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvAsk<'a>::TAG: u32
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvAsk<'a>::decode(&'a [u8]) -> core::result::Result<Self, i32>
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvAsk<'a>::encode(&self, &mut [u8]) -> core::result::Result<usize, i32>
+pub const fn paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvAsk<'a>::new(&'a str, u32, &'a str) -> Self
+pub paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvAsk::element: &'a str
+pub paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvAsk::flags: u32
+pub paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvAsk::markup: &'a str
+pub struct paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvText<'a>
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvText<'a>::TAG: u32
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvText<'a>::decode(&'a [u8]) -> core::result::Result<Self, i32>
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvText<'a>::encode(&self, &mut [u8]) -> core::result::Result<usize, i32>
+pub const fn paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvText<'a>::new(&'a str, u32) -> Self
+pub paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvText::flags: u32
+pub paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvText::text: &'a str
+pub struct paperpaw_sdk::native::stage_schemas::core_convert_v1::InputWriter<'w>
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::InputWriter<'w>::finish(self) -> core::result::Result<usize, i32>
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::InputWriter<'w>::is_empty(&self) -> bool
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::InputWriter<'w>::len(&self) -> usize
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::InputWriter<'w>::new(&'w mut [u8]) -> core::result::Result<Self, i32>
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::InputWriter<'w>::push(&mut self, &paperpaw_sdk::native::stage_schemas::core_convert_v1::Record<'_>) -> core::result::Result<(), i32>
+pub enum paperpaw_sdk::native::stage_schemas::core_convert_v1::Record<'a>
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::Record<'a>::tag(&self) -> u32
+pub paperpaw_sdk::native::stage_schemas::core_convert_v1::Record::ConvAsk(paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvAsk<'a>)
+pub paperpaw_sdk::native::stage_schemas::core_convert_v1::Record::ConvText(paperpaw_sdk::native::stage_schemas::core_convert_v1::ConvText<'a>)
+pub struct paperpaw_sdk::native::stage_schemas::core_convert_v1::RecordStream<'a>
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::RecordStream<'_>::is_empty(&self) -> bool
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::RecordStream<'_>::len(&self) -> usize
+pub type paperpaw_sdk::native::stage_schemas::core_convert_v1::RecordStream<'a>::Item = core::result::Result<paperpaw_sdk::native::stage_schemas::core_convert_v1::Record<'a>, i32>
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::RecordStream<'a>::next(&mut self) -> core::option::Option<Self::Item>
+pub struct paperpaw_sdk::native::stage_schemas::core_convert_v1::ReplyWriter<'w>
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::ReplyWriter<'w>::finish(self) -> core::result::Result<usize, i32>
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::ReplyWriter<'w>::is_empty(&self) -> bool
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::ReplyWriter<'w>::len(&self) -> usize
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::ReplyWriter<'w>::new(&'w mut [u8]) -> core::result::Result<Self, i32>
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::ReplyWriter<'w>::push(&mut self, &paperpaw_sdk::native::stage_schemas::core_convert_v1::Record<'_>) -> core::result::Result<(), i32>
 pub struct paperpaw_sdk::native::stage_schemas::core_format_v1::FmtBlock<'a>
 pub const paperpaw_sdk::native::stage_schemas::core_format_v1::FmtBlock<'a>::TAG: u32
 pub fn paperpaw_sdk::native::stage_schemas::core_format_v1::FmtBlock<'a>::decode(&'a [u8]) -> core::result::Result<Self, i32>
@@ -563,6 +599,21 @@ pub const paperpaw_sdk::native::stage_schemas::core_book_badge_v1::REPLY_ROWS: u
 pub const paperpaw_sdk::native::stage_schemas::core_book_badge_v1::REPLY_TAGS: &[u32]
 pub const paperpaw_sdk::native::stage_schemas::core_book_badge_v1::REVISION: u16
 pub const paperpaw_sdk::native::stage_schemas::core_book_badge_v1::TEST_ONLY: bool
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::CONV_ASK_ELEMENT_MAX_BYTES: usize
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::CONV_ASK_MARKUP_MAX_BYTES: usize
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::CONV_ASK_TAG: u32
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::CONV_TEXT_TAG: u32
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::CONV_TEXT_TEXT_MAX_BYTES: usize
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::INPUT_TAGS: &[u32]
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::KEY: &str
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::MAJOR: u16
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::MAX_INPUT: usize
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::MAX_REPLY: usize
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::MAX_SUBSCRIBERS: usize
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::REPLY_ROWS: usize
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::REPLY_TAGS: &[u32]
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::REVISION: u16
+pub const paperpaw_sdk::native::stage_schemas::core_convert_v1::TEST_ONLY: bool
 pub const paperpaw_sdk::native::stage_schemas::core_format_v1::FMT_AT_TAG: u32
 pub const paperpaw_sdk::native::stage_schemas::core_format_v1::FMT_BLOCK_LANG_MAX_BYTES: usize
 pub const paperpaw_sdk::native::stage_schemas::core_format_v1::FMT_BLOCK_TAG: u32
@@ -709,6 +760,10 @@ pub fn paperpaw_sdk::native::stage_schemas::core_book_badge_v1::input_decode(&[u
 pub fn paperpaw_sdk::native::stage_schemas::core_book_badge_v1::input_encode(&[paperpaw_sdk::native::stage_schemas::core_book_badge_v1::Record<'_>], &mut [u8]) -> core::result::Result<usize, i32>
 pub fn paperpaw_sdk::native::stage_schemas::core_book_badge_v1::reply_decode(&[u8]) -> core::result::Result<paperpaw_sdk::native::stage_schemas::core_book_badge_v1::RecordStream<'_>, i32>
 pub fn paperpaw_sdk::native::stage_schemas::core_book_badge_v1::reply_encode(&[paperpaw_sdk::native::stage_schemas::core_book_badge_v1::Record<'_>], &mut [u8]) -> core::result::Result<usize, i32>
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::input_decode(&[u8]) -> core::result::Result<paperpaw_sdk::native::stage_schemas::core_convert_v1::RecordStream<'_>, i32>
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::input_encode(&[paperpaw_sdk::native::stage_schemas::core_convert_v1::Record<'_>], &mut [u8]) -> core::result::Result<usize, i32>
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::reply_decode(&[u8]) -> core::result::Result<paperpaw_sdk::native::stage_schemas::core_convert_v1::RecordStream<'_>, i32>
+pub fn paperpaw_sdk::native::stage_schemas::core_convert_v1::reply_encode(&[paperpaw_sdk::native::stage_schemas::core_convert_v1::Record<'_>], &mut [u8]) -> core::result::Result<usize, i32>
 pub fn paperpaw_sdk::native::stage_schemas::core_format_v1::input_decode(&[u8]) -> core::result::Result<paperpaw_sdk::native::stage_schemas::core_format_v1::RecordStream<'_>, i32>
 pub fn paperpaw_sdk::native::stage_schemas::core_format_v1::input_encode(&[paperpaw_sdk::native::stage_schemas::core_format_v1::Record<'_>], &mut [u8]) -> core::result::Result<usize, i32>
 pub fn paperpaw_sdk::native::stage_schemas::core_format_v1::reply_decode(&[u8]) -> core::result::Result<paperpaw_sdk::native::stage_schemas::core_format_v1::RecordStream<'_>, i32>
@@ -734,6 +789,7 @@ pub fn paperpaw_sdk::native::stage_schemas::core_widget_v1::input_encode(&[paper
 pub fn paperpaw_sdk::native::stage_schemas::core_widget_v1::reply_decode(&[u8]) -> core::result::Result<paperpaw_sdk::native::stage_schemas::core_widget_v1::RecordStream<'_>, i32>
 pub fn paperpaw_sdk::native::stage_schemas::core_widget_v1::reply_encode(&[paperpaw_sdk::native::stage_schemas::core_widget_v1::Record], &mut [u8]) -> core::result::Result<usize, i32>
 pub mod paperpaw_sdk::native::stage_schemas::core_book_badge_v1
+pub mod paperpaw_sdk::native::stage_schemas::core_convert_v1
 pub mod paperpaw_sdk::native::stage_schemas::core_format_v1
 pub mod paperpaw_sdk::native::stage_schemas::core_input_filter_v1
 pub mod paperpaw_sdk::native::stage_schemas::core_lookup_v1

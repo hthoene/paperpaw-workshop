@@ -13,8 +13,8 @@ it on a reader right in the window. When you like it, it goes onto your
 reader. It works with [PaperPaw](https://paperpaw.org), first on the
 Xteink X4 and X4 Pro.
 
-> **This is a beta (0.1.0-beta.15), for testers and developers.** It comes
-> with PaperPaw 0.6.0-beta.2, which is a beta too, and makes plugins for
+> **This is a beta (0.1.0-beta.16), for testers and developers.** It comes
+> with PaperPaw 0.6.0-beta.4, which is a beta too, and makes plugins for
 > the PaperPaw you choose in Settings (see below). Expect bugs, and expect
 > things to change before the first release. Keep a copy of your plugins
 > (*Export project…* in the menu). When something goes wrong, please open

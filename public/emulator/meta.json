@@ -1,7 +1,7 @@
 {
-  "ref": "22219684",
-  "commit": "2221968446d64227c32c46d5c7a9c8af89e58335",
-  "built": "2026-10-24",
-  "bytes": 14641067,
-  "sha256": "9be5d6728ff2a910d0ff82581190b36ceb87228190dcd0602a05525a577cc0bd"
+  "ref": "origin/release/0.6.0-beta.4",
+  "commit": "0b6e482456a752ebdd2faa9b25ede5f00b65ae6b",
+  "built": "2026-11-20",
+  "bytes": 8946873,
+  "sha256": "3e191d405f157f589a5d14813c5b3514d06b3d2f95c3f53a8353fad0357b1900"
 }

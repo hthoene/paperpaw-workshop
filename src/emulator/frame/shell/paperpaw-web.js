@@ -63,8 +63,6 @@ export class PaperPawDevice {
     device.module = module;
     device.exports = instance.exports;
     device.memory = instance.exports.memory;
-    // A module built around plugins with code adds them first.
-    device.exports.pp_plugins?.();
     return device;
   }
 

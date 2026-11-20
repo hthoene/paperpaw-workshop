@@ -506,6 +506,35 @@ meaning (the format's own split of a very long paragraph).
 - [D] Inserted blocks and `leading_above` are the reader's (its text filters, #964); formats answer
   none, as in interface 6.
 
+### 4.1 Foreign elements and the conversion hook (`core.convert`, draft 37, #429)
+
+A format that does not convert an element itself hands it on, so that another plugin can (MathML in an
+EPUB: `format-epub` writes the `<math>` and `format-epub-plus` converts it). Nothing is added to the
+record list: a **foreign element** is a `doc_ruby` of `kind` `3 + 0xFFF0` (65,523; the SDK's
+`Annotation::foreign`, `Annotation::FOREIGN`) over `start..end`, the range of the block's text the
+format wrote for the element **without help** (the formula's `alttext`, else the text of its leaves), and
+`text` the element's markup (at most 1,000 bytes: its start tag with the attributes that matter and no
+namespaces, its content, its end tag; text escaped; an element that would be longer is not handed on). The
+block is complete in one fragment (a format that cannot keep it so leaves the element to its text).
+
+At the call level of the format's own (no deeper: the format has answered), the host replaces every
+foreign element of a block that goes no further, in order, at most eight a block: it asks the plugins
+that subscribe to the host-defined stage `core.convert@1` (`registration.stage`, at most 4 on a device,
+in stage order) with one `conv.ask` (`element` the markup's element name, `flags` 0, `markup`), and the
+first `conv.text` with a non-empty `text` (at most 2,048 bytes; `\n` breaks a line) is put where the
+format's text was: the block's `text_bytes`, text parts, runs, maps, cells and annotations after it move
+with it, a place inside the replaced range goes to its start (the end of a range to the end of the new
+text). The foreign records are **never** passed on to the opener. Where there is no subscriber, it fails
+or is not made yet (it is asked to start; the block is passed on with the format's text, the next
+layout has the hook), says nothing, or the block would not fit a fragment (3,840 bytes) after it, the
+format's text stays: a book reads without the hook plugin, with the plain text of the element. A
+foreign element in a fragment of a block that goes on, or whose range does not fit its text, is left
+out the same way. A subscriber never sees the book, the card or the document: only the markup.
+
+SDK: `native::convert` (`Asked::decode`, `Converted::text`/`pass`/`encode`). The stage's key, bounds
+and records: `abi/stages/core.convert@1.def`. A plugin of draft 36 runs unchanged; so does a format that
+writes no foreign element.
+
 ## 5. Images (IMG, N6)
 
 Pictures of books (covers, illustrations, comic pages) and the pictures plugins show (picture-home,
@@ -982,6 +1011,35 @@ meaning (the format's own split of a very long paragraph).
   2.3) as in interface 6; a format sends a gloss only for a text meant to stand above the words.
 - [D] Inserted blocks and `leading_above` are the reader's (its text filters, #964); formats answer
   none, as in interface 6.
+
+### 4.1 Foreign elements and the conversion hook (`core.convert`, draft 37, #429)
+
+A format that does not convert an element itself hands it on, so that another plugin can (MathML in an
+EPUB: `format-epub` writes the `<math>` and `format-epub-plus` converts it). Nothing is added to the
+record list: a **foreign element** is a `doc_ruby` of `kind` `3 + 0xFFF0` (65,523; the SDK's
+`Annotation::foreign`, `Annotation::FOREIGN`) over `start..end`, the range of the block's text the
+format wrote for the element **without help** (the formula's `alttext`, else the text of its leaves), and
+`text` the element's markup (at most 1,000 bytes: its start tag with the attributes that matter and no
+namespaces, its content, its end tag; text escaped; an element that would be longer is not handed on). The
+block is complete in one fragment (a format that cannot keep it so leaves the element to its text).
+
+At the call level of the format's own (no deeper: the format has answered), the host replaces every
+foreign element of a block that goes no further, in order, at most eight a block: it asks the plugins
+that subscribe to the host-defined stage `core.convert@1` (`registration.stage`, at most 4 on a device,
+in stage order) with one `conv.ask` (`element` the markup's element name, `flags` 0, `markup`), and the
+first `conv.text` with a non-empty `text` (at most 2,048 bytes; `\n` breaks a line) is put where the
+format's text was: the block's `text_bytes`, text parts, runs, maps, cells and annotations after it move
+with it, a place inside the replaced range goes to its start (the end of a range to the end of the new
+text). The foreign records are **never** passed on to the opener. Where there is no subscriber, it fails
+or is not made yet (it is asked to start; the block is passed on with the format's text, the next
+layout has the hook), says nothing, or the block would not fit a fragment (3,840 bytes) after it, the
+format's text stays: a book reads without the hook plugin, with the plain text of the element. A
+foreign element in a fragment of a block that goes on, or whose range does not fit its text, is left
+out the same way. A subscriber never sees the book, the card or the document: only the markup.
+
+SDK: `native::convert` (`Asked::decode`, `Converted::text`/`pass`/`encode`). The stage's key, bounds
+and records: `abi/stages/core.convert@1.def`. A plugin of draft 36 runs unchanged; so does a format that
+writes no foreign element.
 
 ## 5. Images (IMG, N6)
 
