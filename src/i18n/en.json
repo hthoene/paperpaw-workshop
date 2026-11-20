@@ -62,7 +62,7 @@
   "upload.refused.shown.other": "The AI can be shown only {n} more pictures in this conversation. Leave some out, or go on in a fresh conversation.",
   "step.build": "Built it",
   "workshop.ppn.failed": "It did not build for the {device}. Ask the AI to build it and fix what the compiler says.",
-  "workshop.ppn.builder": "The builder is not running, so there is no package for the X4 (docker compose --profile code up).",
+  "workshop.ppn.builder": "The builder is not running, so there is no package for the X4.",
   "workshop.ppn.device": "PaperPaw on the {device} takes plugins with code later. Show the X4 or the X4 Pro to download it for them.",
   "step.control": "Controlled the {device}: {what}",
   "step.set_fixtures": "Recorded {n} answers for its requests",
