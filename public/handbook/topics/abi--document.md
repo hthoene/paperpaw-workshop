@@ -212,7 +212,8 @@ caller's own Data). Every op on a document is the opener's only (`ERR_DENIED` fo
 - [D] **The cache is whole or not used.** A cache is made for one **conversion**: the book's
   identity (LIB's fingerprint), the format plugin's id and version, and the conversion key, a hash
   of everything that changes the output (publisher styles, colour, `image_side`, `cover_side`, the
-  CSS file's content hash, the forwarded options), interface 6 `prepared_keeping` and `PreparedCss`.
+  CSS file's content hash, the forwarded options, the plugins' stylesheets of root 7, section 3),
+  interface 6 `prepared_keeping` and `PreparedCss`.
   Root 6 is `.paperpaw/cache/<book key>/<format plugin>/<conversion key>/`; the host keeps at most
   two conversions per book (the older goes, but never one an open document uses: a conversion is
   **pinned** while any document of it is open, on any plugin; a third conversion needed while two
@@ -358,7 +359,7 @@ host passes them on after checking them.
 | Op | Name and input | Rows of the reply | Roots |
 | --- | --- | --- | --- |
 | 1 | `sniff` (`arg`: the file's first at most 512 bytes; with `flags` bit 0 `claimed`, section 1's handing on: `arg` empty, `document` set) | `fmt.yes` (or none: not mine) | none (`claimed`: 3) |
-| 2 | `open` (`flags`, sides, `conversion`; `fmt.option`*) | `doc_state` | 2, 3, 4 |
+| 2 | `open` (`flags`, sides, `conversion`; `fmt.option`*) | `doc_state` | 2, 3, 4, 7 |
 | 3 | `prepare` | `doc_state` (`progress_ppm`; `state` 0 done, 1 more, 2 failed) | 2, 3, 4 |
 | 4 | `close` | none | none |
 | 5 | `meta` | `doc_meta` | 2, 3 |
@@ -404,7 +405,14 @@ host passes them on after checking them.
   cache follows the book on a move and goes with it, LIB), root 3 the book (read only: `path` "" is
   the file; for a `folder` format the folder and below; for a `siblings` format the book's folder
   and below, the call's `text` naming the opened file within it), root 4 the user CSS file (read
-  only, `path` "", during op 2 and 3 only). These three outside such a call are `ERR_UNSUPPORTED`;
+  only, `path` "", during op 2 and 3 only), root 7 the stylesheets installed plugins bring for
+  books (draft 39, #463: a data plugin's `styles.css`; read only, `path` "": all of them as one
+  file, in the plugins' order, each followed by a newline; `ERR_NOT_FOUND` where no plugin has
+  one; the host serves them from what it read at start, never from the card). A format that shows
+  a book's own styles applies them after those and before the user's (`styles.css` beside the
+  book, then the one named like it), as interface 6 `OpenOptions::css` did; they are part of the
+  conversion key. A format built before draft 39 never reads root 7 and runs unchanged. These four
+  outside such a call are `ERR_UNSUPPORTED`;
   roots 0-2 keep their meaning in every callback (`files.md`). The format writes its cache
   atomically per file (D2.5); it may not write root 3.
 - [D] **Root 3 through the slots and through `core.files`** (Files on #499): for a single-file
@@ -416,11 +424,11 @@ host passes them on after checking them.
 - [D] **Root numbers mean one thing everywhere** (Code Reviewer on #346): root 2 is the plugin's
   own install folder (`files.md` section 1.1) in every callback, a format's too; the document's
   cache is root 6, not 2.
-- [D] **Paths in roots 3, 4 and 6** follow the storage slots' rules: relative only; no `..`, `\`,
+- [D] **Paths in roots 3, 4, 6 and 7** follow the storage slots' rules: relative only; no `..`, `\`,
   NUL, empty segments or a leading `/` (`ERR_INVALID`); resolved strictly below the root, a link or
   a name that resolves outside it `ERR_DENIED`. In root 6 the name `.complete` (the host's stamp)
   and everything under `.host/` are host-reserved: a format's write, rename or delete of them is
-  `ERR_DENIED`, a read of them `ERR_NOT_FOUND`. Root 3 refuses every write and delete
+  `ERR_DENIED`, a read of them `ERR_NOT_FOUND`. Roots 3, 4 and 7 refuse every write and delete
   (`ERR_DENIED`).
 - [D] **Cache quota.** A document's cache is counted to the format plugin (S7) and capped at 64 MiB
   per book on the X4 (an EPUB with large images; `ERR_NO_SPACE` beyond and on a full card, the
@@ -723,7 +731,8 @@ caller's own Data). Every op on a document is the opener's only (`ERR_DENIED` fo
 - [D] **The cache is whole or not used.** A cache is made for one **conversion**: the book's
   identity (LIB's fingerprint), the format plugin's id and version, and the conversion key, a hash
   of everything that changes the output (publisher styles, colour, `image_side`, `cover_side`, the
-  CSS file's content hash, the forwarded options), interface 6 `prepared_keeping` and `PreparedCss`.
+  CSS file's content hash, the forwarded options, the plugins' stylesheets of root 7, section 3),
+  interface 6 `prepared_keeping` and `PreparedCss`.
   Root 6 is `.paperpaw/cache/<book key>/<format plugin>/<conversion key>/`; the host keeps at most
   two conversions per book (the older goes, but never one an open document uses: a conversion is
   **pinned** while any document of it is open, on any plugin; a third conversion needed while two
@@ -864,7 +873,7 @@ host passes them on after checking them.
 | Op | Name and input | Rows of the reply | Roots |
 | --- | --- | --- | --- |
 | 1 | `sniff` (`arg`: the file's first at most 512 bytes; with `flags` bit 0 `claimed`, section 1's handing on: `arg` empty, `document` set) | `fmt.yes` (or none: not mine) | none (`claimed`: 3) |
-| 2 | `open` (`flags`, sides, `conversion`; `fmt.option`*) | `doc_state` | 2, 3, 4 |
+| 2 | `open` (`flags`, sides, `conversion`; `fmt.option`*) | `doc_state` | 2, 3, 4, 7 |
 | 3 | `prepare` | `doc_state` (`progress_ppm`; `state` 0 done, 1 more, 2 failed) | 2, 3, 4 |
 | 4 | `close` | none | none |
 | 5 | `meta` | `doc_meta` | 2, 3 |
@@ -910,7 +919,14 @@ host passes them on after checking them.
   cache follows the book on a move and goes with it, LIB), root 3 the book (read only: `path` "" is
   the file; for a `folder` format the folder and below; for a `siblings` format the book's folder
   and below, the call's `text` naming the opened file within it), root 4 the user CSS file (read
-  only, `path` "", during op 2 and 3 only). These three outside such a call are `ERR_UNSUPPORTED`;
+  only, `path` "", during op 2 and 3 only), root 7 the stylesheets installed plugins bring for
+  books (draft 39, #463: a data plugin's `styles.css`; read only, `path` "": all of them as one
+  file, in the plugins' order, each followed by a newline; `ERR_NOT_FOUND` where no plugin has
+  one; the host serves them from what it read at start, never from the card). A format that shows
+  a book's own styles applies them after those and before the user's (`styles.css` beside the
+  book, then the one named like it), as interface 6 `OpenOptions::css` did; they are part of the
+  conversion key. A format built before draft 39 never reads root 7 and runs unchanged. These four
+  outside such a call are `ERR_UNSUPPORTED`;
   roots 0-2 keep their meaning in every callback (`files.md`). The format writes its cache
   atomically per file (D2.5); it may not write root 3.
 - [D] **Root 3 through the slots and through `core.files`** (Files on #499): for a single-file
@@ -922,11 +938,11 @@ host passes them on after checking them.
 - [D] **Root numbers mean one thing everywhere** (Code Reviewer on #346): root 2 is the plugin's
   own install folder (`files.md` section 1.1) in every callback, a format's too; the document's
   cache is root 6, not 2.
-- [D] **Paths in roots 3, 4 and 6** follow the storage slots' rules: relative only; no `..`, `\`,
+- [D] **Paths in roots 3, 4, 6 and 7** follow the storage slots' rules: relative only; no `..`, `\`,
   NUL, empty segments or a leading `/` (`ERR_INVALID`); resolved strictly below the root, a link or
   a name that resolves outside it `ERR_DENIED`. In root 6 the name `.complete` (the host's stamp)
   and everything under `.host/` are host-reserved: a format's write, rename or delete of them is
-  `ERR_DENIED`, a read of them `ERR_NOT_FOUND`. Root 3 refuses every write and delete
+  `ERR_DENIED`, a read of them `ERR_NOT_FOUND`. Roots 3, 4 and 7 refuse every write and delete
   (`ERR_DENIED`).
 - [D] **Cache quota.** A document's cache is counted to the format plugin (S7) and capped at 64 MiB
   per book on the X4 (an EPUB with large images; `ERR_NO_SPACE` beyond and on a full card, the

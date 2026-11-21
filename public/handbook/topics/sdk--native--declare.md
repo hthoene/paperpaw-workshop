@@ -73,6 +73,10 @@ pub paperpaw_sdk::native::declare::EventKind::WifiScanned
 pub paperpaw_sdk::native::declare::EventKind::WorkAllowed
 pub paperpaw_sdk::native::declare::EventKind::WorkDue
 pub paperpaw_sdk::native::declare::EventKind::WorkRefused
+pub enum paperpaw_sdk::native::declare::HintRow
+pub paperpaw_sdk::native::declare::HintRow::Hidden
+pub paperpaw_sdk::native::declare::HintRow::OnPress
+pub paperpaw_sdk::native::declare::HintRow::Shown
 pub enum paperpaw_sdk::native::declare::InputKind
 pub paperpaw_sdk::native::declare::InputKind::Gesture
 pub paperpaw_sdk::native::declare::InputKind::Input
@@ -259,6 +263,7 @@ pub struct paperpaw_sdk::native::declare::ScreenDecl<'a>
 pub const fn paperpaw_sdk::native::declare::ScreenDecl<'_>::dims_below(self) -> Self
 pub const fn paperpaw_sdk::native::declare::ScreenDecl<'_>::grays(self) -> Self
 pub const fn paperpaw_sdk::native::declare::ScreenDecl<'_>::guards(self) -> Self
+pub const fn paperpaw_sdk::native::declare::ScreenDecl<'_>::hints(self, paperpaw_sdk::native::declare::HintRow) -> Self
 pub const fn paperpaw_sdk::native::declare::ScreenDecl<'_>::hints_hidden(self) -> Self
 pub const fn paperpaw_sdk::native::declare::ScreenDecl<'_>::holds_edges(self) -> Self
 pub const fn paperpaw_sdk::native::declare::ScreenDecl<'_>::instances(self, paperpaw_sdk::native::declare::Instances) -> Self

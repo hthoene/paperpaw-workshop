@@ -341,7 +341,11 @@ key and text bytes within the stage budget.
 ### 4.2 Menus, bindings, slots, plugins
 
 These change the user's configuration of the whole device, so they need the D1 feature
-**`uses.registry`** (the store shows it); without it, `ERR_DENIED` for the batch.
+**`uses.registry`** (the store shows it); without it, `ERR_DENIED` for the batch. Not so
+`set_menu` and `bind_key` (owner decision 291, Nov 21): any plugin, also a plugin file on the card,
+changes menus and key bindings (the menu editor and the keys plugin are such files on the X4s), and
+what protects the user is the host's own: no submenu cycle, and the global layer keeps an input to
+the main menu (below), beside the host-fixed escape.
 
 - [D] **Pinned items** are a host-only set: the action that opens the main menu, the settings
   editor's entry and the power actions (sleep, power off, restart). No plugin declares or clears

@@ -40,7 +40,7 @@ Records: `abi/services/core.files@1.def`.
 | 1 | card | the user's files from the card's root, without `plugins/` (a running data plugin's folder excepted, below), `.paperpaw/` and `paperpaw.ini` | read and write, with `uses.storage` |
 | 2 | bundle | the plugin's own install folder `plugins/<id>/` (files it ships, such as `data/`) | read only |
 | 3 | book | inside a `core.format` call of a `folder` or `siblings` document: its folder (`document.md` section 3) | `list` and `stat` only |
-| 4 and above | reserved (4 and 6 are `core.format`'s, through the storage slots) | | `ERR_UNSUPPORTED` |
+| 4 and above | reserved (4, 6 and 7 are `core.format`'s, through the storage slots) | | `ERR_UNSUPPORTED` |
 
 ### 1.2 Features
 

@@ -13,4 +13,4 @@
 | `[core] tap-slop` | Tap tolerance | 1 to 20 | `3` | How far a finger may move and still tap. |
 | `[core] swipe-distance` | Swipe distance | 2 to 50 | `8` | How far a finger must move to swipe. |
 | `[reader] corner-bookmark` | Bookmark corner | `true`, `false` | `true` | A tap on the top right corner of a page sets or removes its bookmark. |
-| `[reader] hold-chapters` | Hold for next chapter | `true`, `false` | `false` | On: holding a page button changes the chapter; a page turns when its button is let go. |
+| `[reader] hold-chapters` | Hold for next chapter | `true`, `false` | `true` | On: holding a page button changes the chapter; a page turns when its button is let go. |

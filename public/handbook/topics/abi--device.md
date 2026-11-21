@@ -18,7 +18,7 @@ Records: `abi/services/core.device@1.def`.
 
 | Key | Allows | Plugins (first-party) |
 | --- | --- | --- |
-| `uses.wifi` | commands 1564-1571 | wifi, transfer, diagnostics, fonts-browser (*Go online* for a download or the list in Offline mode) |
+| `uses.wifi` | commands 1564-1571 | wifi, transfer, diagnostics, fonts-browser, store, calibre, opds, kosync, news, wallabag, browser, joplin (*Go online* in Offline mode, `paperpaw_ui_kit::online`) |
 | `uses.power` | commands 1572-1575 | power, diagnostics, settings, plugin-manager, reading-goal, store, update |
 | `uses.install` | commands 1576, 1577, 1580-1582, 1592 (kind 0); REG `answer_plugin` | store, fonts-browser, plugin-manager, update |
 | `uses.firmware` | commands 1578, 1579, 1592 (kind 1) | update |
@@ -204,6 +204,9 @@ Tags 1564-1592 and 1595 follow UIX's approved commands (1547-1558, 1561-1563) an
   (needs the user). A `join` of a network with a stored password, `wifi_on`, `scan`, `leave` and
   `off` need no input. `go_online` (`for_ms` 1-600,000) is honoured only within 2,000 ms after a
   user input (else `OK` and ignored, logged): no plugin turns the radio on in the background by it.
+  An honoured `go_online` lifts Offline mode at once for what the same callback starts after it
+  (`core.net` requests, `core.sockets` sockets), although the host applies the command only when the
+  callback has returned.
 - [D] **The 2,000 ms input window is the submitting plugin's own.** It counts only a user input
   that went to that plugin: an input record (key, pointer, gesture, widget) delivered to one of its
   callbacks, or the user running one of its actions (a menu entry, a key binding, a slot), and it
@@ -587,7 +590,7 @@ unknown values read as 1.
 | 16, 17 | card error, card full | `ERR_IO`, `ERR_NO_SPACE` |
 | 18 | content changed since checked or asked | `ERR_STATE` |
 | 19 | not on this device | `ERR_UNSUPPORTED` |
-| 20 | the host stopped it (shutdown, card swap) | `ERR_CANCELLED` |
+| 20 | the host stopped it (shutdown, card swap; a firmware install on a battery below 20 % not charging) | `ERR_CANCELLED` |
 | 21 | an installed firmware waits for its restart | `ERR_STATE` |
 
 ## 6. Sizes and memory

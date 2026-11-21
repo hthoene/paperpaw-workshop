@@ -10,6 +10,7 @@ pub const fn paperpaw_sdk::native::ui::RequestId::text(self) -> paperpaw_sdk::na
 pub struct paperpaw_sdk::native::ui::ScreenPolicy
 pub const fn paperpaw_sdk::native::ui::ScreenPolicy::grays(self) -> Self
 pub const fn paperpaw_sdk::native::ui::ScreenPolicy::guards(self) -> Self
+pub const fn paperpaw_sdk::native::ui::ScreenPolicy::hints(self, paperpaw_sdk::native::declare::HintRow) -> Self
 pub const fn paperpaw_sdk::native::ui::ScreenPolicy::holds_edges(self) -> Self
 pub const fn paperpaw_sdk::native::ui::ScreenPolicy::new() -> Self
 pub const fn paperpaw_sdk::native::ui::ScreenPolicy::secret(self) -> Self

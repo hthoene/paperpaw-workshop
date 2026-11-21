@@ -142,7 +142,6 @@
 | `[core] status-bar.all` | Status bar on all screens | `true`, `false` | `false` | Shows the time and the battery at the top of every screen that has no status line of its own. |
 | `[core] status-bar.line` | Status bar line | text | `core.status-line.items` | The status line the status bar shows. Empty: no status bar. |
 | `[core] status-bar.screens` | Status bar per screen | text | `` | One screen per line, as screen=shown or screen=hidden. Wins over what the screen says. |
-| `[core] awake-holds` | Plugins may keep awake | `true`, `false` | `true` | A clock or game may keep it awake; indexing always does. |
 | `[core] network-manager` | Network manager plugin | text | `wifi` | Advanced. The plugin that connects to Wi-Fi when a network is wanted; empty: none. |
 | `[core] network.fonts-browser` | Network | `true`, `false` | `true` | Off, this plugin uses no network at all, not even when you ask it to. |
 | `[core] saving.fonts-browser` | In saving modes | `core.saving.follow`, `core.saving.normal`, `core.saving.manual` | `core.saving.follow` | How this plugin's background work runs in the saving modes. |

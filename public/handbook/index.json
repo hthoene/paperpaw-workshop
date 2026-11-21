@@ -200,7 +200,7 @@
   "title": "Plugins without code",
   "file": "docs--plugins-without-code.md",
   "summary": "A data plugin is a folder:\n\n```text\nplugins/large-print/\n  plugin.ini     [plugin] id, name, description, version, formats\n  i18n/*.ini     translation catalogs",
-  "tokens": 3114
+  "tokens": 3260
  },
  {
   "id": "docs/publishing",
@@ -424,21 +424,21 @@
   "title": "Plugin interface 7: device",
   "file": "abi--device.md",
   "summary": "Contract for #228 (assignment #1025).",
-  "tokens": 15691
+  "tokens": 15786
  },
  {
   "id": "abi/document",
   "title": "Plugin interface 7: document",
   "file": "abi--document.md",
   "summary": "Contract for #228 (assignment #1025).",
-  "tokens": 36209
+  "tokens": 36589
  },
  {
   "id": "abi/files",
   "title": "Plugin interface 7: files",
   "file": "abi--files.md",
   "summary": "Contract for #228 (assignment #1088).",
-  "tokens": 7777
+  "tokens": 7778
  },
  {
   "id": "abi/library",
@@ -473,14 +473,14 @@
   "title": "Plugin interface 7: registry",
   "file": "abi--registry.md",
   "summary": "Status: **draft** of family 2 (#228), revised after Senior's review (#986).",
-  "tokens": 11234
+  "tokens": 11334
  },
  {
   "id": "abi/screens-input",
   "title": "Plugin interface 7: screens input",
   "file": "abi--screens-input.md",
   "summary": "This is the draft-5 contract for #228 and #241.",
-  "tokens": 16798
+  "tokens": 16803
  },
  {
   "id": "abi/secrets",
@@ -515,7 +515,7 @@
   "title": "Plugin interface 7: ui",
   "file": "abi--ui.md",
   "summary": "Contract for #228 (assignment #1002).",
-  "tokens": 24637
+  "tokens": 24796
  },
  {
   "id": "abi/work",
@@ -598,15 +598,15 @@
   "id": "widgets",
   "title": "Widgets for home screen layouts",
   "file": "widgets.md",
-  "summary": "| Widget id | Name |\n|---|---|\n| `core.space` | Space |\n| `core.fill` | Free space |",
-  "tokens": 23
+  "summary": "| Widget id | Name |\n|---|---|\n| `core.space` | Space |\n| `core.fill` | Free space |\n| `home.date` | Date |\n| `home.clock` | Clock |\n| `home.continue` | Continu",
+  "tokens": 343
  },
  {
   "id": "actions",
   "title": "Actions for key maps",
   "file": "actions.md",
   "summary": "| Action id | Name |\n|---|---|\n| `about.open` | About PaperPaw |\n| `bluetooth.open` | Bluetooth |\n| `core.apps` | Apps |\n| `core.back` | Back |\n| `core.clean-up",
-  "tokens": 1102
+  "tokens": 1109
  },
  {
   "id": "devices",
@@ -676,7 +676,7 @@
   "title": "The SDK's module native/declare",
   "file": "sdk--native--declare.md",
   "summary": "```rust\npub enum paperpaw_sdk::native::declare::BookDataKind\npub paperpaw_sdk::native::declare::BookDataKind::Cache\npub paperpaw_sdk::native::declare::BookDataK",
-  "tokens": 8166
+  "tokens": 8255
  },
  {
   "id": "sdk/native/device",
@@ -851,7 +851,7 @@
   "title": "The SDK's module native/storage",
   "file": "sdk--native--storage.md",
   "summary": "```rust\npub enum paperpaw_sdk::native::storage::Root\npub paperpaw_sdk::native::storage::Root::Book\npub paperpaw_sdk::native::storage::Root::Data\npub paperpaw_sd",
-  "tokens": 1001
+  "tokens": 1015
  },
  {
   "id": "sdk/native/text",
@@ -865,7 +865,7 @@
   "title": "The SDK's module native/ui",
   "file": "sdk--native--ui.md",
   "summary": "```rust\npub struct paperpaw_sdk::native::ui::HandoverId(_)\npub const fn paperpaw_sdk::native::ui::HandoverId::get(self) -> u32\npub const fn paperpaw_sdk::native",
-  "tokens": 5743
+  "tokens": 5775
  },
  {
   "id": "sdk/native/work",
@@ -879,7 +879,7 @@
   "title": "Settings of core",
   "file": "settings--core.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] developer` | Developer options | `true`, `false` | `false` | For developers",
-  "tokens": 7704
+  "tokens": 7667
  },
  {
   "id": "settings/aids",
@@ -984,14 +984,14 @@
   "title": "Settings of power",
   "file": "settings--power.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[power] mode` | Power mode | `power.mode.auto`, `power.mode.normal`, `power.mode.s",
-  "tokens": 194
+  "tokens": 201
  },
  {
   "id": "settings/reader",
   "title": "Settings of reader",
   "file": "settings--reader.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[reader] open-last` | Open last book at start | `true`, `false` | `true` | Start w",
-  "tokens": 801
+  "tokens": 808
  },
  {
   "id": "settings/settings",
@@ -1124,7 +1124,7 @@
   "title": "Settings in the group power.group",
   "file": "settings-group--power.group.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] sleep-after` | Sleep after | 0 to 120 | `10` | Idle minutes before sleep; 0",
-  "tokens": 258
+  "tokens": 228
  },
  {
   "id": "settings-group/core.space",
@@ -1145,7 +1145,7 @@
   "title": "Settings in the group core.group.status",
   "file": "settings-group--core.group.status.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] status-font` | Font | `core.status-font.ui`, `core.status-font.book`, `Pape",
-  "tokens": 658
+  "tokens": 666
  },
  {
   "id": "settings-group/core.group.reading-layout",
