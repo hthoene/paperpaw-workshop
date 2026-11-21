@@ -554,6 +554,14 @@ store updates only those it installed, and one put in place otherwise
 manager says. `install::local::Staging` installs a plugin sent file by
 file, with the same checks.
 
+Copy it into the `plugins` folder of a device (or of the emulator's
+library) and restart, or have a plugin load it at once
+(`Command::LoadPlugin` with its folder; `Command::RemovePlugin` removes
+one, its fonts and presets at once, the rest after the next start). A plugin's `styles.css` comes after a book's own
+stylesheets and before one's own (`styles.css` beside the books, then
+the one named like a book), so the more particular wins; a format reads
+the plugins' stylesheets as root 7 (`docs/abi/document.md` section 3).
+
 A `presets.ini` holds presets (see above), a section each: its `kind`,
 its `name` and `description` (translation keys from its `i18n`, or the
 text itself), then the settings it sets by their whole id. Themes are
@@ -949,6 +957,38 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 |---|---|
 | `core.space` | Space |
 | `core.fill` | Free space |
+| `home.date` | Date |
+| `home.clock` | Clock |
+| `home.continue` | Continue reading |
+| `home.recent` | Recently read |
+| `home.status` | Status line |
+| `news.widget.headlines` | News headlines |
+| `vocabulary.widget.word` | Word of the day |
+| `vocabulary.widget.saved` | Words saved |
+| `vocabulary.widget.due` | Cards due |
+| `widgets.day` | Day and date |
+| `widgets.tile-clock` | Clock in tiles |
+| `widgets.calendar` | Calendar |
+| `widgets.countdown` | Countdown |
+| `widgets.year-progress` | The year so far |
+| `widgets.analogue-clock` | Analogue clock |
+| `widgets.moon` | Moon phase |
+| `widgets.world-clock` | World clock |
+| `widgets.word-clock` | Word clock |
+| `widgets.greeting` | Greeting |
+| `widgets.note` | Note |
+| `widgets.quote` | Quote of the day |
+| `widgets.todo` | To do |
+| `widgets.battery` | Battery |
+| `widgets.library` | Library in numbers |
+| `widgets.highlight` | Highlight |
+| `widgets.favourites` | Favourites |
+| `widgets.series` | Series |
+| `widgets.next` | Next up |
+| `widgets.progress` | Book progress |
+| `widgets.reading` | Now reading |
+| `widgets.logo` | PaperPaw logo |
+| `widgets.picture` | Picture |
 
 ## Actions for key maps
 
@@ -991,6 +1031,7 @@ Only these ids exist. `lookup_docs` has the settings of every other plugin (`set
 | `files.by-series` | By series |
 | `files.by-tag` | By tag |
 | `files.favourites` | Favourites |
+| `files.find` | Find |
 | `files.search` | Search the library |
 | `files.shelves` | Shelves |
 | `fonts-browser.open` | More fonts |

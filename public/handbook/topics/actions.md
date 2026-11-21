@@ -37,6 +37,7 @@
 | `files.by-series` | By series |
 | `files.by-tag` | By tag |
 | `files.favourites` | Favourites |
+| `files.find` | Find |
 | `files.search` | Search the library |
 | `files.shelves` | Shelves |
 | `fonts-browser.open` | More fonts |

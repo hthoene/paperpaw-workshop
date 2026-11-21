@@ -234,10 +234,16 @@ events 83, 88 and 90 are free).
     strip; the screen is not drawn). Home and the reader's page declare 2: they have status
     lines of their own. `screen_policy` may change these bits at run time (below); there 0
     keeps what the screen declared, so a policy sent for another bit leaves the bar as it was.
+  - bits 13-14 `hints` (draft 38, #448), when the row of button hints shows (interface 6
+    `HintVisibility`): 0 as bit 8 says (always, or never), 1 always, below the screen; 2 only
+    for a few seconds after one of its buttons was pressed (or `command.show_hints`), over the
+    screen's bottom edge, the screen having the whole display (`OnPress`: the reader's page, as
+    in Beta 3); 3 never. 1 or 2 beside bit 8 is `ERR_INVALID`. `screen_policy` may change them
+    at run time (below), there 0 keeps what the screen declared (Picture home's *Buttons row*).
   Other bits stay `ERR_UNSUPPORTED`.
 - [D] **Policies change at run time** (the lock guards only while locked): `command.screen_policy`
-  (`instance: u32`, 0 for the own top one; `flags: u32` with bits 1, 4, 5, 9 and 11-12 above; 11-12
-  set to 3 is `ERR_INVALID`) sets them for
+  (`instance: u32`, 0 for the own top one; `flags: u32` with bits 1, 4, 5, 9, 11-12 and 13-14
+  above; 11-12 set to 3 is `ERR_INVALID`) sets them for
   one of the submitter's own instances (the policy is the whole set the screen ends with: one that
   declared `grays` and sets a policy without bit 9 turns it off); other bits `ERR_INVALID`, another plugin's instance
   `ERR_DENIED`. **Turning `guards` on** is allowed only for the submitter's own top instance (the

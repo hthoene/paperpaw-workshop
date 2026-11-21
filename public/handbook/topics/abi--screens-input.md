@@ -33,7 +33,8 @@ batch lies in the image, owned otherwise; refused at activation until the SDK vi
   `dispatch_event` for this screen or action. Tokens are the plugin's own numbers; one token may
   serve several screens.
 - [D] `screen.spec.flags`: bit 0 `full_refresh_on_open`, the policy bits of `ui.md` section 1.2
-  (bits 1-9, among them 8 `hints_hidden` and 9 `grays`); other bits must be 0 (`ERR_UNSUPPORTED`).
+  (bits 1-14, among them 8 `hints_hidden`, 9 `grays` and 13-14 `hints`); other bits must be 0
+  (`ERR_UNSUPPORTED`).
   `action.spec.flags`: bit 0 `needs_screen` (the action only runs while one of this plugin's
   screens is on top); other bits 0.
 - [D] Names follow the declaration name rules (`records.md`); full id = `<plugin>.<name>`. A

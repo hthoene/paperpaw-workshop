@@ -234,6 +234,14 @@ store updates only those it installed, and one put in place otherwise
 manager says. `install::local::Staging` installs a plugin sent file by
 file, with the same checks.
 
+Copy it into the `plugins` folder of a device (or of the emulator's
+library) and restart, or have a plugin load it at once
+(`Command::LoadPlugin` with its folder; `Command::RemovePlugin` removes
+one, its fonts and presets at once, the rest after the next start). A plugin's `styles.css` comes after a book's own
+stylesheets and before one's own (`styles.css` beside the books, then
+the one named like a book), so the more particular wins; a format reads
+the plugins' stylesheets as root 7 (`docs/abi/document.md` section 3).
+
 A `presets.ini` holds presets (see above), a section each: its `kind`,
 its `name` and `description` (translation keys from its `i18n`, or the
 text itself), then the settings it sets by their whole id. Themes are
