@@ -265,7 +265,8 @@ Field meanings:
   so a page fits 4,096 bytes with 8 rows. The status items and lines themselves are declared
   through UIX (`ui.md` section 5.3); until those declarations are admitted op 21 answers an empty
   page. The kernel's own items (`core.status.*`, `ui.md` section 5.3) are listed between the
-  declared items and the lines.
+  declared items and the lines; the kernel's own lines (`core.status-line.items`, one text line
+  high: `size` 1000) after the declared lines.
 - `reg_item` for presets: `id` the preset, `plugin` who added it, `title` its name.
 - `reg_binding.origin`: interface-6 `BindingOrigin` (0 plugin, 1 device, 2 preset, 3 user); an
   empty `action` is "bound to nothing".
