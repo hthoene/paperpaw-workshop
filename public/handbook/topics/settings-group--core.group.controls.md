@@ -7,7 +7,7 @@
 | `[core] tap-swap` | Swap left and right taps | `true`, `false` | `false` | Left goes on, right goes back; for the other hand. |
 | `[core] button-hints` | Button hints | `true`, `false` | `true` | A row at the bottom of the screen names what each button below it does. Not while reading. |
 | `[core] swap-page-buttons` | Swap the page buttons | `true`, `false` | `false` | The page buttons turn the other way while reading, not in menus. |
-| `[core] arrows-stay-on-page` | Arrow keys stay on the page | `true`, `false` | `false` | At a page's first or last entry the arrows go round on it; page buttons turn pages. |
+| `[core] arrows-stay-on-page` | Arrow keys stay on the page | `true`, `false` | `true` | At a page's first or last entry the arrows go round on it; page buttons turn pages. |
 | `[core] long-press-ms` | Long press | 200 to 3000 | `500` | How long to hold a button or finger for a long press. |
 | `[core] double-tap-ms` | Double tap | 150 to 1000 | `300` | How quickly the second tap or press must follow the first. |
 | `[core] tap-slop` | Tap tolerance | 1 to 20 | `3` | How far a finger may move and still tap. |
