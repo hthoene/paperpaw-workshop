@@ -50,7 +50,7 @@
 | `[core] rotation` | Turn the screen | `core.rotation.upright`, `core.rotation.landscape`, `core.rotation.upside-down`, `core.rotation.landscape-flipped` | `core.rotation.upright` | Upright or on its side. With “Only this book” on, it applies to that book alone. |
 | `[core] button-hints` | Button hints | `true`, `false` | `true` | A row at the bottom of the screen names what each button below it does. Not while reading. |
 | `[core] swap-page-buttons` | Swap the page buttons | `true`, `false` | `false` | The page buttons turn the other way while reading, not in menus. |
-| `[core] arrows-stay-on-page` | Arrow keys stay on the page | `true`, `false` | `false` | At a page's first or last entry the arrows go round on it; page buttons turn pages. |
+| `[core] arrows-stay-on-page` | Arrow keys stay on the page | `true`, `false` | `true` | At a page's first or last entry the arrows go round on it; page buttons turn pages. |
 | `[core] notice-seconds` | Message time | 1 to 60 | `4` | How long short messages such as “Sync done” stay on the screen. |
 | `[core] long-press-ms` | Long press | 200 to 3000 | `500` | How long to hold a button or finger for a long press. |
 | `[core] double-tap-ms` | Double tap | 150 to 1000 | `300` | How quickly the second tap or press must follow the first. |

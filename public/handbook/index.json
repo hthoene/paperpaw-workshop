@@ -879,7 +879,7 @@
   "title": "Settings of core",
   "file": "settings--core.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] developer` | Developer options | `true`, `false` | `false` | For developers",
-  "tokens": 7667
+  "tokens": 7666
  },
  {
   "id": "settings/aids",
@@ -1075,7 +1075,7 @@
   "title": "Settings in the group core.group.controls",
   "file": "settings-group--core.group.controls.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] edge-ends` | Swipe edges: top and bottom | 0 to 25 | `10` | How far from th",
-  "tokens": 574
+  "tokens": 573
  },
  {
   "id": "settings-group/core.group.library",

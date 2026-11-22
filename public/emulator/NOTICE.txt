@@ -381,7 +381,7 @@ embassy-usb 0.6.0 (MIT OR Apache-2.0, used under MIT)
 embassy-usb-driver 0.2.2 (MIT OR Apache-2.0, used under MIT)
     Copyright the embassy-usb-driver contributors (https://github.com/embassy-rs/embassy)
 embassy-usb-synopsys-otg 0.4.0 (MIT OR Apache-2.0, used under MIT)
-    Copyright the embassy-usb-synopsys-otg contributors (https://github.com/embassy-rs/embassy)
+    Copyright (c) Embassy project contributors
 embedded-can 0.4.1 (MIT OR Apache-2.0, used under MIT)
     Copyright (c) 2021-2022 The Rust embedded HAL team and contributors.
 embedded-hal 0.2.7 (MIT OR Apache-2.0, used under MIT)
