@@ -473,7 +473,7 @@
   "title": "Plugin interface 7: registry",
   "file": "abi--registry.md",
   "summary": "Status: **draft** of family 2 (#228), revised after Senior's review (#986).",
-  "tokens": 11334
+  "tokens": 11365
  },
  {
   "id": "abi/screens-input",
