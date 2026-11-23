@@ -522,7 +522,7 @@
   "title": "Plugin interface 7: work",
   "file": "abi--work.md",
   "summary": "Contract for #228 (assignment #1088), reviewed with `sockets.md` (SOCK).",
-  "tokens": 5332
+  "tokens": 5372
  },
  {
   "id": "docs/customisation",
