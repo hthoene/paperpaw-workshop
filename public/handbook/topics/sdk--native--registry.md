@@ -181,6 +181,7 @@ pub fn paperpaw_sdk::native::registry::RegistrySettingExtra<'a>::shown_value(&se
 pub fn paperpaw_sdk::native::registry::RegistrySettingExtra<'a>::step(&self) -> i32
 pub fn paperpaw_sdk::native::registry::RegistrySettingExtra<'a>::unit(&self) -> &'a str
 pub struct paperpaw_sdk::native::registry::RegistrySetupStep<'a>
+pub fn paperpaw_sdk::native::registry::RegistrySetupStep<'a>::badge(&self) -> &'a str
 pub fn paperpaw_sdk::native::registry::RegistrySetupStep<'a>::flags(&self) -> u32
 pub fn paperpaw_sdk::native::registry::RegistrySetupStep<'a>::id(&self) -> &'a str
 pub fn paperpaw_sdk::native::registry::RegistrySetupStep<'a>::order(&self) -> i32

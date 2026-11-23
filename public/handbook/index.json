@@ -473,14 +473,14 @@
   "title": "Plugin interface 7: registry",
   "file": "abi--registry.md",
   "summary": "Status: **draft** of family 2 (#228), revised after Senior's review (#986).",
-  "tokens": 11365
+  "tokens": 11560
  },
  {
   "id": "abi/screens-input",
   "title": "Plugin interface 7: screens input",
   "file": "abi--screens-input.md",
   "summary": "This is the draft-5 contract for #228 and #241.",
-  "tokens": 16803
+  "tokens": 16829
  },
  {
   "id": "abi/secrets",
@@ -788,7 +788,7 @@
   "title": "The SDK's module native/registry",
   "file": "sdk--native--registry.md",
   "summary": "```rust\npub struct paperpaw_sdk::native::registry::PageCursor\npub const fn paperpaw_sdk::native::registry::PageCursor::generation(self) -> u32\npub const fn pape",
-  "tokens": 6404
+  "tokens": 6428
  },
  {
   "id": "sdk/native/reply",

@@ -258,7 +258,8 @@ a callback each time a menu showed the item; in interface 7 the plugin says it w
 the host shows it from memory, so a menu never runs plugin code and a plugin that is not started
 (lazy start) still shows its last kept state.
 
-- [D] `item` is one of the submitting plugin's own actions or settings, relative to the plugin (the
+- [D] `item` is one of the submitting plugin's own actions, settings or setup steps (the step's
+  `badge` reaches the setup in `reg_setup_step`, `registry.md` 3), relative to the plugin (the
   host prefixes the owner it knows, never a claim in the bytes). Another plugin's item cannot be
   named. A malformed id is `ERR_INVALID`; an id the plugin has not declared, `ERR_NOT_FOUND`.
 - [D] `flags`, a closed set (other bits `ERR_INVALID`): bit 0 `hidden` (not shown in menus), bit 1
