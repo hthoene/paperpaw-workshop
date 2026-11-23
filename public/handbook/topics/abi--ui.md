@@ -113,7 +113,7 @@ events 83, 88 and 90 are free).
   maker. The `open` that names it may open any screen, the reader's own or another plugin's: the
   file stays the maker's, read only, and the document ends with the maker, whoever reads it. Another path, an instance that holds none, or no path is `ERR_DENIED` at op 16.
 - [D] **Long values** (the reader's selected text, interface 6 `params::TEXT`): a hand-over also has
-  one host text (section 3.1 rules: at most 24,576 bytes, written in 3 KiB parts with op 9
+  one host text (section 3.1 rules: at most 24,576 bytes, 1,856 on the X4, written in 3 KiB parts with op 9
   `text_write` on the hand-over id by its maker in the callback that made it, never cut; a begun but
   uncommitted text makes the `open` naming it `ERR_STATE`). The opened screen reads its params with
   op 17 `params` (`ui_handle` → `ui_param`*, `end`) and its text with op 10, at any time while it is
@@ -374,8 +374,8 @@ after the callback, chains bounded at 8 hops, `screens-input.md` section 3).
   (on USB it is not asked), and never turns a radio on: what the screen shows is what plugins
   already hold. A press of the power button wakes the device as before. A device that does not
   have bit 15 (the X4 Pro and Classic: their sleep would need a full start for every refresh)
-  keeps the screen as it was. Cost per wake on the X4: about 0.03 mAh (an estimate from
-  the panel's refresh and about 2 s of the processor awake; not yet measured).
+  keeps the screen as it was. Each wake costs some battery (the panel's refresh and the
+  processor awake for a moment): the less often, the less.
 
 ## 2. Plugin inputs and gestures (declarations)
 
@@ -441,10 +441,12 @@ asker learns its request id at once and long texts move in pages, never cut.
   goes on from there or starts over at 0; op 10 `text_read` (`text` id, `offset`) reads it in
   parts (`ui_text`: `total`, `offset`, `data`, cut only at UTF-8 boundaries). A host text is
   **committed** by the write with `last`; only a committed text is read or answered. Its cap
-  (`ui_question.max_bytes`) is 24,576 bytes on every device: the 6,000 characters of interface 6
-  in any script (at most 4 bytes each). Over it `ERR_NO_SPACE`; the text is never cut. On the X4
-  the host keeps the first 512 bytes of a text in memory and the rest in a host file on the card
-  (deleted when the text ends and at start). **Card failures** (Senior G): a full card is
+  (`ui_question.max_bytes`) is 24,576 bytes: the 6,000 characters of interface 6 in any script (at
+  most 4 bytes each). On the X4, until the card file below is wired, it is 1,856 bytes, what one
+  text alone can hold of the 2 KiB pool (8 chunks and their descriptors), and `max_bytes` says so
+  on every shell of that profile, the emulator's too (#489). Over it `ERR_NO_SPACE`; the text is
+  never cut. With the card file the X4 host keeps the first 512 bytes of a text in memory and the
+  rest in a host file on the card (deleted when the text ends and at start). **Card failures** (Senior G): a full card is
   `ERR_NO_SPACE` for the part; with no card the request's question and the X4 host texts live in
   memory only, capped at what fits there: at most 2 KiB together (the secret text below aside),
   `ERR_IO` beyond; a missing or failing card is `ERR_IO`. A card pulled while a text has a card
@@ -958,8 +960,10 @@ or guard rule: only the maker drops its instances.
   over any screen for a few seconds, host-drawn, never over a guarding instance (it waits until the
   guard closes, one after the other in the order they came, at most 4 waiting, 2 on the X4, older ones dropped; without a guard a new message replaces the one on screen and shows its full time). `flags` bit 0 `announce`: also
   from background work and when no screen of the plugin shows (interface 6 `Announce`: device
-  messages and rules the user set up; never sync results or offers). Without bit 0 a message from a
-  plugin with no instance on the stack is dropped (`OK`, logged). Other bits `ERR_INVALID`.
+  messages and rules the user set up; never sync results or offers). Without bit 0 a message is
+  refused in background work (`ERR_STATE`, `work.md` 2) and shown from any other callback, also
+  when no screen of the plugin shows (an event's answer, as interface 6 showed it, #489). Other
+  bits `ERR_INVALID`.
 - [D] **Clipboard.** Text only, at most 4,096 bytes, not across
   restarts; every device has one (Senior's answer). It is a host text with the fixed id 0 (section
   3.1 rules: append-only parts, start over at 0, committed by `last`): op 18 `clipboard_write`
@@ -1023,7 +1027,8 @@ and every device of that profile (the X3 too), not the model.
   params are a few dozen bytes (Plugin's inventory #984). Allocated fallibly at op 16
   (`ERR_NO_MEMORY`). At most 12 hand-overs exist at once on the X4 (64 elsewhere; an empty one
   counts, `ERR_FULL` beyond).
-- Host texts (request texts and hand-over texts, sections 1.1 and 3.1): up to 24,576 bytes each.
+- Host texts (request texts and hand-over texts, sections 1.1 and 3.1): up to 24,576 bytes each
+  (1,856 on the X4 until the card file is wired, section 3.1).
   On the X4 at most 4 at once (the question, its nested question, two hand-overs; `ERR_FULL`
   beyond), each with at most 512 bytes in memory and the rest in a host file on the card (a
   secret text up to 8,192 bytes, in memory only, as long as typed, in its own pool of 8,960 bytes: 32
