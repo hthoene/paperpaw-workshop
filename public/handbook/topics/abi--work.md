@@ -130,6 +130,9 @@ record.
   never asks.
 - [D] **Held by a screen:** while a real-time screen holds the device (ADR 0030), no work comes
   due and nothing wakes for it; it runs once the hold ends.
+- **Held by a press:** the same while a button or an unmoved finger is down and its click, tap or
+  long press is not told yet (at most the long-press time), so that no work runs between a press
+  and the action it makes (#515). Exact timers are not held, as under a real-time screen.
 
 ### 2.3 The run
 
