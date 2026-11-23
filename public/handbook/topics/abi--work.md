@@ -132,7 +132,9 @@ record.
   due and nothing wakes for it; it runs once the hold ends.
 - **Held by a press:** the same while a button or an unmoved finger is down and its click, tap or
   long press is not told yet (at most the long-press time), so that no work runs between a press
-  and the action it makes (#515). Exact timers are not held, as under a real-time screen.
+  and the action it makes (#515), and in the kernel call of a button or finger event itself: work
+  due then runs in the pass right after it, once its frame is drawn (#518). Exact timers are not
+  held, as under a real-time screen.
 
 ### 2.3 The run
 
