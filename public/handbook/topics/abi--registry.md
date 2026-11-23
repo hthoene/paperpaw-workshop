@@ -158,7 +158,7 @@ Ids (`key`, `plugin`, `item`, ...) are never cut: a declaration that admitted th
 | 1035 | `service.reg_slot` | `id: str 128`, `screen: str 128`, `default: str 128`, `flags: u32`, `title: str 128` |
 | 1036 | `service.reg_menu_row` | `item: str 128`, `kind: u32`, `flags: u32`, `order: i32`, `by: str 64`, `title: str 128`, `icon: str 64`, `badge: str 64`, `describe: str 128` |
 | 1037 | `service.reg_binding` | `layer: str 128`, `input: str 64`, `action: str 128`, `origin: u32` |
-| 1038 | `service.reg_setup_step` | `id: str 128`, `page_kind: u32`, `page: str 128`, `order: i32`, `flags: u32`, `title: str 128` |
+| 1038 | `service.reg_setup_step` | `id: str 128`, `page_kind: u32`, `page: str 128`, `order: i32`, `flags: u32`, `title: str 128`, `badge: str 64` (optional, ordinal 0, empty default; draft 40) |
 | 1039 | `service.reg_value` | `key: str 128`, `value: bytes 512`, `flags: u32` |
 | 1040 | `service.reg_widget` | `id: str 128`, `plugin: str 64`, `kind: str 128`, `icon: str 64`, `flags: u32`, `title: str 128`, `cells: u32` (optional, ordinal 0, default 0; draft 29), `previews: str 128` (optional, ordinal 1, empty default; draft 32) |
 | 1059 | `service.reg_status` | `id: str 128`, `plugin: str 64`, `kind: u32`, `flags: u32`, `priority: u32`, `size: u32`, `tap: str 128`, `title: str 128` |
@@ -271,7 +271,12 @@ Field meanings:
 - `reg_binding.origin`: interface-6 `BindingOrigin` (0 plugin, 1 device, 2 preset, 3 user); an
   empty `action` is "bound to nothing".
 - `reg_setup_step.page_kind`: 0 setting, 1 screen; `flags` bit 0 applies now. Whether a step is
-  done is the setup plugin's own state (its Data file), not the host's.
+  done is the setup plugin's own state (its Data file), not the host's. `badge` (draft 40) is what
+  the step's plugin says of it now ("Connected", "2 being added"): the `badge` of its last
+  `command.set_item_state` (60) for the step, resolved in the reader's language as for a menu row;
+  empty before a push, for a push without one, where the key no longer resolves and for the host's
+  own steps. The setup shows it on a screen step's card in place of *Open* (Beta 3 parity, #496). A
+  plugin built for an earlier draft never reads it; a host before draft 40 never writes it.
 
 ## 4. Commands (slot 15)
 
@@ -440,7 +445,8 @@ the main menu (below), beside the host-fixed escape.
   (70); setting values stay `event.setting_changed` (64). Bit 0 also covers item state pushed with
   command 60 (live, no generation change, coalesced). Bit 31 (`dropped`) goes to one plugin only: a
   staged REG batch of its own was dropped when applied (section 4). Coalescing never loses a bit:
-  pending `what` bits are OR-ed together until the event is delivered.
+  pending `what` bits are OR-ed together until the event is delivered. A parked plugin (installed,
+  not made yet, #248) is not told: it shows nothing, and it reads the registry when it is made (#496).
 - [D] **Plugin requests.** A request never installs anything by itself: an install stays the DEV
   family's `core.install` with the host's confirmation (decision 132; firmware always confirmed,
   decision 134). `command.request_plugins` (ids, one per line, at most 16, the interface-6
