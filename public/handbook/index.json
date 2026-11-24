@@ -991,7 +991,7 @@
   "title": "Settings of reader",
   "file": "settings--reader.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[reader] open-last` | Open last book at start | `true`, `false` | `true` | Start w",
-  "tokens": 808
+  "tokens": 800
  },
  {
   "id": "settings/settings",
@@ -1145,7 +1145,7 @@
   "title": "Settings in the group core.group.status",
   "file": "settings-group--core.group.status.md",
   "summary": "| Setting | Name | Values | Default | What it does |\n|---|---|---|---|---|\n| `[core] status-font` | Font | `core.status-font.ui`, `core.status-font.book`, `Pape",
-  "tokens": 666
+  "tokens": 658
  },
  {
   "id": "settings-group/core.group.reading-layout",
