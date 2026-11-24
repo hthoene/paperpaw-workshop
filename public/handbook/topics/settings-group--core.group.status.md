@@ -8,7 +8,7 @@
 | `[reader] status.size` | Text size | 5 to 16 | `6` | The size of the text in the status lines. |
 | `[reader] status.edge` | Distance from the edge | 0 to 150 | `15` | How near the status lines sit to the edge. The text keeps its margins. |
 | `[reader] status.top-lines` | Lines at the top | list | `` | The lines a tap on the status line switches between. None: no line here. |
-| `[reader] status.bottom-lines` | Lines at the bottom | list | `core.status-line.items, reader.status-line.chapter, reader.status-line.progress, reader.status-line.empty` | The lines a tap on the status line switches between. None: no line here. |
+| `[reader] status.bottom-lines` | Lines at the bottom | list | `core.status-line.items, reader.status-line.progress, reader.status-line.empty` | The lines a tap on the status line switches between. None: no line here. |
 | `[reader] status.top-left` | Top left | list | `` | What this part of the line shows, left to right. |
 | `[reader] status.top-center` | Top centre | list | `` | What this part of the line shows, left to right. |
 | `[reader] status.top-right` | Top right | list | `` | What this part of the line shows, left to right. |

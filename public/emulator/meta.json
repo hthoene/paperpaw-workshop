@@ -1,7 +1,7 @@
 {
-  "ref": "3a58fc6fe9872ad7f8387cfa15c5ad0ec7b1a306",
-  "commit": "3a58fc6fe9872ad7f8387cfa15c5ad0ec7b1a306",
+  "ref": "a9f24ab6b13f59b0b6cc447f20ed47fa6240f679",
+  "commit": "a9f24ab6b13f59b0b6cc447f20ed47fa6240f679",
   "built": "2026-11-24",
-  "bytes": 9031620,
-  "sha256": "50a32377bab8f1c1a0bcab817fd2e952c5320d3ceaf916a487c1b1bec3533bad"
+  "bytes": 9031612,
+  "sha256": "48c3afd7a151572ceeac2ce9d2fdeff28f6a09a42f4dd40edd698d769560cf19"
 }
